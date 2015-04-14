@@ -111,8 +111,6 @@ Display::reset() {
   _xmax = _xCoordSave[1];
   _gBin =  _binningSave;
 
-  _cNames.clear();
-
 }
 
 void
@@ -156,8 +154,6 @@ Display::softReset() {
   _leg=NULL;
   
   _hCoords.clear();
-
-  _cNames.clear();
 
 }
 
@@ -281,7 +277,7 @@ Display::preparePads() {
   
   //  float m=1.3;
 
-  size_t n_ = max( (size_t)1,_nvars);
+  size_t n_ = _nvars;
   float m=1.3-(n_-1)*.1; //other
   
   vector<TPad*> padhigh_;
@@ -344,7 +340,7 @@ Display::preparePadsWithRatio() {
 
   float m=1.3;
 
-  size_t n_ = max((size_t)1,_nvars);
+  size_t n_ = _nvars;
 
   vector<TPad*> padhigh_;
   vector<TPad*> padlow_;
@@ -661,13 +657,26 @@ Display::drawDistribution() {
           _hClones[i]->DrawCopy( opt.c_str() );
         }
         else {
-	  if(f) {
-	    _hClones[i]->DrawCopy( "box" ); //"box"
-	    f=false;
-	  }
-	  else {
-	    _hClones[i]->DrawCopy( opt.c_str() );
-	  }
+
+_hClones[i]->DrawCopy("text colz");
+cmsPrel();
+
+string superidoo = _hClones[i]->GetName();
+string naminger = "/shome/cheidegg/MPAF/workdir/plots/FakeRatio/png/" + superidoo + ".png";
+_c->SaveAs(naminger.c_str() );
+
+
+
+
+
+          //if(f) {
+          //  _hClones[i]->DrawCopy( "box" ); //"box"
+          //  _hClones[i]->DrawCopy( "box" ); //"box"
+          //  f=false;
+          //}
+          //else {
+          //  _hClones[i]->DrawCopy( opt.c_str() );
+          //}
         }
       }
     }
@@ -1358,7 +1367,6 @@ Display::drawDataMCRatio() {
   
   //The bidon histo
   TH1* emptyHisto=(TH1*)_hMC->Clone();
-  //if(_empty!=nullptr) emptyHisto=(TH1*)_empty->Clone();
   emptyHisto->Reset("ICEM");
 
   TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC );
@@ -1476,10 +1484,6 @@ Display::drawDataMCRatio() {
   if(_rmLabel)  {
     ratio->GetYaxis()->SetLabelOffset(1000);
     emptyHisto->GetYaxis()->SetLabelOffset(1000);
-  }
-
-  for(size_t ib=0;ib<_cNames.size();ib++) {
-    emptyHisto->GetXaxis()->SetBinLabel(ib+1, _cNames[ib].c_str() );
   }
 
   emptyHisto->Draw();
@@ -2156,21 +2160,10 @@ Display::drawStatistics(vector<pair<string,vector<vector<float> > > > vals,
   
   if(!_showRatio) _pads = preparePads();
   else _pads = preparePadsWithRatio();
-
   _c->Draw();
 
-  //MM Fixme : temporary disabling of uncertainties
-  systM mTmp;
-  vector<vector<systM> > tmp(1,vector<systM>(0,mTmp));
-  _systMUnc=tmp;
-  
-  //MM fixme
-  float xmaxTmp =  _xmax;
-  _xmax = _empty->GetXaxis()->GetXmax();
   plotDistribution( "1D", "m", 0 );
   
-  _xmax = xmaxTmp;
-
   _comSyst = true;
 }
 
@@ -2214,28 +2207,21 @@ Display::prepareStatistics( vector<pair<string,vector<vector<float> > > > vals,
   mcUncert->SetFillStyle(3001);
   mcUncert->SetFillColor(kGray+1);
   
-  //TGraphAsymmErrors* mcStatUncert = (TGraphAsymmErrors*)mcUncert.Clone();
-
   size_t idat=_mcOnly?-1:(vals[0].second.size()-1);
 
   //now fill the plots
   for(size_t ic=0;ic<vals.size();ic++) {
-  
+
     for(size_t id=0;id<vals[ic].second.size();id++) {
 
       if(id==0) { //MC total
        	hMCt->SetBinContent( ic+1, vals[ic].second[id][0] );
        	hMCt->SetBinError( ic+1, vals[ic].second[id][1] );
        	mcUncert->SetPoint( ic, ic+0.5 , vals[ic].second[id][0] );
-
-	float eyl2=pow(vals[ic].second[id][2],2) + ((_mcSyst)?pow(vals[ic].second[id][1],2):0);
-	float eyh2=pow(vals[ic].second[id][3],2) + ((_mcSyst)?pow(vals[ic].second[id][1],2):0);
-
-       	mcUncert->SetPointError( ic, 0.25,0.25, sqrt(eyl2), sqrt(eyh2) );
+       	mcUncert->SetPointError( ic, 0.25,0.25, vals[ic].second[id][2], vals[ic].second[id][3] );
       }
       else if(id==idat) { //data
         hData->SetBinContent( ic+1, vals[ic].second[id][0] );
-	hData->SetBinError( ic+1, vals[ic].second[id][1] );	
       }
       else {
         if( !_sSignal && dsnames[id].find("sig") == (size_t)-1){
@@ -2260,9 +2246,7 @@ Display::prepareStatistics( vector<pair<string,vector<vector<float> > > > vals,
 							    _normOpts.find("dif")!=_normOpts.end());
   
 
-  //for(int i=0;i<)
-
-  TH1F* emptyH = (TH1F*)hMCt->Clone();
+  TH1F* emptyH = (TH1F*)hData->Clone();
   emptyH->Reset("ICEM");
   
   emptyH->SetFillColor(0);
@@ -2297,7 +2281,6 @@ Display::prepareStatistics( vector<pair<string,vector<vector<float> > > > vals,
   emptyH->GetYaxis()->SetTitle(_ytitle.c_str());
   for(size_t ib=0;ib<cNames.size();ib++) {
     emptyH->GetXaxis()->SetBinLabel(ib+1, cNames[ib].c_str() );
-    //hMCt->GetXaxis()->SetBinLabel(ib+1, cNames[ib].c_str() );
   }
   
   hMCt->SetLineWidth(2);
@@ -2308,12 +2291,8 @@ Display::prepareStatistics( vector<pair<string,vector<vector<float> > > > vals,
   _hClones = hMC;
   _hMC = hMCt;
   _hData = hData;
-  _gData = gData;
-  //_mcUncert.push_back( mcStatUncert );
   _mcUncert.push_back( mcUncert );
   
-  _cNames = cNames;
-
 }
 
 void

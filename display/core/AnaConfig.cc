@@ -188,19 +188,19 @@ AnaConfig::isHistoAnalysis() {
 void
 AnaConfig::addSample( string str, string sname, int col) {
   
-  if( str.find("DD")!=string::npos ) {
+  if( str.find("DD")!=(size_t)-1 ) {
     _ddCuts.push_back(str.substr(3, str.size()-3));
     //sname+="DD";
   }
-  
-  if( str.find("CS")!=string::npos && str.find("CSA14")==string::npos){
+
+  if( str.find("CS")!=(size_t)-1 && str.find("CSA14")==(size_t)-1){
     //parse the line
     size_t p0=str.find(" ");
     size_t p1=str.find(" ",p0+1);
     
     float norm;
     string name;
-    if(p0!=string::npos && p1!=string::npos) {
+    if(p0!=(size_t)-1 && p1!=(size_t)-1) {
       norm=atof( (str.substr(p0,p1-p0)).c_str() );
       name=str.substr(p1+1,str.size()-p1-1);
     }

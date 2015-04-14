@@ -84,6 +84,9 @@ public:
   
   void doPlot();
 
+
+  // void makeSingleDataCard(string sigName, string categ = "global", string cname = "");
+
   void getStatistics(string categ="global");
   void drawStatistics(string categ="global", string cname="");
 

@@ -98,11 +98,6 @@ private:
   int _uncDir;
 
 public:
-
-  enum {kGeneral=0, kMono=1, kMulti=2};
-
-
-public:
   
   AnaUtils();
   ~AnaUtils();
@@ -170,7 +165,7 @@ public:
 // 	vector<string> listFiles(string dir, string files);
   int findElement(vector<string> v, string e);
   //vector< pair<string, vector<vector<float> > > > retrieveNumbers(string anName, string conName, vector<string> snames, vector<string> dsnames, vector<float> weights);
-  vector< pair<string, vector<vector<float> > > > retrieveNumbers(string categ, int mcat, string cname);
+  vector< pair<string, vector<vector<float> > > > retrieveNumbers(string categ, bool mcat, string cname);
   bool getDataCardLines(map<string,string>& lines, vector<string> dsNames, string sigName,
 			string categ, string cname, int bin,
 			map<string,vector<string> > intNuisPars);
@@ -195,7 +190,6 @@ public:
   void setCurrentWorkflow(int wf);
   int getUncWorkflow(string wf);
 
-  int getCategId(string categ);
   
 private:
 
@@ -280,6 +274,7 @@ private:
   void setNumFromStat(int ids,string cName, int iCateg, float sw, float esw, int ngen);
 
   vector<string> prepareDSNames(bool wMC, vector<int>& idxs);
+  int getCategId(string categ);
   
   void internalAddCategory(int iCateg, string eCateg); 
 
