@@ -28,7 +28,7 @@ private:
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later
-  enum {kGlobal=0};
+  enum {kGlobal=0,kDumCat=1,kAltWF=2};
   
 };
 

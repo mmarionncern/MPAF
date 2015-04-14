@@ -135,11 +135,17 @@ FakeEstim::initialize(){
   // _dbm->loadDb("3BMu","FakeRatio_MR03_"+_lepId+"_"+_lepiso+"_none_"+_extScheme+"_all_all_out.root","MR_RMuMap_qcd_MR03_"+_lepId+"_"+_lepiso+"_none_"+_extScheme+"_all_all");
 
 
-  _dbm->loadDb("AllMuT","v3/FakeRatio_all_cut_"+_lepiso+"_none_iso_all_all.root","MR_RMuMapPtMIso/QCD_Mu15_skimfake");
-  _dbm->loadDb("AllMuVT","v3/FakeRatio_all_cut_"+_lepiso+"_none_iso_all_all.root","MR_RMuMapPtMIso/QCD_Mu15_skimfake");
+  // _dbm->loadDb("AllMuT","v3/FakeRatio_all_cut_"+_lepiso+"_none_iso_all_all.root","MR_RMuMapPtMIso/QCD_Mu15_skimfake");
+  // _dbm->loadDb("AllMuVT","v3/FakeRatio_all_cut_"+_lepiso+"_none_iso_all_all.root","MR_RMuMapPtMIso/QCD_Mu15_skimfake");
 
-  //_dbm->loadDb("AllMuT","v3/FakeRatio_all_cut_mixisoT_none_iso_all_all_out.root","MR_RMuMapPtMIso_qcd_all_cut_mixisoT_none_iso_all_all");
-  //_dbm->loadDb("AllMuVT","v3/FakeRatio_all_cut_mixisoVT_none_iso_all_all_out.root","MR_RMuMapPtMIso_qcd_all_cut_mixisoVT_none_iso_all_all");
+  // _dbm->loadDb("AllMuT","v3/FakeRatio_all_cut_mixisoVT_none_iso_all_all_out.root","MR_RMuMapPtMIso/QCD_Mu15_skimfake");
+  // _dbm->loadDb("AllMuVT","v3/FakeRatio_all_cut_mixisoHT_none_iso_all_all_out.root","MR_RMuMapPtMIso/QCD_Mu15_skimfake");
+
+  _dbm->loadDb("AllElT","v3/FakeRatio_all_cut_mixisoVT_none_iso_all_all_out.root","MR_RElMapPtMIso_qcd_all_cut_mixisoVT_none_iso_all_all");
+  _dbm->loadDb("AllElVT","v3/FakeRatio_all_cut_mixisoHT_none_iso_all_all_out.root","MR_RElMapPtMIso_qcd_all_cut_mixisoHT_none_iso_all_all");
+
+  _dbm->loadDb("AllMuT","v3/FakeRatio_all_cut_mixisoT_none_iso_all_all_out.root","MR_RMuMapPtMIso_qcd_all_cut_mixisoT_none_iso_all_all");
+  _dbm->loadDb("AllMuVT","v3/FakeRatio_all_cut_mixisoVT_none_iso_all_all_out.root","MR_RMuMapPtMIso_qcd_all_cut_mixisoVT_none_iso_all_all");
 
 
   //additional workflow
@@ -288,6 +294,8 @@ FakeEstim::run() {
   // selecting best same-sign pair 
   bool is_ss_event = alternateSSEventSelection();//ssEventSelection();
   if(!makeCut( is_ss_event , "same-sign selection", "=") ) return;
+
+  fillSkimTree();
 
   //if(_fullIdLeps.size()!=1 || _nonFullIdLeps.size()!=1) return;
 
@@ -1681,8 +1689,11 @@ FakeEstim::getFR(Candidate* cand, int idx) {
     // if(std::abs(cand->pdgId())==11) db="AllEl";
     // if(std::abs(cand->pdgId())==13) db="AllMu";
 
-  if(_lepiso == "multiIso") db="AllMuT";
-  else if(_lepiso == "multiIsoHTight") {db="AllMuVT"; wp=kVTight;}
+  if( std::abs(cand->pdgId())==13) db="AllMu";
+  else  db="AllEl";
+
+  if(_lepiso == "multiIso") db+="T";
+  else if(_lepiso == "multiIsoHTight") {db+="VT"; wp=kVTight;}
   else db="AllMuT";
 
   // }
