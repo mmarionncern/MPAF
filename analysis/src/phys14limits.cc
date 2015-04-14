@@ -1089,13 +1089,13 @@ bool phys14limits::baseSelection(){
   // lepton multiplicity
   if(!makeCut<int>( _nLeps, 2, ">=", "lepton multiplicity and flavor" ) ) return false; 
 
-  // veto on third lepton using all selected leptons
-  if(!makeCut( mllVetoSelection(), "mll vetos", "=") ) return false;
-
   // selecting best same-sign pair 
   bool is_ss_event = ssEventSelection();
   if(!makeCut( is_ss_event , "same-sign selection", "=") ) return false;
 
+  // veto on third lepton using all selected leptons
+  if(!makeCut( mllVetoSelection(), "mll vetos", "=") ) return false;
+  
   return true;
 
 }
