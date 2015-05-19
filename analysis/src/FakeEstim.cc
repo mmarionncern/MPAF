@@ -258,8 +258,21 @@ FakeEstim::run() {
    
   retrieveObjects();
   
+  // 1:1:40
+  // 1:6:537
+  // 1:6:599
+  // 1:9:857
+  // 1:11:1020
+  // 1:67:6633
+  // 1:95:9467
+  // 1:464:46359
+
+  //if(_vc->get("evt")!=3104 || _vc->get("lumi")!=32) return;
+
+
   counter("denominator");
  
+
   // triggers  
   // if(_isData && !makeCut<int>(_vc->get("HLT_DoubleMu"), 1, "=", "HLT DoubleMu") ) return;	
   // if(_isData && !makeCut<int>(_vc->get("HLT_DoubleEl"), 1, "=", "HLT DoubleEl") ) return;	
@@ -267,7 +280,32 @@ FakeEstim::run() {
   
   if(true) {
 
-    if(!makeCut( _vc->get("nLepGood10_Mini")>=2, "lepMult" ) ) return;
+    // if(!makeCut( _vc->get("nLepGood10_Mini")>=2, "lepMult" ) ) return;
+    // cout<<_vc->get("nLepGood10_Mini")<<"   "<<_vc->get("iL1T_Mini")<<"   "<<_vc->get("iL2T_Mini")<<endl;
+    
+    // for(int i1=0;i1<_vc->get("nLepGood10_Mini");i1++) {
+    //   for(int i2=i1+1;i2<_vc->get("nLepGood10_Mini");i2++) {
+	
+    // 	bool isMu=std::abs(_vc->get("LepGood_pdgId", i1))==13;
+    // 	Candidate* l1 = Candidate::create(_vc->get("LepGood_pt", i1),
+    // 					  _vc->get("LepGood_eta", i1),
+    // 					  _vc->get("LepGood_phi", i1),
+    // 					  _vc->get("LepGood_pdgId", i1),
+    // 					  _vc->get("LepGood_charge", i1),
+    // 					  isMu?0.105:0.0005);
+    // 	isMu=std::abs(_vc->get("LepGood_pdgId", i2))==11;
+    // 	Candidate* l2 = Candidate::create(_vc->get("LepGood_pt", i2),
+    // 					  _vc->get("LepGood_eta", i2),
+    // 					  _vc->get("LepGood_phi", i2),
+    // 					  _vc->get("LepGood_pdgId", i2),
+    // 					  _vc->get("LepGood_charge", i2),
+    // 					  isMu?0.105:0.0005);
+
+    // 	// cout<<i1<<"/"<<_vc->get("LepGood_charge", i1)<<"/"<<_vc->get("LepGood_pdgId", i1)<<"/"<<_vc->get("LepGood_pt", i1)<<"/"<<goodLepton(i1, _vc->get("LepGood_pdgId", i1) )<<"/"<<_susyMod->multiIsoSel(i1, SusyModule::kMedium)<<"   "
+    // 	//     <<i2<<"/"<<_vc->get("LepGood_charge", i2)<<"/"<<_vc->get("LepGood_pdgId", i2)<<"/"<<_vc->get("LepGood_pt", i2)<<"/"<<goodLepton(i2, _vc->get("LepGood_pdgId", i2) )<<"/"<<_susyMod->multiIsoSel(i2, SusyModule::kMedium)<<" -->  "
+    // 	//     <<Candidate::create(l1,l2)->mass()<<"     "<<endl;
+    //   }
+    // }
 
     if(!makeCut( _vc->get("LepGood_charge", _idxL1)*_vc->get("LepGood_charge", _idxL2)>0, "same sign" ) ) return;
 
@@ -348,11 +386,11 @@ FakeEstim::run() {
   double HT = _HT;
   int sr = ((getCurrentWorkflow()<kBR0H)?(getCurrentWorkflow()):(0));
   
-  // cout << Form("%1d %9d %12d\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d",
-  // 	       run, lumi, event, nLep,
-  // 	       id1, pt1, id2, pt2,
-  // 	       njet, nbjet, met, HT,
-  // 	       sr ) << endl;
+  cout << Form("%1d %9d %12d\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d",
+  	       run, lumi, event, nLep,
+  	       id1, pt1, id2, pt2,
+  	       njet, nbjet, met, HT,
+  	       sr ) << endl;
 
 }
 
@@ -724,7 +762,7 @@ FakeEstim::setSignalRegions() {
   else if( _SR== "SR11A" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:<:300");
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:200:500|NJ:>=:2|HT:<:300");
-    setSelLine("LL:=:hh|NB:=:1|MT:>=:120|MET:50:[]:500|NJ:>=:2|HT:<:300");
+    setSelLine("LL:=:hh|NB:=:1|MT:>=:120|MET:[]:50:500|NJ:>=:2|HT:<:300");
   }
   else if( _SR== "SR12A" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:1600");
@@ -753,7 +791,7 @@ FakeEstim::setSignalRegions() {
   else if( _SR== "SR19A" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:<:300");
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:200:500|NJ:>=:2|HT:<:300");
-    setSelLine("LL:=:hh|NB:=:2|MT:>=:120|MET:50:[]:500|NJ:>=:2|HT:<:300");
+    setSelLine("LL:=:hh|NB:=:2|MT:>=:120|MET:[]:50:500|NJ:>=:2|HT:<:300");
   }
   else if( _SR== "SR20A" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:1600");
@@ -1096,8 +1134,11 @@ FakeEstim::testRegion() {
 
   for(size_t is=0;is<_sels[_SR].size();is++) {
     passSel=true;
+    //cout<<"new region ================== "<<_SR<<endl;
     for(size_t ii=0;ii<_sels[_SR][is].size();ii++) {
     
+      //cout<<_sels[_SR][is][ii][0]<<" >> "<<endl;
+
       if(_sels[_SR][is][ii][0]=="LL") { //lepton pt scheme, specific case 
 	if(_sels[_SR][is][ii][2]=="hh" && 
 	   (_l1Cand->pt()<25 || _l2Cand->pt()<25) ) {passSel=false;break;}
@@ -1109,6 +1150,9 @@ FakeEstim::testRegion() {
       
       }
       else { //all other selections
+
+	//cout<<":: "<<_sels[_SR][is][ii][0]<<" :: "<<(*(_val[_sels[_SR][is][ii][0] ]))<<" "<<_sels[_SR][is][ii][1]<<" "<<atof(_sels[_SR][is][ii][2].c_str() )<<"  "<<atof(_sels[_SR][is][ii][3].c_str())<<endl;
+
 	bool dec=(_au->simpleCut<float>( (*(_val[_sels[_SR][is][ii][0] ])) , atof(_sels[_SR][is][ii][2].c_str() ), _sels[_SR][is][ii][1], atof(_sels[_SR][is][ii][3].c_str()) ));
 	if(!_au->simpleCut<float>( (*(_val[_sels[_SR][is][ii][0] ])) , atof(_sels[_SR][is][ii][2].c_str() ),
 				   _sels[_SR][is][ii][1], atof(_sels[_SR][is][ii][3].c_str()) ) ) 
@@ -1116,6 +1160,7 @@ FakeEstim::testRegion() {
       }
       
     }
+    //cout<<" --> passing selection? "<<passSel<<endl;
     if(passSel) return true;
   }
 
@@ -1141,11 +1186,11 @@ FakeEstim::goodLepton(int idx, int pdgId) {
 
   if(abs(pdgId)==13) {//mu case
     if(!_susyMod->muIdSel(idx, SusyModule::kTight) ) return false;
-    if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
+    //if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
   }
   else {
     if(!_susyMod->elIdSel(idx, SusyModule::kTight) ) return false;
-    if(!_susyMod->multiIsoSel(idx, SusyModule::kTight) ) return false;
+    //if(!_susyMod->multiIsoSel(idx, SusyModule::kTight) ) return false;
   }
 
   return true;
