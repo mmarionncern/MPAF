@@ -1,14 +1,20 @@
-{
+//{
 
-    if(Recompute) {
-        MPAFDisplay md;
+//    if(Recompute) {
+//        MPAFDisplay md;
  
-        bool * rtmp= const_cast<bool*> pr;
-        *rtmp = false;
+//        bool * rtmp= const_cast<bool*> pr;
+//        *rtmp = false;
 
-    }
-    else 
+//    }
+//    else 
+//    md.refresh();
+
+MPAFDisplay md;
+
+void susy3l_manual() {
     md.refresh();
+
 
 
     //general parameters ********************* general parameters
@@ -269,7 +275,7 @@
     md.prepareDisplay();
     md.doPlot();
     //md.doStatisticsPlot();
-    md.savePlot("SUSY3L");
+    //md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
  
 }
