@@ -121,9 +121,17 @@ void susy3l_manual() {
     }
     if(obs == "mt2"){
         md.dp.setObservables("MT2");
-        int binning=1;
-        double rangeX[2]={0,150};
+        int binning=10;
+        double rangeX[2]={0,400};
         bool logYScale=true;
+    }
+    if(obs == "pt"){
+        md.dp.setObservables("pt_1st_lepton");
+        md.dp.setObservables("pt_2nd_lepton");
+        md.dp.setObservables("pt_3rd_lepton");
+        int binning=5;
+        double rangeX[2]={0,200};
+        bool logYScale=false;
     }
     //string autoBinFile="susybinninghigh";
     //md.dp.loadAutoBinning(autoBinFile);

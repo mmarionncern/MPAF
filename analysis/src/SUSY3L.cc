@@ -151,6 +151,7 @@ void SUSY3L::run(){
     _tauIdx.clear();
     _jets.clear();
     _bJets.clear();
+    _leps.clear(); 
     
     // increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -211,13 +212,16 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("SR_NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
 
     //additional observables
-    _hm->addVariable("Zmass"        ,  150,   0.0,  150.0, "Z candidate mass [GeV]"         );
-    _hm->addVariable("MT2"        ,  150,   0.0,  150.0, "Z candidate mass [GeV]"         );
-    _hm->addVariable("deltaR_elmu"  ,  500,   0.0,  10.0, "delta R between el and mu"       );
-    _hm->addVariable("el_multiplicity"  ,  10,   0.0,  10.0, "electron multiplicity"         );
-    _hm->addVariable("mu_multiplicity"  ,  10,   0.0,  10.0, "muon multiplicity"         );
-    _hm->addVariable("tau_multiplicity"  ,  10,   0.0,  10.0, "tau multiplicity"         );
-    _hm->addVariable("lep_multiplicity"  ,  10,   0.0,  10.0, "lepton multiplicity"         );
+    _hm->addVariable("Zmass"            ,  150,     0.0,  150.0,    "Z candidate mass [GeV]"            );
+    _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
+    _hm->addVariable("deltaR_elmu"      ,  500,     0.0,  10.0,     "delta R between el and mu"         );
+    _hm->addVariable("el_multiplicity"  ,  10,      0.0,  10.0,     "electron multiplicity"             );
+    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,  10.0,     "muon multiplicity"                 );
+    _hm->addVariable("tau_multiplicity" ,  10,      0.0,  10.0,     "tau multiplicity"                  );
+    _hm->addVariable("lep_multiplicity" ,  10,      0.0,  10.0,     "lepton multiplicity"               );
+    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "pt of hardest lepton [GeV]"        );
+    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "pt of second hardest lepton [GeV]" );
+    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "pt of softest lepton [GeV]"        );
 }
 
 
@@ -2481,34 +2485,42 @@ bool SUSY3L::baseSelection(){
     //select events with certain lepton multiplicity of all flavor combinations
     if(!makeCut<int>( _nEls + _nMus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR ) ) return false;
 
-    //fill custom plot lepton multiplicity
+    //fill plot for lepton multiplicities
     fill("el_multiplicity" , _nEls , _weight);
     fill("mu_multiplicity" , _nMus , _weight);
     fill("tau_multiplicity" , _nTaus , _weight);
     fill("lep_multiplicity" , _nEls + _nMus + _nTaus , _weight);
+
+    //sort leptons by pt and fill pt plots
+    sortSelectedLeps();
+    fill("pt_1st_lepton" , _leps[0]->pt() , _weight);
+    fill("pt_2nd_lepton" , _leps[1]->pt() , _weight);
+    fill("pt_3rd_lepton" , _leps[2]->pt() , _weight);
     
-    pickMT2Leptons();
+    //calculate MT2 and fill plot
+    float mt_2 = getMT2();
+    fill("MT2" , mt_2        , _weight);
     
     //require at least two of the leptons to be tighter in multiiso
     //bool has_two_tighter_leptons = checkMultiIso();
     //if(!makeCut( has_two_tighter_leptons , "multiIso tightening", "=") ) return false;
 
     //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return false;
+//    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return false;
 
     //require minimum number of b-tagged jets
-    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
+//    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
     
     
     //require at least 1 of the leptons to have higher pT than original cut
-    bool has_hard_leg = hardLegSelection();
-    if(!makeCut( has_hard_leg , "hard leg selection", "=") ) return false;
+//    bool has_hard_leg = hardLegSelection();
+//    if(!makeCut( has_hard_leg , "hard leg selection", "=") ) return false;
 
     //require minimum hadronic activity (sum of jet pT's)
-    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
+//    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
+//    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
 
     //reject event if ossf lepton pair with low invariant mass is found
     bool has_low_mll = lowMllPair();
@@ -2801,7 +2813,7 @@ bool SUSY3L::srSelection(){
 }
 
 //____________________________________________________________________________
-void SUSY3L::pickMT2Leptons(){
+float SUSY3L::getMT2(){
     /*
         selected the two leptons that should be used for the MT2 calculation
         parameters: none
@@ -2809,37 +2821,27 @@ void SUSY3L::pickMT2Leptons(){
     */
     
     bool allSameSigned = false;
-    CandList leps;
     float ptsum = 0; 
     float ptsum_tmp = 0;
     int il1_save = -1;
     int il2_save = -1;
-    
-    //all same signed event?
+
     if(_nMus+_nEls != 3){
-        cout << "pickMT2Lepton: compatible with 3 lepton events only" << endl;
+        cout << "getMT2: compatible with 3 lepton events only" << endl;
     }
- 
-    for(int im=0;im<_nMus;im++){
-        leps.push_back(_mus[im]);
-    }
-    for(int ie=0;ie<_nEls;ie++){
-        leps.push_back(_els[ie]);
-    }
-    int nleps = leps.size();
-    
-    if(((signbit(leps[0]->pdgId())) == (signbit(leps[1]->pdgId()))) && ((signbit(leps[0]->pdgId())) == (signbit(leps[2]->pdgId())))){
+   
+    if(((signbit(_leps[0]->pdgId())) == (signbit(_leps[1]->pdgId()))) && ((signbit(_leps[0]->pdgId())) == (signbit(_leps[2]->pdgId())))){
          allSameSigned = true; 
     }
      
     if(allSameSigned){
-        for(int il1=0;il1<nleps;il1++){
-            for(int il2=il1+1;il2<nleps;il2++){
+        for(int il1=0;il1<_nleps;il1++){
+            for(int il2=il1+1;il2<_nleps;il2++){
                 //calculate sum of pt's
-                ptsum_tmp = leps[il1]->pt() + leps[il2]->pt();
+                ptsum_tmp = _leps[il1]->pt() + _leps[il2]->pt();
                 //keep lepton pair candidate if it has the highest sum of pt's
                 if(ptsum_tmp >= ptsum) {
-                    ptsum = leps[il1]->pt() + leps[il2]->pt();
+                    ptsum = _leps[il1]->pt() + _leps[il2]->pt();
                     il1_save = il1;
                     il2_save = il2;
                 }
@@ -2848,17 +2850,17 @@ void SUSY3L::pickMT2Leptons(){
     }
     //in case not all leptons are of the same sign require os lepton pair 
     else{
-        for(int il1=0;il1<nleps;il1++){
-            for(int il2=il1+1;il2<nleps;il2++){
+        for(int il1=0;il1<_nleps;il1++){
+            for(int il2=il1+1;il2<_nleps;il2++){
                 //continue if not os
-                if((signbit(leps[il1]->pdgId())) == (signbit(leps[il2]->pdgId()))){
+                if((signbit(_leps[il1]->pdgId())) == (signbit(_leps[il2]->pdgId()))){
                     continue;
                 }
                 //calculate sum of pt's
-                ptsum_tmp = leps[il1]->pt() + leps[il2]->pt();
+                ptsum_tmp = _leps[il1]->pt() + _leps[il2]->pt();
                 //keep lepton pair candidate if it has the highest sum of pt's
                 if(ptsum_tmp >= ptsum) {
-                    ptsum = leps[il1]->pt() + leps[il2]->pt();
+                    ptsum = _leps[il1]->pt() + _leps[il2]->pt();
                     il1_save = il1;
                     il2_save = il2;
                 }
@@ -2867,12 +2869,10 @@ void SUSY3L::pickMT2Leptons(){
     }
 
     //take the two selected leptons and compute MT2 with them
-    _lep1 = leps[il1_save];
-    _lep2 = leps[il2_save];
-    
-    float mt_2 = MT2(_lep1, _lep2, _met, 0.0);
-    fill("MT2" , mt_2        , _weight);
-    leps.clear(); 
+    _lep1 = _leps[il1_save];
+    _lep2 = _leps[il2_save];
+              
+    return MT2(_lep1, _lep2, _met, 0.0);
 }
 
 /*******************************************************************************
@@ -3010,5 +3010,47 @@ float SUSY3L::MT2(Candidate* lep1, Candidate* lep2, Candidate* met, double mass_
 
         return mt2_value;
 
+}
+
+//____________________________________________________________________________
+void SUSY3L::sortSelectedLeps(){
+    /*
+        joins all selected leptons into one candidate list ordered by pt
+        parameters: none
+        return: none
+    */
+        CandList leps_tmp;
+        CandList leps_tmp2;
+        
+        for(int im=0;im<_nMus;im++){
+            leps_tmp.push_back(_mus[im]);
+        }
+        for(int ie=0;ie<_nEls;ie++){
+            leps_tmp.push_back(_els[ie]);
+        }
+
+        while(leps_tmp.size()>0){
+            float pt = -1;
+            float pt_tmp = -1;
+            int i_save = -1;
+            for(int i=0; i < leps_tmp.size(); i++){
+                pt_tmp = leps_tmp[i]->pt();
+                if(pt_tmp > pt){
+                    pt = pt_tmp;
+                    i_save = i;
+                }
+            }
+            for(int i=0; i < leps_tmp.size(); i++){
+                if(i!=i_save){
+                    leps_tmp2.push_back(leps_tmp[i]);
+                }
+            }
+            _leps.push_back(leps_tmp[i_save]);
+            leps_tmp.clear();
+            leps_tmp = leps_tmp2;
+            leps_tmp2.clear();
+        }
+        _nleps = _leps.size();
+ 
 }
 
