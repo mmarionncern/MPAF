@@ -56,12 +56,13 @@ private:
     bool electronMvaCut(int, int);
     bool multiIsolation(int, float, float, float);
     void fillEventPlots(std::string);
-
+    void pickMT2Leptons();
 
 
     float HT();
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
+    float MT2(Candidate*, Candidate*, Candidate*, double);
 
     string _selectTaus;
     string _pairmass;
@@ -135,6 +136,8 @@ private:
     CandList _bJets;
     Candidate* _met;
     Candidate* _Z;
+    Candidate* _lep1;
+    Candidate* _lep2;
 
     float _HT;
     float _deltaR;

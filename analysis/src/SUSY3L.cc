@@ -212,6 +212,7 @@ void SUSY3L::defineOutput(){
 
     //additional observables
     _hm->addVariable("Zmass"        ,  150,   0.0,  150.0, "Z candidate mass [GeV]"         );
+    _hm->addVariable("MT2"        ,  150,   0.0,  150.0, "Z candidate mass [GeV]"         );
     _hm->addVariable("deltaR_elmu"  ,  500,   0.0,  10.0, "delta R between el and mu"       );
     _hm->addVariable("el_multiplicity"  ,  10,   0.0,  10.0, "electron multiplicity"         );
     _hm->addVariable("mu_multiplicity"  ,  10,   0.0,  10.0, "muon multiplicity"         );
@@ -2486,6 +2487,8 @@ bool SUSY3L::baseSelection(){
     fill("tau_multiplicity" , _nTaus , _weight);
     fill("lep_multiplicity" , _nEls + _nMus + _nTaus , _weight);
     
+    pickMT2Leptons();
+    
     //require at least two of the leptons to be tighter in multiiso
     //bool has_two_tighter_leptons = checkMultiIso();
     //if(!makeCut( has_two_tighter_leptons , "multiIso tightening", "=") ) return false;
@@ -2524,7 +2527,10 @@ bool SUSY3L::baseSelection(){
 //    else if(_pairmass == "on"){
 //        if(!makeCut( is_reconstructed_Z, "mll selection", "=") ) return false;
 //    }
-  
+    
+        
+    
+
     return true;
 }
 
@@ -2794,7 +2800,80 @@ bool SUSY3L::srSelection(){
 
 }
 
+//____________________________________________________________________________
+void SUSY3L::pickMT2Leptons(){
+    /*
+        selected the two leptons that should be used for the MT2 calculation
+        parameters: none
+        return: none
+    */
+    
+    bool allSameSigned = false;
+    CandList leps;
+    float ptsum = 0; 
+    float ptsum_tmp = 0;
+    int il1_save = -1;
+    int il2_save = -1;
+    
+    //all same signed event?
+    if(_nMus+_nEls != 3){
+        cout << "pickMT2Lepton: compatible with 3 lepton events only" << endl;
+    }
+ 
+    for(int im=0;im<_nMus;im++){
+        leps.push_back(_mus[im]);
+    }
+    for(int ie=0;ie<_nEls;ie++){
+        leps.push_back(_els[ie]);
+    }
+    int nleps = leps.size();
+    
+    if(((signbit(leps[0]->pdgId())) == (signbit(leps[1]->pdgId()))) && ((signbit(leps[0]->pdgId())) == (signbit(leps[2]->pdgId())))){
+         allSameSigned = true; 
+    }
+     
+    if(allSameSigned){
+        for(int il1=0;il1<nleps;il1++){
+            for(int il2=il1+1;il2<nleps;il2++){
+                //calculate sum of pt's
+                ptsum_tmp = leps[il1]->pt() + leps[il2]->pt();
+                //keep lepton pair candidate if it has the highest sum of pt's
+                if(ptsum_tmp >= ptsum) {
+                    ptsum = leps[il1]->pt() + leps[il2]->pt();
+                    il1_save = il1;
+                    il2_save = il2;
+                }
+            }   
+        }
+    }
+    //in case not all leptons are of the same sign require os lepton pair 
+    else{
+        for(int il1=0;il1<nleps;il1++){
+            for(int il2=il1+1;il2<nleps;il2++){
+                //continue if not os
+                if((signbit(leps[il1]->pdgId())) == (signbit(leps[il2]->pdgId()))){
+                    continue;
+                }
+                //calculate sum of pt's
+                ptsum_tmp = leps[il1]->pt() + leps[il2]->pt();
+                //keep lepton pair candidate if it has the highest sum of pt's
+                if(ptsum_tmp >= ptsum) {
+                    ptsum = leps[il1]->pt() + leps[il2]->pt();
+                    il1_save = il1;
+                    il2_save = il2;
+                }
+            }   
+        }
+    }
 
+    //take the two selected leptons and compute MT2 with them
+    _lep1 = leps[il1_save];
+    _lep2 = leps[il2_save];
+    
+    float mt_2 = MT2(_lep1, _lep2, _met, 0.0);
+    fill("MT2" , mt_2        , _weight);
+    leps.clear(); 
+}
 
 /*******************************************************************************
 * ******************************************************************************
@@ -2908,6 +2987,28 @@ bool SUSY3L::multiIsolation(int idx, float miniRelIso_cut, float ptRatio_cut, fl
        }
 
        return false;
+
+}
+
+
+//____________________________________________________________________________
+float SUSY3L::MT2(Candidate* lep1, Candidate* lep2, Candidate* met, double mass_invisible){
+    /*
+        calculates the MT2 variable based on the mt2_bisect class
+        parameters: 2 leptons candidates, the met candidate, and the mass of the invisible particles
+        return: value of MT2
+    */
+
+        double pa[3]     = { lep1->mass()   , lep1->px()    , lep1->py()    };
+        double pb[3]     = { lep2->mass()   , lep2->px()    , lep2->py()    };
+        double pmiss[3]  = { 0              , met->px()     , met->py()     };
+        
+        mt2 mt2_event;
+        mt2_event.set_momenta( pa, pb, pmiss );
+        mt2_event.set_mn( mass_invisible );
+        double mt2_value = mt2_event.get_mt2();
+
+        return mt2_value;
 
 }
 

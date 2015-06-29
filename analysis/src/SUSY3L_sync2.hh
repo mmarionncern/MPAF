@@ -123,6 +123,7 @@ private:
     int _nVTaus;
     int _nJets;
     int _nBJets;
+    int _numberTau;
 
     //list of object candidates
     CandList _els;

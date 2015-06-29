@@ -51,7 +51,7 @@ void SUSY3L_sync2::initialize(){
         parameters: none
         return: none
     */
-
+    _numberTau=0;
     // define variables using _vc varibale class
     // _vc->registerVar("name"           , "type");
     _vc->registerVar("lumi"                            );    //lumi section number
@@ -171,7 +171,9 @@ void SUSY3L_sync2::run(){
     //printout for RA7 synchronization
     int lumi = _vc->get("lumi");
     int evt = _vc->get("evt");
-    //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+    cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+    //_numberTau += _nTaus;
+    //cout << _numberTau << endl; 
 
     // initialization of signal region cuts, categorization of events passing the baseline 
     // selection into different signal regions, and filling of plots
@@ -266,12 +268,23 @@ void SUSY3L_sync2::collectKinematicObjects(){
         return: none
     */
    
-    
-    if(_vc->get("lumi") == 4529 && _vc->get("evt") == 52817){
+   /* 
+    if(_vc->get("lumi") == 4973 && _vc->get("evt") == 97241){
         cout << "--------------------------------------------------"<< endl; 
-        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << "number of jets: " <<  _vc->get("nJet") << endl;
+        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose leptons: " <<  _vc->get("nLepGood") << endl;
+        for(int i = 0; i<_vc->get("nLepGood");i++){
+            cout << "lep " << i << ": " << _vc->get("LepGood_pt",i) << " " << _vc->get("LepGood_eta",i)<< " " << _vc->get("LepGood_phi",i) << " " << _vc->get("LepGood_pdgId",i) <<endl;
+        }
+        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose jets: " <<  _vc->get("nJet") << endl;
+        for(int i = 0; i<_vc->get("nJet");i++){
+            cout << "jet " << i << ": " << _vc->get("Jet_pt",i) << " " << _vc->get("Jet_eta",i)<< " " << _vc->get("Jet_phi",i)  <<endl;
+        }
+        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose taus: " <<  _vc->get("nTauGood") << endl;
+        for(int i = 0; i<_vc->get("nTauGood");i++){
+            cout << "tau " << i << ": " << _vc->get("TauGood_pt",i) << " " << _vc->get("TauGood_eta",i)<< " " << _vc->get("TauGood_phi",i)  <<endl;
+        }
     }
-
+*/
 
    
     
@@ -379,19 +392,6 @@ void SUSY3L_sync2::collectKinematicObjects(){
 
     // loop over all jets of the event
     for(int i = 0; i < _vc->get("nJet"); ++i){
-        /*
-        if(_vc->get("lumi") == 12 && _vc->get("evt") == 1111 ){
-            cout << "pt " << _vc->get("Jet_pt", i) <<endl;
-            cout << "eta " << _vc->get("Jet_eta", i) <<endl;
-            cout << "phi " << _vc->get("Jet_phi", i) <<endl;
-            cout << "mass " << _vc->get("Jet_mass", i) <<endl;
-            cout << "muf " << _vc->get("Jet_muEF", i) <<endl;
-        }
-        */
-    
-    
-    
-    
         //if jet passes good jet selection, create a jet candidate and fetch kinematics  
         if(goodJetSelection(i)) {
             _jets.push_back( Candidate::create(_vc->get("Jet_pt", i),
@@ -455,12 +455,11 @@ bool SUSY3L_sync2::electronSelection(int elIdx){
     int kVeryTight = 3;
     int kHyperTight = 4;
  
-    if(_vc->get("lumi") == 4529 && _vc->get("evt") == 52817){cout << "electron pt / eta / phi: " << _vc->get("LepGood_pt", elIdx) << " " << _vc->get("LepGood_eta", elIdx)  << " " << _vc->get("LepGood_phi", elIdx) << endl;}
-    
     //apply the cuts
     //makeCut(variable to cut on, cut value, direction of acception, name, 2nd cut value, counter)
     if(!makeCut<float>( _vc->get("LepGood_pt", elIdx) , pt_cut, ">"  , "pt selection"    , 0    , kElId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("LepGood_eta", elIdx)), eta_cut  , "<"  , "eta selection"   , 0    , kElId)) return false;
+    
     //removed after RA7 sync round 2
     //if(!makeCut<float>( std::abs(_vc->get("LepGood_eta", elIdx)), eta_veto_low, "[!]", "eta selection veto"   , eta_veto_high, kElId)) return false;
     //removed after RA7 sync round 2
@@ -468,6 +467,7 @@ bool SUSY3L_sync2::electronSelection(int elIdx){
     //mva based electron ID
     bool elTightMvaID = electronMvaCut(elIdx, 1);
         if(!makeCut( elTightMvaID, "electron tight mva wp", "=", kElId)) return false;
+
     //3 variable isolation criteria: miniIso < A and (pt ratio > B or pt rel > C)
     int wp = kMedium;
     //if(_vc->get("lumi") == 2995  && _vc->get("evt") == 99457){
@@ -475,6 +475,7 @@ bool SUSY3L_sync2::electronSelection(int elIdx){
     //}
     bool isolated = multiIsolation(elIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
         if(!makeCut( isolated, "initial multiIso selection", "=", kElId)) return false;
+
     //replaced by 3 varibale isolation
     //if(!makeCut<float>( _vc->get("LepGood_relIso03", elIdx) , isolation_cut   , "<"  , "isolation "      , 0    , kElId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("LepGood_dz", elIdx)), vertex_dz_cut   , "<"  , "dz selection"    , 0    , kElId)) return false;
@@ -482,10 +483,10 @@ bool SUSY3L_sync2::electronSelection(int elIdx){
     if(!makeCut<float>( std::abs(_vc->get("LepGood_sip3d", elIdx)), sip3d_cut  , "<"  , "sip3d selection"   , 0    , kElId)) return false;
     //removed after RA7 sync round 2
     //if(!makeCut<int>( _vc->get("LepGood_tightCharge", elIdx) , 1     , ">"  , "charge selection", 0    , kElId)) return false;
-    
     //boolian variable if electron comes from gamma conversion or not (true if not from conversion)
     bool not_conv = (_vc->get("LepGood_convVeto", elIdx)>0 && _vc->get("LepGood_lostHits", elIdx)==0);
     if(!makeCut( not_conv, "conversion rejection", "=", kElId)) return false;
+
     
     //removed after RA7 sync round 2
     //reject electrons which are within a cone of delta R around a muon candidate (potentially final state radiation, bremsstrahlung)
@@ -531,7 +532,7 @@ bool SUSY3L_sync2::muonSelection(int muIdx){
     int kVeryTight = 3;
     int kHyperTight = 4;
  
-    if(_vc->get("lumi") == 4529 && _vc->get("evt") == 52817){cout << "muon pt / eta / phi: " << _vc->get("LepGood_pt", muIdx) << " " << _vc->get("LepGood_eta", muIdx)  << " " << _vc->get("LepGood_phi", muIdx) << endl;}
+    //if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){cout << "muon pt / eta / phi: " << _vc->get("LepGood_pt", muIdx) << " " << _vc->get("LepGood_eta", muIdx)  << " " << _vc->get("LepGood_phi", muIdx) << endl;}
     
     //apply the cuts
     if(!makeCut<float>( _vc->get("LepGood_pt", muIdx), pt_cut, ">", "pt selection"    , 0, kMuId)) return false;
@@ -579,7 +580,7 @@ bool SUSY3L_sync2::tauSelection(int tauIdx){
     if(!makeCut<int>( _vc->get("TauGood_idAntiMu", tauIdx) , 2     , "=" , "anti muon" , 0    , kTauId)) return false;
     if(!makeCut<int>( _vc->get("TauGood_idAntiE", tauIdx) , 4     , ">=" , "anti electron" , 0    , kTauId)) return false;
     if(!makeCut<int>( _vc->get("TauGood_idDecayMode", tauIdx) , 1     , "=" , "decay mode" , 0    , kTauId)) return false;
-    if(!makeCut<int>( _vc->get("TauGood_isoCI3hit", tauIdx) , 1     , ">=" , "ci3hit" , 0    , kTauId)) return false;
+    //if(!makeCut<int>( _vc->get("TauGood_isoCI3hit", tauIdx) , 1     , ">=" , "ci3hit" , 0    , kTauId)) return false;
     //remove taus which are within a cone of deltaR around selected electrons or muons
     //loop over all electron candidates
     bool lepMatch = false;
@@ -672,20 +673,22 @@ bool SUSY3L_sync2::goodJetSelection(int jetIdx){
     float eta_cut = 2.4;
     float deltaR = 0.4;
 
-    if(_vc->get("lumi") == 4529 && _vc->get("evt") == 52817){cout << "entered jet selection with pt" << _vc->get("Jet_pt", jetIdx) << " " << _vc->get("Jet_eta", jetIdx)  << " " << _vc->get("Jet_phi", jetIdx) << endl;}
-    
-    
+//    if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){
+//        cout << "---------------------------------------------" << endl;
+//        cout << "entered jet selection with pt" << _vc->get("Jet_pt", jetIdx) << " " << _vc->get("Jet_eta", jetIdx)  << " " << _vc->get("Jet_phi", jetIdx) << endl;}
+  
+  
     if(!makeCut<float>(_vc->get("Jet_pt", jetIdx)       , pt_cut, ">", "pt selection" , 0, kJetId) ) return false;
-    if(_vc->get("lumi") == 4529 && _vc->get("evt") == 52817){cout << "survivied pt cut" << endl;}
+//    if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){cout << "survivied pt cut" << endl;}
 
 
     if(!makeCut<float>(std::abs(_vc->get("Jet_eta", jetIdx)),  eta_cut, "<", "eta selection", 0, kJetId) ) return false;
-    if(_vc->get("lumi") == 4529 && _vc->get("evt") == 52817){cout << "survivied eta cut" << endl;}
+//    if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){cout << "survivied eta cut" << endl;}
 
 
     if(!makeCut<float>(_vc->get("Jet_id", jetIdx),  1, ">=", "jet id", 0, kJetId) ) return false;
-    if(_vc->get("lumi") == 4529 && _vc->get("evt") == 52817){cout << "survivied jetId cut" << endl;}
-    
+//    if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){cout << "survivied jetId cut" << endl;}
+  
     //exclude jets which are within a cone of deltaR around lepton candidates or taus
     //loop over all electron candidates
     bool lepMatch = false;
@@ -693,8 +696,10 @@ bool SUSY3L_sync2::goodJetSelection(int jetIdx){
         //calculate delta R, input eta1, eta2, phi1, phi2
         float dr = KineUtils::dR( _els[ie]->eta(), _vc->get("Jet_eta", jetIdx), _els[ie]->phi(), _vc->get("Jet_phi", jetIdx));
         if(dr < deltaR){
-            lepMatch = true; 
-            break;
+          lepMatch = true; 
+
+//          if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){cout << "electron match: " << dr << endl;}
+          break;
         }
     }
 
@@ -704,22 +709,26 @@ bool SUSY3L_sync2::goodJetSelection(int jetIdx){
         float dr = KineUtils::dR( _mus[im]->eta(), _vc->get("Jet_eta", jetIdx), _mus[im]->phi(), _vc->get("Jet_phi", jetIdx));
         if(dr < deltaR) {
             lepMatch = true; 
+//            if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){cout << "muon match: " << dr << endl;}
             break;
         }
     }
-    
+  
     //loop over all tau candidates
     for(int it=0; it<_nTaus; ++it){
         //calculate delta R, input eta1, eta2, phi1, phi2
         float dr = KineUtils::dR( _taus[it]->eta(), _vc->get("Jet_eta", jetIdx), _taus[it]->phi(), _vc->get("Jet_phi", jetIdx));
         if(dr < deltaR) {
             lepMatch = true; 
+//            if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){cout << "tau match: " << dr << endl;}
             break;
         }
     }
-    
+  
     if(!makeCut(!lepMatch,  "lepton cleaning", "=", kJetId) ) return false;
-    
+  
+//    if(_vc->get("lumi") == 4979 && _vc->get("evt") == 97876){cout << "survivied cleaning" << endl;}
+  
     return true;
 }
 
@@ -1100,28 +1109,48 @@ bool SUSY3L_sync2::baseSelection(){
     */
     
     //print event information before selection
-    
-    if(_vc->get("lumi") ==  4529 && _vc->get("evt") == 52817){
+   /* 
+    if(_vc->get("lumi") ==  4973 && _vc->get("evt") == 97241){
         cout << "--------------------------------------------------"<< endl; 
         cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " " << _nMus  << " "<<  _nEls << " " << _nTaus << " " << _nJets << " "  << _nBJets << endl;
         for(int i =0;i<_nEls;i++){
             cout << _els[i]->pt()<<endl;
             cout << _els[i]->eta()<<endl;
             cout << _els[i]->phi()<<endl;
+            cout << "--------" << endl;
             }
         cout << " muons " << endl;    
         for(int i =0;i<_nMus;i++){
             cout << _mus[i]->pt()<<endl;
             cout << _mus[i]->eta()<<endl;
             cout << _mus[i]->phi()<<endl;
+            cout << "--------" << endl;
             //float dr = KineUtils::dR( _mus[i]->eta(), _els[0]->eta(), _mus[i]->phi(), _els[0]->phi());
             //cout << "deltaR with electron " << dr << endl;
             }
-    
+        cout << " jets " << endl;    
+        for(int i =0;i<_nJets;i++){
+            cout << _jets[i]->pt()<<endl;
+            cout << _jets[i]->eta()<<endl;
+            cout << _jets[i]->phi()<<endl;
+            cout << "--------" << endl;
+            //float dr = KineUtils::dR( _mus[i]->eta(), _els[0]->eta(), _mus[i]->phi(), _els[0]->phi());
+            //cout << "deltaR with electron " << dr << endl;
+            }
+        cout << " taus " << endl;    
+        for(int i =0;i<_nTaus;i++){
+            cout << _taus[i]->pt()<<endl;
+            cout << _taus[i]->eta()<<endl;
+            cout << _taus[i]->phi()<<endl;
+            cout << "--------" << endl;
+            //float dr = KineUtils::dR( _mus[i]->eta(), _els[0]->eta(), _mus[i]->phi(), _els[0]->phi());
+            //cout << "deltaR with electron " << dr << endl;
+            }
+
         cout << "--------------------------------------------------"<< endl; 
 
     }
-    
+    */
 
 
   
@@ -1599,11 +1628,13 @@ bool SUSY3L_sync2::multiIsolation(int idx, float miniRelIso_cut, float ptRatio_c
        }
         */
 
-       if(_vc->get("LepGood_miniRelIso",idx) < miniRelIso_cut){
+      
+       
+        if(_vc->get("LepGood_miniRelIso",idx) < miniRelIso_cut){
            if((_vc->get("LepGood_jetPtRatio",idx) > ptRatio_cut) || (_vc->get("LepGood_jetPtRel",idx) > ptRel_cut)){ 
                return true;
            }
-       }
+        }
 
 
 
