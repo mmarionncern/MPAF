@@ -49,7 +49,7 @@ private:
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection();
     bool checkMultiIso();
-    bool lowMllPair();
+    float lowestOssfMll();
     bool ZEventSelection();
     bool ZEventSelectionLoop();
     bool srSelection();
@@ -89,6 +89,7 @@ private:
     float _valCutMETSR;
     float _valCutNJetsSR;
     float _valCutNBJetsSR;
+    float _valCutMllBR;
     
     std::string _cTypeLepMultiplicityBR;
     std::string _cTypeNJetsBR;
@@ -99,6 +100,7 @@ private:
     std::string _cTypeNBJetsSR;
     std::string _cTypeHTSR;
     std::string _cTypeMETSR;
+    std::string _cTypeMllBR;
 
     float _upValCutLepMultiplicityBR;
     float _upValCutNJetsBR;
@@ -109,6 +111,7 @@ private:
     float _upValCutNBJetsSR;
     float _upValCutHTSR;
     float _upValCutMETSR;
+    float _upValCutMllBR;
 
     //vectors for electron, muon, and tau candidates
     std::vector<int> _elIdx;
@@ -143,6 +146,7 @@ private:
 
     float _HT;
     float _deltaR;
+    float _mll;
   
     
 };

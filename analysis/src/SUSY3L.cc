@@ -760,9 +760,9 @@ void SUSY3L::setBaselineRegion(){
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
         setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
-        _lowMllCut                    = 12.         ;     //low invariant mass cut for ossf leptoin pairs
         setCut("HT"                 ,   60, ">=" )  ;     //sum of jet pT's
         setCut("MET"                ,   50, ">=" )  ;     //missing transverse energy
+        setCut("Mll"                ,   12, ">" )   ;     //invariant mass of ossf lepton pair
     }
 
 }
@@ -2435,6 +2435,12 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
         _cTypeMETBR    = cType;
         _upValCutMETBR = upValCut;
     }
+    else if(var == "Mll") {
+        _valCutMllBR   = valCut;
+        _cTypeMllBR    = cType;
+        _upValCutMllBR = upValCut;
+    }
+
 
 
     // signal region
@@ -2523,8 +2529,8 @@ bool SUSY3L::baseSelection(){
 //    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
 
     //reject event if ossf lepton pair with low invariant mass is found
-    bool has_low_mll = lowMllPair();
-    if(!makeCut( !has_low_mll , "low mll rejection", "=") ) return false;
+    _mll = lowestOssfMll();
+    if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR) ) return false;
     
     //select on or off-Z events according to specification in config file
     //bool is_reconstructed_Z = ZEventSelectionLoop();
@@ -2617,20 +2623,28 @@ bool SUSY3L::hardLegSelection(){
 }
 
 //____________________________________________________________________________
-bool SUSY3L::lowMllPair(){
+float SUSY3L::lowestOssfMll(){
     /*
-        Checks if event has ossf lepton pair with low invariant mass 
-        return: true (if the event has such a lepton pair), false (else)
+        Checks if event has an ossf lepton pair and comutes the lowest invariant mass of all ossf pairs
+        parameters: none
+        return: smallest mll of ossf lepton pair if a pair is found, -1 if no pair is found
     */
+
+    bool ossf_pair_found = false;
+    std::vector< int > mlls;
+    float lowest_mll = 99999;
 
     //loop over all possible combination of two electrons
     for(int ie1=0; ie1 < _nEls; ie1++) {
         for(int ie2 = ie1; ie2 < _nEls; ie2++) {
             //continue if not an ossf pair
             if( _els[ie1]->pdgId() != - _els[ie2]->pdgId()) continue;
-            //return true if low mass pair is found
-            float mll = Candidate::create(_els[ie1], _els[ie2])->mass();
-            if(mll < _lowMllCut) return true;
+            //save mll if it is the smallest of all mll found so far
+            float mll_tmp = Candidate::create(_els[ie1], _els[ie2])->mass();
+            ossf_pair_found = true;
+            if(mll_tmp < lowest_mll){
+                lowest_mll = mll_tmp;
+            }
         }
     }
 
@@ -2639,13 +2653,17 @@ bool SUSY3L::lowMllPair(){
         for(int im2 = im1; im2 < _nMus; im2++) {
             //continue if not an ossf pair
             if( _mus[im1]->pdgId() != - _mus[im2]->pdgId()) continue;
-            //return true if low mass pair is found
-            float mll = Candidate::create(_mus[im1], _mus[im2])->mass();
-            if(mll < _lowMllCut) return true;
-           }
+            //save mll if it is the smallest of all mll found so far
+            float mll_tmp = Candidate::create(_mus[im1], _mus[im2])->mass();
+            ossf_pair_found = true;
+            if(mll_tmp < lowest_mll){
+                lowest_mll = mll_tmp;
+            }
         }
+    }
  
-    return false;
+    if(ossf_pair_found){return lowest_mll;}
+    else{return 999;}
 }
 
 //____________________________________________________________________________
