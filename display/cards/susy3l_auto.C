@@ -1,17 +1,14 @@
-
 {
-
 
     if(Recompute) {
         MPAFDisplay md;
- 
+
         bool * rtmp= const_cast<bool*> pr;
         *rtmp = false;
 
     }
     else 
     md.refresh();
-
 
 
 

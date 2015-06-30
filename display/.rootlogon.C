@@ -28,12 +28,12 @@
   }
 
 
-  // bool Recompute=1;
-  // bool* pr=&Recompute;
+  bool Recompute=1;
+   bool* pr=&Recompute;
 
-  // bool unlock=1;
-  // bool* pr2=&unlock;
+   bool unlock=1;
+   bool* pr2=&unlock;
 
-   //MPAFDisplay md;
+   MPAFDisplay md;
 
 }

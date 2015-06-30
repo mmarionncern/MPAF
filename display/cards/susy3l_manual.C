@@ -30,8 +30,8 @@ void susy3l_manual() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="mt2";
-    
+    string obs ="mll";    //njets, nbjets, met, ht, lep, zpeak, mt2, pt, mll
+    string sigs = "t"; 
 
     //observables **********************
     //string obs[6]={"","","","","",""};
@@ -77,12 +77,12 @@ void susy3l_manual() {
     if(obs == "njets"){
         md.dp.setObservables("BR_NJets");
         int binning=1;
-        double rangeX[2]={2,7};
+        double rangeX[2]={0,7};
     }
     if(obs == "nbjets"){
         md.dp.setObservables("BR_NBJets");
         int binning=1;
-        double rangeX[2]={0,7};
+        double rangeX[2]={0,5};
     }
     if(obs == "met"){
         md.dp.setObservables("BR_MET");
@@ -95,26 +95,15 @@ void susy3l_manual() {
         double rangeX[2]={0,800};
     }
     if(obs == "lep"){
+        md.dp.setObservables("mu_multiplicity");
+        md.dp.setObservables("el_multiplicity");
+        md.dp.setObservables("tau_multiplicity");
         md.dp.setObservables("lep_multiplicity");
         int binning=1;
         double rangeX[2]={0,7};
+        //bool logYScale=true;
     }
-    if(obs == "el"){
-        md.dp.setObservables("el_multiplicity");
-        int binning=1;
-        double rangeX[2]={0,7};
-    }
-    if(obs == "mu"){
-        md.dp.setObservables("mu_multiplicity");
-        int binning=1;
-        double rangeX[2]={0,7};
-    } 
-    if(obs == "tau"){
-        md.dp.setObservables("tau_multiplicity");
-        int binning=1;
-        double rangeX[2]={0,7};
-    }
-    if(obs == "lepmll"){
+    if(obs == "zpeak"){
         md.dp.setObservables("Zmass");
         int binning=1;
         double rangeX[2]={0,200};
@@ -129,10 +118,19 @@ void susy3l_manual() {
         md.dp.setObservables("pt_1st_lepton");
         md.dp.setObservables("pt_2nd_lepton");
         md.dp.setObservables("pt_3rd_lepton");
-        int binning=5;
+        int binning=4;
         double rangeX[2]={0,200};
         bool logYScale=false;
     }
+    if(obs == "mll"){
+        md.dp.setObservables("lowMll");
+        int binning=2;
+        double rangeX[2]={0,400};
+        bool logYScale=true;
+    }
+
+
+
     //string autoBinFile="susybinninghigh";
     //md.dp.loadAutoBinning(autoBinFile);
 
@@ -215,50 +213,53 @@ void susy3l_manual() {
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
     
-//    md.anConf.addSample( "WZJetsTo3LNu"                     ,  "WZ+ZZ"              , kGreen    );
-//    md.anConf.addSample( "ZZTo4L"                           ,  "WZ+ZZ"              , kGreen    );
+    md.anConf.addSample( "WZJetsTo3LNu"                     ,  "WZ+ZZ"              , kGreen    );
+    md.anConf.addSample( "ZZTo4L"                           ,  "WZ+ZZ"              , kGreen    );
 
-//    md.anConf.addSample( "TTZJets"                          ,  "t#bar{t}Z"          , kBlue     );
+    md.anConf.addSample( "TTZJets"                          ,  "t#bar{t}Z"          , kBlue     );
 
-//    md.anConf.addSample( "TTWJets"                          ,  "t#bar{t}W"          , kYellow   );
+    md.anConf.addSample( "TTWJets"                          ,  "t#bar{t}W"          , kYellow   );
 
-//    md.anConf.addSample( "GGHZZ4L"                          ,  "rare SM"            , kCyan     );
-//    md.anConf.addSample( "TTH"                              ,  "rare SM"             , kCyan      );
+    md.anConf.addSample( "GGHZZ4L"                          ,  "rare SM"            , kCyan     );
+    md.anConf.addSample( "TTH"                              ,  "rare SM"             , kCyan      );
 
   //Drell-Yan
-//    md.anConf.addSample( "DYJetsToLL_M50_HT100to200"        ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "DYJetsToLL_M50_HT200to400"        ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "DYJetsToLL_M50_HT400to600"        ,  "non-prompt e/#mu"    , kRed      );
-//   md.anConf.addSample( "DYJetsToLL_M50_HT600toInf"        ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "DYJetsToLL_M50_HT100to200"        ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "DYJetsToLL_M50_HT200to400"        ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "DYJetsToLL_M50_HT400to600"        ,  "non-prompt e/#mu"    , kRed      );
+   md.anConf.addSample( "DYJetsToLL_M50_HT600toInf"        ,  "non-prompt e/#mu"    , kRed      );
 
   //t production
-//    md.anConf.addSample( "TBarToLeptons_sch"                ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "TBarToLeptons_tch"                ,  "non-prompt e/#mu"    , kRed      );
-//   md.anConf.addSample( "TBar_tWch"                        ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "TBarToLeptons_sch"                ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "TBarToLeptons_tch"                ,  "non-prompt e/#mu"    , kRed      );
+   md.anConf.addSample( "TBar_tWch"                        ,  "non-prompt e/#mu"    , kRed      );
     md.anConf.addSample( "TTJets"                           ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "TToLeptons_sch"                   ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "TToLeptons_tch"                   ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "T_tWch"                           ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "TToLeptons_sch"                   ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "TToLeptons_tch"                   ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "T_tWch"                           ,  "non-prompt e/#mu"    , kRed      );
 
   //W+Jets
-//    md.anConf.addSample( "WJetsToLNu_HT100to200"            ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "WJetsToLNu_HT200to400"            ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "WJetsToLNu_HT400to600"            ,  "non-prompt e/#mu"    , kRed      );
-//    md.anConf.addSample( "WJetsToLNu_HT600toInf"            ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "WJetsToLNu_HT100to200"            ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "WJetsToLNu_HT200to400"            ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "WJetsToLNu_HT400to600"            ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "WJetsToLNu_HT600toInf"            ,  "non-prompt e/#mu"    , kRed      );
 
   //signal
-//    md.anConf.addSample( "SMS_T1tttt_2J_mGl1200_mLSP800"                ,  "T1t412 sig"     , kViolet-3 );
-//    md.anConf.addSample( "SMS_T1tttt_2J_mGl1500_mLSP100"                ,  "T1t415 sig"     , kOrange+2  );
-//    md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"    ,  "T5t410 sig"     , kBlue+1  );
-//    md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4WZ315 sig"  , kGreen+1  );
-    //md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4WZ325 sig"  , kGreen+2  );
-//    md.anConf.addSample( "T5qqqqWZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4WZ12 sig"   , kGreen+3  );
-//    md.anConf.addSample( "T5qqqqWZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4WZ15 sig"   , kGreen+4  );
-    //md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4ZZ315 sig"  , kCyan+1  );
-//    md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4ZZ325 sig"  , kCyan+2  );
-//    md.anConf.addSample( "T5qqqqZZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4ZZ12 sig"   , kCyan+3  );
-//    md.anConf.addSample( "T5qqqqZZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4ZZ15 sig"   , kCyan+4  );
-
+    if(sigs=="t"){
+    md.anConf.addSample( "SMS_T1tttt_2J_mGl1200_mLSP800"                ,  "T1t412 sig"     , kBlue-3 );
+    md.anConf.addSample( "SMS_T1tttt_2J_mGl1500_mLSP100"                ,  "T1t415 sig"     , kBlue-7  );
+    md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"    ,  "T5t410 sig"     , kOrange+10  );
+    }
+    if(sigs=="q"){
+    md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4WZ315 sig"  , kGreen+2  );
+    md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4WZ325 sig"  , kMagenta  );
+    md.anConf.addSample( "T5qqqqWZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4WZ12 sig"   , kRed-6  );
+    md.anConf.addSample( "T5qqqqWZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4WZ15 sig"   , kRed+3  );
+    md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4ZZ315 sig"  , kGreen+3  );
+    md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4ZZ325 sig"  , kMagenta+2  );
+    md.anConf.addSample( "T5qqqqZZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4ZZ12 sig"   , kRed-9  );
+    md.anConf.addSample( "T5qqqqZZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4ZZ15 sig"   , kRed+1  );
+    }
 
 
 

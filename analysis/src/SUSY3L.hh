@@ -76,7 +76,8 @@ private:
 
     //cut variables
     float _valCutLepMultiplicityBR;
-    float _pt_cut_hard_leg;
+    float _pt_cut_hard_legs;
+    int   _nHardLeptons;
     float _M_T_3rdLep_MET_cut;
     float _multiIsoWP[5][3];
     float _valCutNJetsBR;
