@@ -95,7 +95,7 @@
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=10000; //pb-1 19470
+    float lumi=3000; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;

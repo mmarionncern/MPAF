@@ -171,7 +171,7 @@ void SUSY3L_sync2::run(){
     //printout for RA7 synchronization
     int lumi = _vc->get("lumi");
     int evt = _vc->get("evt");
-    cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+   //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
     //_numberTau += _nTaus;
     //cout << _numberTau << endl; 
 
@@ -268,8 +268,8 @@ void SUSY3L_sync2::collectKinematicObjects(){
         return: none
     */
    
-   /* 
-    if(_vc->get("lumi") == 4973 && _vc->get("evt") == 97241){
+    
+    if(_vc->get("lumi") == 4644 && _vc->get("evt") == 64395){
         cout << "--------------------------------------------------"<< endl; 
         cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose leptons: " <<  _vc->get("nLepGood") << endl;
         for(int i = 0; i<_vc->get("nLepGood");i++){
@@ -284,7 +284,7 @@ void SUSY3L_sync2::collectKinematicObjects(){
             cout << "tau " << i << ": " << _vc->get("TauGood_pt",i) << " " << _vc->get("TauGood_eta",i)<< " " << _vc->get("TauGood_phi",i)  <<endl;
         }
     }
-*/
+
 
    
     

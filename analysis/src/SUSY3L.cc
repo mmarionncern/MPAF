@@ -431,7 +431,7 @@ bool SUSY3L::electronSelection(int elIdx){
     counter("ElectronDenominator", kElId);
 
     //define cuts for electrons
-    float pt_cut = 8.;
+    float pt_cut = 10.;
     float eta_cut = 2.5;
     float eta_veto_low = 1.4442;
     float eta_veto_high = 1.566;
@@ -460,7 +460,7 @@ bool SUSY3L::electronSelection(int elIdx){
     bool elTightMvaID = electronMvaCut(elIdx, 1);
     if(!makeCut( elTightMvaID, "electron tight mva wp", "=", kElId)) return false;
     //3 variable isolation criteria: miniIso < A and (pt ratio > B or pt rel > C)
-    int wp = kMedium;
+    int wp = kTight;
     bool isolated = multiIsolation(elIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
     if(!makeCut( isolated, "initial multiIso selection", "=", kElId)) return false;
     //replaced by multiIsolation
@@ -505,7 +505,7 @@ bool SUSY3L::muonSelection(int muIdx){
     counter("MuonDenominator", kMuId);
 
     //define cut values
-    float pt_cut = 8.;
+    float pt_cut = 10.;
     float eta_cut = 2.4;
     float isolation_cut = 0.15;
     float vertex_dz_cut = 0.1;
@@ -523,7 +523,7 @@ bool SUSY3L::muonSelection(int muIdx){
     if(!makeCut<float>( _vc->get("LepGood_pt", muIdx), pt_cut, ">", "pt selection"    , 0, kMuId)) return false;
     if(!makeCut<float>( std::abs( _vc->get("LepGood_eta", muIdx)), eta_cut, "<", "eta selection", 0, kMuId)) return false;
     //3 variable isolation criteria: miniIso < A and (pt ratio > B or pt rel > C)
-    int wp = kLoose;
+    int wp = kMedium;
     bool isolated = multiIsolation(muIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
     if(!makeCut( isolated, "initial multiIso selection", "=", kMuId)) return false;
     //replaced by multiIsolation
@@ -756,22 +756,22 @@ void SUSY3L::setBaselineRegion(){
 
     if(_BR == "BR0"){
         setCut("LepMultiplicity"    ,    3, "="  )  ;     //number of isolated leptons
-        _pt_cut_hard_legs             = 10          ;     //harsher pT requirement for at least _nHardLeptons (below)
-        _nHardLeptons                 = 2           ;     //number of leptons which need to fulfill harder pt cut
+        _pt_cut_hard_legs             = 20          ;     //harsher pT requirement for at least _nHardLeptons (below)
+        _nHardLeptons                 = 1           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
-        setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
+        setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,   60, ">=" )  ;     //sum of jet pT's
         setCut("MET"                ,   50, ">=" )  ;     //missing transverse energy
-        setCut("Mll"                ,    4, ">=" )  ;     //invariant mass of ossf lepton pair
+        setCut("Mll"                ,   12, ">=" )  ;     //invariant mass of ossf lepton pair
     }
 
 }
 
 
 //____________________________________________________________________________
-//void SUSY3L::setSignalRegion() {
+void SUSY3L::setSignalRegion() {
   
     /*
         sets the cuts of the signal region (_SR)
@@ -781,7 +781,7 @@ void SUSY3L::setBaselineRegion(){
 
 
     // 30 SR as in PAS 013-008
-/*
+
     if(_SR == "SR000") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
@@ -993,13 +993,397 @@ void SUSY3L::setBaselineRegion(){
     }
 
 }
-*/
-
 
 
 //____________________________________________________________________________
-void SUSY3L::setSignalRegion() {
+//void SUSY3L::setSignalRegion() {
+/*
+if(_SR == "SR000") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 50, "[[", 150 );
+}
 
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR014") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR015") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR016") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR017") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR018") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR019") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR020") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR021") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR022") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR023") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR024") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR025") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR026") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR027") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR028") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR029") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR030") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR031") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR032") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR033") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR034") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR035") {
+   setCut("NBJetsSR", 1, "[[", 3 );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR036") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR037") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR038") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR039") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR040") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR041") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR042") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR043") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR044") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 2, "[[", 5 );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR045") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR046") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR047") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR048") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR049") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR050") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("METSR", 300, ">=" );
+}
+
+if(_SR == "SR051") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+}
+
+if(_SR == "SR052") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+}
+
+if(_SR == "SR053") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("METSR", 300, ">=" );
+}
+
+
+}
+*/
+
+
+//____________________________________________________________________________
+//void SUSY3L::setSignalRegion() {
+/*
 if(_SR == "SR000") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("NJetsSR", 2, "[[", 4 );
@@ -1760,6 +2144,7 @@ if(_SR == "SR107") {
 
 
 }
+*/
 //____________________________________________________________________________
 void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upValCut) {
     /*
