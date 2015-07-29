@@ -151,7 +151,6 @@
   //if( md.isInitStatus() ) {
 
 
-<<<<<<< HEAD
   md.anConf.addSample( "TTJets_skimfake"                        , "t#bar{t}"    , kRed-6  ); 
   md.anConf.addSample( "QCD_Mu15_skimfake"                      , "QCD Mu"      , kBlue+2 ); 
   md.anConf.addSample( "QCD_Pt20to30_EMEnriched_skimfake"       , "QCD EM+BCtoE", kBlue-4 ); 
