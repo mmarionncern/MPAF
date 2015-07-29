@@ -1,0 +1,14 @@
+*.[a,o,pdf,png,pyc,root,so,swo,swp]
+*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
+*/*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
+*/*/*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
+*/*/*_dict_*
+analysis/bin/analysis
+analysis/lib
+cfg/tmpFiles
+display/cards/tmpFiles
+display/lib
+tools/lib
+workdir
+*dictgen.mk
+*gen.mk
