@@ -768,22 +768,22 @@ bool FakeRatio::mrSelection(){
 
 
   // lepton multiplicity
-  if(!makeCut<int>( _nDenLeps            , 1   , "=", "lepton multiplicity and flavor" ) ) return false;
+  if(!makeCut<int>( _nDenLeps    , 1   , "=" , "lepton multiplicity and flavor")) return false;
 
-  //CH: RA5 guys select lep pt later one
-  //if     (_lepptcut == "mu15" && _lLeps[0] -> pt() < 15.) return false;
-  //else if(_lepptcut == "mu5"  && _lLeps[0] -> pt() > 15.) return false;
+  //CH: RA5 guys select muon pt later on
+  if     (_sampleName.find("Mu15") != std::string::npos && _denLeps[0] -> pt() < 15.) return false;
+  else if(_sampleName.find("Mu5")  != std::string::npos && _denLeps[0] -> pt() > 15.) return false;
  
   // jet multiplicity
-  if(!makeCut<int>( _nJets       , 1   , ">=", "jet multiplicity") ) return false; 
+  if(!makeCut<int>( _nJets       , 1   , ">=", "jet multiplicity"              )) return false; 
 
   // MET 
-  if(!makeCut<float>( _met->pt() , 20.0, "<" , "MET selection"   ) ) return false;
+  if(!makeCut<float>( _met->pt() , 20.0, "<" , "MET selection"                 )) return false;
 
   // MT
   Candidate* MT = nullptr;
   MT = Candidate::create( _denLeps[0], _met);
-  if(!makeCut<float>( MT->mass() , 20.0, "<" , "MT selection"    ) ) return false;
+  if(!makeCut<float>( MT->mass() , 20.0, "<" , "MT selection"                  )) return false;
 
   return true;
 
