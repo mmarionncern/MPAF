@@ -245,7 +245,6 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
   if(dir.find("psi.ch")!=(size_t)-1)
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+sname+".root";
 
-
   datafile = TFile::Open(NameF.c_str());
   if(datafile==nullptr) { 
     cout<<" No such file "<<sname<<endl; return;

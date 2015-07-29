@@ -494,9 +494,8 @@ void HistoManager::fill(string var, int ds, float valx, float valy, float weight
   else {
     if( _itVar->second.htype.find("P") != (size_t) -1 )
       dynamic_cast<TProfile*>(_itVar->second.hs[ds])->Fill(valx, valy, weight);
-    else{
+    else
       dynamic_cast<TH2*>(_itVar->second.hs[ds])->Fill(valx, valy, weight); //to be checked...
-    }
   }
 }
 

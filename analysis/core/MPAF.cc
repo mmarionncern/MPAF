@@ -114,7 +114,8 @@ void MPAF::analyze(){
   for(unsigned int i=0; i<_numDS; ++i){
 		
     // open file
-   _sampleName = _datasets[i]->getName();
+    _sampleName = _datasets[i]->getName();
+
     _inds = i;
     _isData = _datasets[i]->isPPcolDataset();
     

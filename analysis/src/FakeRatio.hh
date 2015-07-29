@@ -51,7 +51,7 @@ private:
   bool vetoElectronSelection(int);
   bool vetoMuonSelection(int);
 
-  void setCut(std::string, float, std::string, float = 0); 
+  void setCut(std::string, float, std::string, float = 0);
   void setMeasurementRegion();
 
   bool mrSelection();
@@ -65,8 +65,6 @@ private:
   void fillFakeRatioMaps();
 
   float overflowPt(float);
-
-
 
 private: 
 
@@ -112,7 +110,7 @@ private:
   vector<int> _vetLepsIdx;
   vector<int> _vetMusIdx;
 
-  Candidate * _met; 
+  Candidate * _met;
   float _HT;
 
   string _bvar;
