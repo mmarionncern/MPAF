@@ -134,15 +134,11 @@ void MPAF::analyze(){
 
     
     cout<<" Starting processing dataset : "<<_sampleName<<"  (running on "<<nEvts<<" events)"<<endl;
-    _averageJetPtRatio = 0.;
-    _numJetPtRatio = 0;
 
     boost::progress_display show_progress( nEvts );
     for(_ie = _nSkip; _ie < nEvts; ++_ie) {
       ++show_progress;
       stw.Start();
-      
-     
       
       //reinitialization
       _weight = 1.;
@@ -204,8 +200,6 @@ void MPAF::analyze(){
     //cleaning memory
     _datasets[i]->freeMemory();
  
-    cout << "average Jet Pt ratio for the leptons is " << (_averageJetPtRatio / _numJetPtRatio) << endl; 
-
   }
 
 
@@ -214,7 +208,6 @@ void MPAF::analyze(){
   cout<<"   CPU time = "<<timeCPU/nE<<" s/evt "<<"->"<<nE/timeCPU<<" Hz"<<endl<<endl;
 
   // write all outputs to disk
-  writeOutput();
   internalWriteOutput();
 
   if(_summary)

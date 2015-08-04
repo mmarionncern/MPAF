@@ -442,7 +442,10 @@ void FakeRatioStudy::defineOutput(){
 
 
   //registerLepPlots(leps, "MapBJM"  , bins_pt.size()-1, bins_pt, bins_eta.size()-1, bins_eta, "P_T(lep)", "#||{#eta}(lep)"  ); 
- 
+
+
+  _averageJetPtRatio = 0.;
+  _numJetPtRatio = 0; 
 
 }
 
@@ -455,6 +458,8 @@ void FakeRatioStudy::writeOutput(){
     paramters: none
     return: none
   */
+
+  cout << "average Jet Pt ratio for the leptons is " << (_averageJetPtRatio / _numJetPtRatio) << endl;
 
   divideFRMaps("MR", "El");
   divideFRMaps("MR", "Mu");

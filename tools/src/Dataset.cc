@@ -140,7 +140,7 @@ Dataset::addFriend(string friendname){
 int
 Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
 
-  string p= string(getenv ("MPAF"))+"/workdir/data";
+  string p= string(getenv ("MPAF"))+"/workdir";
   string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
   if(path.find("psi.ch")!=(size_t)-1)
     NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";

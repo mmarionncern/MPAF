@@ -153,6 +153,8 @@ private:
   float _HT;
 
   vector<float> _alpha;
+  float _averageJetPtRatio;
+  int _numJetPtRatio;
 
   bool _mvaId;
   string _bvar;

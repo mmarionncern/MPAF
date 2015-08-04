@@ -154,6 +154,7 @@ void FakeRatio::initialize(){
   //SusyModule
   _susyMod = new SusyModule(_vc);
 
+
 }
 
 
