@@ -31,6 +31,7 @@ SusyModule::defineLeptonWPS() {
   }
   
   //conv rej ====================
+  _cLostHitWP[kDenom] = 1; 
   _cLostHitWP[kLoose] = 1; 
   _cLostHitWP[kTight] = 0; 
 
@@ -40,12 +41,15 @@ SusyModule::defineLeptonWPS() {
   _ptWP[kEl][kTight] = 10; _ptWP[kMu][kTight] = 10;
 
   //sip & IP ======================
-  _sipWP[kLoose] = 4.0; 
+  _sipWP[kDenom] = 4.0; 
+  _sipWP[kLoose] = 1000.0; 
   _sipWP[kTight] = 4.0; 
   
+  _dxyWP[kDenom] = 0.05; //cm
   _dxyWP[kLoose] = 0.05; //cm
   _dxyWP[kTight] = 0.05; //cm
   
+  _dzWP[kDenom] = 0.1; //cm
   _dzWP[kLoose] = 0.1; //cm
   _dzWP[kTight] = 0.1; //cm
 
