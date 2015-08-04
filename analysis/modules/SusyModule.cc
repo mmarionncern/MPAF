@@ -31,7 +31,7 @@ SusyModule::defineLeptonWPS() {
   }
   
   //conv rej ====================
-  _cLostHitWP[kLoose] = 0; 
+  _cLostHitWP[kLoose] = 1; 
   _cLostHitWP[kTight] = 0; 
 
   //pt ============================
@@ -361,10 +361,10 @@ float
 SusyModule::conePt(int idx, int isoWp) const {
 
   if(_vc->get("LepGood_jetPtRel", idx) > _multiIsoWP[kPtRel][isoWp] ) {
-    return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
+    return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
   }
+  return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
 
-  return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
 }
 
 

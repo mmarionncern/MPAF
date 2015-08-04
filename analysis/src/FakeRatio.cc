@@ -543,9 +543,10 @@ bool FakeRatio::denominatorElectronSelection(int elIdx){
   // CH: FO2 selection for electrons
   // extrapolation in ElMvaId and mini isolation
 
-  if(!makeCut<float>(         _vc->get("LepGood_pt"         , elIdx) , 10.   , ">"  , "pt selection"      , 0    , kDenEls)) return false;
+  if(!makeCut<float>(   _susyMod -> conePt(elIdx, SusyModule::kTight), 10.   , ">"  , "pt selection"      , 0    , kDenEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 2.5   , "<"  , "eta selection"     , 0    , kDenEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 1.4442, "[!]", "eta selection veto", 1.566, kDenEls)) return false;
+  if(!makeCut<int>(           _vc->get("LepGood_mcMatchId"  , elIdx) ,  0    , "="  , "gen match fake"    , 0    , kDenEls)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_sip3d"      , elIdx) , 4.0   , "<"  , "SIP 3D"            , 0    , kDenEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"         , elIdx)), 0.1   , "<"  , "dz selection"      , 0    , kDenEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"        , elIdx)), 0.05  , "<"  , "dxy selection"     , 0    , kDenEls)) return false;
@@ -580,15 +581,21 @@ bool FakeRatio::denominatorMuonSelection(int muIdx){
   //CH: FO1 for muons
   //extrapolation in isolation only
 
-  if(!makeCut<float>(         _vc->get("LepGood_pt"          , muIdx) , 10.  , ">", "pt selection"  , 0, kDenMus)) return false;
+  if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kDenom), "isolation", "=", kDenMus)) return false;
+
+  if(!makeCut<float>(   _susyMod -> conePt(muIdx, SusyModule::kMedium), 10.  , ">", "pt selection"  , 0, kDenMus)) return false;
+  if      (_sampleName.find("Mu15") != std::string::npos && 
+              !makeCut<float>(_vc->get("LepGood_pt"          , muIdx) , 15.  , ">", "pt15 selection", 0, kDenMus)) return false;
+  else if (_sampleName.find("Mu5") != std::string::npos && 
+              !makeCut<float>(_vc->get("LepGood_pt"          , muIdx) , 15.  , "<", "pt15 selection", 0, kDenMus)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_eta"         , muIdx) ,  2.4 , "<", "eta selection" , 0, kDenMus)) return false;
+  if(!makeCut<int>(           _vc->get("LepGood_mcMatchId"   , muIdx) ,  0   , "=", "gen match fake", 0, kDenMus)) return false;
   if(!makeCut<int>(           _vc->get("LepGood_mediumMuonId", muIdx) ,  0   , ">", "medium muon ID", 0, kDenMus)) return false;
   if(!makeCut<int>(           _vc->get("LepGood_tightCharge" , muIdx) ,  1   , ">", "error/pt < 20" , 0, kDenMus)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_sip3d"       , muIdx) ,  4.0 , "<", "SIP 3D"        , 0, kDenMus)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"          , muIdx)),  0.1 , "<", "dz selection"  , 0, kDenMus)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"         , muIdx)),  0.05, "<", "dxy selection" , 0, kDenMus)) return false;
 
-  if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kDenom), "isolation", "=", kDenMus)) return false;
 
   return true;
 
@@ -600,9 +607,10 @@ bool FakeRatio::numeratorElectronSelection(int elIdx){
 
   counter("NumeratorElectrons", kNumEls);
 
-  if(!makeCut<float>(         _vc->get("LepGood_pt"         , elIdx) , 10.   , ">"  , "pt selection"      , 0    , kNumEls)) return false;
+  if(!makeCut<float>(   _susyMod -> conePt(elIdx, SusyModule::kTight), 10.   , ">"  , "pt selection"      , 0    , kNumEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 2.5   , "<"  , "eta selection"     , 0    , kNumEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 1.4442, "[!]", "eta selection veto", 1.566, kNumEls)) return false;
+  if(!makeCut<int>(           _vc->get("LepGood_mcMatchId"  , elIdx) ,  0    , "="  , "gen match fake"    , 0    , kNumEls)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_sip3d"      , elIdx) , 4.0   , "<"  , "SIP 3D"            , 0    , kNumEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"         , elIdx)), 0.1   , "<"  , "dz selection"      , 0    , kNumEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"        , elIdx)), 0.05  , "<"  , "dxy selection"     , 0    , kNumEls)) return false;
@@ -634,15 +642,20 @@ bool FakeRatio::numeratorMuonSelection(int muIdx){
 
   counter("NumeratorMuons", kNumMus);
 
-  if(!makeCut<float>(         _vc->get("LepGood_pt"          , muIdx) , 10.  , ">", "pt selection"  , 0, kNumMus)) return false;
+  if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kMedium), "isolation", "=", kNumMus)) return false;
+
+  if(!makeCut<float>(   _susyMod -> conePt(muIdx, SusyModule::kMedium), 10.  , ">", "pt selection"  , 0, kNumMus)) return false;
+  if      (_sampleName.find("Mu15") != std::string::npos && 
+              !makeCut<float>(_vc->get("LepGood_pt"          , muIdx) , 15.  , ">", "pt15 selection", 0, kNumMus)) return false;
+  else if (_sampleName.find("Mu5") != std::string::npos && 
+              !makeCut<float>(_vc->get("LepGood_pt"          , muIdx) , 15.  , "<", "pt15 selection", 0, kNumMus)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_eta"         , muIdx) ,  2.4 , "<", "eta selection" , 0, kNumMus)) return false;
+  if(!makeCut<int>(           _vc->get("LepGood_mcMatchId"   , muIdx) ,  0   , "=", "gen match fake", 0, kNumMus)) return false;
   if(!makeCut<int>(           _vc->get("LepGood_mediumMuonId", muIdx) ,  0   , ">", "medium muon ID", 0, kNumMus)) return false;
   if(!makeCut<int>(           _vc->get("LepGood_tightCharge" , muIdx) ,  1   , ">", "error/pt < 20" , 0, kNumMus)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_sip3d"       , muIdx) ,  4.0 , "<", "SIP 3D"        , 0, kNumMus)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"          , muIdx)),  0.1 , "<", "dz selection"  , 0, kNumMus)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"         , muIdx)),  0.05, "<", "dxy selection" , 0, kNumMus)) return false;
-
-  if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kTight), "isolation", "=", kNumMus)) return false;
  
   return true;
 
@@ -771,19 +784,28 @@ bool FakeRatio::mrSelection(){
   if(!makeCut<int>( _nDenLeps    , 1   , "=" , "lepton multiplicity and flavor")) return false;
 
   //CH: RA5 guys select muon pt later on
-  if     (_sampleName.find("Mu15") != std::string::npos && _denLeps[0] -> pt() < 15.) return false;
-  else if(_sampleName.find("Mu5")  != std::string::npos && _denLeps[0] -> pt() > 15.) return false;
- 
-  // jet multiplicity
-  if(!makeCut<int>( _nJets       , 1   , ">=", "jet multiplicity"              )) return false; 
+  //if     (_sampleName.find("Mu15") != std::string::npos && _denLeps[0] -> pt() < 15.) return false;
+  //else if(_sampleName.find("Mu5")  != std::string::npos && _denLeps[0] -> pt() > 15.) return false;
+
+  if(_nDenMus == 1)
+    counter("muon multiplicity"); 
 
   // MET 
   if(!makeCut<float>( _met->pt() , 20.0, "<" , "MET selection"                 )) return false;
+  if(_nDenMus == 1)
+    counter("muon MET"); 
 
   // MT
   Candidate* MT = nullptr;
   MT = Candidate::create( _denLeps[0], _met);
   if(!makeCut<float>( MT->mass() , 20.0, "<" , "MT selection"                  )) return false;
+  if(_nDenMus == 1)
+    counter("muon MT"); 
+
+  // jet multiplicity
+  if(!makeCut<int>( _nJets       , 1   , ">=", "jet multiplicity"              )) return false; 
+  if(_nDenMus == 1)
+    counter("muon Jet"); 
 
   return true;
 
