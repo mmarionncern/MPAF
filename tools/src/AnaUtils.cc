@@ -609,7 +609,7 @@ AnaUtils::saveNumbers(string anName, string conName,  map<string, int> cnts) {
 	  else {
 	    if(itm -> second.sumw > 0.000001 ) { 
 	      ostringstream os, os2, os3;
-	      os<< itm -> second.sumw; // fixed << setprecision(4)
+	      os<< setprecision(10) << itm -> second.sumw; // fixed << setprecision(4)
 	      os2<< itm -> second.N; // fixed << setprecision(0) <<
 	      os3<< sqrt(itm -> second.sumw2); // fixed << setprecision(4) <<
 	      

@@ -160,6 +160,7 @@ private:
   // float applySystDBVar(SystST s, string db, float v1, float v2, float v3, float v4,
   // 		       float v5,float v6,float v7,float v8,float v9, float v10);
 
+
   // Protected Members
 
 protected:
@@ -178,6 +179,9 @@ protected:
   float _weight;
 
   std::string _cfgName;
+
+  int _numDS;
+
 
   // Private Members
  
