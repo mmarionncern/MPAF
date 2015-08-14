@@ -18,6 +18,20 @@ SSDL2015::~SSDL2015(){
 void
 SSDL2015::initialize(){
 
+  _vc->registerVar("Flag_goodVertices"                      ); 
+  _vc->registerVar("Flag_trkPOG_manystripclus53X"           ); 
+  _vc->registerVar("Flag_trkPOG_toomanystripclus53X"        ); 
+  _vc->registerVar("Flag_trkPOG_logErrorTooManyClusters"    ); 
+  _vc->registerVar("Flag_CSCTightHaloFilter"                ); 
+  _vc->registerVar("hbheFilterNew25ns"                      ); 
+  _vc->registerVar("hbheFilterIso"                          ); 
+  _vc->registerVar("Flag_EcalDeadCellTriggerPrimitiveFilter"); 
+  _vc->registerVar("Flag_eeBadScFilter"                     ); 
+  _vc->registerVar("LepGood_sigmaIEtaIEta"                  );
+  _vc->registerVar("LepGood_hadronicOverEm"                 );
+  _vc->registerVar("LepGood_dEtaScTrkIn"                    );
+  _vc->registerVar("LepGood_dPhiScTrkIn"                    );
+  _vc->registerVar("LepGood_eInvMinusPInv"                  );
 
   _vc->registerVar("run"                          );
   _vc->registerVar("lumi"                         );
@@ -178,6 +192,7 @@ SSDL2015::initialize(){
   _SR      = getCfgVarS("SR"     );
   _FR      = getCfgVarS("FR"     );
   _categorization = getCfgVarI("categorization");
+  _filter  = getCfgVarS("FILTER" );
 
 //  vector<string> jess;
 //  jess.push_back("Jet_pt");
@@ -267,6 +282,20 @@ SSDL2015::run() {
   //if(_vc->get("evt")!=72688 && _vc->get("evt")!=49205) return;
   //cout<<" =================================="<< _sampleName <<endl;
   counter("denominator");
+
+
+  if((_filter=="all" || _filter=="PV"      ) && _vc->get("Flag_goodVertices"                      ) == 0) return; 
+  if((_filter=="all" || _filter=="trkMSC"  ) && _vc->get("Flag_trkPOG_manystripclus53X"           ) == 0) return; 
+  if((_filter=="all" || _filter=="trkTMSC" ) && _vc->get("Flag_trkPOG_toomanystripclus53X"        ) == 0) return; 
+  if((_filter=="all" || _filter=="trkLETMC") && _vc->get("Flag_trkPOG_logErrorTooManyClusters"    ) == 0) return; 
+  if((_filter=="all" || _filter=="CSC"     ) && _vc->get("Flag_CSCTightHaloFilter"                ) == 0) return; 
+  if((_filter=="all" || _filter=="HBHE"    ) && _vc->get("hbheFilterNew25ns"                      ) == 0) return; 
+  if((_filter=="all" || _filter=="HBHEiso" ) && _vc->get("hbheFilterIso"                          ) == 0) return; 
+  if((_filter=="all" || _filter=="ECALtp"  ) && _vc->get("Flag_EcalDeadCellTriggerPrimitiveFilter") == 0) return; 
+  if((_filter=="all" || _filter=="ECALsc"  ) && _vc->get("Flag_eeBadScFilter"                     ) == 0) return; 
+ 
+
+
   
   retrieveObjects();
 
@@ -1390,6 +1419,25 @@ SSDL2015::looseLepton(int idx, int pdgId) {
     if(!_susyMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
   }
   else {
+    // additional cuts for trigger
+    if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479){
+      if(         _vc->get("LepGood_sigmaIEtaIEta" , idx)  > 0.011) return false;
+      if(         _vc->get("LepGood_hadronicOverEm", idx)  > 0.08 ) return false;
+      if(std::abs(_vc->get("LepGood_dEtaScTrkIn"   , idx)) > 0.01 ) return false;
+      if(std::abs(_vc->get("LepGood_dPhiScTrkIn"   , idx)) > 0.04 ) return false;
+      if(std::abs(_vc->get("LepGood_eInvMinusPInv" , idx)) > 0.01 ) return false;
+    }
+    else {
+      if(         _vc->get("LepGood_sigmaIEtaIEta" , idx)  > 0.031) return false;
+      if(         _vc->get("LepGood_hadronicOverEm", idx)  > 0.08 ) return false;
+      if(std::abs(_vc->get("LepGood_dEtaScTrkIn"   , idx)) > 0.01 ) return false;
+      if(std::abs(_vc->get("LepGood_dPhiScTrkIn"   , idx)) > 0.08 ) return false;
+      if(std::abs(_vc->get("LepGood_eInvMinusPInv" , idx)) > 0.01 ) return false;
+    }
+    //CH: still need to write this!
+    //Plus for isolated triggers only: EcalPFClusterIso<0.45, HcalPFClusterIso<0.25, TrackIso<0.2
+
+	
     if(!_susyMod->elIdSel(idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
   }

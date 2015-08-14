@@ -16,6 +16,13 @@
 #include "analysis/core/MPAF.hh"
 #include "analysis/modules/SusyModule.hh"
 
+#include "RooAddPdf.h"
+#include "RooArgList.h"
+#include "RooArgSet.h"
+#include "RooDataHist.h"
+#include "RooHistPdf.h"
+#include "RooRealVar.h"
+
 class FakeRatio: public MPAF {
 
 public:
@@ -23,24 +30,28 @@ public:
 
   // Member Functions
 
-  FakeRatio(std::string);
+  FakeRatio(string);
   virtual ~FakeRatio();
 
 
 private:
 
   void initialize();
-
   void run();
-  void defineOutput();
-  void modifyWeight();
-  void writeOutput();
-  void modifySkimming();
 
-  void divideFRMap(string kr, string postpend);
+  void defineOutput(); 
+  void divideFRMap(string postpend);
   void divideFRMaps();
+  void doEwkSub();
+  vector<float> doubleFit(TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin = 0, float hmax = 0); 
+  void modifySkimming();
+  void modifyWeight();
   void registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis);
+  float singleFit(TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
+  void subtractPrompts();
+  void sumMaps();
+  void writeOutput();
 
   void collectKinematicObjects();
   bool goodJetSelection(int);
@@ -54,9 +65,12 @@ private:
   void setCut(std::string, float, std::string, float = 0);
   void setMeasurementRegion();
 
+  bool ewkSelection();
   bool mrSelection();
   bool skimSelection();
 
+  void fillEwkLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
+  void fillEwkLeptonPlots();
   void fillEventPlots();
   void fillLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
   void fillLeptonPlots();
@@ -69,10 +83,18 @@ private:
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later
-  enum {kGlobal=0, kDenEls, kDenMus, kNumEls, kNumMus, kVetEls, kVetMus, kGoodJets};
+  enum {kGlobal=0, kEwkSel, kDenEls, kDenMus, kNumEls, kNumMus, kVetEls, kVetMus, kGoodJets};
 
   enum {kNoGenMatch=0, kMisMatchPdgId,
 	kMisChargePdgId, kGenMatched};
+
+  int _idx_data;
+  int _idx_datacorr;
+  int _idx_ewk;
+  int _idx_qcd;
+
+  float _lumi;
+  bool _doEwkSub;
 
   float _valCutNBJetsMR;
   std::string _cTypeNBJetsMR;
