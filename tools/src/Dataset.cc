@@ -92,7 +92,8 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
   //======
 	
   //Looking for the tree if not data-driven
-  string tmpPath=isTreeType()?("data/"+path):"root";
+  //string tmpPath=isTreeType()?("data/"+path):"root"; //CH: why? what about absolute paths?
+  string tmpPath=isTreeType()?(path):"root";
   string tmpFName=isTreeType()?(sId.name):objName;
   int nProcEvt = (hname=="")?-1:getNProcEvents(tmpPath, dir, tmpFName, hname);
   
@@ -140,7 +141,7 @@ Dataset::addFriend(string friendname){
 int
 Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
 
-  string p= string(getenv ("MPAF"))+"/workdir";
+  string p= string(getenv ("MPAF"))+"/workdir/data";
   string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
   if(path.find("psi.ch")!=(size_t)-1)
     NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";

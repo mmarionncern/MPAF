@@ -179,6 +179,7 @@ private:
   string _leptl;
   string _SR;
   string _FR;
+  string _filter;
 
   int _fakeEl;
   int _fakeMu;

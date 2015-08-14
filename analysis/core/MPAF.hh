@@ -179,15 +179,15 @@ protected:
   float _weight;
 
   std::string _cfgName;
-
+ 
+  int _inds;
   int _numDS;
+  std::vector <Dataset*> _datasets;
 
 
   // Private Members
  
 private:
-   
-  int _inds;
 
   unsigned int _nEvtMax; 
   unsigned int _nSkip; 
@@ -200,12 +200,8 @@ private:
   TTree* _skimTree;
   TH1I* _hnSkim;
 
-
-
   bool _skim;
   bool _fullSkim;
-
-  std::vector <Dataset*> _datasets;
 
   // Configuration File Variables
   std::string _inputPath;

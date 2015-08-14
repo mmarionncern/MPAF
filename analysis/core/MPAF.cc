@@ -103,12 +103,14 @@ void MPAF::analyze(){
   float timeWall=0;
   int nE=0;
 
+  //CH: this line has to be BEFORE the call of defineOutput!
+  //the FakeRatio class needs to know the number of datasets
+  _numDS = _datasets.size();
+
   // define and book all outputs
   defineOutput();
   //copy the histograms for the different workflows
   addWorkflowHistos();
-
-  _numDS = _datasets.size();
 
   // loop over given samples
   for(unsigned int i=0; i<_numDS; ++i){
@@ -132,7 +134,6 @@ void MPAF::analyze(){
     unsigned int nEvts = _datasets[i]->getNEvents();
     if(_nEvtMax!=(size_t)-1) nEvts =  min(_nEvtMax+_nSkip,nEvts);
 
-    
     cout<<" Starting processing dataset : "<<_sampleName<<"  (running on "<<nEvts<<" events)"<<endl;
 
     boost::progress_display show_progress( nEvts );
