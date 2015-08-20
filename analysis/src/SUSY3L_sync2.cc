@@ -51,7 +51,7 @@ void SUSY3L_sync2::initialize(){
         parameters: none
         return: none
     */
-    _numberTau=0;
+
     // define variables using _vc varibale class
     // _vc->registerVar("name"           , "type");
     _vc->registerVar("lumi"                            );    //lumi section number
@@ -151,6 +151,7 @@ void SUSY3L_sync2::run(){
     _tauIdx.clear();
     _jets.clear();
     _bJets.clear();
+    _leps.clear(); 
     
     // increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -441,7 +442,6 @@ bool SUSY3L_sync2::electronSelection(int elIdx){
     float vertex_dxy_cut = 0.05;    //in cm
     float sip3d_cut = 4;
     float deltaR = 0.1;
-    float barrel_eta = 1.479;
     
     //multiIso working points
     int kLoose = 0;
@@ -460,12 +460,12 @@ bool SUSY3L_sync2::electronSelection(int elIdx){
     //if(!makeCut<int>( _vc->get("LepGood_eleCutIdCSA14_50ns_v1", elIdx) , 3     , ">=" , "POG CB WP-M Id " , 0    , kElId)) return false;
     //mva based electron ID
     bool elTightMvaID = electronMvaCut(elIdx, 1);
-        if(!makeCut( elTightMvaID, "electron tight mva wp", "=", kElId)) return false;
+    if(!makeCut( elTightMvaID, "electron tight mva wp", "=", kElId)) return false;
     //3 variable isolation criteria: miniIso < A and (pt ratio > B or pt rel > C)
     int wp = kMedium;
     bool isolated = multiIsolation(elIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
     if(!makeCut( isolated, "initial multiIso selection", "=", kElId)) return false;
-    //replaced by 3 varibale isolation
+    //replaced by multiIsolation
     //if(!makeCut<float>( _vc->get("LepGood_relIso03", elIdx) , isolation_cut   , "<"  , "isolation "      , 0    , kElId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("LepGood_dz", elIdx)), vertex_dz_cut   , "<"  , "dz selection"    , 0    , kElId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("LepGood_dxy", elIdx)), vertex_dxy_cut  , "<"  , "dxy selection"   , 0    , kElId)) return false;
@@ -478,16 +478,17 @@ bool SUSY3L_sync2::electronSelection(int elIdx){
     
     //removed after RA7 sync round 2
     //reject electrons which are within a cone of delta R around a muon candidate (potentially final state radiation, bremsstrahlung)
-    //bool muMatch = false;
-    //for(int im=0; im<_nMus; ++im){
-    //    float dr = KineUtils::dR( _mus[im]->eta(), _vc->get("LepGood_eta", elIdx), _mus[im]->phi(), _vc->get("LepGood_phi", elIdx));
-    //    //_deltaR = dr;
-    //    //fill("deltaR_elmu" , _deltaR        , _weight);
-    //    if(dr<deltaR){
-    //        muMatch = true;
-    //        break;
-    //    }
-    //}
+    bool muMatch = false;
+    for(int im=0; im<_nMus; ++im){
+        float dr = KineUtils::dR( _mus[im]->eta(), _vc->get("LepGood_eta", elIdx), _mus[im]->phi(), _vc->get("LepGood_phi", elIdx));
+        //_deltaR = dr;
+        //fill("deltaR_elmu" , _deltaR        , _weight);
+        if(dr<deltaR){
+            muMatch = true;
+            break;
+        }
+    }
+    //enable to clean on tight objects
     //if(!makeCut( !muMatch, "dR selection (mu)", "=", kElId) ) return false;
 
     return true;
@@ -526,8 +527,8 @@ bool SUSY3L_sync2::muonSelection(int muIdx){
     //3 variable isolation criteria: miniIso < A and (pt ratio > B or pt rel > C)
     int wp = kLoose;
     bool isolated = multiIsolation(muIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
-        if(!makeCut( isolated, "initial multiIso selection", "=", kMuId)) return false;
-    //replaced by 3 varibale isolation
+    if(!makeCut( isolated, "initial multiIso selection", "=", kMuId)) return false;
+    //replaced by multiIsolation
     //if(!makeCut<float>( _vc->get("LepGood_relIso03", muIdx) , isolation_cut   , "<", "isolation "      , 0, kMuId)) return false;
     //removed after RA7 sync round 2
     //if(!makeCut<int>( _vc->get("LepGood_tightId", muIdx) , 1     , "=", "POG Tight Id "   , 0, kMuId)) return false;
@@ -661,6 +662,7 @@ bool SUSY3L_sync2::goodJetSelection(int jetIdx){
     if(!makeCut<float>(_vc->get("Jet_pt", jetIdx)       , pt_cut, ">", "pt selection" , 0, kJetId) ) return false;
     if(!makeCut<float>(std::abs(_vc->get("Jet_eta", jetIdx)),  eta_cut, "<", "eta selection", 0, kJetId) ) return false;
     if(!makeCut<float>(_vc->get("Jet_id", jetIdx),  1, ">=", "jet id", 0, kJetId) ) return false;
+
     //exclude jets which are within a cone of deltaR around lepton candidates or taus
     //loop over all electron candidates
     bool lepMatch = false;
@@ -668,8 +670,8 @@ bool SUSY3L_sync2::goodJetSelection(int jetIdx){
         //calculate delta R, input eta1, eta2, phi1, phi2
         float dr = KineUtils::dR( _els[ie]->eta(), _vc->get("Jet_eta", jetIdx), _els[ie]->phi(), _vc->get("Jet_phi", jetIdx));
         if(dr < deltaR){
-          lepMatch = true; 
-          break;
+            lepMatch = true; 
+            break;
         }
     }
 
@@ -757,15 +759,18 @@ void SUSY3L_sync2::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"    ,    3, "="  )  ;     //number of isolated leptons
-        _pt_cut_hard_leg              = 20          ;     //harsher pT requirement on one of the leptons
-        _M_T_3rdLep_MET_cut           = 40          ;     //minimum transverse mass of 3rd lepton and met in On-Z events
+        setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
+        _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
+        _pt_cut_hard_legs              = 0          ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
+        _M_T_3rdLep_MET_cut           =  40         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
         setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
-        _lowMllCut                    = 12.         ;     //low invariant mass cut for ossf leptoin pairs
-        setCut("HT"                 ,   60, ">"  )  ;     //sum of jet pT's
-        setCut("MET"                ,   40, ">"  )  ;     //missing transverse energy
+        setCut("HT"                 ,   60, ">=" )  ;     //sum of jet pT's
+        setCut("MET"                ,   40, ">=" )  ;     //missing transverse energy
+        setCut("Mll"                ,   12, ">=" )  ;     //invariant mass of ossf lepton pair
     }
 
 }
@@ -992,6 +997,7 @@ void SUSY3L_sync2::setSignalRegion() {
 
 }
 
+
 //____________________________________________________________________________
 void SUSY3L_sync2::setCut(std::string var, float valCut, std::string cType, float upValCut) {
     /*
@@ -1027,6 +1033,12 @@ void SUSY3L_sync2::setCut(std::string var, float valCut, std::string cType, floa
         _cTypeMETBR    = cType;
         _upValCutMETBR = upValCut;
     }
+    else if(var == "Mll") {
+        _valCutMllBR   = valCut;
+        _cTypeMllBR    = cType;
+        _upValCutMllBR = upValCut;
+    }
+
 
 
     // signal region
@@ -1122,6 +1134,10 @@ bool SUSY3L_sync2::baseSelection(){
     //select events with certain lepton multiplicity of all flavor combinations
     //leptons are ultra-loose in multiiso
     if(!makeCut<int>( _nEls + _nMus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR ) ) return false;
+    
+    //require at least _nHardestLeptons to have higher pT than original cut
+    //bool has_hard_legs = hardLegSelection();
+    //if(!makeCut( has_hard_legs , "hard leg selection", "=") ) return false;
 
     //require at least two of the leptons to be tighter in multiiso
     //bool has_two_tighter_leptons = checkMultiIso();
@@ -1133,27 +1149,19 @@ bool SUSY3L_sync2::baseSelection(){
     //require minimum number of b-tagged jets
     //if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
     
-    //require at least 1 of the leptons to have higher pT than original cut
-    //bool has_hard_leg = hardLegSelection();
-    //if(!makeCut( has_hard_leg , "hard leg selection", "=") ) return false;
-
     //require minimum hadronic activity (sum of jet pT's)
     //if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
 
-    //reject event if ossf lepton pair with low invariant mass is found
-    //bool has_low_mll = lowMllPair();
-    //if(!makeCut( !has_low_mll , "low mll rejection", "=") ) return false;
-  
+    //find smallest invariant mass of ossf pair and reject event if this is below a cut value
+    //_mll = lowestOssfMll();
+    //if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR) ) return false;
+ 
     //select on or off-Z events according to specification in config file
     bool is_reconstructed_Z = ZEventSelectionLoop();
-
-    //if(is_reconstructed_Z){
-    //    fill("Zmass" , _Z->mass()        , _weight);
-    //}
-  
+    //if(is_reconstructed_Z){fill("Zmass" , _Z->mass()        , _weight);}
     if(_pairmass == "off"){
         if(!makeCut( !is_reconstructed_Z, "mll selection", "=") ) return false;
     }
@@ -1216,44 +1224,64 @@ bool SUSY3L_sync2::checkMultiIso(){
 //____________________________________________________________________________
 bool SUSY3L_sync2::hardLegSelection(){
     /*
-        Checks if the selected event with at least 3 leptons has at least one lepton 
-        fullfilling a harsher pT cut 
-        return: true (if the event has such a lepton with higher pT), false (else)
+        Checks if the selected event has at least _nHardestLeptons leptons
+        (muon or electron) fullfilling a harsher pT cut and _nHardLeptons leptons fulfilling another lower cut
+        return: true (if the event has _nHardestLeptons and _nHardLeptons with higher pT), false (else)
     */
+    
+    int nHardestLepCount = 0;
+    int nHardLepCount = 0;
 
-    //check if one of the electrons fullfils hard pt cut
+    //check how many electrons fullfils hard pt cut
     for(int ie=0; ie<_nEls; ++ie){
-        if(_els[ie]->pt()>_pt_cut_hard_leg) return true;
+        if(_els[ie]->pt()>_pt_cut_hard_legs){
+            nHardLepCount += 1;
+            if(_els[ie]->pt()>_pt_cut_hardest_legs){
+                nHardestLepCount += 1;
+            } 
+        }
     }
 
-    //check if one of the muons fullfils hard pt cut
+    //check how many muons fullfils hard pt cut
     for(int im=0; im<_nMus; ++im){
-        if(_mus[im]->pt()>_pt_cut_hard_leg) return true;
+        if(_mus[im]->pt()>_pt_cut_hard_legs){
+            nHardLepCount += 1;
+            if(_mus[im]->pt()>_pt_cut_hardest_legs){
+                nHardestLepCount += 1;
+            }
+        }
     }
 
-    //check if one of the taus fullfils hard pt cut
-    //for(int it=0; it<_nTaus; ++it){
-    //    if(_taus[it]->pt()>_pt_cut_hard_leg) return true;
-    //}
+    //correct number of leptons of hardLeg requirement with required number of leptons with hardestLeg
+    nHardLepCount -= _nHardLeptons;
+
+    if(nHardestLepCount >= _nHardestLeptons && nHardLepCount >= _nHardLeptons) return true;
 
     return false;
 }
 
 //____________________________________________________________________________
-bool SUSY3L_sync2::lowMllPair(){
+float SUSY3L_sync2::lowestOssfMll(){
     /*
-        Checks if event has ossf lepton pair with low invariant mass 
-        return: true (if the event has such a lepton pair), false (else)
+        Checks if event has an ossf lepton pair and comutes the lowest invariant mass of all ossf pairs
+        parameters: none
+        return: smallest mll of ossf lepton pair if a pair is found, 999 if no pair is found
     */
+
+    bool ossf_pair_found = false;
+    float lowest_mll = 99999;
 
     //loop over all possible combination of two electrons
     for(int ie1=0; ie1 < _nEls; ie1++) {
         for(int ie2 = ie1; ie2 < _nEls; ie2++) {
             //continue if not an ossf pair
             if( _els[ie1]->pdgId() != - _els[ie2]->pdgId()) continue;
-            //return true if low mass pair is found
-            float mll = Candidate::create(_els[ie1], _els[ie2])->mass();
-            if(mll < _lowMllCut) return true;
+            //save mll if it is the smallest of all mll found so far
+            float mll_tmp = Candidate::create(_els[ie1], _els[ie2])->mass();
+            ossf_pair_found = true;
+            if(mll_tmp < lowest_mll){
+                lowest_mll = mll_tmp;
+            }
         }
     }
 
@@ -1262,26 +1290,18 @@ bool SUSY3L_sync2::lowMllPair(){
         for(int im2 = im1; im2 < _nMus; im2++) {
             //continue if not an ossf pair
             if( _mus[im1]->pdgId() != - _mus[im2]->pdgId()) continue;
-            //return true if low mass pair is found
-            float mll = Candidate::create(_mus[im1], _mus[im2])->mass();
-            if(mll < _lowMllCut) return true;
-           }
+            //save mll if it is the smallest of all mll found so far
+            float mll_tmp = Candidate::create(_mus[im1], _mus[im2])->mass();
+            ossf_pair_found = true;
+            if(mll_tmp < lowest_mll){
+                lowest_mll = mll_tmp;
+            }
         }
+    }
  
-    //loop over all possible combination of two taus
-    //for(int it1=0; it1 < _nTaus; it1++) {
-    //    for(int it2 = it1; it2 < _nTaus; it2++) {
-    //        //continue if not an ossf pair
-    //        if(_vc->get("LepGood_pdgId", it1) != - _vc->get("LepGood_pdgId", it2) ) continue;
-    //        //return true if low mass pair is found
-    //       float mll = Candidate::create(_taus[it1], _taus[it2])->mass();
-    //        if(mll < _lowMllCut) return true;
-    //       }
-    //    }
- 
-    return false;
+    if(ossf_pair_found){return lowest_mll;}
+    else{return 999;}
 }
-
 
 //____________________________________________________________________________
 bool SUSY3L_sync2::ZEventSelectionLoop(){
@@ -1431,9 +1451,10 @@ bool SUSY3L_sync2::ZEventSelectionLoop(){
             phi_other = 0.;
         }
     }
-    
+
     return false;
 }
+
 
 //____________________________________________________________________________
 bool SUSY3L_sync2::srSelection(){

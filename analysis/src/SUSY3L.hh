@@ -49,7 +49,6 @@ private:
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection();
     bool checkMultiIso();
-    float lowestOssfMll();
     bool ZEventSelection();
     bool ZEventSelectionLoop();
     bool srSelection();
@@ -58,6 +57,7 @@ private:
     void fillEventPlots(std::string);
     float getMT2();
     void sortSelectedLeps();
+    float lowestOssfMll();
 
     float HT();
     float M_T(float, float, float, float);
@@ -78,6 +78,8 @@ private:
     float _valCutLepMultiplicityBR;
     float _pt_cut_hard_legs;
     int   _nHardLeptons;
+    float _pt_cut_hardest_legs;
+    int   _nHardestLeptons;
     float _M_T_3rdLep_MET_cut;
     float _multiIsoWP[5][3];
     float _valCutNJetsBR;
