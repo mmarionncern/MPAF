@@ -171,9 +171,7 @@ void SUSY3L_sync2::run(){
     //printout for RA7 synchronization
     int lumi = _vc->get("lumi");
     int evt = _vc->get("evt");
-   //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
-    //_numberTau += _nTaus;
-    //cout << _numberTau << endl; 
+    //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
 
     // initialization of signal region cuts, categorization of events passing the baseline 
     // selection into different signal regions, and filling of plots
@@ -267,13 +265,13 @@ void SUSY3L_sync2::collectKinematicObjects(){
         parameters: none
         return: none
     */
-   
+  
     
-    if(_vc->get("lumi") == 4644 && _vc->get("evt") == 64395){
+    if(_vc->get("lumi") == 4524 && _vc->get("evt") == 52342){
         cout << "--------------------------------------------------"<< endl; 
         cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose leptons: " <<  _vc->get("nLepGood") << endl;
         for(int i = 0; i<_vc->get("nLepGood");i++){
-            cout << "lep " << i << ": " << _vc->get("LepGood_pt",i) << " " << _vc->get("LepGood_eta",i)<< " " << _vc->get("LepGood_phi",i) << " " << _vc->get("LepGood_pdgId",i) <<endl;
+            cout << "lep " << i << ": " << _vc->get("LepGood_pt",i) << " " << _vc->get("LepGood_eta",i) << " " << _vc->get("LepGood_etaSc",i) << " " << _vc->get("LepGood_phi",i) << " " << _vc->get("LepGood_pdgId",i) <<endl;
         }
         cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose jets: " <<  _vc->get("nJet") << endl;
         for(int i = 0; i<_vc->get("nJet");i++){
@@ -474,8 +472,7 @@ bool SUSY3L_sync2::electronSelection(int elIdx){
     //    cout << "electron idx " << elIdx << " with pt " <<  _vc->get("LepGood_pt", elIdx) << endl;
     //}
     bool isolated = multiIsolation(elIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
-        if(!makeCut( isolated, "initial multiIso selection", "=", kElId)) return false;
-
+    if(!makeCut( isolated, "initial multiIso selection", "=", kElId)) return false;
     //replaced by 3 varibale isolation
     //if(!makeCut<float>( _vc->get("LepGood_relIso03", elIdx) , isolation_cut   , "<"  , "isolation "      , 0    , kElId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("LepGood_dz", elIdx)), vertex_dz_cut   , "<"  , "dz selection"    , 0    , kElId)) return false;
@@ -571,16 +568,18 @@ bool SUSY3L_sync2::tauSelection(int tauIdx){
 
     //define cuts for electrons
     float pt_cut = 20.;
-    float eta_cut = 2.4;
+    float eta_cut = 2.3;
     float deltaR = 0.3;
     
     //apply the cuts
     if(!makeCut<float>( _vc->get("TauGood_pt", tauIdx) , pt_cut, ">"  , "pt selection"    , 0    , kTauId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("TauGood_eta", tauIdx)), eta_cut  , "<"  , "eta selection"   , 0    , kTauId)) return false;
-    if(!makeCut<int>( _vc->get("TauGood_idAntiMu", tauIdx) , 2     , "=" , "anti muon" , 0    , kTauId)) return false;
-    if(!makeCut<int>( _vc->get("TauGood_idAntiE", tauIdx) , 4     , ">=" , "anti electron" , 0    , kTauId)) return false;
-    if(!makeCut<int>( _vc->get("TauGood_idDecayMode", tauIdx) , 1     , "=" , "decay mode" , 0    , kTauId)) return false;
+    //removed after sync
+    //if(!makeCut<int>( _vc->get("TauGood_idAntiMu", tauIdx) , 2     , "=" , "anti muon" , 0    , kTauId)) return false;
+    //if(!makeCut<int>( _vc->get("TauGood_idAntiE", tauIdx) , 4     , ">=" , "anti electron" , 0    , kTauId)) return false;
+    //if(!makeCut<int>( _vc->get("TauGood_idDecayMode", tauIdx) , 1     , "=" , "decay mode" , 0    , kTauId)) return false;
     //if(!makeCut<int>( _vc->get("TauGood_isoCI3hit", tauIdx) , 1     , ">=" , "ci3hit" , 0    , kTauId)) return false;
+    
     //remove taus which are within a cone of deltaR around selected electrons or muons
     //loop over all electron candidates
     bool lepMatch = false;
@@ -1109,8 +1108,8 @@ bool SUSY3L_sync2::baseSelection(){
     */
     
     //print event information before selection
-   /* 
-    if(_vc->get("lumi") ==  4973 && _vc->get("evt") == 97241){
+    
+    if(_vc->get("lumi") ==  4524 && _vc->get("evt") == 52342){
         cout << "--------------------------------------------------"<< endl; 
         cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " " << _nMus  << " "<<  _nEls << " " << _nTaus << " " << _nJets << " "  << _nBJets << endl;
         for(int i =0;i<_nEls;i++){
@@ -1150,14 +1149,9 @@ bool SUSY3L_sync2::baseSelection(){
         cout << "--------------------------------------------------"<< endl; 
 
     }
-    */
-
-
-  
-
-  
-    
  
+
+  
     //select events with certain lepton multiplicity of all flavor combinations
     //leptons are ultra-loose in multiiso
     if(!makeCut<int>( _nEls + _nMus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR ) ) return false;
@@ -1182,18 +1176,19 @@ bool SUSY3L_sync2::baseSelection(){
 
     //require minimum missing transvers energy (actually missing momentum)
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
+    if(_vc->get("lumi") ==  4524 && _vc->get("evt") == 52342){cout << "MET: " << _met->pt() << " " << _met->phi() << endl;}
 
     //reject event if ossf lepton pair with low invariant mass is found
     //bool has_low_mll = lowMllPair();
     //if(!makeCut( !has_low_mll , "low mll rejection", "=") ) return false;
-    
+  
     //select on or off-Z events according to specification in config file
     bool is_reconstructed_Z = ZEventSelectionLoop();
 
     //if(is_reconstructed_Z){
     //    fill("Zmass" , _Z->mass()        , _weight);
     //}
-    
+  
     if(_pairmass == "off"){
         if(!makeCut( !is_reconstructed_Z, "mll selection", "=") ) return false;
     }
@@ -1336,7 +1331,7 @@ bool SUSY3L_sync2::ZEventSelectionLoop(){
         Checks if there is a same-flavor opposite-charge lepton pair with an invariant 
         mass around the Z mass. The ossf pair with an invariant mass closest to the 
         Z mass is added as Z candidate. Additionally a requirement on the transverse mass
-        of the any of the other leptons and the met is checked
+        of any of the other leptons and the met is checked
         return: true (if a Z can be reconstructed from 2 leptons and tranverse mass 
         requirement is fulfilled), false (else)
     */
@@ -1377,9 +1372,9 @@ bool SUSY3L_sync2::ZEventSelectionLoop(){
             }
         }
     }
-    //if(_vc->get("lumi") == 4613 && _vc->get("evt") == 61208){
-    //    cout << "el_Zcand " << el_Zcand << endl;
-    //}
+    if(_vc->get("lumi") == 4524 && _vc->get("evt") == 52342){
+        cout << "el_Zcand " << el_Zcand << endl;
+    }
             
     //check MT requirement if there is a Z candidate with electrons
     if(el_Zcand == true){
@@ -1446,9 +1441,10 @@ bool SUSY3L_sync2::ZEventSelectionLoop(){
         }
     }
  
-    //if(_vc->get("lumi") == 4613 && _vc->get("evt") == 61208){
-    //    cout << "mu_Zcand " << mu_Zcand << endl;
-    //}
+    if(_vc->get("lumi") == 4524 && _vc->get("evt") == 52342){
+        cout << "mu_Zcand " << mu_Zcand << endl;
+        cout << "ossf pair: " << _mus[im1_save]->pt() << " " << _mus[im2_save]->pt() << endl;
+    }
        
     //check MT requirement if there is a Z candidate with electrons
     if(mu_Zcand == true){
@@ -1461,6 +1457,10 @@ bool SUSY3L_sync2::ZEventSelectionLoop(){
             phi_other = _mus[im]->phi();
             //calculate transverse mass of other lepton and met
             mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
+            if(_vc->get("lumi") ==  4524 && _vc->get("evt") == 52342){
+                cout << "MT: " << mt << endl;
+                cout << "3rd muon: " << _mus[im]->pt() << endl;
+                }
             //if(_vc->get("lumi") == 4613 && _vc->get("evt") == 61208){
             //    cout << "mt " << mt << "for muon " << im << endl;
             //    cout <<  pt_other << " " <<  _vc->get("met_pt") << " " << phi_other << " " <<  _vc->get("met_phi") << endl;
@@ -1483,7 +1483,7 @@ bool SUSY3L_sync2::ZEventSelectionLoop(){
             mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
             //accept event if Z candidate exists and mt critirion is fulfilled
             if(mt > _M_T_3rdLep_MET_cut){
-               return true;
+                return true;
             }
             mt = 0.;
             pt_other = 0.;
@@ -1627,9 +1627,7 @@ bool SUSY3L_sync2::multiIsolation(int idx, float miniRelIso_cut, float ptRatio_c
            cout << idx << " ptrel "   << _vc->get("LepGood_jetPtRel",idx) << endl;
        }
         */
-
-      
-       
+        
         if(_vc->get("LepGood_miniRelIso",idx) < miniRelIso_cut){
            if((_vc->get("LepGood_jetPtRatio",idx) > ptRatio_cut) || (_vc->get("LepGood_jetPtRel",idx) > ptRel_cut)){ 
                return true;
