@@ -26,6 +26,7 @@ private:
   string _rootFile;
   vector<string> _statFileList;
   string _hname;
+  string _hwgtname;
 
   vector<string> _samplenames;
   vector<string> _dsnames;
@@ -115,6 +116,7 @@ public:
   bool isNoDataAna();
 
   string getHName();
+  string getHwgtName();
   
   //void setNMax(size_t testNMax);
 
