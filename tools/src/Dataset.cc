@@ -56,14 +56,15 @@ void Dataset::freeMemory() {
 
 
 //____________________________________________________________________________
-void Dataset::addSample(const SampleId sId, string path, string dir, string objName, string hname, float xSect, float kFact, float lumi, float eqLumi, bool loadH) {
+void Dataset::addSample(const SampleId sId, string path, string dir, string objName, string hname, string hwgtname, float xSect, float kFact, float lumi, float eqLumi, bool loadH) {
   /*
     adds a sample to the dataset; the sample has a name encoded in sfullname,
     lies in the directory path/dir/, has a tree called objName or a histogram
-    called hname, has cross section xSect, k-factor kFact, luminosity lumi
+    called hname (hwgtname is a histogram for the sum of processed weights
+    corresponding to the sample), has cross section xSect, k-factor kFact, luminosity lumi
     and equivalent luminosity eqLumi (i.e. corrected for the number of events we're
     looping on)
-    parameters: sfullname ("data:sname" or just "sname"), path, dir, objName, hname, xSect, kFact, lumi, eqLumi
+    parameters: sfullname ("data:sname" or just "sname"), path, dir, objName, hname, hwgtname, xSect, kFact, lumi, eqLumi
     return: none
   */
 
@@ -95,8 +96,9 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
   string tmpPath=isTreeType()?("data/"+path):"root";
   string tmpFName=isTreeType()?(sId.name):objName;
   int nProcEvt = (hname=="")?-1:getNProcEvents(tmpPath, dir, tmpFName, hname);
+  double sumProcWgt = (hwgtname=="")?-1:getSumProcWgts(tmpPath, dir, tmpFName, hwgtname);
   
-  Sample s(sId, nProcEvt, xSect, kFact, eqLumi);
+  Sample s(sId, nProcEvt, sumProcWgt, xSect, kFact, eqLumi);
   _samples.push_back(s);
   
   //tree analysis 
@@ -105,7 +107,7 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
 	
     cout<<" Adding "<<sId.name<<"  to "<<_name
 	<<"   :  nEvt "<<_chain->GetEntries()<<" ("<<nProcEvt
-	<<" gen) "<<" / w (/pb-1) = "<<s.getLumW()<<endl;
+	<<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
   }
   else {
     if(loadH) { //reading histograms only when needed (disabled for datacards)
@@ -161,10 +163,50 @@ Dataset::getNProcEvents(string path, string dir, string fileName, string hname) 
   return nProc;
 }
 
+double
+Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtname) {
+
+  string p= string(getenv ("MPAF"))+"/workdir";
+  string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
+  if(path.find(":")!=(size_t)-1) NameF=path+"/"+fileName+".root";
+  if(dir.find("psi.ch")!=(size_t)-1)
+    NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
+  
+  TFile* file = TFile::Open( NameF.c_str() );
+  TH1* htmp = (TH1*)file->Get( hwgtname.c_str() );
+  double nProc=-1;
+  if(htmp) {
+    nProc = htmp->Integral(0,1001);
+    delete htmp;
+  }
+  else nProc = -1;
+
+  file->Close();
+  delete file;
+
+  return nProc;
+}
+
+
+
 int
 Dataset::getNProcEvents(int evt) {
   //MM fixme, multiple sample handling not considered anymore, still useful?
   return _samples[0].getNProcEvts();
+
+  // for(size_t iv=0;iv<_events.size();iv++) {
+  //   if(evt>=_events[iv].first && evt<_events[iv].second) {
+  //     return _samples[iv]->getNProcEvts();
+  //   }
+  // }
+  // return -1;
+
+}
+
+double
+Dataset::getSumProcWgts(int evt) {
+  //MM fixme, multiple sample handling not considered anymore, still useful?
+  return _samples[0].getSumProcWgts();
 
   // for(size_t iv=0;iv<_events.size();iv++) {
   //   if(evt>=_events[iv].first && evt<_events[iv].second) {
