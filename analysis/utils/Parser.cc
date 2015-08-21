@@ -41,6 +41,8 @@ Parser::parseLine(string line) {
     type=Parser::kVar;
   if(tks[0]=="histo")
     type=Parser::kHisto;
+  if(tks[0]=="wgthisto")
+    type=Parser::kWgtHisto;
   if(tks[0]=="tree")
     type=Parser::kTree;
   if(tks[0]=="ds")

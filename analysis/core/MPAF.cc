@@ -74,6 +74,7 @@ void MPAF::initialize(){
   _wfNames[AUtils::kGlobal] = "";
 
   _hname="";
+  _hwgtname="";
   _summary=false;
 }
 
@@ -257,6 +258,9 @@ void MPAF::loadConfigurationFile(std::string cfg){
     if(it->second.type==Parser::kHisto) {
       _hname = it->second.val;
     }
+    if(it->second.type==Parser::kWgtHisto) {
+      _hwgtname = it->second.val;
+    }
     if(it->second.type==Parser::kFT){
       _friends.push_back(it->second.val);
     }
@@ -310,9 +314,9 @@ void MPAF::loadConfigurationFile(std::string cfg){
     }
 
     if(!absdir)
-      _datasets.back()->addSample(sId, _inputPath, dirName, tName, _hname, 1.0, 1.0, 1.0, 1.0);
+      _datasets.back()->addSample(sId, _inputPath, dirName, tName, _hname, _hwgtname, 1.0, 1.0, 1.0, 1.0);
     else
-      _datasets.back()->addSample(sId, "://"+dirName, "", tName, _hname, 1.0, 1.0, 1.0, 1.0);
+      _datasets.back()->addSample(sId, "://"+dirName, "", tName, _hname, _hwgtname, 1.0, 1.0, 1.0, 1.0);
     
     _au->addDataset( dsName );
   }
@@ -400,14 +404,16 @@ void MPAF::internalWriteOutput() {
   writeOutput();
 
   map<string, int> cnts;
+  map<string, double> wgtcnts;
   for(unsigned int ids=0;ids<_datasets.size(); ++ids) {
     cnts[ _datasets[ids]->getName() ] = _datasets[ids]->getNProcEvents(0);
+    wgtcnts[ _datasets[ids]->getName() ] = _datasets[ids]->getSumProcWgts(0);
   }
 
   cout << "writing output to disk" << endl;
 
-  _hm->saveHistos (_className, _cfgName, cnts);
-  _au->saveNumbers(_className, _cfgName, cnts);
+  _hm->saveHistos (_className, _cfgName, cnts, wgtcnts);
+  _au->saveNumbers(_className, _cfgName, cnts, wgtcnts);
 
 
 }

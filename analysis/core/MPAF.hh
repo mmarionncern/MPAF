@@ -212,6 +212,7 @@ private:
   std::string _className;
 
   std::string _hname;
+  std::string _hwgtname;
 
   //workflows
   int _curWF;
