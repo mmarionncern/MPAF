@@ -17,6 +17,7 @@ private:
 
   string _name;
   int _nProcEvents;
+  double _sumProcWgts;
   
   float _xSection;
   float _kFactor;
@@ -32,13 +33,14 @@ private:
 public:
 
   Sample();
-  Sample(SampleId sId, int nProcEvt, 
+  Sample(SampleId sId, int nProcEvt, double sumProcWgt, 
 	 float xSect, float kfact, float eqLumi);
 
   virtual ~Sample();
 
   void setName(string N){ _name=N;};
   void setNProcEvts(int n){ _nProcEvents=n;};
+  void setSumProcWgts(double w){ _sumProcWgts=w;};
 
   void setXSect(float XS) { _xSection=XS;};
   void setKFact(float KF) { _kFactor=KF;};
@@ -48,6 +50,7 @@ public:
   
   string getName() const { return _sId.name;};
   int getNProcEvts() const { return _nProcEvents;};
+  double getSumProcWgts() const { return _sumProcWgts;};
   
   float getXSect() const {return _xSection;};
   float getKFact() const {return _kFactor;};
