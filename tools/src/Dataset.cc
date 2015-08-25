@@ -374,6 +374,7 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
 	   
 	//histograms and not normalization file
 	if(varName=="nEvtProc") continue;
+	if(varName=="sumWgtProc") continue;
        
 	
 	if(_histos[ varName ].size()==0) { //initialization
