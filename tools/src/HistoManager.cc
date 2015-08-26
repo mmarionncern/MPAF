@@ -547,7 +547,7 @@ void HistoManager::fill(string var, string type, float value, float weight, stri
 }
 
 //____________________________________________________________________________
-void HistoManager::saveHistos(string anName, string conName, map<string, int> cnts) {
+void HistoManager::saveHistos(string anName, string conName, map<string, int> cnts, map<string, double> wgtcnts) {
   /*
     creates a root file and stores all variables in it; if the file already
     exists, it renames the existing file to the same name plus the timestamp
@@ -626,6 +626,22 @@ void HistoManager::saveHistos(string anName, string conName, map<string, int> cn
     htmp->Write();     
     delete htmp;
   }
+
+  //counter histograms
+  ofile->mkdir("sumWgtProc");
+  ofile->cd("sumWgtProc");
+  map<string, double>::const_iterator it2;
+  for(size_t ids = 0; ids < _dsNames.size(); ++ids) {
+    
+    it2 = wgtcnts.find( _dsNames[ids] );
+    if(it2==wgtcnts.end() ) continue;
+
+    TH1D* htmp= new TH1D(_dsNames[ids].c_str(), _dsNames[ids].c_str(), 1,0, 1);
+    htmp->SetBinContent(1, it2->second );
+    htmp->Write();     
+    delete htmp;
+  }
+
   
   ofile->cd();
   ofile->Write();

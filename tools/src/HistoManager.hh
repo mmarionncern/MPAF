@@ -121,7 +121,7 @@ public:
   systM findSysts(string var,string type);
 
 
-  void saveHistos(string anName, string conName, std::map<std::string, int> cnts);
+  void saveHistos(string anName, string conName, std::map<std::string, int> cnts, std::map<std::string, double> wgtcnts);
 
   ClassDef(HistoManager,0)
 };

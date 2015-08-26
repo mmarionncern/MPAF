@@ -67,7 +67,7 @@ public:
   void setColor(int ncol){ _color=ncol;};
 	
   void addSample(SampleId sId, std::string path, std::string dir, 
-		 std::string objName, std::string hname, float xSect,
+		 std::string objName, std::string hname, std::string hwgtname, float xSect,
 		 float kFact, float lumi, float eqLumi, bool loadH=true);
 
   void addFriend(std::string friendname);
@@ -104,6 +104,7 @@ public:
   int getNEvents() { return _chain->GetEntries(); };
 	
   int getNProcEvents(int evt);
+  double getSumProcWgts(int evt);
 	
   //void setNMax(size_t nmax);
 	
@@ -124,6 +125,7 @@ private:
   // 		      float lumi, float& eqLumi);
   
   int getNProcEvents(string path, string dir, string sname, string hname);
+  double getSumProcWgts(string path, string dir, string sname, string hwgtname);
   
 
   ClassDef(Dataset,0)
