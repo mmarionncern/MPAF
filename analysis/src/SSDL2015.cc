@@ -341,13 +341,8 @@ SSDL2015::run() {
   counter("weigthing");
   
 
-  fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
-  fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
-  fill("HT", _HT, _weight);
-  fill("MET", _met->pt(), _weight);
-  //  fill("MTmin", _mTmin, _weight);
-  fill("NBJets", _nBJets, _weight);
-
+  fillhistos();//fill histos for kGlobal and kGlobalFake
+  
   if(_categorization) {
     categorize();
     
@@ -362,6 +357,7 @@ SSDL2015::run() {
   }
 
   counter("selected");
+  fillhistos();//fill histos for SR and BR  (and the SR_Fake and BR_Fake)
 
   
   if( getCurrentWorkflow()==0) return; //getCurrentWorkflow()==100 ||
@@ -802,17 +798,7 @@ SSDL2015::wzCRSelection() {
   if(_susyMod->passMllMultiVeto( _l1Cand, &_looseLeps, 76, 106, true) &&
      _susyMod->passMllMultiVeto( _l2Cand, &_looseLeps, 76, 106, true) ) return;
   counter("Z selection");
-  
-  float MT = 0.;
-  if     (_susyMod->passMllMultiVeto( _l1Cand, &_looseLeps, 76, 106, true)) 
-    MT = Candidate::create(_l1Cand, _met)->mass();
-  else if(_susyMod->passMllMultiVeto( _l2Cand, &_looseLeps, 76, 106, true))
-    MT = Candidate::create(_l2Cand, _met)->mass();
-  else 
-    MT = 0.;
-  //  _mTmin=min( Candidate::create(_l1Cand, _met)->mass(),
-//	      Candidate::create(_l2Cand, _met)->mass() );
-  
+    
   // now apply tighter requirements on MET, HT, MT... 
   if(!makeCut(_HT > 80., "H_{T} > 80 GeV")) return;
   if(!makeCut(_nJets>=2, "n_{jets} >= 2")) return;
@@ -823,14 +809,8 @@ SSDL2015::wzCRSelection() {
   //	      (_HT>200 && _met->pt()<50),"MET cut  ")) return;
   if(!makeCut(_met->pt()>50, "MET > 50 GeV")) return;
 
-  fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
-  fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
-  fill("HT"    , _HT       , _weight);
-  fill("MET"   , _met->pt(), _weight);
-  fill("MT"    , MT        , _weight);
-  fill("NBJets", _nBJets   , _weight);
-  fill("NJets" , _nJets    , _weight);
-  
+  fillhistos();//fill histos for kWZCR
+    
   setWorkflow(kGlobal); 
 }
 
@@ -850,7 +830,6 @@ SSDL2015::setSignalRegions() {
 
   //HH-regions =============================================================
   //0b-jet =================================================================
-  
   if( _SR== "SR1A" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:<:300");
   }
@@ -1371,13 +1350,14 @@ SSDL2015::testRegion() {
 
 void
 SSDL2015::categorize() {
-  
+
   int offset=1;
   string categ="";
   for(size_t ic=0;ic< _categs.size();ic++) {
     _SR = _categs[ic];
     if(testRegion() ) {setWorkflow(ic+offset); return;}
   }
+  std::cout << "WARNING: SSDL2015::categorize() did not find any workflow that matches this event. The workflow returns to kGlobal what may cause problems with the histograms" << std::endl;
   setWorkflow(kGlobal);
 }
 
@@ -1630,6 +1610,16 @@ SSDL2015::varyMET() {
   }
   
   return met;
+}
+
+void SSDL2015::fillhistos() {
+  fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
+  fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
+  fill("HT"    , _HT       , _weight);
+  fill("MET"   , _met->pt(), _weight);
+  fill("MT"    , _mTmin        , _weight);
+  fill("NBJets", _nBJets   , _weight);
+  fill("NJets" , _nJets    , _weight);
 }
 
 
