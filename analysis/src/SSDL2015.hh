@@ -193,6 +193,8 @@ private:
 
   vector<TVector2> _uncleanJets;
   vector<TVector2> _uncleanFwdJets;
+  
+  void fillhistos();
 
 };
 
