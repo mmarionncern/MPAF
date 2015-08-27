@@ -1,0 +1,13 @@
+//vs    c
+//keep this header format!!
+WWTo2L2Nu_50ns              1
+WZp8_50ns                   1
+ZZp8_50ns                   1
+TToLeptons_tch_50ns         1
+T_tWch_50ns                 1
+TBar_tWch_50ns              1
+TTJets_LO_50ns              1
+WJetsToLNu_50ns             1.23
+DYJetsToLL_LO_M50_50ns      1.27
+DYJetsToLL_M10to50_50ns     1
+DYJetsToLL_M50_50ns         1
