@@ -357,8 +357,10 @@ SSDL2015::run() {
   }
 
   counter("selected");
-  fillhistos();//fill histos for SR and BR  (and the SR_Fake and BR_Fake)
-
+  
+  if(_categorization) {
+    fillhistos();//fill histos for SR and BR  (and the SR_Fake and BR_Fake)
+  }
   
   if( getCurrentWorkflow()==0) return; //getCurrentWorkflow()==100 ||
 
