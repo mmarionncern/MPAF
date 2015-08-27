@@ -178,7 +178,7 @@ public:
   void setWFSystematics(int ids, string cName, string sName,
 			bool up, bool down, float w, string uncName="") ;
 
-  void saveNumbers(string anName, string conName, std::map<string, int> cnts);
+  void saveNumbers(string anName, string conName, std::map<string, int> cnts, std::map<string, double> wgtcnts);
   void printNumbers();
 
   void printTables(string categ="global");

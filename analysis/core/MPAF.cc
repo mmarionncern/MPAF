@@ -74,6 +74,7 @@ void MPAF::initialize(){
   _wfNames[AUtils::kGlobal] = "";
 
   _hname="";
+  _hwgtname="";
   _summary=false;
 }
 
@@ -108,11 +109,14 @@ void MPAF::analyze(){
   //copy the histograms for the different workflows
   addWorkflowHistos();
 
+  _numDS = _datasets.size();
+
   // loop over given samples
-  for(unsigned int i=0; i<_datasets.size(); ++i){
+  for(unsigned int i=0; i<_numDS; ++i){
 		
     // open file
     _sampleName = _datasets[i]->getName();
+
     _inds = i;
     _isData = _datasets[i]->isPPcolDataset();
     
@@ -128,15 +132,14 @@ void MPAF::analyze(){
     // loop over entries
     unsigned int nEvts = _datasets[i]->getNEvents();
     if(_nEvtMax!=(size_t)-1) nEvts =  min(_nEvtMax+_nSkip,nEvts);
+
     
-    cout<<" Processing dataset : "<<_sampleName<<"  (running on "<<nEvts<<" events)"<<endl;
-    
+    cout<<" Starting processing dataset : "<<_sampleName<<"  (running on "<<nEvts<<" events)"<<endl;
+
     boost::progress_display show_progress( nEvts );
     for(_ie = _nSkip; _ie < nEvts; ++_ie) {
       ++show_progress;
       stw.Start();
-      
-     
       
       //reinitialization
       _weight = 1.;
@@ -197,8 +200,7 @@ void MPAF::analyze(){
 		
     //cleaning memory
     _datasets[i]->freeMemory();
-  
-
+ 
   }
 
 
@@ -223,7 +225,7 @@ void MPAF::loadConfigurationFile(std::string cfg){
   */
 
   _inputVars = Parser::parseFile(cfg);
-
+  _nEvtMax = -1;
   string tName;
   vector<string> _friends;
 
@@ -255,6 +257,9 @@ void MPAF::loadConfigurationFile(std::string cfg){
     }
     if(it->second.type==Parser::kHisto) {
       _hname = it->second.val;
+    }
+    if(it->second.type==Parser::kWgtHisto) {
+      _hwgtname = it->second.val;
     }
     if(it->second.type==Parser::kFT){
       _friends.push_back(it->second.val);
@@ -309,9 +314,9 @@ void MPAF::loadConfigurationFile(std::string cfg){
     }
 
     if(!absdir)
-      _datasets.back()->addSample(sId, _inputPath, dirName, tName, _hname, 1.0, 1.0, 1.0, 1.0);
+      _datasets.back()->addSample(sId, _inputPath, dirName, tName, _hname, _hwgtname, 1.0, 1.0, 1.0, 1.0);
     else
-      _datasets.back()->addSample(sId, "://"+dirName, "", tName, _hname, 1.0, 1.0, 1.0, 1.0);
+      _datasets.back()->addSample(sId, "://"+dirName, "", tName, _hname, _hwgtname, 1.0, 1.0, 1.0, 1.0);
     
     _au->addDataset( dsName );
   }
@@ -399,12 +404,16 @@ void MPAF::internalWriteOutput() {
   writeOutput();
 
   map<string, int> cnts;
+  map<string, double> wgtcnts;
   for(unsigned int ids=0;ids<_datasets.size(); ++ids) {
     cnts[ _datasets[ids]->getName() ] = _datasets[ids]->getNProcEvents(0);
+    wgtcnts[ _datasets[ids]->getName() ] = _datasets[ids]->getSumProcWgts(0);
   }
 
-  _hm->saveHistos (_className, _cfgName, cnts);
-  _au->saveNumbers(_className, _cfgName, cnts);
+  cout << "writing output to disk" << endl;
+
+  _hm->saveHistos (_className, _cfgName, cnts, wgtcnts);
+  _au->saveNumbers(_className, _cfgName, cnts, wgtcnts);
 
 
 }

@@ -516,7 +516,7 @@ AnaUtils::getCategSystematics(string ds, string src, string lvl, string categ, b
 
 
 void 
-AnaUtils::saveNumbers(string anName, string conName,  map<string, int> cnts) {
+AnaUtils::saveNumbers(string anName, string conName,  map<string, int> cnts,  map<string, double> wgtcnts) {
 
   // testing write permission on output directory
   cout << endl;
@@ -609,7 +609,7 @@ AnaUtils::saveNumbers(string anName, string conName,  map<string, int> cnts) {
 	  else {
 	    if(itm -> second.sumw > 0.000001 ) { 
 	      ostringstream os, os2, os3;
-	      os<< itm -> second.sumw; // fixed << setprecision(4)
+	      os<< setprecision(10) << itm -> second.sumw; // fixed << setprecision(4)
 	      os2<< itm -> second.N; // fixed << setprecision(0) <<
 	      os3<< sqrt(itm -> second.sumw2); // fixed << setprecision(4) <<
 	      
@@ -634,18 +634,27 @@ AnaUtils::saveNumbers(string anName, string conName,  map<string, int> cnts) {
   //MM, gen event counters to be added for automatic normalization in yields/stats
   string dsStr="dsCnts\t";
   string dsCntStr="cnts\t";
+  string dsWgtCntStr="wgts\t";
   map<string, int>::const_iterator it;
+  map<string, double>::const_iterator it2;
   for(size_t id = 0; id < dsNames.size(); ++id) { //datasets
     it = cnts.find( dsNames[id] );
     if(it==cnts.end() ) continue;
 
+    it2 = wgtcnts.find( dsNames[id] );
+    if(it2==wgtcnts.end() ) continue;
+
     ostringstream os; os<<it->second;
+    ostringstream oswgt; oswgt<<it2->second;
+    
     dsStr += dsNames[id]+"\t";
     dsCntStr += os.str()+"\t";
+    dsWgtCntStr += oswgt.str()+"\t";
   }
   
   ofile<< dsStr <<endl;
-  ofile<< dsCntStr<<endl<<endl;
+  ofile<< dsCntStr<<endl;
+  ofile<< dsWgtCntStr<<endl<<endl;
 
 
   ofile.close();
