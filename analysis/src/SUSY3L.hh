@@ -58,6 +58,8 @@ private:
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll();
+    bool passMultiLine(bool doubleOnly);
+    bool passHLTLine(string line);
 
     float HT();
     float M_T(float, float, float, float);
@@ -68,6 +70,8 @@ private:
     string _pairmass;
     string _BR;
     string _SR;
+    
+
 
 private:
 
@@ -93,6 +97,7 @@ private:
     float _valCutNJetsSR;
     float _valCutNBJetsSR;
     float _valCutMllBR;
+    std::vector<std::string> _hltLines;
     
     std::string _cTypeLepMultiplicityBR;
     std::string _cTypeNJetsBR;

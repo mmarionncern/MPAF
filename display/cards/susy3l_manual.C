@@ -30,8 +30,8 @@ void susy3l_manual() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="mll";    //njets, nbjets, met, ht, lep, zpeak, mt2, pt, mll
-    string sigs = "t"; 
+    string obs ="zpeak";    //njets, nbjets, met, ht, lep, zpeak, mt2, pt, mll
+    string sigs = "none"; 
 
     //observables **********************
     //string obs[6]={"","","","","",""};
@@ -105,7 +105,7 @@ void susy3l_manual() {
     }
     if(obs == "zpeak"){
         md.dp.setObservables("Zmass");
-        int binning=1;
+        int binning=3;
         double rangeX[2]={0,200};
     }
     if(obs == "mt2"){
@@ -145,7 +145,7 @@ void susy3l_manual() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=10000; //pb-1 19470
+    float lumi=42; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
