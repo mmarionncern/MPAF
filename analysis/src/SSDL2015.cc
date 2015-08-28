@@ -45,6 +45,7 @@ SSDL2015::initialize(){
   _vc->registerVar("LepGood_relIso03"             );
   _vc->registerVar("LepGood_relIso04"             );
   _vc->registerVar("LepGood_jetPtRatio"           );
+  _vc->registerVar("LepGood_jetPtRatio_LepAwareJEC");
   _vc->registerVar("LepGood_jetPtRel"             );
   _vc->registerVar("LepGood_jetBTagCSV"           );
   _vc->registerVar("LepGood_miniRelIso"           );
@@ -60,6 +61,10 @@ SSDL2015::initialize(){
   _vc->registerVar("met_eta"                      );
   _vc->registerVar("met_phi"                      );
   _vc->registerVar("met_mass"                     );
+  _vc->registerVar("metNoHF_pt"                   );
+  _vc->registerVar("metNoHF_eta"                  );
+  _vc->registerVar("metNoHF_phi"                  );
+  _vc->registerVar("metNoHF_mass"                 );
   _vc->registerVar("nJet25"                       );
   _vc->registerVar("nJet40"                       );
   _vc->registerVar("nJet"                         );
@@ -95,23 +100,8 @@ SSDL2015::initialize(){
   _vc->registerVar("nBJetLoose25"                 );
   _vc->registerVar("nBJetMedium40"                );
   _vc->registerVar("nBJetMedium25"                );
+  _vc->registerVar("nBJetTight40"                 );
   _vc->registerVar("nSoftBJetMedium25"            );
-
-  //minitree variables
-  _vc->registerVar("iL1TV_Mini" );
-  _vc->registerVar("iL2TV_Mini" );
-  _vc->registerVar("nLepGood10_Mini" );
-  _vc->registerVar("nLepTightVeto10_Mini" );
-  _vc->registerVar("nLepGood_Mini");
-  _vc->registerVar("nLepTightVeto_Mini");
-  _vc->registerVar("mZ1cut10TL_Mini" );
-  _vc->registerVar("minMllAFOSTL_Mini" );
-  _vc->registerVar("minMllAFASTL_Mini" );
-  _vc->registerVar("nJet40_Mini" );
-  _vc->registerVar("htJet40j_Mini" );
-  // _vc->registerVar("_Mini" );
-  _vc->registerVar("nBJetMedium25_Mini" );
-
 
   _susyMod = new SusyModule(_vc);
   
@@ -239,7 +229,7 @@ SSDL2015::defineOutput() {
   
   // event variables 
   _hm->addVariable("METnoHF"        , 500, 0. , 500, "#slash{E}_{T} [GeV]");
-  _hm->addVariable("htJet40"        , 800, 0. , 800, "H_{T} [GeV]");
+  _hm->addVariable("htJet40j"       , 800, 0. , 800, "H_{T} [GeV]");
   _hm->addVariable("mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-} [GeV]");
   _hm->addVariable("MTmin"          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]");
   _hm->addVariable("NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)");
@@ -491,10 +481,6 @@ SSDL2015::retrieveObjects(){
   _nJets=_jets.size();
   _nBJets=_bJets.size();
   _HT=_susyMod->HT( &(_jets) );
-
-  // _nJets  = _vc->get("nJet40_Mini");//_jets.size();
-  // _nBJets = _vc->get("nBJetMedium25_Mini");
-  // _HT  = _vc->get("htJet40j_Mini");//_susyMod->HT( &(_jets) );
 
   if(false) {
     TVector2 met = varyMET();
