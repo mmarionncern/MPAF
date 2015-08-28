@@ -19,8 +19,8 @@ void susy3l_data() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="3L_data"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3L_data"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3L_data_noTaus"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3L_data_noTaus"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -30,7 +30,7 @@ void susy3l_data() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="zpeak";    //njets, nbjets, met, ht, lep, zpeak, mt2, pt, mll
+    string obs ="met";    //njets, nbjets, met, ht, lep, zpeak, mt2, pt, mll
     string sigs = "none"; 
     bool data = true;
 
@@ -169,6 +169,9 @@ void susy3l_data() {
     // if( md.isInitStatus() )
     md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
 
+    
+    
+    
     //===============================================================
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {

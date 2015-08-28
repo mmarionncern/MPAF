@@ -436,6 +436,19 @@ DataBaseManager::getDBErrH(string key, float v1, float v2, float v3, float v4,
   return _mDBEHs[ key ]->GetBinContent( vbin );
 }
 
+
+float 
+DataBaseManager::getDBValue(string key, string v1) {
+  for(_mSIt=_mStrIdx.begin(); _mSIt!=_mStrIdx.end(); ++_mSIt)
+    cout<<_mSIt->first<<"  ===>  "<<_mSIt->second<<"  "<<getDBValue(key, _mSIt->second)<<endl;
+  _mSIt = _mStrIdx.find(v1);
+  if(_mSIt==_mStrIdx.end()) {
+    cout<<"Warning, no value "<<v1<<" in database"<<key<<endl;
+    return -1000;
+  }
+  return getDBValue(key, _mSIt->second);
+}
+
 float 
 DataBaseManager::getDBErrL(string key, float v1, float v2, float v3, float v4,
 			   float v5, float v6,float v7, float v8, float v9, float v10) {
@@ -454,7 +467,7 @@ DataBaseManager::getDBErrL(string key, float v1, float v2, float v3, float v4,
   return _mDBELs[ key ]->GetBinContent( vbin );
 }
 
-
+/*
 float 
 DataBaseManager::getDBValue(string key, string v1) {
   _mSIt = _mStrIdx.find(v1);
@@ -465,7 +478,7 @@ DataBaseManager::getDBValue(string key, string v1) {
 
   return getDBValue(key, _mSIt->second);
 }
-
+*/
 float 
 DataBaseManager::getDBErrL(string key, string v1) {
  _mSIt = _mStrIdx.find(v1);

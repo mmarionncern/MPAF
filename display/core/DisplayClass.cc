@@ -861,7 +861,6 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     
     hTmps[it] = (TH1*)theobs->hs[ih]->Clone();
     hTmps[it]->Scale( _lumi );
-
   }
   //================================
     
@@ -900,7 +899,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     
     _itCol = _colors.find( _names[_nhmc-ih-1] );
     _itW = _gWeights.find( _names[_nhmc-ih-1] );
-    
+   
     _hClones[ih] = (TH1*)hTmps[ih]->Clone();
     _hClonesNoStack[ih] = (TH1*)hTmps[ih]->Clone();
 
