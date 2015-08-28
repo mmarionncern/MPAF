@@ -208,43 +208,44 @@ SSDL2015::modifySkimming() {
 
 void
 SSDL2015::defineOutput() {
-
-  _hm->addVariable("pdgId1", 20, 0., 20,"");
-  _hm->addVariable("pdgId2", 20, 0., 20,"");
-
-  _hm->addVariable("NIso",5,0,5,"NIso");
-  _hm->addVariable("NNonIso",5,0,5,"NIso");
-  _hm->addVariable("l1Id",100,-10,10,"NIso");
-  _hm->addVariable("l2Id",100,-10,10,"NIso");
-
-  _hm->addVariable("isolation",100,0,1,"iso");
-  _hm->addVariable("NSelPair2Iso",5,0,5,"iso");
-  _hm->addVariable("NSelPair1Iso",5,0,5,"iso");
-  _hm->addVariable("NSelPair0Iso",5,0,5,"iso");
-
-  _hm->addVariable("NBJet",10,0,10,"nbjet");
-
-  _hm->addVariable("jetPtRatio", 110, 0., 1.1,"jetPtRatio");
-  _hm->addVariable("miniIso", 110, 0., 1.1,"miniIso");
-  _hm->addVariable("jetPtRel", 110, 0., 22,"jetPtRel");
-
-  _hm->addVariable("srcFake", 10, 0,10,"srcFake");
-
-  _hm->addVariable("MET",1000,0,1000,"#slash{E}_{T} [GeV]");
-  _hm->addVariable("MT",1000,0,1000,"M_{T} (W, l) [GeV]");
-  // _hm->addVariable("METVsMT",100,0,1000,100,0,1000,"#slash{E}_{T} [GeV]",
-  // 		   "min(M_{T,1}, M_{T,2}) [GeV]");
-
-  //lepton pT(30,0,150), HT(20,0,1000), MET(20,0,200), mTmin(20,0,200) 
-  _hm->addVariable("l1Pt", 150, 0, 150,"p_{T}(l_{1}) [GeV]");
-  _hm->addVariable("l2Pt", 150, 0, 150,"p_{T}(l_{2}) [GeV]");
-
-  _hm->addVariable("HT", 1000, 0, 1000,"H_{T} [GeV]");
-  //  _hm->addVariable("MET", 20, 0, 200,"#slash{E}_{T} [GeV]");
-  //  _hm->addVariable("MTmin", 20, 0, 200,"min(M_{T,1}, M_{T,2}) [GeV]");
+  ///////////////////////////////////////////////////////////////////////////
+  // GLOBAL PLOTS:  These plots are drawn for every SR
+  ///////////////////////////////////////////////////////////////////////////
+  _hm->addVariable("l1Pt"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 ); // , true);
+  _hm->addVariable("l2Pt"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 ); // , true);
+  _hm->addVariable("MET"   , 500, 0. , 500, "#slash{E}_{T} [GeV]"                ); // , true);
+  _hm->addVariable("HT"    , 800, 0. , 800, "H_{T} [GeV]"                        ); // , true);
+  _hm->addVariable("MT"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        ); // , true);
+  _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)"); // , true);
+  _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          ); // , true);
   
-  _hm->addVariable("NBJets", 4, 0, 4,"N_{b-jets} ");
-  _hm->addVariable("NJets", 4, 0, 4,"N_{b-jets} ");
+  ///////////////////////////////////////////////////////////////////////////
+  // VALIDATION PLOTS:  plotting these varibles for a general SS selection //
+  ///////////////////////////////////////////////////////////////////////////
+  // lepton variables
+  _hm->addVariable("lep1_jetPtRatio", 100, 0., 1.2, "Leading Lepton Jet p_{T} Ratio [GeV]");
+  _hm->addVariable("lep1_jetPtRel"  , 100, 0., 1.2, "Leading Lepton Jet p_{T} Rel   [GeV]");
+  _hm->addVariable("lep1_miniRelIso", 100, 0., 0.4, "Leading Lepton Isolation");
+  _hm->addVariable("lep1_Pt"        , 100, 0., 100, "Leading Lepton p_{T} [GeV]");
+  _hm->addVariable("lep1_Eta"       , 100, 0., 2.5, "Leading Lepton #eta");
+  _hm->addVariable("lep1_SIP3D"     , 100, 0., 5.0, "Leading Lepton SIP_{3D}");
+
+  _hm->addVariable("lep2_jetPtRatio", 100, 0., 1.2, "Subleading Lepton Jet p_{T} Ratio [GeV]");
+  _hm->addVariable("lep2_jetPtRel"  , 100, 0., 1.2, "Subleading Lepton Jet p_{T} Rel   [GeV]");
+  _hm->addVariable("lep2_miniRelIso", 100, 0., 0.4, "Subleading Lepton Isolation");
+  _hm->addVariable("lep2_Pt"        , 100, 0., 100, "Subleading Lepton p_{T} [GeV]");
+  _hm->addVariable("lep2_Eta"       , 100, 0., 2.5, "Subleading Lepton #eta");
+  _hm->addVariable("lep2_SIP3D"     , 100, 0., 5.0, "Subleading Lepton SIP_{3D}");
+  
+  // event variables 
+  _hm->addVariable("METnoHF"        , 500, 0. , 500, "#slash{E}_{T} [GeV]");
+  _hm->addVariable("htJet40"        , 800, 0. , 800, "H_{T} [GeV]");
+  _hm->addVariable("mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-} [GeV]");
+  _hm->addVariable("MTmin"          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]");
+  _hm->addVariable("NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)");
+  _hm->addVariable("NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
+  _hm->addVariable("NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)");
+  _hm->addVariable("NJets40"        ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV)");
   
 }
 
@@ -342,7 +343,8 @@ SSDL2015::run() {
   
 
   fillhistos();//fill histos for kGlobal and kGlobalFake
-  
+  fillValidationHistos();
+
   if(_categorization) {
     categorize();
     
@@ -1624,5 +1626,30 @@ void SSDL2015::fillhistos() {
   fill("NJets" , _nJets    , _weight);
 }
 
+void SSDL2015::fillValidationHistos(){
+  
+  fill("lep1_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL1) , _weight);
+  fill("lep1_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL1)               , _weight);
+  fill("lep1_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL1)             , _weight);
+  fill("lep1_Pt"        , _vc->get("LepGood_pt", _idxL1)                     , _weight);
+  fill("lep1_Eta"       , fabs(_vc->get("LepGood_eta", _idxL1))              , _weight);
+  fill("lep1_SIP3D"     , _vc->get("LepGood_sip3d", _idxL1)                  , _weight);
+
+  fill("lep2_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL2) , _weight);
+  fill("lep2_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL2)               , _weight);
+  fill("lep2_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL2)             , _weight);
+  fill("lep2_Pt"        , _vc->get("LepGood_pt", _idxL2)                     , _weight);
+  fill("lep2_Eta"       , fabs(_vc->get("LepGood_eta", _idxL2))              , _weight);
+  fill("lep2_SIP3D"     , _vc->get("LepGood_sip3d", _idxL2)                  , _weight);
+
+  fill("METnoHF"        , _vc->get("metNoHF_pt")    , _weight);
+  fill("htJet40j"       , _vc->get("htJet40j")      , _weight);
+  fill("mZ1"            , _vc->get("mZ1")           , _weight);
+  fill("MTmin"          , _mTmin                    , _weight);
+  fill("NBJetsLoose25"  , _vc->get("nBJetLoose25")  , _weight);
+  fill("NBJetsMedium25" , _vc->get("nBJetMedium25") , _weight);
+  fill("NBJetsTight40"  , _vc->get("nBJetTight40")  , _weight);
+  fill("NJets40"        , _vc->get("nJet40")        , _weight);
+}  
 
 
