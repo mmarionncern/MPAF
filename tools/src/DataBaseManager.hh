@@ -67,6 +67,7 @@ private:
 
   std::map<std::string, int> _mStrIdx;
   std::map<std::string, int>::const_iterator _mSIt;
+  int _strIdx;
 
 };
 
