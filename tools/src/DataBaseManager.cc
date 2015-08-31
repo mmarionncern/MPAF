@@ -5,6 +5,7 @@
 using namespace std;
 
 DataBaseManager::DataBaseManager() {
+  _strIdx=0;
 }
 
 DataBaseManager::~DataBaseManager() {
@@ -29,8 +30,7 @@ DataBaseManager::readDb(string key, string dbName) {
   int nE=0;
   int nN=0;
   vector<int> strIdxs;
-  int strIdx=0;
-
+  
   map<int, int* > idxs;
   
   string ndb= (string)getenv("MPAF")+"/workdir/database/"+dbName;
@@ -84,9 +84,9 @@ DataBaseManager::readDb(string key, string dbName) {
 	    float val = atof(tks[i].c_str());
 	    for(size_t idx=0;idx<strIdxs.size();idx++)
 	      if(strIdxs[idx] == i ) {
-		val = strIdx;
-		_mStrIdx[tks[i]] = strIdx;
-		strIdx++;
+		val = _strIdx;
+		_mStrIdx[tks[i]+key] = _strIdx;
+		_strIdx++;
 	      }
 
 	    bool isReg=false;
@@ -144,7 +144,7 @@ DataBaseManager::readDb(string key, string dbName) {
 	    float val = atof(tks[i].c_str());
 	    for(size_t idx=0;idx<strIdxs.size();idx++)
 	      if(strIdxs[idx] == i ) {
-		val = _mStrIdx[tks[i]];
+		val = _mStrIdx[tks[i]+key];
 	      }
 	    
 	    vbin[i] = StatUtils::findBin<float>(val, _cDbLim[key][i]);
@@ -404,6 +404,11 @@ float
 DataBaseManager::getDBValue(string key, float v1, float v2, float v3, float v4,
 			    float v5, float v6,float v7, float v8, float v9, float v10) {
 
+  if(!exists(key) ) {
+    cout<<"WARNING!! no database "<<key<<" registered! "<<endl;
+    return 1;
+  }
+
   float vals[10]={v1,v2,v3,v4,v5,v6,v7,v8,v9,v10};
   int vbin[10]={0,0,0,0,0,0,0,0,0,0};
 
@@ -420,7 +425,12 @@ DataBaseManager::getDBValue(string key, float v1, float v2, float v3, float v4,
 
 float 
 DataBaseManager::getDBErrH(string key, float v1, float v2, float v3, float v4,
-			    float v5, float v6,float v7, float v8, float v9, float v10) {
+			   float v5, float v6,float v7, float v8, float v9, float v10) {
+
+  if(!exists(key) ) {
+    cout<<"WARNING!! no database "<<key<<" registered! "<<endl;
+    return 1;
+  }
 
   float vals[10]={v1,v2,v3,v4,v5,v6,v7,v8,v9,v10};
   int vbin[10]={0,0,0,0,0,0,0,0,0,0};
@@ -440,6 +450,11 @@ float
 DataBaseManager::getDBErrL(string key, float v1, float v2, float v3, float v4,
 			   float v5, float v6,float v7, float v8, float v9, float v10) {
 
+  if(!exists(key) ) {
+    cout<<"WARNING!! no database "<<key<<" registered! "<<endl;
+    return 1;
+  }
+
   float vals[10]={v1,v2,v3,v4,v5,v6,v7,v8,v9,v10};
   int vbin[10]={0,0,0,0,0,0,0,0,0,0};
 
@@ -457,7 +472,8 @@ DataBaseManager::getDBErrL(string key, float v1, float v2, float v3, float v4,
 
 float 
 DataBaseManager::getDBValue(string key, string v1) {
-  _mSIt = _mStrIdx.find(v1);
+  
+  _mSIt = _mStrIdx.find(v1+key);
   if(_mSIt==_mStrIdx.end()) {
     cout<<"Warning, no value "<<v1<<" in database"<<key<<endl;
     return -1000;
@@ -468,7 +484,7 @@ DataBaseManager::getDBValue(string key, string v1) {
 
 float 
 DataBaseManager::getDBErrL(string key, string v1) {
- _mSIt = _mStrIdx.find(v1);
+ _mSIt = _mStrIdx.find(v1+key);
   if(_mSIt==_mStrIdx.end()) {
     cout<<"Warning, no value "<<v1<<" in database"<<key<<endl;
     return -1000;
@@ -479,7 +495,7 @@ DataBaseManager::getDBErrL(string key, string v1) {
 
 float
 DataBaseManager::getDBErrH(string key, string v1){
- _mSIt = _mStrIdx.find(v1);
+ _mSIt = _mStrIdx.find(v1+key);
   if(_mSIt==_mStrIdx.end()) {
     cout<<"Warning, no value "<<v1<<" in database"<<key<<endl;
     return -1000;
