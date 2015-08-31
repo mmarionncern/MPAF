@@ -63,7 +63,7 @@ void HistoManager::configAnalysis(vector<string> datasets) {
 
 //Histogram access and booking
 //____________________________________________________________________________
-void HistoManager::addVariable(string var, int nBin, float min, float max, string Xleg, bool prof, string type) {
+void HistoManager::addVariable(string var, int nBin, float min, float max, string Xleg, bool isglb, bool prof, string type) {
 
   //Protection against overdeclaration
  
@@ -76,14 +76,14 @@ void HistoManager::addVariable(string var, int nBin, float min, float max, strin
   vector<float> bins(2,-1);
   bins[0] = min; bins[1] = max;
   hObs tmp;
-  tmp = preparehObs(var, nBin, bins, Xleg,"", type,prof);
+  tmp = preparehObs(var, nBin, bins, Xleg,"", type, isglb, prof);
   _variables[ var ]= tmp;
   
 }
 
 
 //____________________________________________________________________________
-void HistoManager::addVariable(string var, int nBin, vector<float> bins, string Xleg, bool prof, string type) {
+void HistoManager::addVariable(string var, int nBin, vector<float> bins, string Xleg, bool isglb, bool prof, string type) {
   
   //Protection against overdeclaration
   _itVar = _variables.find(var);
@@ -93,7 +93,7 @@ void HistoManager::addVariable(string var, int nBin, vector<float> bins, string 
   }
 
   hObs tmp;
-  tmp = preparehObs( var, nBin, bins, Xleg,"", type, prof);
+  tmp = preparehObs( var, nBin, bins, Xleg,"", type, isglb, prof);
   _variables[ var ]= tmp;
  
 }
@@ -101,7 +101,7 @@ void HistoManager::addVariable(string var, int nBin, vector<float> bins, string 
 //____________________________________________________________________________
 void
 HistoManager::addVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY,
-			  float maxY, string Xleg, string Yleg, bool prof, string type) {
+			  float maxY, string Xleg, string Yleg, bool isglb, bool prof, string type) {
 
   //Protection against overdeclaration
   _itVar = _variables.find(var);
@@ -117,14 +117,14 @@ HistoManager::addVariable(string var, int nBinX, float minX, float maxX, int nBi
   binsY[0]=minY; binsY[1]=maxY;
 
   hObs tmp;
-  tmp = preparehObs(var, nBinX, binsX, Xleg,Yleg, type, prof, nBinY, binsY);
+  tmp = preparehObs(var, nBinX, binsX, Xleg,Yleg, type, isglb, prof, nBinY, binsY);
   _variables[ var ]= tmp;
 
 }
 
 //____________________________________________________________________________
 void
-HistoManager::addVariableFromTemplate(string var, TH1* h, bool prof, 
+HistoManager::addVariableFromTemplate(string var, TH1* h,  bool prof, 
 				      bool is2D, string type) {
 
   //Protection against overdeclaration
@@ -142,7 +142,7 @@ HistoManager::addVariableFromTemplate(string var, TH1* h, bool prof,
 void
 HistoManager::addVariable(string var, int nBinX, vector<float> binsX, int nBinY,
 			  vector<float> binsY, string Xleg, string Yleg,
-			  bool prof, string type) {
+			  bool isglb, bool prof, string type) {
 
   //Protection against overdeclaration
   _itVar = _variables.find(var);
@@ -151,7 +151,7 @@ HistoManager::addVariable(string var, int nBinX, vector<float> binsX, int nBinY,
     return;
   }
   hObs tmp;
-  tmp = preparehObs(var, nBinX, binsX, Xleg, Yleg, type, prof, nBinY, binsY);
+  tmp = preparehObs(var, nBinX, binsX, Xleg, Yleg, type, isglb, prof, nBinY, binsY);
   _variables[ var ]= tmp;
 
 }
@@ -159,7 +159,7 @@ HistoManager::addVariable(string var, int nBinX, vector<float> binsX, int nBinY,
 
 //____________________________________________________________________________
 hObs HistoManager::preparehObs(string var, int nbinsX, vector<float> bins, string Xleg,
-			       string Yleg, string type, bool prof, int nbinsY, vector<float> binsY ) {
+			       string Yleg, string type, bool isglb, bool prof, int nbinsY, vector<float> binsY ) {
   
   bool twoDim = (nbinsY != -1);
 	
@@ -174,6 +174,7 @@ hObs HistoManager::preparehObs(string var, int nbinsX, vector<float> bins, strin
   otmp.titleY = Yleg;
   otmp.name = var;
   otmp.type = type;
+  otmp.isglb = isglb;
   otmp.htype = (prof?(twoDim?"2DP":"1DP"):(twoDim?"2D":"1D"));
 	
   for(size_t id=0;id<_nds;id++) {
@@ -282,6 +283,7 @@ hObs HistoManager::preparehObsFromTemplate(string var, TH1* h, bool prof, bool i
   otmp.titleY = h->GetYaxis()->GetTitle();
   otmp.name  = var;
   otmp.type  = type;
+  otmp.isglb = false;
   otmp.htype = (prof?(twoDim?"2DP":"1DP"):(twoDim?"2D":"1D"));
 	
   for(size_t id=0;id<_nds;id++) {
@@ -465,9 +467,8 @@ void HistoManager::fill(string var, int ds, float val, float weight) {
     parameters: var, ds, val, weight
     return: none
   */
- 
   _itVar = _variables.find(var);
-	
+  
   if( _itVar == _variables.end() ) {
     cout << " Error, no such variable declared, " << var << endl;
     return;

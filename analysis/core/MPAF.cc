@@ -108,7 +108,7 @@ void MPAF::analyze(){
   defineOutput();
   //copy the histograms for the different workflows
   addWorkflowHistos();
-
+  
   _numDS = _datasets.size();
 
   // loop over given samples
@@ -432,26 +432,41 @@ void MPAF::fill(string var, float valx, float weight) {
     parameters: var, valx, weight
     return: none
   */
-  //cout<<_uncId<<"   "<<_curWF<<"   "<<_wfNames[_curWF]<<endl;
-  if(!_uncId) { //central value
-   
-    if(_curWF!=-100) { //single workflow
-      _hm->fill( var+_wfNames[_curWF], _inds, valx, weight );
-    }
-    else { //multiple workflows
-      for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
-	_hm->fill( var+_itWF->second, _inds, valx, weight );
+  const hObs* obs = _hm->getHObs(var);
+  
+  if(obs->isglb) {  
+    // IF HISTOGRAM IS GLOBAL DO AS USUAL:
+    if(!_uncId) { //central value
+      if(_curWF!=-100) { //single workflow
+	_hm->fill( var+_wfNames[_curWF], _inds, valx, weight );
       }
+      else { //multiple workflows
+	for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
+	  _hm->fill( var+_itWF->second, _inds, valx, weight );
+	}
+      }
+      
     }
-    
+    else {
+      if(_uDir==SystUtils::kUp)
+	_hm->fill( var, _unc, valx, weight,"Up");
+      //fillUnc(var,_unc,valx,weight,"Up");
+      if(_uDir==SystUtils::kDown)
+	_hm->fill( var, _unc, valx, weight,"Do");
+      //fillUnc(var,_unc,valx,weight,"Do");
+    }
   }
-  else {
-    if(_uDir==SystUtils::kUp)
-      _hm->fill( var, _unc, valx, weight,"Up");
-    //fillUnc(var,_unc,valx,weight,"Up");
-    if(_uDir==SystUtils::kDown)
-      _hm->fill( var, _unc, valx, weight,"Do");
-    //fillUnc(var,_unc,valx,weight,"Do");
+  else {  //for local HISTOS
+    if(!_uncId) { //central value
+      _hm->fill( var, _inds, valx, weight );
+    }
+    else {
+      if(_uDir==SystUtils::kUp)
+	_hm->fill( var, _unc, valx, weight,"Up");
+      //fillUnc(var,_unc,valx,weight,"Up");
+      if(_uDir==SystUtils::kDown)
+	_hm->fill( var, _unc, valx, weight,"Do");
+    }
   }
 
 }
@@ -464,14 +479,22 @@ void MPAF::fill(string var, float valx, float valy, float weight) {
     parameters: var, valx, valy, weight
     return: none
   */
+  const hObs* obs = _hm->getHObs(var);
   
-  if(_curWF!=-100) { //single workflow
+  if(obs->isglb) {  
+    // IF HISTOGRAM IS GLOBAL DO AS USUAL:
+    if(_curWF!=-100) { //single workflow
     _hm->fill( var+_wfNames[_curWF], _inds, valx, valy, weight );
-  }
-  else { //multiple workflows
-    for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
-      _hm->fill( var+_itWF->second, _inds, valx, valy, weight );
     }
+    else { //multiple workflows
+      for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
+	_hm->fill( var+_itWF->second, _inds, valx, valy, weight );
+      }
+    }
+  }
+  else {
+    // IF HISTOGRAM IS GLOBAL DO AS USUAL:
+    _hm->fill( var, _inds, valx, valy, weight );
   }
 }
 
@@ -677,18 +700,19 @@ MPAF::addWorkflowHistos() {
   if(_wfNames.size()==1) return;
 
   vector<string> obss = _hm->getObservables(true);
-
+  
   for(unsigned int io=0;io<obss.size();io++) {
     const hObs* obs = _hm->getHObs(obss[io]);
     bool prof = obs->htype.find("P")!=string::npos;
     bool is2D = obs->htype.find("2D")!=string::npos;
 
+    if (!obs->isglb) continue;  // don't declare histo if it's not declared as global
+
     for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
       if(_itWF->second=="") continue; //protection for global histo
       _hm->addVariableFromTemplate( obs->name+_itWF->second, obs->hs[0], prof, is2D, obs->type );
     }
-  }
-
+  }  
 }
 
 

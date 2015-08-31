@@ -201,13 +201,13 @@ SSDL2015::defineOutput() {
   ///////////////////////////////////////////////////////////////////////////
   // GLOBAL PLOTS:  These plots are drawn for every SR
   ///////////////////////////////////////////////////////////////////////////
-  _hm->addVariable("l1Pt"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 ); // , true);
-  _hm->addVariable("l2Pt"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 ); // , true);
-  _hm->addVariable("MET"   , 500, 0. , 500, "#slash{E}_{T} [GeV]"                ); // , true);
-  _hm->addVariable("HT"    , 800, 0. , 800, "H_{T} [GeV]"                        ); // , true);
-  _hm->addVariable("MT"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        ); // , true);
-  _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)"); // , true);
-  _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          ); // , true);
+  _hm->addVariable("l1Pt"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 , true);
+  _hm->addVariable("l2Pt"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 , true);
+  _hm->addVariable("MET"   , 500, 0. , 500, "#slash{E}_{T} [GeV]"                , true);
+  _hm->addVariable("HT"    , 800, 0. , 800, "H_{T} [GeV]"                        , true);
+  _hm->addVariable("MT"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        , true);
+  _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", true);
+  _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          , true);
   
   ///////////////////////////////////////////////////////////////////////////
   // VALIDATION PLOTS:  plotting these varibles for a general SS selection //

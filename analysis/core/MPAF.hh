@@ -228,7 +228,7 @@ private:
   vector<string> _uncSrcs;
   vector<int> _uncDirs;
   map<string, bool> _uType;
-
+  
 };
 
 

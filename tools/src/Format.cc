@@ -24,6 +24,8 @@ struct hObs {
   std::string titleY;
   std::string name;
   std::string type;
+  
+  bool isglb;
 };
 
 typedef std::map<std::string,TH1*> systM;

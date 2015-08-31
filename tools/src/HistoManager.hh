@@ -77,16 +77,16 @@ public:
   //Histogram access and booking
   
   void addVariable(string var, int nBin, float min, float max, 
-		   string Xleg, bool prof=false, string type="m");
+		   string Xleg, bool isglb=false, bool prof=false, string type="m");
   void addVariable(string var, int nBin, vector<float> bins,
-		   string Xleg, bool prof=false, string type="m");
+		   string Xleg, bool isglb=false, bool prof=false, string type="m");
   void addVariable(string var, int nBinX, float minX, float maxX,
 		   int nBinY, float minY,
 		   float maxY, string Xleg,string Yleg,
-		   bool prof=false, string type="m");
+		   bool isglb=false, bool prof=false, string type="m");
   void addVariable(string var, int nBinX, vector<float> binsX, int nBinY,
 		   vector<float> binsY,
-		   string Xleg,string Yleg,bool prof=false, string type="m");
+		   string Xleg,string Yleg, bool isglb=false, bool prof=false, string type="m");
   
   void addVariableFromTemplate(string var, TH1* h, bool prof, 
 			       bool is2D, string type);
@@ -105,7 +105,7 @@ public:
   //Prepare observables
   hObs preparehObs(string var, int nbinX, vector<float> bins, 
 		   string Xleg,string Yleg,
-		   string type, bool prof,
+		   string type, bool isglb, bool prof,
 		   int nbinsY=-1, 
 		   vector<float> binsY=vector<float>(0,0) );
    
