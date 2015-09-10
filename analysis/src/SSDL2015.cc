@@ -236,14 +236,14 @@ SSDL2015::defineOutput() {
   
   for (size_t r=0; r<reg.size(); r++) {
     // lepton variables
-    _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 40., "Leading Lepton Jet p_{T} Ratio [GeV]");
-    _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 1.2, "Leading Lepton Jet p_{T} Rel   [GeV]");
+    _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 1.2, "Leading Lepton Jet p_{T} Ratio [GeV]");
+    _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 40., "Leading Lepton Jet p_{T} Rel   [GeV]");
     _hm->addVariable(reg[r]+"_lep1_miniRelIso", 100, 0., 0.4, "Leading Lepton Isolation");
     _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "Leading Lepton p_{T} [GeV]");
     _hm->addVariable(reg[r]+"_lep1_Eta"       , 100, 0., 2.5, "Leading Lepton #eta");
     _hm->addVariable(reg[r]+"_lep1_SIP3D"     , 100, 0., 5.0, "Leading Lepton SIP_{3D}");
-    _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 40., "Subleading Lepton Jet p_{T} Ratio [GeV]");
-    _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 1.2, "Subleading Lepton Jet p_{T} Rel   [GeV]");
+    _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "Subleading Lepton Jet p_{T} Ratio [GeV]");
+    _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "Subleading Lepton Jet p_{T} Rel   [GeV]");
     _hm->addVariable(reg[r]+"_lep2_miniRelIso", 100, 0., 0.4, "Subleading Lepton Isolation");
     _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "Subleading Lepton p_{T} [GeV]");
     _hm->addVariable(reg[r]+"_lep2_Eta"       , 100, 0., 2.5, "Subleading Lepton #eta");
@@ -259,6 +259,8 @@ SSDL2015::defineOutput() {
     _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)");
     _hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)");
   }
+
+
   
 }
 
