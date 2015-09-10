@@ -174,7 +174,7 @@ hObs HistoManager::preparehObs(string var, int nbinsX, vector<float> bins, strin
   otmp.titleY = Yleg;
   otmp.name = var;
   otmp.type = type;
-  otmp.isglb = isglb;
+  otmp.SetGlobal(isglb);
   otmp.htype = (prof?(twoDim?"2DP":"1DP"):(twoDim?"2D":"1D"));
 	
   for(size_t id=0;id<_nds;id++) {
@@ -283,7 +283,7 @@ hObs HistoManager::preparehObsFromTemplate(string var, TH1* h, bool prof, bool i
   otmp.titleY = h->GetYaxis()->GetTitle();
   otmp.name  = var;
   otmp.type  = type;
-  otmp.isglb = false;
+  otmp.SetGlobal(false);
   otmp.htype = (prof?(twoDim?"2DP":"1DP"):(twoDim?"2D":"1D"));
 	
   for(size_t id=0;id<_nds;id++) {

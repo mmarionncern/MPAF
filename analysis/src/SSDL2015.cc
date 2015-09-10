@@ -22,7 +22,10 @@ SSDL2015::initialize(){
   _vc->registerVar("run"                          );
   _vc->registerVar("lumi"                         );
   _vc->registerVar("evt"                          );
+  _vc->registerVar("HLT_SingleEl"                 );
   _vc->registerVar("HLT_SingleMu"                 );
+  _vc->registerVar("HLT_SingleEl50ns"             );
+  _vc->registerVar("HLT_SingleMu50ns"             );
   _vc->registerVar("HLT_MuEG"                     );
   _vc->registerVar("HLT_TripleEl"                 );
   _vc->registerVar("HLT_DoubleEl"                 );
@@ -102,7 +105,13 @@ SSDL2015::initialize(){
   _vc->registerVar("nBJetMedium25"                );
   _vc->registerVar("nBJetTight40"                 );
   _vc->registerVar("nSoftBJetMedium25"            );
-
+  
+  // FLAGS
+  _vc->registerVar("hbheFilterNew25ns"            );
+  _vc->registerVar("Flag_CSCTightHaloFilter"      );
+  _vc->registerVar("Flag_eeBadScFilter"           );
+  
+  
   _susyMod = new SusyModule(_vc);
   
   int nCateg=156; //78 156
@@ -168,6 +177,7 @@ SSDL2015::initialize(){
   _SR      = getCfgVarS("SR"     );
   _FR      = getCfgVarS("FR"     );
   _categorization = getCfgVarI("categorization");
+  _DoValidationPlots = getCfgVarI("ValidationPlots");
 
 //  vector<string> jess;
 //  jess.push_back("Jet_pt");
@@ -209,33 +219,42 @@ SSDL2015::defineOutput() {
   _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", true);
   _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          , true);
   
+  if(!_DoValidationPlots) return; 
   ///////////////////////////////////////////////////////////////////////////
   // VALIDATION PLOTS:  plotting these varibles for a general SS selection //
   ///////////////////////////////////////////////////////////////////////////
-  // lepton variables
-  _hm->addVariable("lep1_jetPtRatio", 100, 0., 1.2, "Leading Lepton Jet p_{T} Ratio [GeV]");
-  _hm->addVariable("lep1_jetPtRel"  , 100, 0., 1.2, "Leading Lepton Jet p_{T} Rel   [GeV]");
-  _hm->addVariable("lep1_miniRelIso", 100, 0., 0.4, "Leading Lepton Isolation");
-  _hm->addVariable("lep1_Pt"        , 100, 0., 100, "Leading Lepton p_{T} [GeV]");
-  _hm->addVariable("lep1_Eta"       , 100, 0., 2.5, "Leading Lepton #eta");
-  _hm->addVariable("lep1_SIP3D"     , 100, 0., 5.0, "Leading Lepton SIP_{3D}");
-
-  _hm->addVariable("lep2_jetPtRatio", 100, 0., 1.2, "Subleading Lepton Jet p_{T} Ratio [GeV]");
-  _hm->addVariable("lep2_jetPtRel"  , 100, 0., 1.2, "Subleading Lepton Jet p_{T} Rel   [GeV]");
-  _hm->addVariable("lep2_miniRelIso", 100, 0., 0.4, "Subleading Lepton Isolation");
-  _hm->addVariable("lep2_Pt"        , 100, 0., 100, "Subleading Lepton p_{T} [GeV]");
-  _hm->addVariable("lep2_Eta"       , 100, 0., 2.5, "Subleading Lepton #eta");
-  _hm->addVariable("lep2_SIP3D"     , 100, 0., 5.0, "Subleading Lepton SIP_{3D}");
+  vector<string> reg;
+  reg.push_back("ttbar");
+  reg.push_back("ZMuMu");
+  reg.push_back("ZEE");
+  reg.push_back("Zl");
+  reg.push_back("Wl");
   
-  // event variables 
-  _hm->addVariable("METnoHF"        , 500, 0. , 500, "#slash{E}_{T} [GeV]");
-  _hm->addVariable("htJet40j"       , 800, 0. , 800, "H_{T} [GeV]");
-  _hm->addVariable("mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-} [GeV]");
-  _hm->addVariable("MTmin"          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]");
-  _hm->addVariable("NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)");
-  _hm->addVariable("NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
-  _hm->addVariable("NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)");
-  _hm->addVariable("NJets40"        ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV)");
+  for (size_t r=0; r<reg.size(); r++) {
+    // lepton variables
+    _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 40., "Leading Lepton Jet p_{T} Ratio [GeV]");
+    _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 1.2, "Leading Lepton Jet p_{T} Rel   [GeV]");
+    _hm->addVariable(reg[r]+"_lep1_miniRelIso", 100, 0., 0.4, "Leading Lepton Isolation");
+    _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "Leading Lepton p_{T} [GeV]");
+    _hm->addVariable(reg[r]+"_lep1_Eta"       , 100, 0., 2.5, "Leading Lepton #eta");
+    _hm->addVariable(reg[r]+"_lep1_SIP3D"     , 100, 0., 5.0, "Leading Lepton SIP_{3D}");
+    _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 40., "Subleading Lepton Jet p_{T} Ratio [GeV]");
+    _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 1.2, "Subleading Lepton Jet p_{T} Rel   [GeV]");
+    _hm->addVariable(reg[r]+"_lep2_miniRelIso", 100, 0., 0.4, "Subleading Lepton Isolation");
+    _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "Subleading Lepton p_{T} [GeV]");
+    _hm->addVariable(reg[r]+"_lep2_Eta"       , 100, 0., 2.5, "Subleading Lepton #eta");
+    _hm->addVariable(reg[r]+"_lep2_SIP3D"     , 100, 0., 5.0, "Subleading Lepton SIP_{3D}");
+    
+    // event variables 
+    _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]");
+    _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} [GeV]");
+    _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]");
+    _hm->addVariable(reg[r]+"_MTmin"          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]");
+    _hm->addVariable(reg[r]+"_NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)");
+    _hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
+    _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)");
+    _hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)");
+  }
   
 }
 
@@ -260,6 +279,16 @@ SSDL2015::run() {
   counter("denominator");
   
   retrieveObjects();
+  
+  if(_DoValidationPlots) {
+    if (ttbarSelection())   fillValidationHistos("ttbar");
+    if (ZlSelection())      fillValidationHistos("Zl");
+    if (WlSelection())      fillValidationHistos("Wl");
+    if (ZMuMuSelection())   fillValidationHistos("ZMuMu");
+    if (ZEESelection())     fillValidationHistos("ZEE");
+  }
+  
+  //  return;
 
   if(!makeCut(ssLeptonSelection(),"SS Selection")) {
     // failed same-sign lepton selection, fill WZ control region
@@ -276,8 +305,8 @@ SSDL2015::run() {
 	      Candidate::create(_l2Cand, _met)->mass() );
   //===============================
 
-  if(!passGenSelection() ) return;
-  counter("genselection");
+  //  if(!passGenSelection() ) return;
+  //  counter("genselection");
   
 
   //MC check for FR --> one fake only
@@ -333,7 +362,7 @@ SSDL2015::run() {
   
 
   fillhistos();//fill histos for kGlobal and kGlobalFake
-  fillValidationHistos();
+  //  fillValidationHistos();
 
   if(_categorization) {
     categorize();
@@ -546,7 +575,7 @@ SSDL2015::ssLeptonSelection() {
       
     // if(_l1Cand==nullptr || _l2Cand==nullptr) return false;
       
-    if(!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) return false;
+    //    if(!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) return false;
     //if(genMatchedToFake(_idxL1) && genMatchedToFake(_idxL2) ) return false;
 
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
@@ -572,7 +601,7 @@ SSDL2015::ssLeptonSelection() {
     _idxL1 = _tightLepsVeto10Idx[_idxL1];
     _idxL2 = _tightLepsVeto10Idx[_idxL2];
     
-    if(!genMatchedToFake(_idxL1) || !genMatchedToFake(_idxL2) ) return false;
+    //    if(!genMatchedToFake(_idxL1) || !genMatchedToFake(_idxL2) ) return false;
 
     if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
     if(!makeCut(_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
@@ -1477,7 +1506,142 @@ SSDL2015::passCERNSelection() {
   return true;
 
 }
+bool SSDL2015::ttbarSelection(){
+  ///filters : hbheFilterNew25ns==1 && Flag_CSCTightHaloFilter==1 && Flag_eeBadScFilter==1
+  ///trigger : HLT_DoubleMu || HLT_DoubleEl || HLT_MuEG
+  ///nL : nLepGood >= 2
+  ///EE_MuMu_MuE : LepGood1_pdgId == -LepGood2_pdgId || abs(LepGood1_pdgId+LepGood2_pdgId)==2
+  ///pt2515 : LepGood1_pt>25 && LepGood2_pt>15
+  ///mll > 12 : minMllAFAS > 12
+  ///nJet40 : nJet40 >= 2
+  ///nBJetMedium25 : nBJetMedium25 >= 1 || nBJetLoose25 == 2
+  ///Z peak : abs(mZ1-91.2) > 10
+  if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+  if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
+  if (_vc->get("nLepGood") < 2) return false;
+  _idxL1 = 0;
+  _idxL2 = 1;
+  if (!(_vc->get("LepGood_pdgId", _idxL1) == -_vc->get("LepGood_pdgId", _idxL2) || 
+	abs(_vc->get("LepGood_pdgId", _idxL1)+_vc->get("LepGood_pdgId", _idxL2)) == 2)
+      ) return false;
+  if (_vc->get("LepGood_pt", _idxL1) < 25. || _vc->get("LepGood_pt", _idxL2) < 15.) return false;
+  if (_vc->get("minMllAFAS") < 12.) return false;
+  if (_vc->get("nJet40") < 2) return false;
+  if (!(_vc->get("nBJetMedium25") >= 1 || _vc->get("nBJetLoose25") == 2)) return false; 
+  if (abs(_vc->get("mZ1")-91.2) < 10.)  return false;
+  
+  return true;
+}
 
+bool SSDL2015::ZlSelection(){
+  if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+  if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
+  if (_vc->get("nLepGood10") !=3 ) return false;
+  if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
+  if (abs(_vc->get("mZ1")-91.2) > 15.) return false;
+  
+  Candidate* lep3=Candidate::create(_vc->get("LepGood_pt", 2),
+				    _vc->get("LepGood_eta", 2),
+				    _vc->get("LepGood_phi", 2),
+				    _vc->get("LepGood_pdgId", 2),
+				    _vc->get("LepGood_charge", 2),
+				    0.105);
+  float mT= Candidate::create(lep3, _met)->mass();
+  
+  if (mT > 55.) return false;
+  if (_vc->get("minMllAFAS") < 12.) return false;
+  if (_vc->get("LepGood_pt", 2) > 50.) return false;
+  if (_vc->get("met_pt") > 60.) return false;
+
+  _idxL1 = 0;
+  _idxL2 = 2;
+    
+  return true;
+}
+bool SSDL2015::WlSelection(){
+  if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+  if (!(_vc->get("HLT_SingleMu") || _vc->get("HLT_SingleEl"))) return false;
+  if (_vc->get("nLepGood10") != 2) return false;
+  if (_vc->get("LepGood_charge", 0)*_vc->get("LepGood_charge", 1) < 0) return false;
+  
+  _idxL1 = 0;
+  _idxL2 = 1;
+  
+  bool charge= (_vc->get("LepGood_tightCharge",_idxL1) > (abs(_vc->get("LepGood_pdgId",_idxL1))==11))  && 
+               (_vc->get("LepGood_tightCharge",_idxL2) > (abs(_vc->get("LepGood_pdgId",_idxL2))==11));
+  
+  if (!charge) return false;
+  
+  Candidate* lep=Candidate::create(_vc->get("LepGood_pt", _idxL1),
+				   _vc->get("LepGood_eta", _idxL1),
+				   _vc->get("LepGood_phi", _idxL1),
+				   _vc->get("LepGood_pdgId", _idxL1),
+				   _vc->get("LepGood_charge", _idxL1),
+				   0.105);
+  float mT= Candidate::create(lep, _met)->mass();
+
+  if (_vc->get("LepGood_sip3d",_idxL1) > 4) return false;
+  if (_vc->get("LepGood_relIso03",_idxL1) > 0.05) return false;
+  if (_vc->get("LepGood_miniRelIso",_idxL1) > 0.05) return false;
+  if (_vc->get("nBJetMedium25") != 0) return false;
+  if (_vc->get("met_pt") < 30.) return false;
+  if (mT < 40.) return false;
+
+  if ((abs(_vc->get("LepGood_pdgId",_idxL1))==11 && abs(_vc->get("LepGood_pdgId",_idxL2))==11) && 
+       (_vc->get("mZ1") > 76. && _vc->get("mZ1") < 106.))  return false;
+  
+  return true;
+}
+
+bool SSDL2015::ZMuMuSelection(){
+  if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+  if (!(_vc->get("HLT_SingleMu"))) return false;
+  if (_vc->get("nLepGood") < 2) return false;
+  if (_vc->get("nLepGood10") != 2) return false;
+  if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
+  //  cout << _vc->get("LepGood_pdgId", 0)  << " = " << _vc->get("LepGood_pdgId", 1) << endl;
+  if (abs(_vc->get("LepGood_pdgId", 0)) != 13) return false;
+  if (_vc->get("mZ1") < 60. || _vc->get("mZ1") > 120.) return false;
+  
+  if (_vc->get("LepGood_charge", 0) < 0) {
+    _idxL1 = 0;
+    _idxL2 = 1;
+  }
+  else if (_vc->get("LepGood_charge", 1) < 0) {
+    _idxL1 = 1;
+    _idxL2 = 0;
+  }
+  
+  if (_vc->get("LepGood_pt", _idxL1) < 20) return false;
+  if (_vc->get("LepGood_relIso03", _idxL1) > 0.2 ) return false;
+  if (abs(_vc->get("LepGood_eta", _idxL1)) > 2.1) return false;
+
+  return true;
+}
+
+bool SSDL2015::ZEESelection(){
+  if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+  if (!(_vc->get("HLT_SingleEl"))) return false;
+  if (_vc->get("nLepGood") < 2) return false;
+  if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
+  if (abs(_vc->get("LepGood_pdgId", 0)) != 11) return false;
+  if (_vc->get("mZ1") < 60. || _vc->get("mZ1") > 120.) return false;
+  
+  if (_vc->get("LepGood_charge", 0) < 0) {
+    _idxL1 = 0;
+    _idxL2 = 1;
+  }
+  else if (_vc->get("LepGood_charge", 1) < 0) {
+    _idxL1 = 1;
+    _idxL2 = 0;
+  }
+  
+  if (_vc->get("LepGood_pt", _idxL1) < 30) return false;
+  if (_vc->get("LepGood_relIso03", _idxL1) > 0.2 ) return false;
+  if (abs(_vc->get("LepGood_eta", _idxL1)) > 2.1) return false;
+  
+  return true;
+}
 
 //===========================================================================
 void
@@ -1612,30 +1776,30 @@ void SSDL2015::fillhistos() {
   fill("NJets" , _nJets    , _weight);
 }
 
-void SSDL2015::fillValidationHistos(){
+void SSDL2015::fillValidationHistos(string reg){
   
-  fill("lep1_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL1) , _weight);
-  fill("lep1_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL1)               , _weight);
-  fill("lep1_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL1)             , _weight);
-  fill("lep1_Pt"        , _vc->get("LepGood_pt", _idxL1)                     , _weight);
-  fill("lep1_Eta"       , fabs(_vc->get("LepGood_eta", _idxL1))              , _weight);
-  fill("lep1_SIP3D"     , _vc->get("LepGood_sip3d", _idxL1)                  , _weight);
-
-  fill("lep2_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL2) , _weight);
-  fill("lep2_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL2)               , _weight);
-  fill("lep2_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL2)             , _weight);
-  fill("lep2_Pt"        , _vc->get("LepGood_pt", _idxL2)                     , _weight);
-  fill("lep2_Eta"       , fabs(_vc->get("LepGood_eta", _idxL2))              , _weight);
-  fill("lep2_SIP3D"     , _vc->get("LepGood_sip3d", _idxL2)                  , _weight);
-
-  fill("METnoHF"        , _vc->get("metNoHF_pt")    , _weight);
-  fill("htJet40j"       , _vc->get("htJet40j")      , _weight);
-  fill("mZ1"            , _vc->get("mZ1")           , _weight);
-  fill("MTmin"          , _mTmin                    , _weight);
-  fill("NBJetsLoose25"  , _vc->get("nBJetLoose25")  , _weight);
-  fill("NBJetsMedium25" , _vc->get("nBJetMedium25") , _weight);
-  fill("NBJetsTight40"  , _vc->get("nBJetTight40")  , _weight);
-  fill("NJets40"        , _vc->get("nJet40")        , _weight);
+  fill(reg+"_lep1_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL1) , _weight);
+  fill(reg+"_lep1_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL1)               , _weight);
+  fill(reg+"_lep1_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL1)             , _weight);
+  fill(reg+"_lep1_Pt"        , _vc->get("LepGood_pt", _idxL1)                     , _weight);
+  fill(reg+"_lep1_Eta"       , fabs(_vc->get("LepGood_eta", _idxL1))              , _weight);
+  fill(reg+"_lep1_SIP3D"     , _vc->get("LepGood_sip3d", _idxL1)                  , _weight);
+  
+  fill(reg+"_lep2_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL2) , _weight);
+  fill(reg+"_lep2_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL2)               , _weight);
+  fill(reg+"_lep2_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL2)             , _weight);
+  fill(reg+"_lep2_Pt"        , _vc->get("LepGood_pt", _idxL2)                     , _weight);
+  fill(reg+"_lep2_Eta"       , fabs(_vc->get("LepGood_eta", _idxL2))              , _weight);
+  fill(reg+"_lep2_SIP3D"     , _vc->get("LepGood_sip3d", _idxL2)                  , _weight);
+   
+  fill(reg+"_MET"            , _vc->get("met_pt")        , _weight);
+  fill(reg+"_htJet40j"       , _vc->get("htJet40j")      , _weight);
+  fill(reg+"_mZ1"            , _vc->get("mZ1")           , _weight);
+  fill(reg+"_MTmin"          , _mTmin                    , _weight);
+  fill(reg+"_NBJetsLoose25"  , _vc->get("nBJetLoose25")  , _weight);
+  fill(reg+"_NBJetsMedium25" , _vc->get("nBJetMedium25") , _weight);
+  fill(reg+"_NBJetsTight40"  , _vc->get("nBJetTight40")  , _weight);
+  fill(reg+"_NJets40"        , _vc->get("nJet40")        , _weight);
 }  
 
 

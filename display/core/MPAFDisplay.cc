@@ -353,7 +353,7 @@ MPAFDisplay::setHistograms() {
   // and store them into the HistoManager
 
   //do not need to reload everything at each iteration, but let's do it for the moment
-  if(!_recompute) return;
+  //  if(!_recompute) return;
 
   for(size_t ids=0;ids<_dsNames.size();ids++) {
     
@@ -362,7 +362,7 @@ MPAFDisplay::setHistograms() {
 
     Dataset* ds=anConf.getDataset( _ids );
     string tmpDs= _ids;
-
+    
     vector<string> obss = ds->getObservables();
     for(size_t io=0;io<obss.size();io++) {
       TH1* htmp(0);
@@ -586,8 +586,8 @@ MPAFDisplay::getIntegral(float x1, float x2, float y1, float y2) {
 void
 MPAFDisplay::refresh() {
   dp.reset();
-  // anConf.reset();
-  // _hm->reset();
+  anConf.reset();
+  _hm->reset();
 }
 
 

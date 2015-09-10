@@ -25,6 +25,9 @@ struct hObs {
   std::string name;
   std::string type;
   
+  bool IsGlobal() const { return isglb; };
+  void SetGlobal(bool glb) { isglb = glb; }; 
+private: 
   bool isglb;
 };
 

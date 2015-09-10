@@ -60,7 +60,16 @@ private:
   bool looseLepton(int idx, int pdgId);
   bool tightLepton(int idx, int pdgId);
   bool fakableLepton(int idx, int pdgId);
-
+  
+  //==============================
+  // Validation regions
+  bool ttbarSelection();
+  bool ZMuMuSelection();
+  bool ZEESelection();
+  bool WlSelection(); 
+  //  bool WOSlSelection(){return false;};
+  bool ZlSelection();
+  
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later
@@ -190,12 +199,13 @@ private:
 
   vector<string> _categs;
   bool _categorization;
+  bool _DoValidationPlots;
 
   vector<TVector2> _uncleanJets;
   vector<TVector2> _uncleanFwdJets;
   
   void fillhistos();
-  void fillValidationHistos();
+  void fillValidationHistos(std::string reg);
 };
 
 

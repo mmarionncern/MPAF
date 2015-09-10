@@ -434,7 +434,7 @@ void MPAF::fill(string var, float valx, float weight) {
   */
   const hObs* obs = _hm->getHObs(var);
   
-  if(obs->isglb) {  
+  if(obs->IsGlobal()) {  
     // IF HISTOGRAM IS GLOBAL DO AS USUAL:
     if(!_uncId) { //central value
       if(_curWF!=-100) { //single workflow
@@ -481,7 +481,7 @@ void MPAF::fill(string var, float valx, float valy, float weight) {
   */
   const hObs* obs = _hm->getHObs(var);
   
-  if(obs->isglb) {  
+  if(obs->IsGlobal()) {  
     // IF HISTOGRAM IS GLOBAL DO AS USUAL:
     if(_curWF!=-100) { //single workflow
     _hm->fill( var+_wfNames[_curWF], _inds, valx, valy, weight );
@@ -706,7 +706,7 @@ MPAF::addWorkflowHistos() {
     bool prof = obs->htype.find("P")!=string::npos;
     bool is2D = obs->htype.find("2D")!=string::npos;
 
-    if (!obs->isglb) continue;  // don't declare histo if it's not declared as global
+    if (!obs->IsGlobal()) continue;  // don't declare histo if it's not declared as global
 
     for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
       if(_itWF->second=="") continue; //protection for global histo
