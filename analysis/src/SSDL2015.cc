@@ -23,6 +23,7 @@ SSDL2015::initialize(){
   _vc->registerVar("lumi"                         );
   _vc->registerVar("evt"                          );
   _vc->registerVar("HLT_SingleEl"                 );
+  _vc->registerVar("isData"                       );
   _vc->registerVar("HLT_SingleMu"                 );
   _vc->registerVar("HLT_SingleEl50ns"             );
   _vc->registerVar("HLT_SingleMu50ns"             );
@@ -198,6 +199,9 @@ SSDL2015::initialize(){
 void
 SSDL2015::modifyWeight() {
 
+  if (_vc->get("isData") != 1)
+    _weight *= _vc->get("genWeight");
+
 }
 
 void
@@ -305,9 +309,10 @@ SSDL2015::run() {
 	      Candidate::create(_l2Cand, _met)->mass() );
   //===============================
 
-  //  if(!passGenSelection() ) return;
-  //  counter("genselection");
-  
+  if (_vc->get("isData") != 1) {
+    if(!passGenSelection() ) return;
+    counter("genselection");
+  }
 
   //MC check for FR --> one fake only
   if(!_isFake) {
@@ -1199,6 +1204,8 @@ SSDL2015::setSelLine(string str) {
 bool 
 SSDL2015::genMatchedToFake(int idx) {
 
+  if (_vc->get("isData") == 1) return false;
+
   int id1  = _vc->get("LepGood_mcMatchId" ,idx); 
   if(id1==0) return true;
 
@@ -1207,6 +1214,8 @@ SSDL2015::genMatchedToFake(int idx) {
 
 bool
 SSDL2015::genMatchedMisCharge() {
+
+  if (_vc->get("isData") == 1) return false;
     
   int nGenL=_vc->get("nGenPart");
   int pdgId1=0;
