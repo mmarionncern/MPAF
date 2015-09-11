@@ -37,8 +37,8 @@ MPAFDisplay::configure() {
 void
 MPAFDisplay::reset() {
   _hm->reset();
-  dp.reset();
-  anConf.reset(); 
+  //  dp.reset();
+  //  anConf.reset(); 
   //  _au->reset();
 }
 
