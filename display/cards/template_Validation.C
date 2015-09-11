@@ -27,6 +27,13 @@ void template_Validation(std::string var){
   int xDiv[3]={8,6,0};
   int yDiv[3]={6,6,0}; //Nlabel /  sous-Div /ssdiv
   bool logYScale=false;
+  if (var.find("miniRelIso") != std::string::npos && 
+      (var.find("ttbar") != std::string::npos ||  
+       var.find("ZMuMu") != std::string::npos ||  
+       var.find("ZEE")   != std::string::npos)
+      ) {
+    logYScale = true;
+  }
   bool overFlowBin=true;
   bool underFlowBin=false;
   bool showDMCRatio=false;
@@ -81,16 +88,9 @@ void template_Validation(std::string var){
   md.anConf.addSample( "DYJetsToLL_M50"     , "DY"         ,  kCyan  );
 
   // the order MATTERS!!! 
-  //md.anConf.addSample( "SingleElectron_Run2015C_v1"        , "Data", kBlack);
-  //md.anConf.addSample( "SingleMuon_Run2015C_v1"            , "Data", kBlack);
-  //md.anConf.addSample( "DoubleEG_Run2015B_17Jul2015"       , "data", kBlack);
   md.anConf.addSample( "DoubleEG_Run2015C_v1"              , "data", kBlack);
-  //md.anConf.addSample( "DoubleMuon_Run2015B_17Jul2015"     , "data", kBlack);
   md.anConf.addSample( "DoubleMuon_Run2015C_v1"            , "data", kBlack);
-  //md.anConf.addSample( "MuonEG_Run2015B_17Jul2015"         , "data", kBlack);
   md.anConf.addSample( "MuonEG_Run2015C_v1"                , "data", kBlack);
-  //  md.anConf.addSample( "SingleElectron_Run2015B_17Jul2015" , "Data", kBlack);
-  //  md.anConf.addSample( "SingleMuon_Run2015B_17Jul2015"     , "Data", kBlack);
   md.anConf.addSample( "SingleElectron_Run2015C_v1"        , "data", kBlack);
   md.anConf.addSample( "SingleMuon_Run2015C_v1"            , "data", kBlack);
 
