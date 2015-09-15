@@ -24,6 +24,11 @@ struct hObs {
   std::string titleY;
   std::string name;
   std::string type;
+  
+  bool IsGlobal() const { return isglb; };
+  void SetGlobal(bool glb) { isglb = glb; }; 
+private: 
+  bool isglb;
 };
 
 typedef std::map<std::string,TH1*> systM;

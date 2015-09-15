@@ -1176,8 +1176,8 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   }
   
   _empty->Reset("ICEM");
-  _empty->SetName("h_tmp");
-  _empty->SetTitle("h_tmp");
+  _empty->SetName("");
+  _empty->SetTitle("");
   
   //X axis
   _xmin = xAxTeV?(_xmin/1000):_xmin;
