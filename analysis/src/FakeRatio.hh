@@ -43,9 +43,10 @@ private:
   void divideFRMap(string postpend);
   void divideFRMaps();
   void doEwkSub();
-  vector<float> doubleFit(TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin = 0, float hmax = 0); 
+  vector<float> doubleFit(TH1* h_data, TH1* h_ewk, TH1* h_qcd, float s_ewk = 1., float s_qcd = 1., float hmin = 0, float hmax = 0); 
   void modifySkimming();
   void modifyWeight();
+  vector<float> prepareHists(TH1* h_data, TH1* h_ewk, TH1* h_qcd);
   void registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis);
   float singleFit(TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
@@ -69,9 +70,10 @@ private:
   bool mrSelection();
   bool skimSelection();
 
+  void fillEventPlots();
+  void fillEwkEventPlots();
   void fillEwkLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
   void fillEwkLeptonPlots();
-  void fillEventPlots();
   void fillLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
   void fillLeptonPlots();
   void fillJetPlots();
@@ -94,6 +96,7 @@ private:
   int _idx_qcd;
 
   float _lumi;
+  string _ewkSub;
   bool _doEwkSub;
 
   float _valCutNBJetsMR;

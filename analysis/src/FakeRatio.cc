@@ -164,7 +164,8 @@ void FakeRatio::initialize(){
   _dbm -> loadDb("XS", "XSectionsSpring15.db");  
 
   //input Variables
-  _lumi = getCfgVarF("LUMINOSITY");
+  _lumi   = getCfgVarF("LUMINOSITY");
+  _ewkSub = getCfgVarS("EWKSUB"); // all, el, mu
 
   //default Variables
   _doEwkSub = false;
@@ -210,6 +211,7 @@ void FakeRatio::run(){
 
   // ewk-enriched measurement region selection
   if(ewkSelection()) {
+    fillEwkEventPlots();
     fillEwkLeptonPlots();
   }
 
@@ -279,7 +281,9 @@ void FakeRatio::defineOutput(){
 
   // Measurement Region
   _hm->addVariable("MR_HT"         , 1000,   0.0, 1000.0, "H_T [GeV]"                            ); 
+  _hm->addVariable("MR_HTinvMET"   , 1000,   0.0, 1000.0, "H_T [GeV]"                            ); 
   _hm->addVariable("MR_MET"        , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"                    );
+  _hm->addVariable("MR_METinvMET"  , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"                    );
   _hm->addVariable("MR_NumJets"    ,   20,   0.0,   20.0, "jet multiplicity"                     );
   _hm->addVariable("MR_NumBJets"   ,   20,   0.0,   20.0, "b-jet multiplicity"                   );
   _hm->addVariable("MR_NumDenEls"  ,   20,   0.0,   20.0, "denominator electron multiplicity"    );
@@ -292,18 +296,25 @@ void FakeRatio::defineOutput(){
   _hm->addVariable("MR_JetCSVBTag" ,   50,   0.0,    1.0, "jet CSV B-Tag"                        );
   _hm->addVariable("MR_JetPt"      , 1000,   0.0, 1000.0, "P_T(jet) [GeV]"                       );
 
-  registerLepPlots(leps, "DXY"     , 5000, 0.0,   10.0, "#||{dxy}(lep) [cm]"                   );
-  registerLepPlots(leps, "DZ"      , 5000, 0.0,   10.0, "#||{dz}(lep) [cm]"                    );
-  registerLepPlots(leps, "SIP"     , 1000, 0.0,   10.0, "SIP3d(lep)"                           );
-  registerLepPlots(leps, "Eta"     ,  240, 0.0,    2.4, "#||{#eta(lep)}"                       );
-  registerLepPlots(leps, "RelIso"  ,   50, 0.0,    1.0, "PF RelIso (lep)"                      );
-  registerLepPlots(leps, "MiniIso" ,   50, 0.0,    1.0, "PF MiniIso (lep)"                     );
-  registerLepPlots(leps, "MT"      , 1000, 0.0, 1000.0, "M_T(lep, MET) [GeV]"                  );
-  registerLepPlots(leps, "MTinvMET",   20, 0.0,  200.0, "M_T(lep, MET) [GeV]"                  );
-  registerLepPlots(leps, "Pt"      , 1000, 0.0, 1000.0, "P_T(lep) [GeV]"                       );
-  registerLepPlots(leps, "PtJet"   , 1000, 0.0, 1000.0, "P_T(jet closest to lep) [GeV]"        );
-  registerLepPlots(leps, "PtCorr"  , 1000, 0.0, 1000.0, "cone corr. P_T(lep) [GeV]"            );
-  registerLepPlots(leps, "PtRel"   , 1000, 0.0, 1000.0, "PtRel(lep)"                           );
+  registerLepPlots(leps, "DXY"          , 5000, 0.0,   10.0, "#||{dxy}(lep) [cm]"                   );
+  registerLepPlots(leps, "DXYinvMET"    , 5000, 0.0,   10.0, "#||{dxy}(lep) [cm]"                   );
+  registerLepPlots(leps, "DZ"           , 5000, 0.0,   10.0, "#||{dz}(lep) [cm]"                    );
+  registerLepPlots(leps, "DZinvMET"     , 5000, 0.0,   10.0, "#||{dz}(lep) [cm]"                    );
+  registerLepPlots(leps, "SIP"          , 1000, 0.0,   10.0, "SIP3d(lep)"                           );
+  registerLepPlots(leps, "SIPinvMET"    , 1000, 0.0,   10.0, "SIP3d(lep)"                           );
+  registerLepPlots(leps, "Eta"          ,  240, 0.0,    2.4, "#||{#eta(lep)}"                       );
+  registerLepPlots(leps, "EtainvMET"    ,  240, 0.0,    2.4, "#||{#eta(lep)}"                       );
+  registerLepPlots(leps, "RelIso"       ,   50, 0.0,    1.0, "PF RelIso (lep)"                      );
+  registerLepPlots(leps, "MiniIso"      ,   50, 0.0,    1.0, "PF MiniIso (lep)"                     );
+  registerLepPlots(leps, "MiniIsoinvMET",   50, 0.0,    1.0, "PF MiniIso (lep)"                     );
+  registerLepPlots(leps, "MT"           , 1000, 0.0, 1000.0, "M_T(lep, MET) [GeV]"                  );
+  registerLepPlots(leps, "MTinvMET"     ,   20, 0.0,  200.0, "M_T(lep, MET) [GeV]"                  );
+  registerLepPlots(leps, "MTinvMET0"    ,   20, 0.0,  200.0, "M_T(lep, MET) [GeV]"                  );
+  registerLepPlots(leps, "Pt"           , 1000, 0.0, 1000.0, "P_T(lep) [GeV]"                       );
+  registerLepPlots(leps, "PtinvMET"     , 1000, 0.0, 1000.0, "P_T(lep) [GeV]"                       );
+  registerLepPlots(leps, "PtJet"        , 1000, 0.0, 1000.0, "P_T(jet closest to lep) [GeV]"        );
+  registerLepPlots(leps, "PtCorr"       , 1000, 0.0, 1000.0, "cone corr. P_T(lep) [GeV]"            );
+  registerLepPlots(leps, "PtRel"        , 1000, 0.0, 1000.0, "PtRel(lep)"                           );
 
 
   // electron maps
@@ -371,28 +382,28 @@ void FakeRatio::doEwkSub(){
 
 
 //  ____________________________________________________________________________
-vector<float> FakeRatio::doubleFit(TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin, float hmax){
+vector<float> FakeRatio::doubleFit(TH1* h_data, TH1* h_ewk, TH1* h_qcd, float s_ewk, float s_qcd, float hmin, float hmax){
 
-  if(hmin == 0) hmin = h_data->GetXaxis()->GetXmin();
-  if(hmax == 0) hmax = h_data->GetXaxis()->GetXmax();
+  if(hmin == 0) hmin = h_data -> GetXaxis() -> GetXmin();
+  if(hmax == 0) hmax = h_data -> GetXaxis() -> GetXmax();
 
   RooRealVar x("x", "x", hmin, hmax);
-  RooArgList list(x);
-  RooArgSet  set (x);
+  RooArgList rlist(x);
+  RooArgSet  rset (x);
 
-DUMP(h_data -> Integral());
-DUMP(h_ewk  -> Integral());
-DUMP(h_qcd  -> Integral());
+  RooDataHist rdh_data("data", "data", rlist, h_data  );
+  RooDataHist rdh_ewk ("ewk" , "ewk" , rlist, h_ewk   );
+  RooDataHist rdh_qcd ("qcd" , "qcd" , rlist, h_qcd   );
+              
+  RooHistPdf  pdf_ewk ("ewk" , "ewk" , rset , rdh_ewk );
+  RooHistPdf  pdf_qcd ("qcd" , "qcd" , rset , rdh_qcd );
 
-  RooDataHist rdh_data("data", "data", list, h_data  );
-  RooDataHist rdh_ewk ("ewk" , "ewk" , list, h_ewk   );
-  RooDataHist rdh_qcd ("qcd" , "qcd" , list, h_qcd   );
+  float int_data = h_data -> Integral(h_data -> GetXaxis() -> FindBin(hmin), h_data -> GetXaxis() -> FindBin(hmax));
+  float int_ewk  = h_ewk  -> Integral(h_ewk  -> GetXaxis() -> FindBin(hmin), h_ewk  -> GetXaxis() -> FindBin(hmax));
+  float int_qcd  = h_qcd  -> Integral(h_qcd  -> GetXaxis() -> FindBin(hmin), h_qcd  -> GetXaxis() -> FindBin(hmax));
               
-  RooHistPdf  pdf_ewk ("ewk" , "ewk" , list, rdh_ewk );
-  RooHistPdf  pdf_qcd ("qcd" , "qcd" , list, rdh_qcd );
-              
-  RooRealVar  rrv_ewk ("ewk" , "ewk" , h_ewk -> Integral() / h_data -> Integral(), 0.3, 200. );
-  RooRealVar  rrv_qcd ("qcd" , "qcd" , h_qcd -> Integral() / h_data -> Integral(), 0.0, 0.5 );
+  RooRealVar  rrv_ewk ("ewk" , "ewk" , int_ewk * s_ewk, 0.0           , int_data );
+  RooRealVar  rrv_qcd ("qcd" , "qcd" , int_qcd * s_qcd, int_data * 0.1, int_data );
 
   RooArgList pdfs (pdf_ewk, pdf_qcd); 
   RooArgList coeff(rrv_ewk, rrv_qcd); 
@@ -401,10 +412,8 @@ DUMP(h_qcd  -> Integral());
   RooFitResult* result = totPdf.fitTo(rdh_data, RooFit::SumW2Error(false), RooFit::Extended(), RooFit::PrintLevel(-1));
 
   vector<float> central;
-  central.push_back(rrv_ewk.getVal());
-  central.push_back(rrv_qcd.getVal());
-
-DUMPVECTOR(central);
+  central.push_back(rrv_ewk.getVal() / int_ewk);
+  central.push_back(rrv_qcd.getVal() / int_qcd);
 
   return central;
 
@@ -426,8 +435,31 @@ void FakeRatio::modifyWeight() {
   */ 
 	
   //_weight = (i->second)->Getweight();
-  // if(_PUReweighting) 
-  //   _weight *= _vc->get("puWeight");
+
+  if(_sampleName.find("data") == std::string::npos && _vc->get("puWeight") > 0)
+    _weight *= _vc->get("puWeight");
+  else
+    _weight = 1.;
+
+}
+
+
+//  ____________________________________________________________________________
+vector<float> FakeRatio::prepareHists(TH1* h_data, TH1* h_ewk, TH1* h_qcd){
+
+  vector<float> scales;
+  scales.push_back(1.);
+  scales.push_back(1.);
+
+  if(h_data -> Integral() < h_ewk -> Integral())
+    scales[0] = floor(h_data->Integral() / h_ewk->Integral() * 1000) / 1000;
+
+  if(h_data -> Integral() < h_qcd -> Integral())
+    scales[1] = floor(h_data->Integral() / h_qcd->Integral() * 1000) / 1000;
+
+  DUMPVECTOR(scales);
+
+  return scales;
 
 }
 
@@ -453,17 +485,21 @@ void FakeRatio::registerLepPlots(vector<string> leps, string var, int nxbins, ve
 //  ____________________________________________________________________________
 float FakeRatio::singleFit(TH1* h_data, TH1* h_mc, float hmin, float hmax){
 
-  if(hmin == 0) hmin = h_data->GetXaxis()->GetXmin();
-  if(hmax == 0) hmax = h_data->GetXaxis()->GetXmax();
+  if(hmin == 0) hmin = h_data -> GetXaxis() -> GetXmin();
+  if(hmax == 0) hmax = h_data -> GetXaxis() -> GetXmax();
 
   RooRealVar x("x", "x", hmin, hmax);
-  RooArgList list(x);
-  RooArgSet  set (x);
+  RooArgList rlist(x);
+  RooArgSet  rset (x);
 
-  RooDataHist rdh_data("data", "data", list, h_data  );
-  RooDataHist rdh_mc  ("mc"  , "mc"  , list, h_mc    );
-  RooHistPdf  pdf_mc  ("mc"  , "mc"  , list, rdh_mc  );
-  RooRealVar  rrv_mc  ("mc"  , "mc"  , h_mc -> Integral() / h_data -> Integral(), 0.0, 1.0 );
+  RooDataHist rdh_data("data", "data", rlist, h_data  );
+  RooDataHist rdh_mc  ("mc"  , "mc"  , rlist, h_mc    );
+  RooHistPdf  pdf_mc  ("mc"  , "mc"  , rset , rdh_mc  );
+
+  float int_data = h_data -> Integral(h_data -> GetXaxis() -> FindBin(hmin), h_data -> GetXaxis() -> FindBin(hmax));
+  float int_mc   = h_mc   -> Integral(h_mc   -> GetXaxis() -> FindBin(hmin), h_mc   -> GetXaxis() -> FindBin(hmax));
+
+  RooRealVar  rrv_mc  ("mc"  , "mc"  , int_data, int_data * 0.8, int_data );
 
   RooArgList  pdfs    (pdf_mc); 
   RooArgList  coeff   (rrv_mc); 
@@ -471,7 +507,7 @@ float FakeRatio::singleFit(TH1* h_data, TH1* h_mc, float hmin, float hmax){
   RooAddPdf   totPdf  ("totPdf", "totPdf", pdfs, coeff);
   RooFitResult* result = totPdf.fitTo(rdh_data, RooFit::SumW2Error(false), RooFit::Extended(), RooFit::PrintLevel(-1));
 
-  return rrv_mc.getVal();
+  return rrv_mc.getVal() / int_mc;
 
 } 
 
@@ -484,56 +520,131 @@ void FakeRatio::subtractPrompts(){
 
   if(!_doEwkSub) return; 
 
-  TH1 * el_mt_data = _hm -> getHisto("MR_NumElMTinvMET", _idx_data);   
-  TH1 * el_mt_ewk  = _hm -> getHisto("MR_NumElMTinvMET", _idx_ewk );   
-  TH1 * el_mt_qcd  = _hm -> getHisto("MR_NumElMTinvMET", _idx_qcd );   
-  TH1 * mu_mt_data = _hm -> getHisto("MR_NumMuMTinvMET", _idx_data);   
-  TH1 * mu_mt_ewk  = _hm -> getHisto("MR_NumMuMTinvMET", _idx_ewk );   
-  TH1 * mu_mt_qcd  = _hm -> getHisto("MR_NumMuMTinvMET", _idx_qcd );   
+  float scales_ewk_el = 1.0;
+  float scales_ewk_mu = 1.0;
+  float scales_qcd_el = 1.0;
+  float scales_qcd_mu = 1.0;
+
+  bool subel = false;
+  bool submu = false;
+
+  if(_ewkSub == "all" || _ewkSub == "el") {
+
+    TH1 * el_mt_data   = _hm -> getHisto("MR_NumElMTinvMET", _idx_datacorr);   
+    TH1 * el_mt_ewk    = _hm -> getHisto("MR_NumElMTinvMET", _idx_ewk );   
+    TH1 * el_mt_qcd    = _hm -> getHisto("MR_NumElMTinvMET", _idx_qcd );   
+
+    // prepare the histograms
+    vector<float> el_init  = prepareHists(el_mt_data, el_mt_ewk, el_mt_qcd);
+
+    // first fit EWK and QCD together to data in range [0, infinity]
+    vector<float> el_first = doubleFit(el_mt_data, el_mt_ewk, el_mt_qcd, el_init[0], el_init[1]);
+
+    // fix QCD and subtract from data
+    TH1 * el_mt_dataqcdsub = (TH1*) el_mt_data -> Clone(); 
+    el_mt_dataqcdsub -> Add(el_mt_qcd, el_first[1] * (-1));
+
+    TH1 * ewk = (TH1*) el_mt_ewk -> Clone();
+    ewk -> Scale(el_first[0]);
+
+    // for debugging
+    cout << "ewk first scale is " << el_first[0] << endl;
+    cout << "qcd first scale is " << el_first[1] << endl;
+
+    // fit EWK to QCD-subtracted-data in range [50,120]
+
+    scales_qcd_el = el_init[1] * el_first[1];
+    scales_ewk_el = el_init[0] * el_first[0] * singleFit(el_mt_dataqcdsub, ewk, 50, 120);
+
+    subel = true;
 
 
-  // first fit EWK and QCD together to data in range [0, infinity]
-  vector<float> el_first = doubleFit(el_mt_data, el_mt_ewk, el_mt_qcd);
-  vector<float> mu_first = doubleFit(mu_mt_data, mu_mt_ewk, mu_mt_qcd);
-
-  // fix QCD and subtract from data
-  el_mt_qcd -> Scale(el_first[1]);
-  mu_mt_qcd -> Scale(mu_first[1]);
-
-  TH1 * el_mt_dataqcdsub = (TH1*) el_mt_data -> Clone();
-  TH1 * mu_mt_dataqcdsub = (TH1*) mu_mt_data -> Clone();
-
-  el_mt_dataqcdsub -> Add(el_mt_qcd, -1);
-  mu_mt_dataqcdsub -> Add(mu_mt_qcd, -1);
-
-
-  // fit EWK to QCD-subtracted-data in range [50,120]
-  vector<float> scales;
-  scales.push_back(singleFit(el_mt_dataqcdsub, el_mt_ewk, 50, 120));
-  scales.push_back(singleFit(mu_mt_dataqcdsub, mu_mt_ewk, 50, 120));
-
-
-  // subtract ewk contamination from all numerators and denominators  
-  string aleps[2] = {"El", "Mu"};
-  string amaps[3] = {"MapPt", "MapPtJet", "MapPtCorr"};
-  string asels[3] = {"Den", "Num", "Rat"};
-
-  vector<string> leps = Tools::toVector(aleps);
-  vector<string> maps = Tools::toVector(amaps);
-  vector<string> sels = Tools::toVector(asels);
-
-  for(unsigned int i = 0; i < 2; ++i){
-    for(unsigned int j = 0; j < 3; ++j) {
-      for(unsigned int k = 0; k < 3; ++k) {
-        cout << "subtracting MR_" << sels[k] << leps[i] << maps[j] << " for " << _idx_datacorr << endl;
-        TH1 * d = _hm -> getHisto("MR_" + sels[k] + leps[i] + maps[j], _idx_datacorr);
-        TH1 * e = _hm -> getHisto("MR_" + sels[k] + leps[i] + maps[j], _idx_ewk     );
-        TH1 * ewk = (TH1*) e -> Clone();
-        ewk -> Scale(scales[i]);
-        d -> Add(ewk, -1);
-      }
-    }
   }
+
+  if(_ewkSub == "all" || _ewkSub == "mu") {
+
+    TH1 * mu_mt_data = _hm -> getHisto("MR_NumMuMTinvMET", _idx_datacorr);   
+    TH1 * mu_mt_ewk  = _hm -> getHisto("MR_NumMuMTinvMET", _idx_ewk );   
+    TH1 * mu_mt_qcd  = _hm -> getHisto("MR_NumMuMTinvMET", _idx_qcd );   
+
+    // prepare the histograms
+    vector<float> mu_init  = prepareHists(mu_mt_data, mu_mt_ewk, mu_mt_qcd);
+
+    // first fit EWK and QCD together to data in range [0, infinity]
+    vector<float> mu_first = doubleFit(mu_mt_data, mu_mt_ewk, mu_mt_qcd, mu_init[0], mu_init[1]);
+
+    // fix QCD and subtract from data
+    TH1 * mu_mt_dataqcdsub = (TH1*) mu_mt_data -> Clone();
+    mu_mt_dataqcdsub -> Add(mu_mt_qcd, mu_first[1] * (-1));
+
+    TH1 * ewk = (TH1*) mu_mt_ewk -> Clone();
+    ewk -> Scale(mu_first[0]);
+
+	cout << "overall qcd scale: " << (mu_init[1] * mu_first[1]) << endl;
+
+    // fit EWK to QCD-subtracted-data in range [50,120]
+    scales_qcd_mu = mu_init[1] * mu_first[1];
+    scales_ewk_mu = mu_init[0] * mu_first[0] * singleFit(mu_mt_dataqcdsub, ewk, 50, 120);
+
+    submu = true;
+
+  }
+
+  // fix scales of the summed "qcd" and "ewk" numerators and denominators
+  // subtract ewk from all "datacorr" numerators and denominators
+
+  vector<string> obs = _hm -> getObservables(true);
+  vector<string> nobs;
+  for(unsigned int i = 0; i < obs.size(); ++i)
+    if(obs[i].find("MTinvMET0") == std::string::npos)
+      nobs.push_back(obs[i]);
+
+  for(unsigned int i = 0; i < nobs.size(); ++i) {
+
+    cout << "correcting " << nobs[i] << endl;
+
+    float s_ewk = 1.0;
+	float s_qcd = 1.0;
+    if(nobs[i].find("El") != std::string::npos){
+      if(!subel) continue;
+      s_ewk = scales_ewk_el;
+      s_qcd = scales_qcd_el;
+    }
+    if(nobs[i].find("Mu") != std::string::npos){
+      if(!submu) continue;
+      s_ewk = scales_ewk_mu;
+      s_qcd = scales_qcd_mu;
+    }
+
+    TH1 * d = _hm -> getHisto(nobs[i], _idx_datacorr);
+    TH1 * e = _hm -> getHisto(nobs[i], _idx_ewk     );
+    TH1 * q = _hm -> getHisto(nobs[i], _idx_qcd     );
+
+    e -> Scale(s_ewk);
+    q -> Scale(s_qcd); 
+
+    d -> Add(e, -1);
+  } 
+
+  //// subtract ewk contamination from all numerators and denominators  
+  //string amaps[3] = {"MapPt", "MapPtJet", "MapPtCorr"};
+  //string asels[3] = {"Den", "Num", "Rat"};
+
+  //vector<string> maps = Tools::toVector(amaps);
+  //vector<string> sels = Tools::toVector(asels);
+
+  //for(unsigned int i = 0; i < leps.size(); ++i){
+  //  for(unsigned int j = 0; j < maps.size(); ++j) {
+  //    for(unsigned int k = 0; k < sels.size(); ++k) {
+  //      cout << "subtracting MR_" << sels[k] << leps[i] << maps[j] << " for " << _idx_datacorr << endl;
+  //      TH1 * d = _hm -> getHisto("MR_" + sels[k] + leps[i] + maps[j], _idx_datacorr);
+  //      TH1 * e = _hm -> getHisto("MR_" + sels[k] + leps[i] + maps[j], _idx_ewk     );
+  //      //TH1 * ewk = (TH1*) e -> Clone();
+  //      //ewk -> Scale(scales[i]);
+  //      d -> Add(e, scales[i] * (-1));
+  //    }
+  //  }
+  //}
 }   
 
 
@@ -814,7 +925,7 @@ bool FakeRatio::denominatorElectronSelection(int elIdx){
   if(!makeCut<float>(   _susyMod -> conePt(elIdx, SusyModule::kTight), 10.   , ">"  , "pt selection"      , 0    , kDenEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 2.5   , "<"  , "eta selection"     , 0    , kDenEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 1.4442, "[!]", "eta selection veto", 1.566, kDenEls)) return false;
-  if(_datasets[_inds]->getName().find("data") == std::string::npos && 
+  if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
      !makeCut<int>(           _vc->get("LepGood_mcMatchId"  , elIdx) ,  0    , "="  , "gen match fake"    , 0    , kDenEls)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_sip3d"      , elIdx) , 4.0   , "<"  , "SIP 3D"            , 0    , kDenEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"         , elIdx)), 0.1   , "<"  , "dz selection"      , 0    , kDenEls)) return false;
@@ -854,7 +965,7 @@ bool FakeRatio::denominatorMuonSelection(int muIdx){
 
   if(!makeCut<float>(   _susyMod -> conePt(muIdx, SusyModule::kMedium), 10.  , ">", "pt selection"  , 0, kDenMus)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_eta"         , muIdx) ,  2.4 , "<", "eta selection" , 0, kDenMus)) return false;
-  if(_datasets[_inds]->getName().find("data") == std::string::npos && 
+  if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
      !makeCut<int>(           _vc->get("LepGood_mcMatchId"   , muIdx) ,  0   , "=", "gen match fake", 0, kDenMus)) return false;
   if(!makeCut<int>(           _vc->get("LepGood_mediumMuonId", muIdx) ,  0   , ">", "medium muon ID", 0, kDenMus)) return false;
   if(!makeCut<int>(           _vc->get("LepGood_tightCharge" , muIdx) ,  1   , ">", "error/pt < 20" , 0, kDenMus)) return false;
@@ -894,7 +1005,7 @@ bool FakeRatio::numeratorElectronSelection(int elIdx){
   if(!makeCut<float>(   _susyMod -> conePt(elIdx, SusyModule::kTight), 10.   , ">"  , "pt selection"      , 0    , kNumEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 2.5   , "<"  , "eta selection"     , 0    , kNumEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 1.4442, "[!]", "eta selection veto", 1.566, kNumEls)) return false;
-  if(_datasets[_inds]->getName().find("data") == std::string::npos && 
+  if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
      !makeCut<int>(           _vc->get("LepGood_mcMatchId"  , elIdx) ,  0    , "="  , "gen match fake"    , 0    , kNumEls)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_sip3d"      , elIdx) , 4.0   , "<"  , "SIP 3D"            , 0    , kNumEls)) return false;
   if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"         , elIdx)), 0.1   , "<"  , "dz selection"      , 0    , kNumEls)) return false;
@@ -931,7 +1042,7 @@ bool FakeRatio::numeratorMuonSelection(int muIdx){
 
   if(!makeCut<float>(   _susyMod -> conePt(muIdx, SusyModule::kMedium), 10.  , ">", "pt selection"  , 0, kNumMus)) return false;
   if(!makeCut<float>(         _vc->get("LepGood_eta"         , muIdx) ,  2.4 , "<", "eta selection" , 0, kNumMus)) return false;
-  if(_datasets[_inds]->getName().find("data") == std::string::npos && 
+  if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
      !makeCut<int>(           _vc->get("LepGood_mcMatchId"   , muIdx) ,  0   , "=", "gen match fake", 0, kNumMus)) return false;
   if(!makeCut<int>(           _vc->get("LepGood_mediumMuonId", muIdx) ,  0   , ">", "medium muon ID", 0, kNumMus)) return false;
   if(!makeCut<int>(           _vc->get("LepGood_tightCharge" , muIdx) ,  1   , ">", "error/pt < 20" , 0, kNumMus)) return false;
@@ -1150,12 +1261,35 @@ void FakeRatio::fillEventPlots(){
 
 
 //____________________________________________________________________________
+void FakeRatio::fillEwkEventPlots(){
+  /*
+    fills the control plots for event quantities
+    parameters: none
+    return: none
+  */
+
+  fill("MR_HTinvMET"  , _HT                 , _weight);
+  fill("MR_METinvMET" , _met->pt()          , _weight);
+
+}
+
+
+//____________________________________________________________________________
 void FakeRatio::fillEwkLepPlots(string prepend, Candidate * lep, int lepIdx, int wp){
   /*
     fills the control plots for leptons PER LEPTON
   */  
 
-  fill(prepend + "MTinvMET", Candidate::create( lep, _met) -> mass(), _weight);
+  Candidate * mt = Candidate::create( lep, _met);
+
+  fill(prepend + "PtinvMET"     ,          _vc->get(_leps + "_pt"        , lepIdx) , _weight);
+  fill(prepend + "EtainvMET"    , std::abs(_vc->get(_leps + "_eta"       , lepIdx)), _weight);
+  fill(prepend + "DXYinvMET"    , std::abs(_vc->get(_leps + "_dxy"       , lepIdx)), _weight);
+  fill(prepend + "DZinvMET"     , std::abs(_vc->get(_leps + "_dz"        , lepIdx)), _weight);
+  fill(prepend + "SIPinvMET"    ,          _vc->get(_leps + "_sip3d"     , lepIdx) , _weight);
+  fill(prepend + "MiniIsoinvMET",          _vc->get(_leps + "_miniRelIso", lepIdx) , _weight);
+  fill(prepend + "MTinvMET"     , mt -> mass()                                     , _weight);
+  fill(prepend + "MTinvMET0"    , mt -> mass()                                     , _weight);
 
 }
 
