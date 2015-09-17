@@ -66,6 +66,8 @@ private:
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
 
+    string _selectMuons;
+    string _selectElectrons;
     string _selectTaus;
     string _pairmass;
     string _BR;
@@ -97,6 +99,7 @@ private:
     float _valCutNJetsSR;
     float _valCutNBJetsSR;
     float _valCutMllBR;
+    float _valCutMT2BR;
     std::vector<std::string> _hltLines;
     
     std::string _cTypeLepMultiplicityBR;
@@ -109,6 +112,7 @@ private:
     std::string _cTypeHTSR;
     std::string _cTypeMETSR;
     std::string _cTypeMllBR;
+    std::string _cTypeMT2BR;
 
     float _upValCutLepMultiplicityBR;
     float _upValCutNJetsBR;
@@ -120,6 +124,7 @@ private:
     float _upValCutHTSR;
     float _upValCutMETSR;
     float _upValCutMllBR;
+    float _upValCutMT2BR;
 
     //vectors for electron, muon, and tau candidates
     std::vector<int> _elIdx;
@@ -153,6 +158,7 @@ private:
     Candidate* _lep2;
 
     float _HT;
+    float _MT2;
     float _deltaR;
     float _mll;
   
