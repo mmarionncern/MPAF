@@ -326,7 +326,6 @@ AnaConfig::addSample( string str, string sname, int col, bool loadH) {
   }
   
   if(sname=="data" || sname=="Data" || sId.dd ) {
-    
     _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
 				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1., 1., 1., loadH);
     //_samplenames.push_back(str);

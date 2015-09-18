@@ -117,11 +117,11 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
       if(sId.cr=="" && sId.dd==false)
 	cout<<" Adding "<<sId.name<<"  to "<<_name
 	    <<"   : "<<" ("<<nProcEvt
-	    <<" gen) "<<" / w (/pb-1) = "<<s.getLumW()<<endl;
+	    <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
       else
 	cout<<" Adding "<<sId.name<<" ("<<sId.cr<<")  to "<<_name
 	    <<"   : "<<" ("<<nProcEvt
-	    <<" gen) "<<" / w (/pb-1) = "<<s.getLumW()<<endl; 
+	    <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
     
     }
     else {
@@ -350,6 +350,7 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
     
     //MM FIXME, jsut take a too long time to load everything, should be done in a better way thatn disabling everything 
     //if(varName.find("_")!=string::npos || varName.find("SR")!=string::npos) continue;
+    if(varName.find("Fake")!=string::npos || varName.find("SR")!=string::npos) continue;
   
 
     if(optCat!="") {
