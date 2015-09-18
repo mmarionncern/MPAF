@@ -30,7 +30,7 @@ void susy3l_data_25ns() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="muonsip";    //njets, nbjets, met, ht, lep, zpeak, mt, mt2, pt, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio
+    string obs ="pt";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio
     string sigs = "none"; 
     bool data = true;
 
@@ -113,6 +113,11 @@ void susy3l_data_25ns() {
         int binning=2;
         double rangeX[2]={60,120};
     }
+    if(obs == "zpt"){
+        md.dp.setObservables("Zpt");
+        int binning=10;
+        double rangeX[2]={0,150};
+    }
     if(obs == "mt2"){
         md.dp.setObservables("MT2");
         int binning=25;
@@ -126,9 +131,9 @@ void susy3l_data_25ns() {
         bool logYScale=true;
     }
     if(obs == "pt"){
-        //md.dp.setObservables("pt_1st_lepton");
+        md.dp.setObservables("pt_1st_lepton");
         //md.dp.setObservables("pt_2nd_lepton");
-        md.dp.setObservables("pt_3rd_lepton");
+        //md.dp.setObservables("pt_3rd_lepton");
         int binning=2;
         double rangeX[2]={0,80};
         bool logYScale=false;

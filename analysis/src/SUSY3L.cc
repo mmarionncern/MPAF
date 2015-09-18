@@ -159,6 +159,7 @@ void SUSY3L::modifyWeight() {
         parameters: none
         return: none
     */ 
+    _w *= _vc->get("genWeight");
 }
 
 
@@ -235,8 +236,9 @@ void SUSY3L::defineOutput(){
 
     //additional observables
     _hm->addVariable("Zmass"            ,  150,     0.0,  150.0,    "Z candidate mass [GeV]"            );
+    _hm->addVariable("Zpt"              ,  150,     0.0,  150.0,    "Z candidate pt [GeV]"              );
     _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
-    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "MT [GeV]"                         );
+    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "MT [GeV]"                          );
     _hm->addVariable("deltaR_elmu"      ,  500,     0.0,  10.0,     "delta R between el and mu"         );
     _hm->addVariable("el_multiplicity"  ,  10,      0.0,  10.0,     "electron multiplicity"             );
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,  10.0,     "muon multiplicity"                 );
@@ -2318,7 +2320,10 @@ bool SUSY3L::baseSelection(){
     }
     
     //fill plots 
-    if(is_reconstructed_Z){fill("Zmass" , _Z->mass()        , _weight);}
+    if(is_reconstructed_Z){
+        fill("Zmass" , _Z->mass()      , _weight);
+        fill("Zpt"   , _Z->pt()        , _weight);
+    }
     
     fill("lowMll" , _mll        , _weight);
     fill("el_multiplicity" , _nEls , _weight);
