@@ -1,15 +1,3 @@
-//{
-
-//    if(Recompute) {
-//        MPAFDisplay md;
- 
-//        bool * rtmp= const_cast<bool*> pr;
-//        *rtmp = false;
-
-//    }
-//    else 
-//    md.refresh();
-
 MPAFDisplay md;
 
 void susy3l_data_25ns() {
@@ -30,23 +18,9 @@ void susy3l_data_25ns() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="pt";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio
+    string obs ="zpt";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio
     string sigs = "none"; 
     bool data = true;
-
-    //observables **********************
-    //string obs[6]={"","","","","",""};
-    //md.dp.setObservables("Zmass");
-    //md.dp.setObservables("deltaR_elmu");
-    //md.dp.setObservables("BR_NJets");
-    //md.dp.setObservables("BR_NBJets");
-    //md.dp.setObservables("BR_HT");
-    //md.dp.setObservables("BR_MET");
-    //md.dp.setObservables("SR_NJets");
-    //md.dp.setObservables("SR_NBJets");
-    //md.dp.setObservables("SR_HT");
-    //md.dp.setObservables("SR_MET");
-
 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";

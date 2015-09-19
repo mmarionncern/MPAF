@@ -67,6 +67,7 @@ void SUSY3L::initialize(){
     _vc->registerVar("run"                             );    //run number
     _vc->registerVar("lumi"                            );    //lumi section number
     _vc->registerVar("evt"                             );    //event number
+    _vc->registerVar("isData"                          );    //identify data
     
     _vc->registerVar("nLepGood"                        );    //number of leptons in event
     _vc->registerVar("LepGood_pdgId"                   );    //identifier for leptons (11: electron, 13: muon)
@@ -126,6 +127,8 @@ void SUSY3L::initialize(){
     _vc->registerVar("HLT_MuEG"                        );
     _vc->registerVar("HLT_DoubleMuHT"                  );
     _vc->registerVar("HLT_DoubleElHT"                  );
+    
+    _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
 
 
 
@@ -159,7 +162,11 @@ void SUSY3L::modifyWeight() {
         parameters: none
         return: none
     */ 
-    _w *= _vc->get("genWeight");
+    //if (_vc->get("isData") != 1){
+        //_weight *= _vc->get("genWeight");
+        //cout << _weight << endl;
+
+    //}
 }
 
 
@@ -186,7 +193,7 @@ void SUSY3L::run(){
 
     //initialize multiIso working points
     setMultiIsoWP();
-
+    
     // do the minimal selection and collect kinematic variables for events passing it
     collectKinematicObjects();
 
