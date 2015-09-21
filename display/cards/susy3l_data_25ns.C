@@ -209,13 +209,6 @@ void susy3l_data_25ns() {
     //md.anConf.addSample( "GGHZZ4L"                          ,  "rare SM"            , kCyan     );
     //md.anConf.addSample( "TTH"                              ,  "rare SM"             , kCyan      );
 
-  //Drell-Yan
-    //md.anConf.addSample( "DYJetsToLL_LO_M50_50ns"        ,  "non-prompt e/#mu"    , kRed      );
-    md.anConf.addSample( "DYJetsToLL_M50"        ,  "DY"    , kRed     );
-    //md.anConf.addSample( "DYJetsToLL_M50_HT200to400"        ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "DYJetsToLL_M50_HT400to600"        ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "DYJetsToLL_M50_HT600toInf"        ,  "non-prompt e/#mu"    , kRed      );
-
   //t production
     //md.anConf.addSample( "TBarToLeptons_sch"                ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "TBarToLeptons_tch"                ,  "non-prompt e/#mu"    , kRed      );
@@ -230,6 +223,14 @@ void susy3l_data_25ns() {
     //md.anConf.addSample( "WJetsToLNu_HT200to400"            ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "WJetsToLNu_HT400to600"            ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "WJetsToLNu_HT600toInf"            ,  "non-prompt e/#mu"    , kRed      );
+
+  //Drell-Yan
+    //md.anConf.addSample( "DYJetsToLL_LO_M50_50ns"        ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "DYJetsToLL_M50"        ,  "DY"    , kRed     );
+    //md.anConf.addSample( "DYJetsToLL_M50_HT200to400"        ,  "non-prompt e/#mu"    , kRed      );
+    //md.anConf.addSample( "DYJetsToLL_M50_HT400to600"        ,  "non-prompt e/#mu"    , kRed      );
+    //md.anConf.addSample( "DYJetsToLL_M50_HT600toInf"        ,  "non-prompt e/#mu"    , kRed      );
+
 
   //signal
     if(sigs=="t"){

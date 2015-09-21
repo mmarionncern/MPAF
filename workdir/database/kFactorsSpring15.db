@@ -46,13 +46,8 @@ TToLeptons_tch						1.00
 TToLeptons_tch_50ns					1.00
 TToLeptons_sch						1.00
 TBar_tWch						1.00
-<<<<<<< HEAD
-TBar_tWch_50ns					1.00
-T_tWch  						1.00
-=======
 TBar_tWch_50ns						1.00
 T_tWch							1.00
->>>>>>> e9e3fb20a4c0bbdbbd366e2da63fb3370cb74f97
 T_tWch_50ns						1.00
 WJetsToLNu						1.00
 WJetsToLNu_50ns						1.00

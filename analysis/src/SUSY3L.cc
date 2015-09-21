@@ -162,11 +162,11 @@ void SUSY3L::modifyWeight() {
         parameters: none
         return: none
     */ 
-    //if (_vc->get("isData") != 1){
-        //_weight *= _vc->get("genWeight");
+    if (_vc->get("isData") != 1){
+        _weight *= _vc->get("genWeight");
         //cout << _weight << endl;
+    }
 
-    //}
 }
 
 
