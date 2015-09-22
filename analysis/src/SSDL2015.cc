@@ -113,7 +113,7 @@ SSDL2015::initialize(){
   _vc->registerVar("Flag_eeBadScFilter"           );
   
   
-  _susyMod = new SusyModule(_vc);
+  _susyMod = new SusyModule(_vc, _dbm);
   
   int nCateg=156; //78 156
   _categs.resize(nCateg);
