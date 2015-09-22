@@ -215,13 +215,13 @@ SSDL2015::defineOutput() {
   ///////////////////////////////////////////////////////////////////////////
   // GLOBAL PLOTS:  These plots are drawn for every SR
   ///////////////////////////////////////////////////////////////////////////
-  _hm->addVariable("l1Pt"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 , true);
-  _hm->addVariable("l2Pt"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 , true);
-  _hm->addVariable("MET"   , 500, 0. , 500, "#slash{E}_{T} [GeV]"                , true);
-  _hm->addVariable("HT"    , 800, 0. , 800, "H_{T} [GeV]"                        , true);
-  _hm->addVariable("MT"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        , true);
-  _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", true);
-  _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          , true);
+  _hm->addVariable("l1Pt"  , 150, 0.,  150, "p_{T}(l_{1}) [GeV]"                 );
+  _hm->addVariable("l2Pt"  , 150, 0.,  150, "p_{T}(l_{2}) [GeV]"                 );
+  _hm->addVariable("MET"   , 500, 0. , 500, "#slash{E}_{T} [GeV]"                );
+  _hm->addVariable("HT"    , 800, 0. , 800, "H_{T} [GeV]"                        );
+  _hm->addVariable("MT"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        );
+  _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
+  _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          );
   
   if(!_DoValidationPlots) return; 
   ///////////////////////////////////////////////////////////////////////////
@@ -236,28 +236,28 @@ SSDL2015::defineOutput() {
   
   for (size_t r=0; r<reg.size(); r++) {
     // lepton variables
-    _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 1.2, "Leading Lepton Jet p_{T} Ratio [GeV]");
-    _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 40., "Leading Lepton Jet p_{T} Rel   [GeV]");
-    _hm->addVariable(reg[r]+"_lep1_miniRelIso", 100, 0., 0.4, "Leading Lepton Isolation");
-    _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "Leading Lepton p_{T} [GeV]");
-    _hm->addVariable(reg[r]+"_lep1_Eta"       , 100, 0., 2.5, "Leading Lepton #eta");
-    _hm->addVariable(reg[r]+"_lep1_SIP3D"     , 100, 0., 5.0, "Leading Lepton SIP_{3D}");
-    _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "Subleading Lepton Jet p_{T} Ratio [GeV]");
-    _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "Subleading Lepton Jet p_{T} Rel   [GeV]");
-    _hm->addVariable(reg[r]+"_lep2_miniRelIso", 100, 0., 0.4, "Subleading Lepton Isolation");
-    _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "Subleading Lepton p_{T} [GeV]");
-    _hm->addVariable(reg[r]+"_lep2_Eta"       , 100, 0., 2.5, "Subleading Lepton #eta");
-    _hm->addVariable(reg[r]+"_lep2_SIP3D"     , 100, 0., 5.0, "Subleading Lepton SIP_{3D}");
+    _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 1.2, "Leading Lepton Jet p_{T} Ratio [GeV]", false);
+    _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 40., "Leading Lepton Jet p_{T} Rel   [GeV]", false);
+    _hm->addVariable(reg[r]+"_lep1_miniRelIso", 100, 0., 0.4, "Leading Lepton Isolation", false);
+    _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "Leading Lepton p_{T} [GeV]", false);
+    _hm->addVariable(reg[r]+"_lep1_Eta"       , 100, 0., 2.5, "Leading Lepton #eta", false);
+    _hm->addVariable(reg[r]+"_lep1_SIP3D"     , 100, 0., 5.0, "Leading Lepton SIP_{3D}", false);
+    _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "Subleading Lepton Jet p_{T} Ratio [GeV]", false);
+    _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "Subleading Lepton Jet p_{T} Rel   [GeV]", false);
+    _hm->addVariable(reg[r]+"_lep2_miniRelIso", 100, 0., 0.4, "Subleading Lepton Isolation", false);
+    _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "Subleading Lepton p_{T} [GeV]", false);
+    _hm->addVariable(reg[r]+"_lep2_Eta"       , 100, 0., 2.5, "Subleading Lepton #eta", false);
+    _hm->addVariable(reg[r]+"_lep2_SIP3D"     , 100, 0., 5.0, "Subleading Lepton SIP_{3D}", false);
     
     // event variables 
-    _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]");
-    _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} [GeV]");
-    _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]");
-    _hm->addVariable(reg[r]+"_MTmin"          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]");
-    _hm->addVariable(reg[r]+"_NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)");
-    _hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
-    _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)");
-    _hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)");
+    _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
+    _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} [GeV]", false);
+    _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]", false);
+    _hm->addVariable(reg[r]+"_MTmin"          ,  20, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]", false);
+    _hm->addVariable(reg[r]+"_NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
+    _hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
+    _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
+    _hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
   }
 
 
@@ -286,6 +286,8 @@ SSDL2015::run() {
   
   retrieveObjects();
   
+ 
+
   if(_DoValidationPlots) {
     if (ttbarSelection())   fillValidationHistos("ttbar");
     if (ZlSelection())      fillValidationHistos("Zl");
@@ -303,6 +305,11 @@ SSDL2015::run() {
     return;
   }
   
+  //Scale factors =======================
+  _susyMod->applySingleLepSF(_l1Cand, _weight);
+  _susyMod->applySingleLepSF(_l2Cand, _weight);
+  // ====================================
+
   fillSkimTree();
   //  return;
   //cout<<" pouet "<<endl;
@@ -312,6 +319,7 @@ SSDL2015::run() {
   //===============================
 
   if (_vc->get("isData") != 1) {
+    //lepton scale factors -> MM: trying to find a good way to handle it
     if(!passGenSelection() ) return;
     counter("genselection");
   }
@@ -589,7 +597,7 @@ SSDL2015::ssLeptonSelection() {
     if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
 //    if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
 //    if(!makeCut(_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
-     
+    
     return true;
   }
 
@@ -834,6 +842,12 @@ SSDL2015::wzCRSelection() {
   //  if(!makeCut((_HT<200 && _met->pt()>50 && _met->pt()<100) ||
   //	      (_HT>200 && _met->pt()<50),"MET cut  ")) return;
   if(!makeCut(_met->pt()>50, "MET > 50 GeV")) return;
+
+
+  //Scale factors =======================
+  _susyMod->applySingleLepSF(_l1Cand, _weight);
+  _susyMod->applySingleLepSF(_l2Cand, _weight);
+  // ====================================
 
   fillhistos();//fill histos for kWZCR
     

@@ -40,6 +40,5 @@ Sample::computeWeight() {
     if(_sumProcWgts != -1) _eqLumi = _sumProcWgts/_xSection;
   }
   
-  
   _weight =(1./_eqLumi)*_kFactor;
 }
