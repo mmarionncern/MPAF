@@ -141,12 +141,10 @@ Dataset::addFriend(string friendname){
 
 int
 Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
-  cout<<"pouet2 "<<path<<"  "<<dir<<endl;
   string p= string(getenv ("MPAF"))+"/workdir";
   string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
   if(path.find("psi.ch")!=(size_t)-1) {
     if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
-    cout<<" new path "<<path<<endl;
     NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
   }
   else if(path.find(":")!=(size_t)-1) 
@@ -171,7 +169,6 @@ Dataset::getNProcEvents(string path, string dir, string fileName, string hname) 
 
 double
 Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtname) {
-  cout<<"pouet1 "<<endl;
   string p= string(getenv ("MPAF"))+"/workdir";
   string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
   if(path.find("psi.ch")!=(size_t)-1) {
@@ -285,7 +282,6 @@ Dataset::getSample(string sname) const {
 
 void 
 Dataset::loadTree(string path, string dir, string sname, string objName) {
-  cout<<"pouet "<<path<<"  "<<dir<<"  "<<objName<<endl;
   TFile* datafile(nullptr);
   if(dir=="") dir=path;
   string p= string(getenv ("MPAF"))+"/workdir";
