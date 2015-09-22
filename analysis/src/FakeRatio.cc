@@ -152,7 +152,7 @@ void FakeRatio::initialize(){
   _au->addCategory( kGoodJets, "Good Jets"            );
 
   //SusyModule
-  _susyMod = new SusyModule(_vc);
+  _susyMod = new SusyModule(_vc, _dbm);
 
 
 }
@@ -234,7 +234,7 @@ void FakeRatio::run(){
 //____________________________________________________________________________
 void FakeRatio::divideFRMap(string kr, string postpend){
 
-  for(unsigned int i=0; i<_numDS; ++i){
+  for(int i=0; i<_numDS; ++i){
     TH1 * denom = _hm -> getHisto(kr + "_Den" + postpend, i);
     TH1 * num   = _hm -> getHisto(kr + "_Rat" + postpend, i);
     num -> Divide(denom);
@@ -258,7 +258,7 @@ void FakeRatio::divideFRMaps(){
 //____________________________________________________________________________
 void FakeRatio::registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis){
 
-  for(int i = 0; i < leps.size(); ++i)
+  for(unsigned int i = 0; i < leps.size(); ++i)
     _hm->addVariable(leps[i] + var, nbins, bmin, bmax, axis);
 
 } 
@@ -267,7 +267,7 @@ void FakeRatio::registerLepPlots(vector<string> leps, string var, int nbins, flo
 //____________________________________________________________________________
 void FakeRatio::registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis){
 
-  for(int i = 0; i < leps.size(); ++i)
+  for(unsigned int i = 0; i < leps.size(); ++i)
     _hm->addVariable(leps[i] + var, nxbins, xbins, nybins, ybins, xaxis, yaxis);
 
 }
@@ -386,7 +386,7 @@ void FakeRatio::collectKinematicObjects(){
     return: none
   */
   
-  for(int i = 0; i < _vc->get("n" + _leps); ++i){
+  for(unsigned int i = 0; i < _vc->get("n" + _leps); ++i){
 
     bool den = false;
     bool num = false;
@@ -863,11 +863,11 @@ void FakeRatio::fillFakeRatioMaps(){
     return: none
   */
 
-  for(int i = 0; i < _denEls.size(); ++i) { fillFRMaps("MR_DenEl"  , _denEls[i]  , _denElsIdx[i], SusyModule::kTight ); }
-  for(int i = 0; i < _denMus.size(); ++i) { fillFRMaps("MR_DenMu"  , _denMus[i]  , _denMusIdx[i], SusyModule::kMedium); }
-  for(int i = 0; i < _numEls.size(); ++i) { fillFRMaps("MR_NumEl"  , _numEls[i]  , _numElsIdx[i], SusyModule::kTight );
+  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillFRMaps("MR_DenEl"  , _denEls[i]  , _denElsIdx[i], SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillFRMaps("MR_DenMu"  , _denMus[i]  , _denMusIdx[i], SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillFRMaps("MR_NumEl"  , _numEls[i]  , _numElsIdx[i], SusyModule::kTight );
                                             fillFRMaps("MR_RatEl"  , _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
-  for(int i = 0; i < _numMus.size(); ++i) { fillFRMaps("MR_NumMu"  , _numMus[i]  , _numMusIdx[i], SusyModule::kMedium);
+  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillFRMaps("MR_NumMu"  , _numMus[i]  , _numMusIdx[i], SusyModule::kMedium);
                                             fillFRMaps("MR_RatMu"  , _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
 
 }
@@ -902,10 +902,10 @@ void FakeRatio::fillLeptonPlots(){
     return: none
   */
 
-  for(int i = 0; i < _denEls.size(); ++i) { fillLepPlots("MR_DenEl"  , _denEls[i]  , _denElsIdx[i], SusyModule::kTight ); }
-  for(int i = 0; i < _denMus.size(); ++i) { fillLepPlots("MR_DenMu"  , _denMus[i]  , _denMusIdx[i], SusyModule::kMedium); }
-  for(int i = 0; i < _numEls.size(); ++i) { fillLepPlots("MR_NumEl"  , _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
-  for(int i = 0; i < _numMus.size(); ++i) { fillLepPlots("MR_NumMu"  , _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillLepPlots("MR_DenEl"  , _denEls[i]  , _denElsIdx[i], SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillLepPlots("MR_DenMu"  , _denMus[i]  , _denMusIdx[i], SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillLepPlots("MR_NumEl"  , _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillLepPlots("MR_NumMu"  , _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
 
 }
 

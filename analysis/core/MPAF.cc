@@ -228,7 +228,7 @@ void MPAF::loadConfigurationFile(std::string cfg){
   _nEvtMax = -1;
   string tName;
   vector<string> _friends;
-
+  
   for(MIPar::const_iterator it=_inputVars.begin(); 
       it!=_inputVars.end();it++) {
 

@@ -148,7 +148,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
       if(tks.size()==0 || line == "") continue; 
       
       //counters FIXME, done with rootfile for the moment
-       if(tks[0]=="dsCnts" || tks[0]=="cnts" ) {
+       if(tks[0]=="dsCnts" || tks[0]=="cnts" || tks[0]=="wgts" ) {
 	 continue;
        }
        
