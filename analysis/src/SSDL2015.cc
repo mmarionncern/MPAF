@@ -112,6 +112,9 @@ SSDL2015::initialize(){
   _vc->registerVar("Flag_CSCTightHaloFilter"      );
   _vc->registerVar("Flag_eeBadScFilter"           );
   
+  //pileup
+  _vc->registerVar("puWeight"                     );
+
   
   _susyMod = new SusyModule(_vc, _dbm);
   
@@ -199,8 +202,12 @@ SSDL2015::initialize(){
 void
 SSDL2015::modifyWeight() {
 
-  if (_vc->get("isData") != 1)
+  if (_vc->get("isData") != 1) {
+    //generator weights
     _weight *= _vc->get("genWeight");
+    //pileup weights
+    _weight *= _vc->get("puWeight");
+  }
 
 }
 

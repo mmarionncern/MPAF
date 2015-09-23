@@ -448,6 +448,8 @@ SusyModule::cleanJets(CandList* leptons,
 void 
 SusyModule::applyHLTSF(const string& hltLine, const CandList& cands, float& weight) {
 
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+
   if(hltLine=="HLT_DoubleEG") {
     weight *= _dbm->getDBValue("hltDEG", std::abs(cands[0]->eta()), cands[0]->pt(), cands[1]->eta(), cands[1]->pt() );
   }
@@ -476,6 +478,8 @@ SusyModule::applyLepSF(const CandList& cands, float& weight) {
 
 void 
 SusyModule::applySingleLepSF(const Candidate* cand, float& weight) {
+
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
 
   switch(std::abs(cand->pdgId())) {
   case 11: {weight *= _dbm->getDBValue("eleSFDb", std::abs(cand->eta()), cand->pt() ); break;}
