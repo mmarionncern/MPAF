@@ -1,7 +1,7 @@
 {
 
   //setTDRStyle();
-
+  gStyle->SetOptStat(0);
   gStyle->SetPadColor(0);
   gStyle->SetCanvasColor(0);
   //gStyle->SetTitleColor(0);

@@ -18,7 +18,7 @@ void susy3l_data_25ns() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="mll";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
+    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
     string sigs = "none"; 
     bool data = true;
 
@@ -124,7 +124,7 @@ void susy3l_data_25ns() {
     }
     if(obs == "mll"){
         md.dp.setObservables("lowMll");
-        int binning=0;
+        int binning=2;
         double rangeX[2]={0,400};
         bool logYScale=true;
     }
@@ -330,9 +330,9 @@ void susy3l_data_25ns() {
              mcOnly,cmsPrel, uncDet);
     md.prepareDisplay();
     md.doPlot();
-    md.dp.getIntegral(0, 200);
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
  
+    gROOT->ProcessLine(".q");
 }
