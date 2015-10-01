@@ -18,7 +18,7 @@ void susy3l_data_25ns() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="mll";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
+    string obs ="muoniso";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
     string sigs = "none"; 
     bool data = true;
 
@@ -125,7 +125,7 @@ void susy3l_data_25ns() {
     if(obs == "mll"){
         md.dp.setObservables("lowMll");
         int binning=0;
-        double rangeX[2]={0,400};
+        double rangeX[2]={0,200};
         bool logYScale=true;
     }
     if(obs == "muonsip"){
@@ -138,7 +138,7 @@ void susy3l_data_25ns() {
         md.dp.setObservables("muon_miniRelIso");
         int binning=1;
         double rangeX[2]={0,0.4};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "muondz"){
         md.dp.setObservables("muon_dz");
@@ -218,7 +218,7 @@ void susy3l_data_25ns() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=20.4; //pb-1 19470
+    float lumi=121.6; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
@@ -247,9 +247,9 @@ void susy3l_data_25ns() {
     md.anConf.addSample( "WZp8"                           ,  "WZ"              , kGreen    );
     md.anConf.addSample( "ZZp8"                           ,  "ZZ"              , kGreen+3  );
 
-    //md.anConf.addSample( "TTZJets"                          ,  "t#bar{t}Z"          , kBlue     );
+    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z"          , kBlue     );
 
-    //md.anConf.addSample( "TTWJets"                          ,  "t#bar{t}W"          , kYellow   );
+    md.anConf.addSample( "TTWToLNu"                          ,  "t#bar{t}W"          , kYellow   );
 
     //md.anConf.addSample( "GGHZZ4L"                          ,  "rare SM"            , kCyan     );
     //md.anConf.addSample( "TTH"                              ,  "rare SM"             , kCyan      );
@@ -258,7 +258,7 @@ void susy3l_data_25ns() {
     //md.anConf.addSample( "TBarToLeptons_sch"                ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "TBarToLeptons_tch"                ,  "non-prompt e/#mu"    , kRed      );
     md.anConf.addSample( "TBar_tWch"                        ,  "TW"    , kRed+3      );
-    md.anConf.addSample( "TTJets_LO"                        ,  "TT"    , kRed+2      );
+    md.anConf.addSample( "TT_pow"                        ,  "TT"    , kRed+2      );
     md.anConf.addSample( "TToLeptons_sch"                   ,  "TT"    , kRed+2      );
     md.anConf.addSample( "TToLeptons_tch"                   ,  "TT"    , kRed+2      );
     md.anConf.addSample( "T_tWch"                           ,  "TW"    , kRed+3      );
@@ -296,11 +296,11 @@ void susy3l_data_25ns() {
     
   //data
     if(data){
-    md.anConf.addSample( "DoubleEG_Run2015C_v1_runs_254231_254907"       , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015C_v1_runs_254231_254907"              , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015C_v1_runs_254231_254907"     , "data"          , kBlack    );
-    md.anConf.addSample( "SingleElectron_Run2015C_v1_runs_254231_254907"            , "data"          , kBlack    );
-    md.anConf.addSample( "SingleMuon_Run2015C_v1_runs_254231_254907"            , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_256630_256843"       , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_256630_256843"              , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015D_v3_runs_256630_256843"     , "data"          , kBlack    );
+    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_256843"            , "data"          , kBlack    );
+    md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_256630_256843"            , "data"          , kBlack    );
     }
 
 

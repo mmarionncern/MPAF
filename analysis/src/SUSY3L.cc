@@ -532,14 +532,6 @@ bool SUSY3L::electronSelection(int elIdx){
     }
     //enable to clean on tight objects
     //if(!makeCut( !muMatch, "dR selection (mu)", "=", kElId) ) return false;
- 
-    fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , elIdx))        , _weight);
-    fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , elIdx)*10000)        , _weight);
-    fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , elIdx)*10000)        , _weight);
-    fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio" , elIdx))        , _weight);
-    fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRel" , elIdx))        , _weight);
-    fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , elIdx))        , _weight);
- 
     return true;
 }
 
@@ -586,14 +578,6 @@ bool SUSY3L::muonSelection(int muIdx){
     if(!makeCut<float>(std::abs(_vc->get("LepGood_dz", muIdx)), vertex_dz_cut   , "<", "dz selection"    , 0, kMuId)) return false;
     if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy", muIdx)), vertex_dxy_cut , "<", "dxy selection"   , 0, kMuId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("LepGood_sip3d", muIdx)), sip3d_cut  , "<"  , "sip3d selection"   , 0    , kMuId)) return false;
- 
-    fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , muIdx))        , _weight);
-    fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , muIdx)*10000)        , _weight);
-    fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , muIdx)*10000)        , _weight);
-    fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio" , muIdx))        , _weight);
-    fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRel" , muIdx))        , _weight);
-    fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , muIdx))        , _weight);
- 
 
     return true;
 }
@@ -815,9 +799,9 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
-        _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
+        setCut("LepMultiplicity"   ,    2, ">="  )  ;     //number of isolated leptons
+        _pt_cut_hardest_legs          = 25          ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        _nHardestLeptons              = 2           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs              = 0          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
@@ -2302,52 +2286,50 @@ bool SUSY3L::baseSelection(){
     */
    
     //select events with certain lepton multiplicity of all flavor combinations
-    //if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR ) ) return false;
-    if(!makeCut<int>( _nMus , 1, "=" , "muon multiplicity", 0 ) ) return false;
-    if(!makeCut<int>( _nTaus, 1, ">=" , "tau multiplicity", 0 ) ) return false;
+    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR ) ) return false;
+    //if(!makeCut<int>( _nMus , 1, "=" , "muon multiplicity", 0 ) ) return false;
+    //if(!makeCut<int>( _nTaus, 1, ">=" , "tau multiplicity", 0 ) ) return false;
     
-    //require at least _nHardestLeptons to have higher pT than original cut
-//    bool has_hard_legs = hardLegSelection();
-//    if(!makeCut( has_hard_legs , "hard leg selection", "=") ) return false;
+    //apply additional pt cuts on leptons
+    bool has_hard_legs = hardLegSelection();
+    if(!makeCut( has_hard_legs , "hard leg selection", "=") ) return false;
 
     //require at least two of the leptons to be tighter in multiiso
     //bool has_two_tighter_leptons = checkMultiIso();
     //if(!makeCut( has_two_tighter_leptons , "multiIso tightening", "=") ) return false;
 
     //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return false;
+    //if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return false;
 
     //require minimum number of b-tagged jets
     //if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
-//    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
+    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
-//    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
+    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
 
     //find smallest invariant mass of ossf pair and reject event if this is below a cut value
-    _mll = lowestOssfMll(false);
-//    if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR) ) return false;
+    _mll = lowestOssfMll();
+    if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR) ) return false;
+    fill("lowMll" , _mll        , _weight);
  
-    
     //select on or off-Z events according to specification in config file
-//    bool is_reconstructed_Z = ZEventSelectionLoop();
-    
-//    if(_pairmass == "off"){
-//        if(!makeCut( !is_reconstructed_Z, "mll selection", "=") ) return false;
-//    }
-//    else if(_pairmass == "on"){
-//        if(!makeCut( is_reconstructed_Z, "mll selection", "=") ) return false;
-//    }
+    bool is_reconstructed_Z = ZEventSelectionLoop();
+    if(_pairmass == "off"){
+        if(!makeCut( !is_reconstructed_Z, "mll selection", "=") ) return false;
+    }
+    else if(_pairmass == "on"){
+        if(!makeCut( is_reconstructed_Z, "mll selection", "=") ) return false;
+    }
     
     //fill plots 
-//    if(is_reconstructed_Z){
-//        fill("Zmass" , _Z->mass()      , _weight);
-//        fill("Zpt"   , _Z->pt()        , _weight);
-//    }
+    if(is_reconstructed_Z){
+        fill("Zmass" , _Z->mass()      , _weight);
+        fill("Zpt"   , _Z->pt()        , _weight);
+    }
     
-    fill("lowMll" , _mll        , _weight);
     fill("el_multiplicity" , _nEls , _weight);
     fill("mu_multiplicity" , _nMus , _weight);
     fill("tau_multiplicity" , _nTaus , _weight);
@@ -2362,13 +2344,34 @@ bool SUSY3L::baseSelection(){
     }
     
     //calculate MT2 and fill plot
-//    if(_nMus + _nEls + _nTaus == 3){
-//        _MT2 = getMT2();
+    if(_nMus + _nEls + _nTaus == 3){
+        _MT2 = getMT2();
         //cut on MT2
         //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR) ) return false;
-//        fill("MT2" , _MT2        , _weight);
-//    }
-        
+        fill("MT2" , _MT2        , _weight);
+    }
+ 
+ 
+    //fill leptons kinematics
+    for(int el=0; el<_nEls;++el){         
+        fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , el))        , _weight);
+        fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , el)*10000)        , _weight);
+        fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , el)*10000)        , _weight);
+        fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio" , el))        , _weight);
+        fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRel" , el))        , _weight);
+        fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , el))        , _weight);
+    }
+    
+    for(int mu=0; mu<_nMus;++mu){         
+        fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , mu))        , _weight);
+        fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , mu)*10000)        , _weight);
+        fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , mu)*10000)        , _weight);
+        fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio" , mu))        , _weight);
+        fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRel" , mu))        , _weight);
+        fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , mu))        , _weight);
+    } 
+
+
     return true;
 }
 
@@ -2845,7 +2848,7 @@ float SUSY3L::getMT2(){
     int il2_save = -1;
 
     if(_nMus+_nEls != 3){
-        cout << "getMT2: compatible with 3 lepton events only" << endl;
+        return 0;
     }
    
     if(((signbit(_leps[0]->pdgId())) == (signbit(_leps[1]->pdgId()))) && ((signbit(_leps[0]->pdgId())) == (signbit(_leps[2]->pdgId())))){

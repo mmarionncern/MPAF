@@ -109,3 +109,5 @@ QCD_Pt1400to1800_50ns					1.00
 QCD_Pt1800to2400_50ns					1.00
 QCD_Pt2400to3200_50ns					1.00
 QCD_Pt3200toInf_50ns					1.00
+TTWToLNu                                1.00
+TTZToLLNuNu                             1.00
