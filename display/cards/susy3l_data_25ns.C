@@ -18,7 +18,7 @@ void susy3l_data_25ns() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="muoniso";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
+    string obs ="ht";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
     string sigs = "none"; 
     bool data = true;
 
@@ -30,7 +30,7 @@ void susy3l_data_25ns() {
     //double rangeX[2]={0,7};
     int xDiv[3]={8,6,0};
     int yDiv[3]={6,6,0}; //Nlabel /  sous-Div /ssdiv
-    bool logYScale=false;
+    bool logYScale=true;
     bool overFlowBin=true;
     bool underFlowBin=false;
     bool showDMCRatio=true;
@@ -53,25 +53,25 @@ void susy3l_data_25ns() {
         md.dp.setObservables("BR_NJets");
         int binning=1;
         double rangeX[2]={0,7};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "nbjets"){
         md.dp.setObservables("BR_NBJets");
         int binning=1;
         double rangeX[2]={0,5};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "met"){
         md.dp.setObservables("BR_MET");
         int binning=50;
         double rangeX[2]={0,500};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "ht"){
         md.dp.setObservables("BR_HT");
-        int binning=50;
-        double rangeX[2]={0,800};
-        bool logYScale=true;
+        int binning=0;
+        double rangeX[2]={0,1000};
+        //bool logYScale=true;
     }
     if(obs == "lep"){
         //md.dp.setObservables("mu_multiplicity");
@@ -80,7 +80,7 @@ void susy3l_data_25ns() {
         md.dp.setObservables("lep_multiplicity");
         int binning=1;
         double rangeX[2]={0,7};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "zpeak"){
         md.dp.setObservables("Zmass");
@@ -96,43 +96,43 @@ void susy3l_data_25ns() {
         md.dp.setObservables("MT2");
         int binning=25;
         double rangeX[2]={0,400};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "mt"){
         md.dp.setObservables("MT");
         int binning=10;
         double rangeX[2]={0,200};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "pt1"){
         md.dp.setObservables("pt_1st_lepton");
         int binning=2;
         double rangeX[2]={0,80};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "pt2"){
         md.dp.setObservables("pt_2nd_lepton");
         int binning=2;
         double rangeX[2]={0,80};
-        bool logYScale=true;
+        //bool logYScale=true;
     }   
     if(obs == "pt3"){
         md.dp.setObservables("pt_3rd_lepton");
         int binning=2;
         double rangeX[2]={0,80};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "mll"){
         md.dp.setObservables("lowMll");
         int binning=0;
         double rangeX[2]={0,200};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "muonsip"){
         md.dp.setObservables("muon_SIP3d");
         int binning=1;
         double rangeX[2]={0,5};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "muoniso"){
         md.dp.setObservables("muon_miniRelIso");
@@ -156,7 +156,7 @@ void susy3l_data_25ns() {
         md.dp.setObservables("muon_JetPtRel");
         int binning=1;
         double rangeX[2]={0,40};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "muonptratio"){
         md.dp.setObservables("muon_JetPtRatio");
@@ -168,13 +168,13 @@ void susy3l_data_25ns() {
         md.dp.setObservables("el_SIP3d");
         int binning=1;
         double rangeX[2]={0,5};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "eliso"){
         md.dp.setObservables("el_miniRelIso");
         int binning=1;
         double rangeX[2]={0,0.4};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "eldz"){
         md.dp.setObservables("el_dz");
@@ -192,7 +192,7 @@ void susy3l_data_25ns() {
         md.dp.setObservables("el_JetPtRel");
         int binning=1;
         double rangeX[2]={0,40};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "elptratio"){
         md.dp.setObservables("el_JetPtRatio");
@@ -270,7 +270,7 @@ void susy3l_data_25ns() {
     //md.anConf.addSample( "WJetsToLNu_HT600toInf"            ,  "non-prompt e/#mu"    , kRed      );
 
   //Drell-Yan
-    //md.anConf.addSample( "DYJetsToLL_LO_M50_50ns"        ,  "non-prompt e/#mu"    , kRed      );
+    md.anConf.addSample( "DYJetsToLL_M10to50"    ,  "DY"    , kRed      );
     md.anConf.addSample( "DYJetsToLL_M50"        ,  "DY"    , kRed     );
     //md.anConf.addSample( "DYJetsToLL_M50_HT200to400"        ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "DYJetsToLL_M50_HT400to600"        ,  "non-prompt e/#mu"    , kRed      );
