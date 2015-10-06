@@ -141,12 +141,13 @@ Dataset::addFriend(string friendname){
 
 int
 Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
-
   string p= string(getenv ("MPAF"))+"/workdir";
   string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
-  if(path.find("psi.ch")!=(size_t)-1)
+  if(path.find("psi.ch")!=(size_t)-1) {
+    if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
     NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
-  if(path.find(":")!=(size_t)-1) 
+  }
+  else if(path.find(":")!=(size_t)-1) 
     NameF=path+"/"+fileName+".root";
   if(dir.find("psi.ch")!=(size_t)-1)
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
@@ -168,10 +169,13 @@ Dataset::getNProcEvents(string path, string dir, string fileName, string hname) 
 
 double
 Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtname) {
-
   string p= string(getenv ("MPAF"))+"/workdir";
   string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
-  if(path.find(":")!=(size_t)-1) NameF=path+"/"+fileName+".root";
+  if(path.find("psi.ch")!=(size_t)-1) {
+    if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
+    NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
+  }
+  else if(path.find(":")!=(size_t)-1) NameF=path+"/"+fileName+".root";
   if(dir.find("psi.ch")!=(size_t)-1)
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
   
@@ -193,7 +197,7 @@ Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtnam
 
 
 int
-Dataset::getNProcEvents(int evt) {
+Dataset::getNProcEvents(/*int evt*/) const {
   //MM fixme, multiple sample handling not considered anymore, still useful?
   return _samples[0].getNProcEvts();
 
@@ -207,7 +211,7 @@ Dataset::getNProcEvents(int evt) {
 }
 
 double
-Dataset::getSumProcWgts(int evt) {
+Dataset::getSumProcWgts(/*int evt*/) const {
   //MM fixme, multiple sample handling not considered anymore, still useful?
   return _samples[0].getSumProcWgts();
 
@@ -278,12 +282,13 @@ Dataset::getSample(string sname) const {
 
 void 
 Dataset::loadTree(string path, string dir, string sname, string objName) {
-  
   TFile* datafile(nullptr);
   if(dir=="") dir=path;
   string p= string(getenv ("MPAF"))+"/workdir";
   string NameF = p+"/data/"+dir+"/"+sname+".root"; 
-  if(path.find(":")!=(size_t)-1) NameF=path+"/"+sname+".root";
+  if(path.find("psi.ch")!=(size_t)-1)
+    NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+sname+".root";
+  else if(path.find(":")!=(size_t)-1) NameF=path+"/"+sname+".root";
   if(dir.find("psi.ch")!=(size_t)-1)
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+sname+".root";
 
@@ -308,8 +313,10 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
     } 
     //nEvent = tmptree->GetEntries();
   }
-  else
-    cout<<" Error no correct tree in "<<sname<<" file "<<endl;
+  else {
+    cout<<" Error no correct tree in "<<sname<<" file, aborting"<<endl;
+    abort();
+  }    
 
   delete tmptree;
   delete datafile;

@@ -127,6 +127,8 @@ protected:
   };
   void fillSkimTree() { if(_skim) _skimTree->Fill();};
 
+  //datasets
+  const Dataset* getCurrentDS() const {return _datasets[_inds];};
 
   //uncertainties
   void addSystSource(string name, int dir, string type, vector<string> modVar, 
@@ -181,7 +183,7 @@ protected:
 
   std::string _cfgName;
 
-  int _numDS;
+  unsigned int _numDS;
 
 
   // Private Members

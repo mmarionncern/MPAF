@@ -2,9 +2,17 @@
 
 
 SusyModule::SusyModule(VarClass* vc):
-  _vc(vc)
+  _vc(vc),_dbm(nullptr)
 {
   defineLeptonWPS();
+  
+}
+
+SusyModule::SusyModule(VarClass* vc, DataBaseManager* dbm):
+  _vc(vc), _dbm(dbm)
+{
+  defineLeptonWPS();
+  loadDBs();
 }
 
 SusyModule::~SusyModule() {
@@ -12,6 +20,23 @@ SusyModule::~SusyModule() {
   delete _vc;
 }
 
+void
+SusyModule::loadDBs() {
+
+  //_dbm->loadDb("PileupWeights.root",""); -> done with trees
+
+  //HLT scale factors
+  _dbm->loadDb("hltDEG","hltSFDoubleEG.db");
+  _dbm->loadDb("hltDMu","hltSFDoubleMu.db");
+  _dbm->loadDb("hltSEle","hltSFSingleEle.db");
+  _dbm->loadDb("hltSMu","hltSFSingleMu.db");
+  
+  //lepton scale factors
+  _dbm->loadDb("eleSFDb","electronSF.db");
+  _dbm->loadDb("muSFDb","muonSF.db");
+  _dbm->loadDb("tauSFDb","tauSF.db");
+  
+}
 
 void
 SusyModule::defineLeptonWPS() {
@@ -415,6 +440,51 @@ SusyModule::cleanJets(CandList* leptons,
     
     cleanBJets.push_back(jet);
     bJetIdxs.push_back(ij);
+  }
+
+}
+
+// Scale factors ====================================
+void 
+SusyModule::applyHLTSF(const string& hltLine, const CandList& cands, float& weight) {
+
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+
+  if(hltLine=="HLT_DoubleEG") {
+    weight *= _dbm->getDBValue("hltDEG", std::abs(cands[0]->eta()), cands[0]->pt(), cands[1]->eta(), cands[1]->pt() );
+  }
+  else if(hltLine=="HLT_DoubleMu") {
+    weight *= _dbm->getDBValue("hltDMu", std::abs(cands[0]->eta()), cands[0]->pt(), cands[1]->eta(), cands[1]->pt() );
+  }
+  else if(hltLine=="HLT_SingleEle") {
+    weight *= _dbm->getDBValue("hltSEle", std::abs(cands[0]->eta()), cands[0]->pt() );
+  }
+  else if(hltLine=="HLT_SingleMu") {
+    weight *= _dbm->getDBValue("hltSMu", std::abs(cands[0]->eta()), cands[0]->pt() );
+  }
+
+
+}
+
+void 
+SusyModule::applyLepSF(const CandList& cands, float& weight) {
+
+  for(unsigned int ic=0;ic<cands.size();ic++) {
+    applySingleLepSF(cands[ic], weight);
+  }
+
+}
+
+
+void 
+SusyModule::applySingleLepSF(const Candidate* cand, float& weight) {
+
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+
+  switch(std::abs(cand->pdgId())) {
+  case 11: {weight *= _dbm->getDBValue("eleSFDb", std::abs(cand->eta()), cand->pt() ); break;}
+  case 13: {weight *= _dbm->getDBValue("muSFDb", std::abs(cand->eta()), cand->pt() ); break;}
+  case 15: {weight *= _dbm->getDBValue("tauSFDb", std::abs(cand->eta()), cand->pt() ); break;}
   }
 
 }

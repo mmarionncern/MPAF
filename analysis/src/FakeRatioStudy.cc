@@ -262,7 +262,7 @@ void FakeRatioStudy::run(){
 //____________________________________________________________________________
 void FakeRatioStudy::divideFRMap(string kr, string postpend){
 
-  for(unsigned int i=0; i<_numDS; ++i){
+  for(int i=0; i<_numDS; ++i){
     TH1 * denom = _hm -> getHisto(kr + "_L" + postpend, i);
     TH1 * num   = _hm -> getHisto(kr + "_R" + postpend, i);
     num -> Divide(denom);
@@ -291,7 +291,7 @@ void FakeRatioStudy::divideFRMaps(string kr, string lep){
 //____________________________________________________________________________
 void FakeRatioStudy::registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis){
 
-  for(int i = 0; i < leps.size(); ++i)
+  for(unsigned int i = 0; i < leps.size(); ++i)
     _hm->addVariable(leps[i] + var, nbins, bmin, bmax, axis);
 
 } 
@@ -300,7 +300,7 @@ void FakeRatioStudy::registerLepPlots(vector<string> leps, string var, int nbins
 //____________________________________________________________________________
 void FakeRatioStudy::registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis){
 
-  for(int i = 0; i < leps.size(); ++i)
+  for(unsigned  int i = 0; i < leps.size(); ++i)
     _hm->addVariable(leps[i] + var, nxbins, xbins, nybins, ybins, xaxis, yaxis);
 
 }
@@ -1167,11 +1167,11 @@ int FakeRatioStudy::findHadrTau(){
 
   if(TauIdx.size() == 0 && AntiTauIdx.size() == 0) return -1;
 
-  for(int i = 0; i < TauIdx.size(); ++i)
+  for(unsigned int i = 0; i < TauIdx.size(); ++i)
     if(!noLeptonicDecay("GenPart", TauIdx[i]))
       return 0;
 
-  for(int i = 0; i < AntiTauIdx.size(); ++i)
+  for(unsigned int i = 0; i < AntiTauIdx.size(); ++i)
     if(!noLeptonicDecay("GenPart", AntiTauIdx[i]))
       return 0;
 
@@ -1288,7 +1288,7 @@ void FakeRatioStudy::onlyFakes(CandList& list, vector<int>& idx, bool hadrTau){
   list.clear();
   idx.clear();
 
-  for(int i = 0; i < n_list.size(); ++i){
+  for(unsigned int i = 0; i < n_list.size(); ++i){
     bool fromTau = fromHadrTau(n_idx[i], hadrTau);
     bool source = false;
     if(_fakes.find("jet") != std::string::npos) source = jetFake(n_idx[i]);
@@ -1301,7 +1301,7 @@ void FakeRatioStudy::onlyFakes(CandList& list, vector<int>& idx, bool hadrTau){
       source = !fromTau;
 
 	//cout << "fake of " << _vc->get("LepGood_mcMatchAny", n_idx[i]) << "," << fromTau << " = " << source << endl; 
-	source == true;
+
     if(_vc->get("LepGood_mcMatchId", n_idx[i]) == 0 && source){ 
       list.push_back(n_list[i]);
       idx .push_back(n_idx [i]);
@@ -1665,13 +1665,13 @@ void FakeRatioStudy::fillFakeRatioMaps(std::string kr){
   */
 
 
-  for(int i = 0; i < _lEls  .size(); ++i) { fillFRMaps(kr + "_LEl"  , _lEls[i]  , _lElIdx[i]  ); }
-  for(int i = 0; i < _lntEls.size(); ++i) { fillFRMaps(kr + "_LNTEl", _lntEls[i], _lntElIdx[i]); }
-  for(int i = 0; i < _tEls  .size(); ++i) { fillFRMaps(kr + "_TEl"  , _tEls[i]  , _tElIdx[i]  ); 
+  for(unsigned int i = 0; i < _lEls  .size(); ++i) { fillFRMaps(kr + "_LEl"  , _lEls[i]  , _lElIdx[i]  ); }
+  for(unsigned int i = 0; i < _lntEls.size(); ++i) { fillFRMaps(kr + "_LNTEl", _lntEls[i], _lntElIdx[i]); }
+  for(unsigned int i = 0; i < _tEls  .size(); ++i) { fillFRMaps(kr + "_TEl"  , _tEls[i]  , _tElIdx[i]  ); 
                                             fillFRMaps(kr + "_REl"  , _tEls[i]  , _tElIdx[i]  ); }
-  for(int i = 0; i < _lMus  .size(); ++i) { fillFRMaps(kr + "_LMu"  , _lMus[i]  , _lMuIdx[i]  ); }
-  for(int i = 0; i < _lntMus.size(); ++i) { fillFRMaps(kr + "_LNTMu", _lntMus[i], _lntMuIdx[i]); }
-  for(int i = 0; i < _tMus  .size(); ++i) { fillFRMaps(kr + "_TMu"  , _tMus[i]  , _tMuIdx[i]  ); 
+  for(unsigned int i = 0; i < _lMus  .size(); ++i) { fillFRMaps(kr + "_LMu"  , _lMus[i]  , _lMuIdx[i]  ); }
+  for(unsigned int i = 0; i < _lntMus.size(); ++i) { fillFRMaps(kr + "_LNTMu", _lntMus[i], _lntMuIdx[i]); }
+  for(unsigned int i = 0; i < _tMus  .size(); ++i) { fillFRMaps(kr + "_TMu"  , _tMus[i]  , _tMuIdx[i]  ); 
                                             fillFRMaps(kr + "_RMu"  , _tMus[i]  , _tMuIdx[i]  ); }
 
 }
@@ -1720,17 +1720,17 @@ void FakeRatioStudy::fillLeptonPlots(std::string kr){
     return: none
   */
 
-  for(int i = 0; i < _lEls   .size(); ++i) fillLepPlots(kr + "_LEl"   , _lEls   [i], _lElIdx   [i]);
-  for(int i = 0; i < _lntEls .size(); ++i) fillLepPlots(kr + "_LNTEl" , _lntEls [i], _lntElIdx [i]);
-  for(int i = 0; i < _tEls   .size(); ++i) fillLepPlots(kr + "_TEl"   , _tEls   [i], _tElIdx   [i]);
-  for(int i = 0; i < _lLeps  .size(); ++i) fillLepPlots(kr + "_LLep"  , _lLeps  [i], _lLepIdx  [i]);
-  for(int i = 0; i < _lntLeps.size(); ++i) fillLepPlots(kr + "_LNTLep", _lntLeps[i], _lntLepIdx[i]);
-  for(int i = 0; i < _tLeps  .size(); ++i) fillLepPlots(kr + "_TLep"  , _tLeps  [i], _tLepIdx  [i]);
-  for(int i = 0; i < _lMus   .size(); ++i) fillLepPlots(kr + "_LMu"   , _lMus   [i], _lMuIdx   [i]);
-  for(int i = 0; i < _lntMus .size(); ++i) fillLepPlots(kr + "_LNTMu" , _lntMus [i], _lntMuIdx [i]);
-  for(int i = 0; i < _tMus   .size(); ++i) fillLepPlots(kr + "_TMu"   , _tMus   [i], _tMuIdx   [i]);
+  for(unsigned int i = 0; i < _lEls   .size(); ++i) fillLepPlots(kr + "_LEl"   , _lEls   [i], _lElIdx   [i]);
+  for(unsigned int i = 0; i < _lntEls .size(); ++i) fillLepPlots(kr + "_LNTEl" , _lntEls [i], _lntElIdx [i]);
+  for(unsigned int i = 0; i < _tEls   .size(); ++i) fillLepPlots(kr + "_TEl"   , _tEls   [i], _tElIdx   [i]);
+  for(unsigned int i = 0; i < _lLeps  .size(); ++i) fillLepPlots(kr + "_LLep"  , _lLeps  [i], _lLepIdx  [i]);
+  for(unsigned int i = 0; i < _lntLeps.size(); ++i) fillLepPlots(kr + "_LNTLep", _lntLeps[i], _lntLepIdx[i]);
+  for(unsigned int i = 0; i < _tLeps  .size(); ++i) fillLepPlots(kr + "_TLep"  , _tLeps  [i], _tLepIdx  [i]);
+  for(unsigned int i = 0; i < _lMus   .size(); ++i) fillLepPlots(kr + "_LMu"   , _lMus   [i], _lMuIdx   [i]);
+  for(unsigned int i = 0; i < _lntMus .size(); ++i) fillLepPlots(kr + "_LNTMu" , _lntMus [i], _lntMuIdx [i]);
+  for(unsigned int i = 0; i < _tMus   .size(); ++i) fillLepPlots(kr + "_TMu"   , _tMus   [i], _tMuIdx   [i]);
 
-  for(int i = 0; i < _tLeps  .size(); ++i) fillAvgJetPtRatio(_tLepIdx[i]);
+  for(unsigned int i = 0; i < _tLeps  .size(); ++i) fillAvgJetPtRatio(_tLepIdx[i]);
 
 }
 

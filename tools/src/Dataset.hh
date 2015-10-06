@@ -103,8 +103,8 @@ public:
   TTree* getTree() {return _chain;};
   int getNEvents() { return _chain->GetEntries(); };
 	
-  int getNProcEvents(int evt);
-  double getSumProcWgts(int evt);
+  int getNProcEvents(/*int evt*/) const;
+  double getSumProcWgts(/*int evt*/) const;
 	
   //void setNMax(size_t nmax);
 	
