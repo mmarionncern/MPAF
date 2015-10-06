@@ -7,8 +7,10 @@ void susy3l_data_25ns() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="3L_data_25ns"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3L_data_25ns"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    //string fileName="3L_data_25ns"; //was treeName in LUNE susy_cut_lowpt
+    string fileName="multiLep_OffZ"; //was treeName in LUNE susy_cut_lowpt
+    //string fileList="3L_data_25ns"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileList="multiLep_OffZ"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
