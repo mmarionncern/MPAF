@@ -22,7 +22,7 @@ Sample::Sample(SampleId sId,
   _eqLumi=eqLumi;
 
   _weight=1.;
-
+  
   computeWeight();
 
 }
@@ -35,6 +35,7 @@ void
 Sample::computeWeight() {
   //means that Xsection used for reweigthing instead of equivalentLumi
   // and means that the number of processed events is available
+  
   if(_eqLumi==-1 && _nProcEvents!=-1) {
     _eqLumi = _nProcEvents/_xSection;
     if(_sumProcWgts != -1) _eqLumi = _sumProcWgts/_xSection;

@@ -280,6 +280,7 @@ void MPAF::loadConfigurationFile(std::string cfg){
     string pfx="";
     string dirName="";
     bool absdir=false;
+    vector<string> friends;
     vector<string> opts= it->second.opts;
     if(opts.size()!=0) {
       for(size_t i=0;i<opts.size();i++) {
@@ -294,7 +295,7 @@ void MPAF::loadConfigurationFile(std::string cfg){
           absdir=true;
         }
 	if(opts[i].substr(0,3)=="ft:"){
-	  _friends.push_back(opts[i].substr(3, opts[i].size()-3 ));
+	  friends.push_back(opts[i].substr(3, opts[i].size()-3 ));
 	} 
       }
     }
@@ -310,7 +311,11 @@ void MPAF::loadConfigurationFile(std::string cfg){
     sId.norm = -1; 
     
     for (size_t ft=0; ft<_friends.size();ft++) {
-      _datasets.back()->addFriend(_friends[ft].c_str()); 
+      _datasets.back()->addFriend(_friends[ft]); 
+    }
+
+    for (size_t ft=0; ft<friends.size();ft++) {
+      _datasets.back()->addFriend(friends[ft]);
     }
 
     if(!absdir)
@@ -406,8 +411,8 @@ void MPAF::internalWriteOutput() {
   map<string, int> cnts;
   map<string, double> wgtcnts;
   for(unsigned int ids=0;ids<_datasets.size(); ++ids) {
-    cnts[ _datasets[ids]->getName() ] = _datasets[ids]->getNProcEvents(0);
-    wgtcnts[ _datasets[ids]->getName() ] = _datasets[ids]->getSumProcWgts(0);
+    cnts[ _datasets[ids]->getName() ] = _datasets[ids]->getNProcEvents();
+    wgtcnts[ _datasets[ids]->getName() ] = _datasets[ids]->getSumProcWgts();
   }
 
   cout << "writing output to disk" << endl;
@@ -663,7 +668,7 @@ void MPAF::initSkimming() {
   if(_fullSkim) {
     _skimTree = (TTree*)_datasets[_inds]->getTree()->CloneTree(0);
     _hnSkim =new TH1I( _hname.c_str(), _hname.c_str(), 1, 0, 1);
-    _hnSkim->SetBinContent(1,_datasets[_inds]->getNProcEvents(0) );
+    _hnSkim->SetBinContent(1,_datasets[_inds]->getNProcEvents() );
   }
   else {
     TString name = _datasets[_inds]->getTree()->GetName();

@@ -197,7 +197,7 @@ Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtnam
 
 
 int
-Dataset::getNProcEvents(int evt) {
+Dataset::getNProcEvents(/*int evt*/) const {
   //MM fixme, multiple sample handling not considered anymore, still useful?
   return _samples[0].getNProcEvts();
 
@@ -211,7 +211,7 @@ Dataset::getNProcEvents(int evt) {
 }
 
 double
-Dataset::getSumProcWgts(int evt) {
+Dataset::getSumProcWgts(/*int evt*/) const {
   //MM fixme, multiple sample handling not considered anymore, still useful?
   return _samples[0].getSumProcWgts();
 
