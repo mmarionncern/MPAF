@@ -131,7 +131,7 @@ void SUSY3L::initialize(){
     _vc->registerVar("HLT_DoubleElHT"                  );
     
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
-    //_vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
+    _vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
 
 
 
@@ -167,7 +167,7 @@ void SUSY3L::modifyWeight() {
     */ 
     if (_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
-        //_weight *= _vc->get("vtxWeight");
+        _weight *= _vc->get("vtxWeight");
     }
 
 }
@@ -769,7 +769,7 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    2, ">="  )  ;     //number of isolated leptons
+        setCut("LepMultiplicity"   ,    3, ">="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs              = 0          ;     //harsher pT requirement for at least _nHardestLeptons (below)
@@ -2275,10 +2275,10 @@ bool SUSY3L::baseSelection(){
     //if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
-    //if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
+    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
+    //if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
 
     //find smallest invariant mass of ossf pair and reject event if this is below a cut value
     _mll = lowestOssfMll();
