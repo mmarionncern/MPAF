@@ -330,7 +330,6 @@ void susy3l_data_25ns() {
              mcOnly,cmsPrel, uncDet);
     md.prepareDisplay();
     md.doPlot();
-    md.dp.getIntegral(0, 200);
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);

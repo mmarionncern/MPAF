@@ -8,7 +8,6 @@
   gStyle->SetStatColor(0);
   gStyle->SetTitleFillColor(0);
   gStyle->SetPalette(1);
-  gStyle->SetOptStat(0);
 
   gStyle->SetFrameBorderMode(0);
   //#include <stdlib.h> 
