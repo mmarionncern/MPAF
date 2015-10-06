@@ -499,12 +499,6 @@ bool SUSY3L::electronSelection(int elIdx){
     //enable to clean on tight objects
     //if(!makeCut( !muMatch, "dR selection (mu)", "=", kElId) ) return false;
     
-    fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , elIdx))        , _weight);
-    fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , elIdx)*10000)        , _weight);
-    fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , elIdx)*10000)        , _weight);
-    fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio_LepAwareJECv2" , elIdx))        , _weight);
-    fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , elIdx))        , _weight);
-    fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , elIdx))        , _weight);
        
     return true;
 }
@@ -553,13 +547,7 @@ bool SUSY3L::muonSelection(int muIdx){
     if(!makeCut<float>(std::abs(_vc->get("LepGood_dz", muIdx)), vertex_dz_cut   , "<", "dz selection"    , 0, kMuId)) return false;
     if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy", muIdx)), vertex_dxy_cut , "<", "dxy selection"   , 0, kMuId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("LepGood_sip3d", muIdx)), sip3d_cut  , "<"  , "sip3d selection"   , 0    , kMuId)) return false;
-    
-    fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , muIdx))                  , _weight);
-    fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , muIdx)*10000)            , _weight);
-    fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , muIdx)*10000)            , _weight);
-    fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio_LepAwareJECv2", muIdx))        , _weight);
-    fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , muIdx))            , _weight);
-    fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , muIdx))          , _weight);
+   
  
     return true;
 }
@@ -782,8 +770,8 @@ void SUSY3L::setBaselineRegion(){
 
     if(_BR == "BR0"){
         setCut("LepMultiplicity"   ,    2, ">="  )  ;     //number of isolated leptons
-        _pt_cut_hardest_legs          = 25          ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardestLeptons              = 2           ;     //number of leptons which need to fulfill harder pt cut
+        _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs              = 0          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
@@ -2331,6 +2319,24 @@ bool SUSY3L::baseSelection(){
         //cut on MT2
         //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR) ) return false;
         fill("MT2" , _MT2        , _weight);
+    }
+
+    for(int mu=0;mu<_nMus;++mu){    
+        fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _muIdx[mu]))                  , _weight);
+        fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _muIdx[mu])*10000)            , _weight);
+        fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , _muIdx[mu])*10000)            , _weight);
+        fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio_LepAwareJECv2", _muIdx[mu]))        , _weight);
+        fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _muIdx[mu]))            , _weight);
+        fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _muIdx[mu]))          , _weight);
+    }
+
+    for(int el=0;el<_nEls;++el){    
+        fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _elIdx[el]))        , _weight);
+        fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _elIdx[el])*10000)        , _weight);
+        fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , _elIdx[el])*10000)        , _weight);
+        fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio_LepAwareJECv2" , _elIdx[el]))        , _weight);
+        fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _elIdx[el]))        , _weight);
+        fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _elIdx[el]))        , _weight);
     }
 
     return true;

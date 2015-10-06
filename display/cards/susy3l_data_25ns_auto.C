@@ -163,7 +163,7 @@ void susy3l_data_25ns() {
     if(obs == "muonptratio"){
         md.dp.setObservables("muon_JetPtRatio");
         int binning=0;
-        double rangeX[2]={0,2.0};
+        double rangeX[2]={0,1.3};
         //bool logYScale=true;
     }
     if(obs == "elsip"){
@@ -199,7 +199,7 @@ void susy3l_data_25ns() {
     if(obs == "elptratio"){
         md.dp.setObservables("el_JetPtRatio");
         int binning=0;
-        double rangeX[2]={0,1.2};
+        double rangeX[2]={0,1.3};
         //bool logYScale=true;
     }
 
