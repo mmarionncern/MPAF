@@ -244,14 +244,11 @@ void susy3l_data_25ns() {
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
  
-
+    md.anConf.addSample( "TTWToLNu"                          ,  "t#bar{t}W"          , kYellow   );
+    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z"          , kBlue     );
    
     md.anConf.addSample( "WZp8"                           ,  "WZ"              , kGreen    );
     md.anConf.addSample( "ZZp8"                           ,  "ZZ"              , kGreen+3  );
-
-    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z"          , kBlue     );
-
-    md.anConf.addSample( "TTWToLNu"                          ,  "t#bar{t}W"          , kYellow   );
 
     //md.anConf.addSample( "GGHZZ4L"                          ,  "rare SM"            , kCyan     );
     //md.anConf.addSample( "TTH"                              ,  "rare SM"             , kCyan      );
