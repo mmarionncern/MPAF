@@ -112,6 +112,7 @@ float Tools::dR(float eta1, float eta2, float phi1, float phi2){
 }
 
 
+//____________________________________________________________________________
 float Tools::dR2(float eta1, float eta2, float phi1, float phi2){
 	/* 
 	computes delta R between two particles, whose pseudorapidity and azimuthal
@@ -242,17 +243,24 @@ std::string Tools::getTimestampDir(){
 
 
 //____________________________________________________________________________
-float Tools::interpretCut(TString cut){
-	/*
-  	interprets a cut value defined in the config file such that it can be used
-  	as a float
-  	parameters: cut
-  	return: the float interpretation of the cut
-  	*/
+std::vector<std::string> Tools::insertIntoVectorS(std::vector<std::string> vector, std::vector<std::string> append){
 
-	if     (cut == "true" ) return 1;
-	else if(cut == "false") return 0;
-	else                    return cut.Atof();
+  for(unsigned int i = 0; i < append.size(); ++i){
+    if(std::find(vector.begin(), vector.end(), append[i]) == vector.end())
+      vector.push_back(append[i]);
+  }
+  
+  return vector;
+
+}
+
+
+//____________________________________________________________________________
+std::string Tools::intToString(int number) {
+
+  std::ostringstream oss;
+  oss << number;
+  return oss.str();
 
 }
 
@@ -417,6 +425,16 @@ VerbosityLevel Tools::toVerbosityLevel(std::string value){
 }
 
 
+
+//____________________________________________________________________________
+std::string Tools::trim(std::string s){
+
+    size_t first = s.find_first_not_of(' ');
+    size_t last  = s.find_last_not_of(' ');
+    if(first == std::string::npos) return "";
+    return s.substr(first, (last-first+1));
+
+}
 
 
 

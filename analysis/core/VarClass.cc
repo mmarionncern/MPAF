@@ -778,7 +778,7 @@ double VarClass::findAVal(int tType, int key, int idx) {
 
 
 double VarClass::get(string name, int idx) {
-  
+
   itVId_ = varIds_.find(name);
   if(itVId_ == varIds_.end() )
     cout << " error, no such variable " << name << endl;

@@ -17,5 +17,8 @@
 
 #define DUMPVECTOR(x) for(int i = 0; i < x.size(); ++i) std::cout << #x << "[" << i << "] = " << x[i] << std::endl
 
+#define DUMPMAP(x) for(int i = 0; i < x.size(); ++i) for(int j = 0; j < x[0].size(); ++j) std::cout << #x << "[" << i << "][" << j << "] = " << x[i][j] << std::endl
+
+#define DUMPCUBE(x) for(int i = 0; i < x.size(); ++i) for(int j = 0; j < x[0].size(); ++j) for(int k = 0; k < x[0][0].size(); ++k) std::cout << #x << "[" << i << "][" << j << "][" << k << "] = " << x[i][j][k] << std::endl
 
 #endif
