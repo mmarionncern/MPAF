@@ -51,27 +51,50 @@ void susy3l_data_25ns() {
     float st=0.039;
     string addText="";
 
-
     if(obs == "njets"){
-        md.dp.setObservables("BR_NJets");
+        md.dp.setObservables("NJets");
         int binning=1;
-        double rangeX[2]={0,10};
+        double rangeX[2]={0,7};
         //bool logYScale=true;
     }
     if(obs == "nbjets"){
-        md.dp.setObservables("BR_NBJets");
+        md.dp.setObservables("NBJets");
         int binning=1;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "met"){
-        md.dp.setObservables("BR_MET");
+        md.dp.setObservables("MET");
         int binning=50;
         double rangeX[2]={0,500};
         //bool logYScale=true;
     }
     if(obs == "ht"){
-        md.dp.setObservables("BR_HT");
+        md.dp.setObservables("HT");
+        int binning=0;
+        double rangeX[2]={0,1000};
+        //bool logYScale=true;
+    }
+    if(obs == "njets_wzcr"){
+        md.dp.setObservables("NJetsWZCR");
+        int binning=1;
+        double rangeX[2]={0,7};
+        //bool logYScale=true;
+    }
+    if(obs == "nbjets_wzcr"){
+        md.dp.setObservables("NBJetsWZCR");
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
+    if(obs == "met_wzcr"){
+        md.dp.setObservables("METWZCR");
+        int binning=50;
+        double rangeX[2]={0,500};
+        //bool logYScale=true;
+    }
+    if(obs == "wzcr_ht"){
+        md.dp.setObservables("HTWZCR");
         int binning=0;
         double rangeX[2]={0,1000};
         //bool logYScale=true;

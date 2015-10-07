@@ -7,8 +7,8 @@ void susy3l_data_25ns() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="multiLep_OffZ"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="multiLep_OffZ"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3L_data_25ns"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3L_data_25ns"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -18,7 +18,7 @@ void susy3l_data_25ns() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="lep";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
+    string obs ="zpeak";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
     string sigs = "none"; 
     bool data = true;
 
@@ -50,25 +50,49 @@ void susy3l_data_25ns() {
 
 
     if(obs == "njets"){
-        md.dp.setObservables("BR_NJets");
+        md.dp.setObservables("NJets");
         int binning=1;
         double rangeX[2]={0,7};
         //bool logYScale=true;
     }
     if(obs == "nbjets"){
-        md.dp.setObservables("BR_NBJets");
+        md.dp.setObservables("NBJets");
         int binning=1;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "met"){
-        md.dp.setObservables("BR_MET");
+        md.dp.setObservables("MET");
         int binning=50;
         double rangeX[2]={0,500};
         //bool logYScale=true;
     }
     if(obs == "ht"){
-        md.dp.setObservables("BR_HT");
+        md.dp.setObservables("HT");
+        int binning=0;
+        double rangeX[2]={0,1000};
+        //bool logYScale=true;
+    }
+    if(obs == "njets_wzcr"){
+        md.dp.setObservables("NJetsWZCR");
+        int binning=1;
+        double rangeX[2]={0,7};
+        //bool logYScale=true;
+    }
+    if(obs == "nbjets_wzcr"){
+        md.dp.setObservables("NBJetsWZCR");
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
+    if(obs == "met_wzcr"){
+        md.dp.setObservables("METWZCR");
+        int binning=50;
+        double rangeX[2]={0,500};
+        //bool logYScale=true;
+    }
+    if(obs == "wzcr_ht"){
+        md.dp.setObservables("HTWZCR");
         int binning=0;
         double rangeX[2]={0,1000};
         //bool logYScale=true;

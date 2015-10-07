@@ -38,12 +38,11 @@ private:
     bool electronSelection(int);
     bool muonSelection(int);
     bool tauSelection(int);
-    bool vetoElectronSelection(int);
-    bool vetoMuonSelection(int);
     bool bJetSelection(int);
     bool goodJetSelection(int);
 
     bool baseSelection();
+    void wzCRSelection();
     void setBaselineRegion();
     void setSignalRegion();
     void setCut(std::string, float, std::string, float = 0);
@@ -54,7 +53,7 @@ private:
     bool srSelection();
     bool electronMvaCut(int, int);
     bool multiIsolation(int, float, float, float);
-    void fillEventPlots(std::string);
+    void fillEventPlots();
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll(bool ossf = true);
@@ -78,7 +77,12 @@ private:
 private:
 
     //counter categories, 0 is ALWAYS global (even if not specified later)
-    enum {kGlobal=0, kElId, kElVeto, kMuId, kMuVeto, kTauId, kTauVeto, kJetId, kBJetId, conZEvents};
+    enum {
+        kGlobal=0,                                      //global counter
+        kElId, kMuId, kTauId, kJetId, kBJetId,          //objects counter
+        conZEvents,                                     //Z cand. counter
+        kWZCR                                           //WZ control region counter
+        };
 
     //cut variables
     float _valCutLepMultiplicityBR;

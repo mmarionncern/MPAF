@@ -137,11 +137,8 @@ void SUSY3L::initialize(){
 
     //additional counter categories
     _au->addCategory( kElId, "el Id");
-    _au->addCategory( kElVeto, "veto El");
     _au->addCategory( kMuId, "muon Id");
-    _au->addCategory( kMuVeto, "veto Mu");
     _au->addCategory( kTauId, "tau Id");
-    _au->addCategory( kTauVeto, "veto tau");
     _au->addCategory( kJetId, "jet Id");
     _au->addCategory( kBJetId, "b-jet Id");
     _au->addCategory( conZEvents, "Z events");
@@ -154,6 +151,9 @@ void SUSY3L::initialize(){
     _BR = getCfgVarS("baselineRegion");
     _SR = getCfgVarS("signalRegion");
 
+    //workflows
+    addWorkflow( kWZCR, "WZCR");
+    
 
 }
 
@@ -191,8 +191,8 @@ void SUSY3L::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    if(!passMultiLine(false)) return;
-    counter("HLT");
+    //if(!passMultiLine(false)) return;
+    //counter("HLT");
 
     //initialize multiIso working points
     setMultiIsoWP();
@@ -203,9 +203,19 @@ void SUSY3L::run(){
     // initialization of baseline region cuts, baseline event selection, and filling of
     // event based observables in plots
     setBaselineRegion();
-    if(!baseSelection()) return;	
+    
+    //check if event goes into baseline selection
+    //if(!makeCut(baseSelection(),"base selection")){	
+    if(!(baseSelection())){	
+        //if event fails baseline selection check if it goes to WZ control region
+        //wzCRSelection();
+        //back to global workflow
+        //setWorkflow(kGlobal);
+        return;
+    }
+
     //fillSkimTree();
-    fillEventPlots("BR");
+    fillEventPlots();
 
     // initialization of signal region cuts, categorization of events passing the baseline 
     // selection into different signal regions, and filling of plots
@@ -233,16 +243,10 @@ void SUSY3L::defineOutput(){
     */
     
     //event based observables for baseline region 
-    _hm->addVariable("BR_HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
-    _hm->addVariable("BR_MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
-    _hm->addVariable("BR_NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
-    _hm->addVariable("BR_NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
-
-    //event based observables for signal region 
-    _hm->addVariable("SR_HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
-    _hm->addVariable("SR_MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
-    _hm->addVariable("SR_NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
-    _hm->addVariable("SR_NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
+    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
+    _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
+    _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
 
     //additional observables
     _hm->addVariable("Zmass"            ,  150,     0.0,  150.0,    "Z candidate mass [GeV]"            );
@@ -603,57 +607,6 @@ bool SUSY3L::tauSelection(int tauIdx){
     return true;
 }
 
-
-//____________________________________________________________________________
-bool SUSY3L::vetoElectronSelection(int elIdx){
-    /*
-        selection of veto electrons
-        parameters: elIdx
-        return: true (if the electron is a veto electron), false (else)
-    */
-    
-    //count veto electron candidates
-    counter("vetoElDenominator", kElVeto);
-
-    //define cut values
-    float pt_cut = 5.;
-    float eta_cut = 2.4;
-    float eta_veto_low = 1.442;
-    float eta_veto_high = 1.566;
-    float isolation_cut = 0.2;
- 
-    //cuts like electron selection, only lower pt cut, looser electron identification id, looser isolation cut
-    if(!makeCut<float>( _vc->get("LepGood_pt", elIdx) , pt_cut   , ">"  , "pt selection"    , 0    , kElVeto)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_eta", elIdx)), eta_cut   , "<"  , "eta selection"   , 0    , kElVeto)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_eta", elIdx)), eta_veto_low, "[!]", "eta selection"   , eta_veto_high, kElVeto)) return false;
-    if(!makeCut<int>( _vc->get("LepGood_eleCutIdCSA14_50ns_v1", elIdx), 1, ">=" , "POG CB WP-L Id " , 0    , kElVeto)) return false;
-    if(!makeCut<float>( _vc->get("LepGood_relIso03", elIdx), isolation_cut    , "<"  , "isolation "      , 0    , kElVeto)) return false;
-
-    return true;
-}
-
-
-//____________________________________________________________________________
-bool SUSY3L::vetoMuonSelection(int muIdx){
-    /*
-        selection of veto muons
-        parameters: muIdx     
-        return: true (if the muon is a veto muon), false (else)
-    */
-    
-    //count veto muon candidates
-    counter("VetoMuonDenominator", kMuVeto);
-
-    //define cut values
-    float pt_cut = 5.;
-    float isolation_cut = 0.2;
-
-    if(!makeCut<int>(   _vc->get("LepGood_tightId", muIdx), 1  , "=", "POG Tight Id", 0, kMuVeto) ) return false;
-    if(!makeCut<float>( _vc->get("LepGood_relIso03", muIdx),  isolation_cut  , "<", "isolation "   , 0, kMuVeto)) return false;
-    if(!makeCut<float>(  _vc->get("LepGood_pt"     , muIdx), pt_cut, ">", "pt selection", 0, kMuVeto ) ) return false;
- 
-    return true;
-}
 
 //____________________________________________________________________________
 bool SUSY3L::goodJetSelection(int jetIdx){
@@ -2343,6 +2296,22 @@ bool SUSY3L::baseSelection(){
 }
 
 //____________________________________________________________________________
+void SUSY3L::wzCRSelection(){
+    /*
+        selects events for the WZ control region to estimate the WZ background from data
+        parameters: none
+        return: none
+    */
+
+    //change to WZCR workflow
+    setWorkflow(kWZCR);
+    if(!makeCut<float>( _HT, 60, ">", "hadronic activity", 0) ) return;
+    fillEventPlots();
+    setWorkflow(kGlobal);
+}
+
+
+//____________________________________________________________________________
 bool SUSY3L::checkMultiIso(){
     /*
         Checks if at least two of the selected leptons (ultra-loose in multiIso) 
@@ -2870,17 +2839,17 @@ float SUSY3L::getMT2(){
 * *****************************************************************************/
 
 //____________________________________________________________________________
-void SUSY3L::fillEventPlots(std::string kr){
+void SUSY3L::fillEventPlots(){
     /*
         fills the control plots for event quantities
         parameters: none
         return: none
     */
 
-    fill(kr + "_HT"        , _HT                    , _weight);
-    fill(kr + "_MET"       , _met->pt()             , _weight);
-    fill(kr + "_NBJets"    , _nBJets                , _weight);
-    fill(kr + "_NJets"     , _nJets                 , _weight);
+    fill("HT"        , _HT                    , _weight);
+    fill("MET"       , _met->pt()             , _weight);
+    fill("NBJets"    , _nBJets                , _weight);
+    fill("NJets"     , _nJets                 , _weight);
 
 }
 
