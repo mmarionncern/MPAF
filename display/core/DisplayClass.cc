@@ -1306,6 +1306,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     if(_normOpts.find("norm")!=_normOpts.end() || 
        _normOpts.find("uni")!=_normOpts.end() )
       ym = ymin;
+    if(ymin<=0 && _logYScale==true){ymin=0.01;ym=0.01;}  
     _empty->GetYaxis()->SetRangeUser( ym, ymax );
     if(_userYScale)
       _empty->GetYaxis()->SetRangeUser( _ymin, _ymax );
