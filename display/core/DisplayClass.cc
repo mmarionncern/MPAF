@@ -1477,7 +1477,9 @@ DisplayClass::drawDataMCRatio() {
   emptyHisto->GetYaxis()->SetTitleOffset(0.54);
   emptyHisto->GetXaxis()->SetTickLength(0.09);
   emptyHisto->GetYaxis()->SetTickLength(0.05);
-  
+ 
+  ratio->SetMarkerStyle(20); 
+  ratio->SetMarkerColor(1); 
   ratio->GetYaxis()->SetRangeUser(  0.4, 1.6);
   ratio->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   ratio->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
