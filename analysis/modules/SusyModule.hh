@@ -52,9 +52,11 @@ public:
   void applySingleLepSF(const Candidate* cand, float& weight);
 
   enum {kDenom=0,
+	kVLoose,
 	kLoose,
 	kMedium,
 	kTight,
+	kVTight,
 	kSpecFakeEl,
 	kSpecFakeMu,
 	kNWPs};
