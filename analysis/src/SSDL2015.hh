@@ -29,6 +29,7 @@ private:
   //============================
   bool noIsoSel();
   bool oneIsoSel();
+  bool twoIsoSel();
   float getProbAtLeastNIso(CandList fObjs, vector<unsigned int> idxs, int nIso);
   bool genMatchedMisCharge();
   int genMatchCateg(const Candidate* cand);
@@ -38,6 +39,8 @@ private:
   
   float getFR(Candidate* cand, int idx);
   
+  void chargeFlipProb();
+
   TVector2 varyMET();
 
   //============================
@@ -112,7 +115,28 @@ private:
 	kBR20H_Fake, kBR20M_Fake, kBR20L_Fake,
 	kBR30H_Fake, kBR30M_Fake, kBR30L_Fake,
 
+
+	
+	kSR1A_mId, kSR2A_mId, kSR3A_mId, kSR4A_mId, kSR5A_mId, kSR6A_mId, kSR7A_mId, kSR8A_mId,
+	kSR9A_mId, kSR10A_mId, kSR11A_mId, kSR12A_mId, kSR13A_mId, kSR14A_mId, kSR15A_mId, kSR16A_mId,
+	kSR17A_mId, kSR18A_mId, kSR19A_mId, kSR20A_mId, kSR21A_mId, kSR22A_mId, kSR23A_mId, kSR24A_mId,
+	kSR25A_mId, kSR26A_mId, kSR27A_mId, kSR28A_mId, kSR29A_mId, kSR30A_mId, kSR31A_mId, kSR32A_mId,
+
+	kSR1B_mId, kSR2B_mId, kSR3B_mId, kSR4B_mId, kSR5B_mId, kSR6B_mId, kSR7B_mId, kSR8B_mId,
+	kSR9B_mId, kSR10B_mId, kSR11B_mId, kSR12B_mId, kSR13B_mId, kSR14B_mId, kSR15B_mId, kSR16B_mId,
+	kSR17B_mId, kSR18B_mId, kSR19B_mId, kSR20B_mId, kSR21B_mId, kSR22B_mId, kSR23B_mId, kSR24B_mId,
+	kSR25B_mId, kSR26B_mId,
+
+	kSR1C_mId, kSR2C_mId, kSR3C_mId, kSR4C_mId, kSR5C_mId, kSR6C_mId, kSR7C_mId, kSR8C_mId,
+
+	
+	kBR00H_mId, kBR00M_mId, kBR00L_mId,
+	kBR10H_mId, kBR10M_mId, kBR10L_mId,
+	kBR20H_mId, kBR20M_mId, kBR20L_mId,
+	kBR30H_mId, kBR30M_mId, kBR30L_mId,
+
 	kGlobalFake,
+	kGlobalmId,
 	
 	kWZCR
   };
@@ -135,8 +159,12 @@ private:
   //MM ugly
   std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
 
+  //charge misId
+  bool _isOS;
+
   //fakes
   bool _isFake;
+  bool _dFake;
   int _idxFake;
 
   CandList _looseLeps;

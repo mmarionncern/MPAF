@@ -50,7 +50,9 @@ SSDL2015::initialize(){
   _vc->registerVar("LepGood_relIso04"             );
   _vc->registerVar("LepGood_jetPtRatio"           );
   _vc->registerVar("LepGood_jetPtRatio_LepAwareJEC");
+  _vc->registerVar("LepGood_jetPtRatiov2"         );
   _vc->registerVar("LepGood_jetPtRel"             );
+  _vc->registerVar("LepGood_jetPtRelv2"           );
   _vc->registerVar("LepGood_jetBTagCSV"           );
   _vc->registerVar("LepGood_miniRelIso"           );
   _vc->registerVar("LepGood_dxy"                  );
@@ -118,9 +120,9 @@ SSDL2015::initialize(){
   
   _susyMod = new SusyModule(_vc, _dbm);
   
-  int nCateg=156; //78 156
+  int nCateg=238; //n*(1+78) + 1  
   _categs.resize(nCateg);
-  string srs[156]={ 
+  string srs[238]={ 
 
     "SR1A", "SR2A", "SR3A", "SR4A", "SR5A", "SR6A", "SR7A", "SR8A",
     "SR9A", "SR10A", "SR11A", "SR12A", "SR13A", "SR14A", "SR15A", "SR16A",
@@ -162,6 +164,28 @@ SSDL2015::initialize(){
     "BR20H_Fake", "BR20M_Fake", "BR20L_Fake",
     "BR30H_Fake", "BR30M_Fake", "BR30L_Fake",
 
+
+    // //misId workflows ==================================================
+
+    "SR1A_mId", "SR2A_mId", "SR3A_mId", "SR4A_mId", "SR5A_mId", "SR6A_mId", "SR7A_mId", "SR8A_mId",
+    "SR9A_mId", "SR10A_mId", "SR11A_mId", "SR12A_mId", "SR13A_mId", "SR14A_mId", "SR15A_mId", "SR16A_mId",
+    "SR17A_mId", "SR18A_mId", "SR19A_mId", "SR20A_mId", "SR21A_mId", "SR22A_mId", "SR23A_mId", "SR24A_mId",
+    "SR25A_mId", "SR26A_mId", "SR27A_mId", "SR28A_mId", "SR29A_mId", "SR30A_mId", "SR31A_mId", "SR32A_mId",
+    
+    "SR1B_mId", "SR2B_mId", "SR3B_mId", "SR4B_mId", "SR5B_mId", "SR6B_mId", "SR7B_mId", "SR8B_mId",
+    "SR9B_mId", "SR10B_mId", "SR11B_mId", "SR12B_mId", "SR13B_mId", "SR14B_mId", "SR15B_mId", "SR16B_mId",
+    "SR17B_mId", "SR18B_mId", "SR19B_mId", "SR20B_mId", "SR21B_mId", "SR22B_mId", "SR23B_mId", "SR24B_mId",
+    "SR25B_mId","SR26B_mId",
+    
+    "SR1C_mId", "SR2C_mId", "SR3C_mId", "SR4C_mId", "SR5C_mId", "SR6C_mId", "SR7C_mId", "SR8C_mId",
+
+
+
+    "BR00H_mId", "BR00M_mId", "BR00L_mId",
+    "BR10H_mId", "BR10M_mId", "BR10L_mId",
+    "BR20H_mId", "BR20M_mId", "BR20L_mId",
+    "BR30H_mId", "BR30M_mId", "BR30L_mId",
+
  
   };
   _categs.assign(srs, srs+nCateg);
@@ -172,7 +196,9 @@ SSDL2015::initialize(){
     addWorkflow( ic+1, _categs[ic] );
   }
 
+
   addWorkflow( kGlobalFake, "Fake" );
+  addWorkflow( kGlobalmId, "mId" );
   addWorkflow( kWZCR, "WZCR");
   
   //extra input variables
@@ -196,6 +222,9 @@ SSDL2015::initialize(){
     _dbm->loadDb("El","MaySync/CH_FRFile_090615.root","tt/nosel/FRISisofo4RElPtMIso2");
     _dbm->loadDb("Mu","MaySync/CH_FRFile_090615.root","tt/nosel/FRISisofo4RMuPtMIso2");
   }
+
+  //chargeflip DB
+  _dbm->loadDb("chargeMId","superDB.db");
 
 }
 
@@ -332,7 +361,7 @@ SSDL2015::run() {
   }
 
   //MC check for FR --> one fake only
-  if(!_isFake) {
+  if(!_isFake && !_isOS) {
     setWorkflow(kGlobal); //MANDATORY (otherwise double counting in other categories)
     
     // if(!genMatchedToFake(_idxL1) && genMatchedToFake(_idxL2) ) {
@@ -343,7 +372,8 @@ SSDL2015::run() {
     // }
     // else return; //no only one fake
   }
-  else setWorkflow(kGlobalFake);
+  else if(_isFake) setWorkflow(kGlobalFake);
+  else if(_isOS) setWorkflow(kGlobalmId);
   
   
   counter("lepton baseline");
@@ -377,7 +407,11 @@ SSDL2015::run() {
  
   if(_isFake) {
     //return;
-    oneIsoSel();
+    if(!_dFake) oneIsoSel();
+    else twoIsoSel();
+  }
+  if(_isOS) {
+    chargeFlipProb();
   }
   
   counter("weigthing");
@@ -391,6 +425,9 @@ SSDL2015::run() {
     
     if(_isFake) {
       setWorkflow(getCurrentWorkflow()+kBR30L); //MM to be done in a better way
+    }
+    if(_isOS) {
+      setWorkflow(getCurrentWorkflow()+kBR30L_Fake); //MM to be done in a better way
     }
 
     counter("region splitting");
@@ -452,6 +489,18 @@ SSDL2015::oneIsoSel() {
 
   return true;
 }
+
+bool
+SSDL2015::twoIsoSel() {
+  
+  if( _fakableLepsVeto10.size()!=2 ) return false;
+
+  float p=getProbAtLeastNIso( _fakableLepsVeto10 ,_fakableLepsVeto10Idx , 2);
+  _weight *= p/(1-p);
+
+  return true;
+}
+
 
 float
 SSDL2015::getProbAtLeastNIso(CandList fObjs, vector<unsigned int> fObjIdx,
@@ -567,9 +616,6 @@ SSDL2015::ssLeptonSelection() {
 
     _idxL1 = _tightLepsVeto10Idx[_idxL1];
     _idxL2 = _tightLepsVeto10Idx[_idxL2];
-    
-//    if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-//    if(!makeCut(_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
  
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
     if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
@@ -577,14 +623,40 @@ SSDL2015::ssLeptonSelection() {
     return true;
   } //MM: validated 2T selection -> sync with CB
    
+  // 2Tight, opposite charge ===================
+
+  if(_tightLepsVeto10.size()>=2) { //main
+    _isFake=false;
+    _isOS=false;
+
+    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
+    if(lepPair.size()<2) return false;
+    _l1Cand = lepPair[0];
+    _l2Cand = lepPair[1];
+
+    if(_l1Cand==nullptr || _l2Cand==nullptr) return false; //case with less than two leptons or no valid pair
+
+    _idxL1 = _tightLepsVeto10Idx[_idxL1];
+    _idxL2 = _tightLepsVeto10Idx[_idxL2];
+  
+    if( _l1Cand->charge()*_l2Cand->charge()>0) return false;
+    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
+   
+    return true;
+  }
+   
+
+  //fake stuff==========================================================================================
+
   // 1Tight 1Loose ====================================
   if(_tightLepsVeto10.size()==1 && _fakableLepsVeto10.size()>=1) { // && _fakableLepsVeto10.size()>=1
     _isFake=true;
+    _isOS=false;
+    _dFake=false;
 
     CandList lepPair=_susyMod->bestSSPair(_tightLepsVeto10[0], (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
     
     if(lepPair.size()<2) return false;
-    //cout<<lepPair.size()<<endl;
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
 
@@ -592,29 +664,29 @@ SSDL2015::ssLeptonSelection() {
     _idxL1 = _tightLepsVeto10Idx[0];
     _idxL2 = _fakableLepsVeto10Idx[_idxL2];
     
-    // _l1Cand = _tightLepsVeto10[0];
-    // _l2Cand = _fakableLepsVeto10[0];
+    _l1Cand = _tightLepsVeto10[0];
+    _l2Cand = _fakableLepsVeto10[0];
       
-    // if(_l1Cand==nullptr || _l2Cand==nullptr) return false;
+    if(_l1Cand==nullptr || _l2Cand==nullptr) return false;
       
     //    if(!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) return false;
     //if(genMatchedToFake(_idxL1) && genMatchedToFake(_idxL2) ) return false;
 
     if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
     if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
-//    if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-//    if(!makeCut(_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
-    
+
     return true;
   }
 
   // 0Tight any loose ====================================
   if(_tightLepsVeto10.size()==0 && _fakableLepsVeto10.size()>=2) {
-
+    _isFake=true;
+    _isOS=false;
+    _dFake=true;
     
     CandList lepPair=_susyMod->bestSSPair( (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
     if(lepPair.size()<2) return false;
-    //cout<<lepPair.size()<<endl;
+
     _l1Cand = lepPair[0];
     _l2Cand = lepPair[1];
 
@@ -1290,8 +1362,8 @@ SSDL2015::passGenSelection() {
 
   if( _sampleName.find("DYJets")!=(size_t)-1 || _sampleName.find("TTJets")!=(size_t)-1 ) {
     //ugly
-    int lep1Id=genMatchCateg(_l1Cand);
-    int lep2Id=genMatchCateg(_l1Cand);
+    // int lep1Id=genMatchCateg(_l1Cand);
+    // int lep2Id=genMatchCateg(_l1Cand);
     
     if(_sampleName.find("charge")!=(size_t)-1) {
       if( !genMatchedMisCharge() )
@@ -1353,6 +1425,17 @@ SSDL2015::getFR(Candidate* cand, int idx) {
 			  std::min(etaVal,(float)2.49) );
 }
 
+
+
+void
+SSDL2015::chargeFlipProb() {
+
+  float p1=_dbm->getDBValue("chargeMId", std::abs(_l1Cand->eta()), _l1Cand->pt());
+  float p2=_dbm->getDBValue("chargeMId", std::abs(_l2Cand->eta()), _l2Cand->pt());
+  float w=p1+p2-2*p1*p2;
+
+  _weight *= w;
+}
 
 
 

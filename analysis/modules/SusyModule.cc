@@ -117,8 +117,8 @@ bool
 SusyModule::multiIsoSel(int idx, int wp) const {
 
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (_vc->get("LepGood_jetPtRatio", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRel", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+      (_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
@@ -128,8 +128,8 @@ bool
 SusyModule::multiIsoSelCone(int idx, int wp) const {
 
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (conePt(idx)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatio", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRel", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+      (conePt(idx)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
@@ -138,7 +138,7 @@ bool
 SusyModule::invMultiIsoSel(int idx, int wp) const {
   
   if( _vc->get("LepGood_miniRelIso", idx)>_multiIsoWP[kMiniIso][wp]) return false;
-  if( 1./_vc->get("LepGood_jetPtRel", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
+  if( 1./_vc->get("LepGood_jetPtRelv2", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
   return true;
 }
 
@@ -400,7 +400,7 @@ SusyModule::closestJetPt(int idx) const {
 float 
 SusyModule::conePt(int idx, int isoWp) const {
 
-  if(_vc->get("LepGood_jetPtRel", idx) > _multiIsoWP[kPtRel][isoWp] ) {
+  if(_vc->get("LepGood_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
     return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
   }
   return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
