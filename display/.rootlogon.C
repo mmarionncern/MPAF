@@ -1,7 +1,6 @@
 {
+ setTDRStyle();
 
-  //setTDRStyle();
-  gStyle->SetOptStat(0);
   gStyle->SetPadColor(0);
   gStyle->SetCanvasColor(0);
   //gStyle->SetTitleColor(0);
@@ -27,12 +26,12 @@
   }
 
 
-  bool Recompute=1;
-   bool* pr=&Recompute;
+  // bool Recompute=1;
+  // bool* pr=&Recompute;
 
-   bool unlock=1;
-   bool* pr2=&unlock;
+  // bool unlock=1;
+  // bool* pr2=&unlock;
 
-   MPAFDisplay md;
+  //  MPAFDisplay md;
 
 }

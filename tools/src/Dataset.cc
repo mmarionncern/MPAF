@@ -84,14 +84,14 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
       return;
     }
   }
-    
+	
   //Tree/chain initialisation =========
   if(isTreeType())
     if(_chain==NULL)
       _chain = new TChain(objName.c_str());
 
   //======
-    
+	
   //Looking for the tree if not data-driven
   string tmpPath=isTreeType()?("data/"+path):"root";
   string tmpFName=isTreeType()?(sId.name):objName;
@@ -104,10 +104,10 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
   //tree analysis 
   if(isTreeType()) {
     loadTree(path, dir, sId.name, objName);
-    
+	
     cout<<" Adding "<<sId.name<<"  to "<<_name
-    <<"   :  nEvt "<<_chain->GetEntries()<<" ("<<nProcEvt
-    <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
+	<<"   :  nEvt "<<_chain->GetEntries()<<" ("<<nProcEvt
+	<<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
   }
   else {
     if(loadH) { //reading histograms only when needed (disabled for datacards)
@@ -115,18 +115,18 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
     }
     if(sId.norm==-1) {
       if(sId.cr=="" && sId.dd==false)
-    cout<<" Adding "<<sId.name<<"  to "<<_name
-        <<"   : "<<" ("<<nProcEvt
-        <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
+	cout<<" Adding "<<sId.name<<"  to "<<_name
+	    <<"   : "<<" ("<<nProcEvt
+	    <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
       else
-    cout<<" Adding "<<sId.name<<" ("<<sId.cr<<")  to "<<_name
-        <<"   : "<<" ("<<nProcEvt
-        <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
+	cout<<" Adding "<<sId.name<<" ("<<sId.cr<<")  to "<<_name
+	    <<"   : "<<" ("<<nProcEvt
+	    <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
     
     }
     else {
       cout<<" Adding "<<sId.name<<"  to "<<_name
-      <<"   : "<<" fixed normalization ("<<sId.norm<<")"<<endl;
+	  <<"   : "<<" fixed normalization ("<<sId.norm<<")"<<endl;
 
     }
 
@@ -372,30 +372,30 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
       if( objD==nullptr ) continue;
       
       if( ((string)(objD->IsA()->GetName())).substr(0,2)!=("TH") &&
-      ((string)(objD->IsA()->GetName())).substr(0,2)!=("TP") ) continue;
+	  ((string)(objD->IsA()->GetName())).substr(0,2)!=("TP") ) continue;
 
       //matching the samples needed for the dataset
       string sName( objD->GetName() );
       for(size_t is=0;is<_samples.size();is++) {
-    if( sName!=_samples[is].getName() ) continue;
+	if( sName!=_samples[is].getName() ) continue;
+	   
+	//histograms and not normalization file
+	if(varName=="nEvtProc") continue;
+	if(varName=="sumWgtProc") continue;
        
-    //histograms and not normalization file
-    if(varName=="nEvtProc") continue;
-    if(varName=="sumWgtProc") continue;
-       
-    
-    if(_histos[ varName ].size()==0) { //initialization
-      tmp[ sName ] = (TH1*)((TH1*)objD->Clone());
-      _histos[ varName ]= tmp;
-    }
-    else {
-      _histos[ varName ][ sName ]= (TH1*)((TH1*)objD->Clone());
-    }     
+	
+	if(_histos[ varName ].size()==0) { //initialization
+	  tmp[ sName ] = (TH1*)((TH1*)objD->Clone());
+	  _histos[ varName ]= tmp;
+	}
+	else {
+	  _histos[ varName ][ sName ]= (TH1*)((TH1*)objD->Clone());
+	}	  
 
-    break;
-    
+	break;
+	
       }
-    
+	
     } //loop keyD in directory
       
   } //loop key in file
