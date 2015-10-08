@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VAR=("njets" "nbjets" "met" "ht" "lep" "zpeak" "zpt" "mt" "mt2" "pt1" "pt2" "pt3" "mll" "muonsip" "muoniso" "muondz" "muondxy" "muonptrel" "muonptratio"  "elsip" "eliso" "eldz" "eldxy" "elptrel" "elptratio")
+VAR=("njets" "nbjets" "met" "ht" "lep" "zpeak" "zpt" "mt" "mt2" "pt1" "pt2" "pt3" "mll" "muonsip" "muoniso" "muondz" "muondxy" "muonptrel" "muonptratio"  "elsip" "eliso" "eldz" "eldxy" "elptrel" "elptratio" "3rdlepflavor")
 
 
 for var in ${VAR[@]}; do

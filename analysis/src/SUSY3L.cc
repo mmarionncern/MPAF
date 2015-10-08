@@ -152,7 +152,7 @@ void SUSY3L::initialize(){
     _SR = getCfgVarS("signalRegion");
 
     //workflows
-    addWorkflow( kWZCR, "WZCR");
+    //addWorkflow( kWZCR, "WZCR");
     
 
 }
@@ -191,8 +191,8 @@ void SUSY3L::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    //if(!passMultiLine(false)) return;
-    //counter("HLT");
+    if(!passMultiLine(false)) return;
+    counter("HLT");
 
     //initialize multiIso working points
     setMultiIsoWP();
@@ -253,6 +253,7 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("Zpt"              ,  150,     0.0,  150.0,    "Z candidate pt [GeV]"              );
     _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
     _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "MT [GeV]"                          );
+    _hm->addVariable("3rd_lepton_flavor",  40,      -20,  20.0,    "3rd lepton pdgId"                   );
     _hm->addVariable("deltaR_elmu"      ,  500,     0.0,  10.0,     "delta R between el and mu"         );
     _hm->addVariable("el_multiplicity"  ,  10,      0.0,  10.0,     "electron multiplicity"             );
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,  10.0,     "muon multiplicity"                 );
@@ -444,8 +445,8 @@ bool SUSY3L::electronSelection(int elIdx){
 
     //define cuts for electrons
     float pt_cut = 10.;
-    //float eta_cut = 2.5;
-    float eta_cut = 1.479;
+    float eta_cut = 2.5;
+    //float eta_cut = 1.479;
     float eta_veto_low = 1.4442;
     float eta_veto_high = 1.566;
     float isolation_cut = 0.15;
@@ -704,11 +705,11 @@ void SUSY3L::setMultiIsoWP(){
     */
  
     //multiIso working points
-    _multiIsoWP[0][0]=0.22;  _multiIsoWP[0][1]=0.63;  _multiIsoWP[0][2]=6.; //loose
-    _multiIsoWP[1][0]=0.14;  _multiIsoWP[1][1]=0.68;  _multiIsoWP[1][2]=6.7;//medium
-    _multiIsoWP[2][0]=0.10;  _multiIsoWP[2][1]=0.70;  _multiIsoWP[2][2]=7.; //tight
-    _multiIsoWP[3][0]=0.075; _multiIsoWP[3][1]=0.725; _multiIsoWP[3][2]=7.; //very tight
-    _multiIsoWP[4][0]=0.05;  _multiIsoWP[4][1]=0.725; _multiIsoWP[4][2]=8.; //hyper tight
+    _multiIsoWP[0][0]=0.25;  _multiIsoWP[0][1]=0.75;  _multiIsoWP[0][2]=4.7; //loose
+    _multiIsoWP[1][0]=0.21;  _multiIsoWP[1][1]=0.80;  _multiIsoWP[1][2]=6.9;//medium
+    _multiIsoWP[2][0]=0.13;  _multiIsoWP[2][1]=0.81;  _multiIsoWP[2][2]=7.2; //tight
+    _multiIsoWP[3][0]=0.088; _multiIsoWP[3][1]=0.84; _multiIsoWP[3][2]=7.2; //very tight
+    _multiIsoWP[4][0]=0;     _multiIsoWP[4][1]=0; _multiIsoWP[4][2]=0; //hyper tight
 
 }
 
@@ -2597,6 +2598,7 @@ bool SUSY3L::ZEventSelectionLoop(){
                 }
                 pt_other = _els[ie]->pt();
                 phi_other = _els[ie]->phi();
+                fill("3rd_lepton_flavor", _els[ie]->pdgId(), _weight);
                 //calculate transverse mass of other lepton and met
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and mt critirion is fulfilled
@@ -2611,6 +2613,7 @@ bool SUSY3L::ZEventSelectionLoop(){
             for(int im=0; im < _nMus; im++){
                 pt_other = _mus[im]->pt();
                 phi_other = _mus[im]->phi();
+                fill("3rd_lepton_flavor", _mus[im]->pdgId(), _weight);
                 //calculate transverse mass of other lepton and met
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and mt critirion is fulfilled
@@ -2626,6 +2629,7 @@ bool SUSY3L::ZEventSelectionLoop(){
             for(int it=0; it < _nTaus; it++){
                 pt_other = _taus[it]->pt();
                 phi_other = _taus[it]->phi();
+                fill("3rd_lepton_flavor", _taus[it]->pdgId(), _weight);
                 //calculate transverse mass of other lepton and met
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and mt critirion is fulfilled
