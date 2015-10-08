@@ -7,9 +7,7 @@ void susy3l_data_25ns() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    //string fileName="3L_data_25ns"; //was treeName in LUNE susy_cut_lowpt
     string fileName="multiLep_OffZ"; //was treeName in LUNE susy_cut_lowpt
-    //string fileList="3L_data_25ns"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string fileList="multiLep_OffZ"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
@@ -20,7 +18,7 @@ void susy3l_data_25ns() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
+    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
     string sigs = "none"; 
     bool data = true;
 
@@ -71,7 +69,7 @@ void susy3l_data_25ns() {
     }
     if(obs == "ht"){
         md.dp.setObservables("HT");
-        int binning=0;
+        int binning=60;
         double rangeX[2]={0,1000};
         //bool logYScale=true;
     }
@@ -121,37 +119,43 @@ void susy3l_data_25ns() {
     }
     if(obs == "mt2"){
         md.dp.setObservables("MT2");
-        int binning=0;
-        double rangeX[2]={0,400};
+        int binning=25;
+        double rangeX[2]={0,200};
         //bool logYScale=true;
     }
     if(obs == "mt"){
         md.dp.setObservables("MT");
-        int binning=0;
+        int binning=25;
         double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "3rdlepflavor"){
+        md.dp.setObservables("3rd_lepton_flavor");
+        int binning=1;
+        double rangeX[2]={-20,20};
         //bool logYScale=true;
     }
     if(obs == "pt1"){
         md.dp.setObservables("pt_1st_lepton");
-        int binning=0;
+        int binning=10;
         double rangeX[2]={0,200};
         //bool logYScale=true;
     }
     if(obs == "pt2"){
         md.dp.setObservables("pt_2nd_lepton");
-        int binning=0;
+        int binning=10;
         double rangeX[2]={0,150};
         //bool logYScale=true;
     }   
     if(obs == "pt3"){
         md.dp.setObservables("pt_3rd_lepton");
-        int binning=0;
+        int binning=10;
         double rangeX[2]={0,100};
         //bool logYScale=true;
     }
     if(obs == "mll"){
         md.dp.setObservables("lowMll");
-        int binning=0;
+        int binning=10;
         double rangeX[2]={0,400};
         //bool logYScale=true;
     }
