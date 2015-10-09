@@ -320,6 +320,8 @@ public:
   // void applyWSystVar(string name, int dir, float& w, vector<string> vars, 
   // 		     string db, string type);
 	
+  void linkFriendBranches(TTree*& tree);
+
   void nextEvent(){ _nextEvent=true;};
   void sameEvent(){ _nextEvent=false;};
 	
@@ -343,6 +345,12 @@ private:
   double findAVal(int tType, int key, int idx);
 
   vector<float> getUnivF(int id);
+
+
+  void linkBranch(string name);
+  void linkScalarVal(string name, int tType, int key);
+  void linkVectorVal(string name, int tType, int key);
+  void linkArrayVal(string name, int tType, int key);
 
   // Public Members
 
@@ -463,7 +471,8 @@ private:
   mapD uncmD;
   mapF uncmF;
 	
-
+  TTree* _mTree;
+  vector<string> _friendBranches;
 
   bool _nextEvent;
 	
