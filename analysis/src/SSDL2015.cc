@@ -101,6 +101,11 @@ SSDL2015::initialize(){
   _vc->registerVar("GenPart_phi"                  );
   _vc->registerVar("GenPart_pdgId"                );
   _vc->registerVar("GenPart_motherId"             );
+  
+  //LHE gen level weights
+  _vc->registerVar("nLHEweight"                   );
+  _vc->registerVar("LHEweight_id"                 );
+  _vc->registerVar("LHEweight_wgt"                );
 
   //bjets
   _vc->registerVar("nBJetLoose25"                 );
@@ -206,6 +211,7 @@ SSDL2015::initialize(){
   _leppt   = getCfgVarS("LEPPT"  );
   _SR      = getCfgVarS("SR"     );
   _FR      = getCfgVarS("FR"     );
+  _LHESYS = getCfgVarS("LHESYS");
   _categorization = getCfgVarI("categorization");
   _DoValidationPlots = getCfgVarI("ValidationPlots");
 
@@ -225,6 +231,15 @@ SSDL2015::initialize(){
 
   //chargeflip DB
   _dbm->loadDb("chargeMId","superDB.db");
+  
+  
+  int ilhe = (int)atoi(_LHESYS.c_str());
+  bool tmp_ismux = ilhe >= 1001 && ilhe <= 1009;
+  bool tmp_ispdf = ilhe >= 2001 && ilhe <= 2100;
+  
+  if (!tmp_ismux && !tmp_ispdf) {
+    _LHESYS = "0";
+  }
 
 }
 
@@ -233,10 +248,36 @@ SSDL2015::modifyWeight() {
 
   if (_vc->get("isData") != 1) {
     //generator weights
-    _weight *= _vc->get("genWeight");
+    if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}
+    else {_weight *= lheWeight();}
     //pileup weights
     _weight *= _vc->get("puWeight");
   }
+
+}
+
+double
+SSDL2015::lheWeight() {
+
+
+  int tmp_nlhe = _vc->get("nLHEweight");
+  //std::cout << "tmp_nlhe=" << tmp_nlhe << std::endl;
+  
+  for (int i = 0; i < tmp_nlhe; i++) {
+        int tmp_lhe_id = _vc->get("LHEweight_id", i);
+	
+      
+        if (tmp_lhe_id == (int)atoi(_LHESYS.c_str())) {
+	  double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
+	  
+	  
+          //std::cout << "using weight LHEid[" << i << "]="  << tmp_lhe_id << " LHEvalue=" << tmp_lhe_wgt  <<  std::endl;
+		
+          return tmp_lhe_wgt;
+        }
+      
+  }
+  return 1.0;
 
 }
 
@@ -1410,7 +1451,7 @@ SSDL2015::getFR(Candidate* cand, int idx) {
   float etaVal=std::abs(cand->eta());
   
   if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx), (float)10.);
-  if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatio", idx);
+  if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
   ptVal=std::max(ptVal, (float)10.);
   // cout<<" ====> "<<cand->pt()<<" / "<<cand->eta()<<" => "<<_dbm->getDBValue(db, std::min( ptVal,(float)69.9),
@@ -1893,15 +1934,15 @@ void SSDL2015::fillhistos() {
 
 void SSDL2015::fillValidationHistos(string reg){
   
-  fill(reg+"_lep1_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL1) , _weight);
-  fill(reg+"_lep1_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL1)               , _weight);
+  fill(reg+"_lep1_jetPtRatio", _vc->get("LepGood_jetPtRatiov2", _idxL1) , _weight);
+  fill(reg+"_lep1_jetPtRel"  , _vc->get("LepGood_jetPtRelv2", _idxL1)               , _weight);
   fill(reg+"_lep1_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL1)             , _weight);
   fill(reg+"_lep1_Pt"        , _vc->get("LepGood_pt", _idxL1)                     , _weight);
   fill(reg+"_lep1_Eta"       , fabs(_vc->get("LepGood_eta", _idxL1))              , _weight);
   fill(reg+"_lep1_SIP3D"     , _vc->get("LepGood_sip3d", _idxL1)                  , _weight);
   
-  fill(reg+"_lep2_jetPtRatio", _vc->get("LepGood_jetPtRatio_LepAwareJEC", _idxL2) , _weight);
-  fill(reg+"_lep2_jetPtRel"  , _vc->get("LepGood_jetPtRel", _idxL2)               , _weight);
+  fill(reg+"_lep2_jetPtRatio", _vc->get("LepGood_jetPtRatiov2", _idxL2) , _weight);
+  fill(reg+"_lep2_jetPtRel"  , _vc->get("LepGood_jetPtRelv2", _idxL2)               , _weight);
   fill(reg+"_lep2_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL2)             , _weight);
   fill(reg+"_lep2_Pt"        , _vc->get("LepGood_pt", _idxL2)                     , _weight);
   fill(reg+"_lep2_Eta"       , fabs(_vc->get("LepGood_eta", _idxL2))              , _weight);
