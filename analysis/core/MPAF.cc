@@ -74,6 +74,7 @@ void MPAF::initialize(){
   _wfNames[AUtils::kGlobal] = "";
 
   _hname="";
+  _hwgtname="";
   _summary=false;
 }
 
@@ -111,7 +112,7 @@ void MPAF::analyze(){
   defineOutput();
   //copy the histograms for the different workflows
   addWorkflowHistos();
-
+  
   // loop over given samples
   for(unsigned int i=0; i<_numDS; ++i){
 		
@@ -228,7 +229,7 @@ void MPAF::loadConfigurationFile(std::string cfg){
   _nEvtMax = -1;
   string tName;
   vector<string> _friends;
-
+  
   for(MIPar::const_iterator it=_inputVars.begin(); 
       it!=_inputVars.end();it++) {
 
@@ -258,6 +259,9 @@ void MPAF::loadConfigurationFile(std::string cfg){
     if(it->second.type==Parser::kHisto) {
       _hname = it->second.val;
     }
+    if(it->second.type==Parser::kWgtHisto) {
+      _hwgtname = it->second.val;
+    }
     if(it->second.type==Parser::kFT){
       _friends.push_back(it->second.val);
     }
@@ -277,6 +281,7 @@ void MPAF::loadConfigurationFile(std::string cfg){
     string pfx="";
     string dirName="";
     bool absdir=false;
+    vector<string> friends;
     vector<string> opts= it->second.opts;
     if(opts.size()!=0) {
       for(size_t i=0;i<opts.size();i++) {
@@ -291,7 +296,7 @@ void MPAF::loadConfigurationFile(std::string cfg){
           absdir=true;
         }
 	if(opts[i].substr(0,3)=="ft:"){
-	  _friends.push_back(opts[i].substr(3, opts[i].size()-3 ));
+	  friends.push_back(opts[i].substr(3, opts[i].size()-3 ));
 	} 
       }
     }
@@ -307,13 +312,17 @@ void MPAF::loadConfigurationFile(std::string cfg){
     sId.norm = -1; 
     
     for (size_t ft=0; ft<_friends.size();ft++) {
-      _datasets.back()->addFriend(_friends[ft].c_str()); 
+      _datasets.back()->addFriend(_friends[ft]); 
+    }
+
+    for (size_t ft=0; ft<friends.size();ft++) {
+      _datasets.back()->addFriend(friends[ft]);
     }
 
     if(!absdir)
-      _datasets.back()->addSample(sId, _inputPath, dirName, tName, _hname, 1.0, 1.0, 1.0, 1.0);
+      _datasets.back()->addSample(sId, _inputPath, dirName, tName, _hname, _hwgtname, 1.0, 1.0, 1.0, 1.0);
     else
-      _datasets.back()->addSample(sId, "://"+dirName, "", tName, _hname, 1.0, 1.0, 1.0, 1.0);
+      _datasets.back()->addSample(sId, "://"+dirName, "", tName, _hname, _hwgtname, 1.0, 1.0, 1.0, 1.0);
     
     _au->addDataset( dsName );
   }
@@ -401,14 +410,16 @@ void MPAF::internalWriteOutput() {
   writeOutput();
 
   map<string, int> cnts;
+  map<string, double> wgtcnts;
   for(unsigned int ids=0;ids<_datasets.size(); ++ids) {
-    cnts[ _datasets[ids]->getName() ] = _datasets[ids]->getNProcEvents(0);
+    cnts[ _datasets[ids]->getName() ] = _datasets[ids]->getNProcEvents();
+    wgtcnts[ _datasets[ids]->getName() ] = _datasets[ids]->getSumProcWgts();
   }
 
   cout << "writing output to disk" << endl;
 
-  _hm->saveHistos (_className, _cfgName, cnts);
-  _au->saveNumbers(_className, _cfgName, cnts);
+  _hm->saveHistos (_className, _cfgName, cnts, wgtcnts);
+  _au->saveNumbers(_className, _cfgName, cnts, wgtcnts);
 
 
 }
@@ -427,26 +438,41 @@ void MPAF::fill(string var, float valx, float weight) {
     parameters: var, valx, weight
     return: none
   */
-  //cout<<_uncId<<"   "<<_curWF<<"   "<<_wfNames[_curWF]<<endl;
-  if(!_uncId) { //central value
-   
-    if(_curWF!=-100) { //single workflow
-      _hm->fill( var+_wfNames[_curWF], _inds, valx, weight );
-    }
-    else { //multiple workflows
-      for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
-	_hm->fill( var+_itWF->second, _inds, valx, weight );
+  const hObs* obs = _hm->getHObs(var);
+  
+  if(obs->IsGlobal()) {  
+    // IF HISTOGRAM IS GLOBAL DO AS USUAL:
+    if(!_uncId) { //central value
+      if(_curWF!=-100) { //single workflow
+	_hm->fill( var+_wfNames[_curWF], _inds, valx, weight );
       }
+      else { //multiple workflows
+	for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
+	  _hm->fill( var+_itWF->second, _inds, valx, weight );
+	}
+      }
+      
     }
-    
+    else {
+      if(_uDir==SystUtils::kUp)
+	_hm->fill( var, _unc, valx, weight,"Up");
+      //fillUnc(var,_unc,valx,weight,"Up");
+      if(_uDir==SystUtils::kDown)
+	_hm->fill( var, _unc, valx, weight,"Do");
+      //fillUnc(var,_unc,valx,weight,"Do");
+    }
   }
-  else {
-    if(_uDir==SystUtils::kUp)
-      _hm->fill( var, _unc, valx, weight,"Up");
-    //fillUnc(var,_unc,valx,weight,"Up");
-    if(_uDir==SystUtils::kDown)
-      _hm->fill( var, _unc, valx, weight,"Do");
-    //fillUnc(var,_unc,valx,weight,"Do");
+  else {  //for local HISTOS
+    if(!_uncId) { //central value
+      _hm->fill( var, _inds, valx, weight );
+    }
+    else {
+      if(_uDir==SystUtils::kUp)
+	_hm->fill( var, _unc, valx, weight,"Up");
+      //fillUnc(var,_unc,valx,weight,"Up");
+      if(_uDir==SystUtils::kDown)
+	_hm->fill( var, _unc, valx, weight,"Do");
+    }
   }
 
 }
@@ -459,14 +485,22 @@ void MPAF::fill(string var, float valx, float valy, float weight) {
     parameters: var, valx, valy, weight
     return: none
   */
+  const hObs* obs = _hm->getHObs(var);
   
-  if(_curWF!=-100) { //single workflow
+  if(obs->IsGlobal()) {  
+    // IF HISTOGRAM IS GLOBAL DO AS USUAL:
+    if(_curWF!=-100) { //single workflow
     _hm->fill( var+_wfNames[_curWF], _inds, valx, valy, weight );
-  }
-  else { //multiple workflows
-    for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
-      _hm->fill( var+_itWF->second, _inds, valx, valy, weight );
     }
+    else { //multiple workflows
+      for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
+	_hm->fill( var+_itWF->second, _inds, valx, valy, weight );
+      }
+    }
+  }
+  else {
+    // IF HISTOGRAM IS GLOBAL DO AS USUAL:
+    _hm->fill( var, _inds, valx, valy, weight );
   }
 }
 
@@ -635,7 +669,7 @@ void MPAF::initSkimming() {
   if(_fullSkim) {
     _skimTree = (TTree*)_datasets[_inds]->getTree()->CloneTree(0);
     _hnSkim =new TH1I( _hname.c_str(), _hname.c_str(), 1, 0, 1);
-    _hnSkim->SetBinContent(1,_datasets[_inds]->getNProcEvents(0) );
+    _hnSkim->SetBinContent(1,_datasets[_inds]->getNProcEvents() );
   }
   else {
     TString name = _datasets[_inds]->getTree()->GetName();
@@ -672,18 +706,19 @@ MPAF::addWorkflowHistos() {
   if(_wfNames.size()==1) return;
 
   vector<string> obss = _hm->getObservables(true);
-
+  
   for(unsigned int io=0;io<obss.size();io++) {
     const hObs* obs = _hm->getHObs(obss[io]);
     bool prof = obs->htype.find("P")!=string::npos;
     bool is2D = obs->htype.find("2D")!=string::npos;
 
+    if (!obs->IsGlobal()) continue;  // don't declare histo if it's not declared as global
+
     for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
       if(_itWF->second=="") continue; //protection for global histo
       _hm->addVariableFromTemplate( obs->name+_itWF->second, obs->hs[0], prof, is2D, obs->type );
     }
-  }
-
+  }  
 }
 
 

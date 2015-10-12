@@ -41,6 +41,7 @@
 #include "analysis/utils/Parser.hh"
 #include "analysis/utils/Tools.hh"
 #include "analysis/utils/Verbose.hh"
+#include "analysis/utils/mt2_bisect.h"
 
 
 #include "analysis/tools/Candidate.hh"
@@ -126,6 +127,8 @@ protected:
   };
   void fillSkimTree() { if(_skim) _skimTree->Fill();};
 
+  //datasets
+  const Dataset* getCurrentDS() const {return _datasets[_inds];};
 
   //uncertainties
   void addSystSource(string name, int dir, string type, vector<string> modVar, 
@@ -208,6 +211,7 @@ private:
   std::string _className;
 
   std::string _hname;
+  std::string _hwgtname;
 
   //workflows
   int _curWF;
@@ -223,7 +227,7 @@ private:
   vector<string> _uncSrcs;
   vector<int> _uncDirs;
   map<string, bool> _uType;
-
+  
 };
 
 

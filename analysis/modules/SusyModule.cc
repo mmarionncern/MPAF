@@ -2,9 +2,17 @@
 
 
 SusyModule::SusyModule(VarClass* vc):
-  _vc(vc)
+  _vc(vc),_dbm(nullptr)
 {
   defineLeptonWPS();
+  
+}
+
+SusyModule::SusyModule(VarClass* vc, DataBaseManager* dbm):
+  _vc(vc), _dbm(dbm)
+{
+  defineLeptonWPS();
+  loadDBs();
 }
 
 SusyModule::~SusyModule() {
@@ -12,6 +20,23 @@ SusyModule::~SusyModule() {
   delete _vc;
 }
 
+void
+SusyModule::loadDBs() {
+
+  //_dbm->loadDb("PileupWeights.root",""); -> done with trees
+
+  //HLT scale factors
+  _dbm->loadDb("hltDEG","hltSFDoubleEG.db");
+  _dbm->loadDb("hltDMu","hltSFDoubleMu.db");
+  _dbm->loadDb("hltSEle","hltSFSingleEle.db");
+  _dbm->loadDb("hltSMu","hltSFSingleMu.db");
+  
+  //lepton scale factors
+  _dbm->loadDb("eleSFDb","electronSF.db");
+  _dbm->loadDb("muSFDb","muonSF.db");
+  _dbm->loadDb("tauSFDb","tauSF.db");
+  
+}
 
 void
 SusyModule::defineLeptonWPS() {
@@ -55,22 +80,43 @@ SusyModule::defineLeptonWPS() {
 
 
   //el mva id ======================
-  _elMvaIdWP[kEBC][kLoose] = -0.11;
-  _elMvaIdWP[kEBF][kLoose] = -0.35;
-  _elMvaIdWP[kEE ][kLoose] = -0.55;
+  //Phys14 50ns?
+  // _elMvaIdWP[kEBC][kLoose] = -0.11;
+  // _elMvaIdWP[kEBF][kLoose] = -0.35;
+  // _elMvaIdWP[kEE ][kLoose] = -0.55;
 
-  _elMvaIdWP[kEBC][kTight] = 0.73;
-  _elMvaIdWP[kEBF][kTight] = 0.57;
-  _elMvaIdWP[kEE ][kTight] = 0.05;
+  // _elMvaIdWP[kEBC][kTight] = 0.73;
+  // _elMvaIdWP[kEBF][kTight] = 0.57;
+  // _elMvaIdWP[kEE ][kTight] = 0.05;
+
+  // emulator for non-isolated and isolated triggers  
+  _elMvaIdWP[kEBC][kSpecFakeElNon] = -0.70;
+  _elMvaIdWP[kEBF][kSpecFakeElNon] = -0.83;
+  _elMvaIdWP[kEE ][kSpecFakeElNon] = -0.92;
+
+  // emulator for isolated triggers only
+  _elMvaIdWP[kEBC][kSpecFakeElIso] = -0.155;
+  _elMvaIdWP[kEBF][kSpecFakeElIso] = -0.56;
+  _elMvaIdWP[kEE ][kSpecFakeElIso] = -0.76;
+
+  _elMvaIdWP[kEBC][kLoose] = -0.38;
+  _elMvaIdWP[kEBF][kLoose] = -0.49;
+  _elMvaIdWP[kEE ][kLoose] = -0.49;
+
+  _elMvaIdWP[kEBC][kTight] = 0.87;
+  _elMvaIdWP[kEBF][kTight] = 0.60;
+  _elMvaIdWP[kEE ][kTight] = 0.17;
 
   //multiIso =======================
   _multiIsoWP[kMiniIso][kDenom]      = 0.4 ; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
-  _multiIsoWP[kMiniIso][kLoose]      = 0.4 ; _multiIsoWP[kPtRatio][kLoose]      = 0   ; _multiIsoWP[kPtRel][kLoose]      = 0  ;
-  _multiIsoWP[kMiniIso][kMedium]     = 0.14; _multiIsoWP[kPtRatio][kMedium]     = 0.68; _multiIsoWP[kPtRel][kMedium]     = 6.7; 
-  _multiIsoWP[kMiniIso][kTight]      = 0.10; _multiIsoWP[kPtRatio][kTight]      = 0.70; _multiIsoWP[kPtRel][kTight]      = 7  ;
+  _multiIsoWP[kMiniIso][kVLoose]     = 0.25; _multiIsoWP[kPtRatio][kVLoose]     = 0.67; _multiIsoWP[kPtRel][kVLoose]     = 6.0;
+  _multiIsoWP[kMiniIso][kLoose]      = 0.20; _multiIsoWP[kPtRatio][kLoose]      = 0.69; _multiIsoWP[kPtRel][kLoose]      = 6.0;
+  _multiIsoWP[kMiniIso][kMedium]     = 0.16; _multiIsoWP[kPtRatio][kMedium]     = 0.76; _multiIsoWP[kPtRel][kMedium]     = 7.2; 
+  _multiIsoWP[kMiniIso][kTight]      = 0.12; _multiIsoWP[kPtRatio][kTight]      = 0.80; _multiIsoWP[kPtRel][kTight]      = 7.2;
+  _multiIsoWP[kMiniIso][kVTight]     = 0.09; _multiIsoWP[kPtRatio][kVTight]     = 0.84; _multiIsoWP[kPtRel][kVTight]     = 7.2;
 
-  _multiIsoWP[kMiniIso][kSpecFakeEl] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeEl] = 0.70; _multiIsoWP[kPtRel][kSpecFakeEl] = 7  ;
-  _multiIsoWP[kMiniIso][kSpecFakeMu] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeMu] = 0.68; _multiIsoWP[kPtRel][kSpecFakeMu] = 6.7;
+  _multiIsoWP[kMiniIso][kSpecFakeEl] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeEl] = 0.80; _multiIsoWP[kPtRel][kSpecFakeEl] = 7.2;
+  _multiIsoWP[kMiniIso][kSpecFakeMu] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeMu] = 0.76; _multiIsoWP[kPtRel][kSpecFakeMu] = 7.2;
 }
 
 
@@ -81,8 +127,8 @@ bool
 SusyModule::multiIsoSel(int idx, int wp) const {
 
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (_vc->get("LepGood_jetPtRatio", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRel", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+      (_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
@@ -92,8 +138,8 @@ bool
 SusyModule::multiIsoSelCone(int idx, int wp) const {
 
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (conePt(idx)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatio", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRel", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+      (conePt(idx)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
@@ -102,7 +148,7 @@ bool
 SusyModule::invMultiIsoSel(int idx, int wp) const {
   
   if( _vc->get("LepGood_miniRelIso", idx)>_multiIsoWP[kMiniIso][wp]) return false;
-  if( 1./_vc->get("LepGood_jetPtRel", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
+  if( 1./_vc->get("LepGood_jetPtRelv2", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
   return true;
 }
 
@@ -357,14 +403,15 @@ SusyModule::bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 float
 SusyModule::closestJetPt(int idx) const {
 
-  return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatio", idx);
+  return _vc->get("LepGood_jetRawPt") * _vc->get("LepGood_jetCorrFactor_L1L2L3Res");
+  //return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatiov2", idx);
 }
 
 
 float 
 SusyModule::conePt(int idx, int isoWp) const {
 
-  if(_vc->get("LepGood_jetPtRel", idx) > _multiIsoWP[kPtRel][isoWp] ) {
+  if(_vc->get("LepGood_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
     return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
   }
   return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
@@ -415,6 +462,51 @@ SusyModule::cleanJets(CandList* leptons,
     
     cleanBJets.push_back(jet);
     bJetIdxs.push_back(ij);
+  }
+
+}
+
+// Scale factors ====================================
+void 
+SusyModule::applyHLTSF(const string& hltLine, const CandList& cands, float& weight) {
+
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+
+  if(hltLine=="HLT_DoubleEG") {
+    weight *= _dbm->getDBValue("hltDEG", std::abs(cands[0]->eta()), cands[0]->pt(), cands[1]->eta(), cands[1]->pt() );
+  }
+  else if(hltLine=="HLT_DoubleMu") {
+    weight *= _dbm->getDBValue("hltDMu", std::abs(cands[0]->eta()), cands[0]->pt(), cands[1]->eta(), cands[1]->pt() );
+  }
+  else if(hltLine=="HLT_SingleEle") {
+    weight *= _dbm->getDBValue("hltSEle", std::abs(cands[0]->eta()), cands[0]->pt() );
+  }
+  else if(hltLine=="HLT_SingleMu") {
+    weight *= _dbm->getDBValue("hltSMu", std::abs(cands[0]->eta()), cands[0]->pt() );
+  }
+
+
+}
+
+void 
+SusyModule::applyLepSF(const CandList& cands, float& weight) {
+
+  for(unsigned int ic=0;ic<cands.size();ic++) {
+    applySingleLepSF(cands[ic], weight);
+  }
+
+}
+
+
+void 
+SusyModule::applySingleLepSF(const Candidate* cand, float& weight) {
+
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+
+  switch(std::abs(cand->pdgId())) {
+  case 11: {weight *= _dbm->getDBValue("eleSFDb", std::abs(cand->eta()), cand->pt() ); break;}
+  case 13: {weight *= _dbm->getDBValue("muSFDb", std::abs(cand->eta()), cand->pt() ); break;}
+  case 15: {weight *= _dbm->getDBValue("tauSFDb", std::abs(cand->eta()), cand->pt() ); break;}
   }
 
 }

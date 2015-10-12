@@ -4,12 +4,16 @@
 #include "analysis/core/VarClass.hh"
 #include "analysis/tools/Candidate.hh"
 #include "analysis/utils/KineUtils.hh"
+#include "analysis/utils/mt2_bisect.h"
+
+#include "tools/src/DataBaseManager.hh"
 
 class SusyModule {
 
 public:
 
   SusyModule(VarClass* vc);
+  SusyModule(VarClass* vc, DataBaseManager* dbm);
   ~SusyModule();
 
   
@@ -44,12 +48,22 @@ public:
   float closestJetPt(int idx) const;
   float conePt(int idx, int isoWp = kTight) const; 
 
+  void applyHLTSF(const string& hltLine, const vector<Candidate*>& cands, float& weight);
+  void applyLepSF(const CandList& cands, float& weight);
+  void applySingleLepSF(const Candidate* cand, float& weight);
+
   enum {kDenom=0,
+	kVLoose,
 	kLoose,
 	kMedium,
 	kTight,
+	kVTight,
 	kSpecFakeEl,
 	kSpecFakeMu,
+    kSpecFakeElNon,
+    kSpecFakeElIso,
+    kSpecFakeMuNon,
+    kSpecFakeMuIso,
 	kNWPs};
 
   enum {kMiniIso=0,kPtRatio,kPtRel};
@@ -61,8 +75,10 @@ public:
 private:
 
   void defineLeptonWPS();
+  void loadDBs();
   //const
   VarClass* _vc;
+  DataBaseManager* _dbm;
 
   vector<float> _cLostHitWP;
   vector<float> _dxyWP;

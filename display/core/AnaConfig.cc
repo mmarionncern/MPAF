@@ -238,6 +238,7 @@ AnaConfig::configureNames(string dir, string rootFile, string fileList) {
   vector<string> filenames = listFiles((string)(getenv("MPAF")) + "/workdir/stats/" + dir + "/", fileList + ".dat");
   _statFileList = filenames;
   _hname = "nEvtProc";//hName;
+  _hwgtname = "sumWgtProc";//hWgtName;
 }
 
 
@@ -325,9 +326,8 @@ AnaConfig::addSample( string str, string sname, int col, bool loadH) {
   }
   
   if(sname=="data" || sname=="Data" || sId.dd ) {
-    
     _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
-				   _hname+"/"+sId.name,0., 1., 1., 1., loadH);
+				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1., 1., 1., loadH);
     //_samplenames.push_back(str);
     _dsnames.push_back(dsName);
  
@@ -384,7 +384,7 @@ AnaConfig::addSample( string str, string sname, int col, bool loadH) {
         }
  
         _datasets[ sname ]->addSample(sId, _path, _dir, _rootFile,
-				  _hname+"/"+sId.name, xSect, kFact, _lumi,
+				  _hname+"/"+sId.name, _hwgtname+"/"+sId.name, xSect, kFact, _lumi,
 				  eqLumi, loadH);
         //_samplenames.push_back(sId.name);
         _dsnames.push_back(sname);
@@ -463,6 +463,21 @@ AnaConfig::getHName() {
     size_t p = _hname.find("/");
 
     return _hname.substr(p+1, _hname.size()-p-1);
+
+  }
+
+}
+
+string
+AnaConfig::getHwgtName() {
+
+
+  if(_hwgtname.find("/")==(size_t)-1)
+    {return _hwgtname;}
+  else {
+    size_t p = _hwgtname.find("/");
+
+    return _hwgtname.substr(p+1, _hwgtname.size()-p-1);
 
   }
 

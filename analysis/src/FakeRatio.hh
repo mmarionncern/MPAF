@@ -50,7 +50,7 @@ private:
   void divideFRMap(string postpend);
   void divideFRMaps();
   void doEwkSub();
-  vector<float> doubleFit(TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin = 0, float hmax = 0); 
+  vector<float> doubleFit(string ext, TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin = 0, float hmax = 0); 
   vector<float> getScalesETH(string obs, float lumi);
   void modifySkimming();
   void modifyWeight();
@@ -58,10 +58,10 @@ private:
   void registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis);
   void registerTriggerVars();
-  void registerVariable(string var, int nBin, float min, float max, string Xleg, bool prof=false, string type="m");
-  void registerVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY, float maxY, string Xleg, string Yleg, bool prof=false, string type="m");
-  void registerVariable(string var, int nBinX, vector<float> binsX, int nBinY, vector<float> binsY, string Xleg, string Yleg, bool prof=false, string type="m");
-  float singleFit(TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
+  void registerVariable(string var, int nBin, float min, float max, string Xleg, bool isglb=true, bool prof=false, string type="m");
+  void registerVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY, float maxY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
+  void registerVariable(string var, int nBinX, vector<float> binsX, int nBinY, vector<float> binsY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
+  float singleFit(string ext, TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
   void subtractPlots(string lep, int idx, vector<float> scales, string postfix);
   void subtractPlotsCERN(string lep, int idx, string postfix);
   void subtractPrompts();
@@ -116,6 +116,8 @@ private:
 
   enum {kNoGenMatch=0, kMisMatchPdgId,
 	kMisChargePdgId, kGenMatched};
+
+  float _vtxWeight;
 
   int _idx_data;
   int _idx_datacorrETH;
