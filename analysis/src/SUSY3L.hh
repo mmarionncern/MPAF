@@ -34,7 +34,6 @@ private:
 
     void modifySkimming();
 
-    void setMultiIsoWP();
     void collectKinematicObjects();
     bool electronSelection(int);
     bool muonSelection(int);
@@ -53,9 +52,7 @@ private:
     bool ZEventSelection();
     bool ZEventSelectionLoop();
     bool srSelection();
-    bool electronMvaCut(int, int);
-    bool multiIsolation(int, float, float, float);
-    void fillEventPlots();
+    void fillEventPlots(std::string);
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll(bool ossf = true);
@@ -83,8 +80,8 @@ private:
         kGlobal=0,                                      //global counter
         kElId, kMuId, kTauId, kJetId, kBJetId,          //objects counter
         kBase,kWZ,
-        conZEvents,                                     //Z cand. counter
-        kWZCR                                     //WZ control region counter
+        conZEvents                                     //Z cand. counter
+        //kWZCR, kSR                                //WZ control region counter
         };
     
     SusyModule* _susyMod;
