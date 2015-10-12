@@ -197,8 +197,8 @@ void SUSY3L::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    //if(!passMultiLine(true)) return;
-    //counter("HLT");
+    if(!passMultiLine(false)) return;
+    counter("HLT");
 
     // do the minimal selection and collect kinematic variables for events passing it
     collectKinematicObjects();
@@ -235,7 +235,6 @@ void SUSY3L::run(){
     if(!srSelection()) return;
     setWorkflow(kSR);
     fillEventPlots();
-   
 }
 
 
@@ -1824,7 +1823,7 @@ bool SUSY3L::baseSelection(){
     //find smallest invariant mass of ossf pair and reject event if this is below a cut value
     _mll = lowestOssfMll();
     if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR, kBase) ) return false;
-    fill("lowMll" , _mll        , _weight);
+//    fill("lowMll" , _mll        , _weight);
  
     //select on or off-Z events according to specification in config file
     bool is_reconstructed_Z = ZEventSelectionLoop();
@@ -1836,32 +1835,32 @@ bool SUSY3L::baseSelection(){
     }
     
     //fill plots 
-    if(is_reconstructed_Z){
-        fill("Zmass" , _Z->mass()      , _weight);
-        fill("Zpt"   , _Z->pt()        , _weight);
-    }
+//    if(is_reconstructed_Z){
+//        fill("Zmass" , _Z->mass()      , _weight);
+//        fill("Zpt"   , _Z->pt()        , _weight);
+//    }
     
-    fill("el_multiplicity" , _nEls , _weight);
-    fill("mu_multiplicity" , _nMus , _weight);
-    fill("tau_multiplicity" , _nTaus , _weight);
-    fill("lep_multiplicity" , _nEls + _nMus + _nTaus , _weight);
+//    fill("el_multiplicity" , _nEls , _weight);
+//    fill("mu_multiplicity" , _nMus , _weight);
+//    fill("tau_multiplicity" , _nTaus , _weight);
+//    fill("lep_multiplicity" , _nEls + _nMus + _nTaus , _weight);
 
     //sort leptons by pt and fill pt plots
-    sortSelectedLeps();
-    fill("pt_1st_lepton" , _leps[0]->pt() , _weight);
-    fill("pt_2nd_lepton" , _leps[1]->pt() , _weight);
-    if(_nMus + _nEls + _nTaus > 2){
-        fill("pt_3rd_lepton" , _leps[2]->pt() , _weight);
-    }
+//    sortSelectedLeps();
+//    fill("pt_1st_lepton" , _leps[0]->pt() , _weight);
+//    fill("pt_2nd_lepton" , _leps[1]->pt() , _weight);
+//    if(_nMus + _nEls + _nTaus > 2){
+//        fill("pt_3rd_lepton" , _leps[2]->pt() , _weight);
+//    }
     
     //calculate MT2 and fill plot
-    if(_nMus + _nEls + _nTaus == 3){
-        _MT2 = getMT2();
+//    if(_nMus + _nEls + _nTaus == 3){
+//        _MT2 = getMT2();
         //cut on MT2
         //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR, kBase) ) return false;
-        fill("MT2" , _MT2        , _weight);
-    }
-
+//        fill("MT2" , _MT2        , _weight);
+//    }
+/*
     for(int mu=0;mu<_nMus;++mu){    
         fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _muIdx[mu]))                  , _weight);
         fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _muIdx[mu])*10000)            , _weight);
@@ -1879,7 +1878,7 @@ bool SUSY3L::baseSelection(){
         fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _elIdx[el]))        , _weight);
         fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _elIdx[el]))        , _weight);
     }
-
+*/
     return true;
 }
 
@@ -2456,10 +2455,12 @@ void SUSY3L::fillEventPlots(){
         return: none
     */
 
+
     fill("HT"        , _HT                    , _weight);
     fill("MET"       , _met->pt()             , _weight);
     fill("NBJets"    , _nBJets                , _weight);
     fill("NJets"     , _nJets                 , _weight);
+
 
 }
 
