@@ -393,7 +393,7 @@ SusyModule::bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 float
 SusyModule::closestJetPt(int idx) const {
 
-  return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatio", idx);
+  return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatiov2", idx);
 }
 
 
