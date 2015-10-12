@@ -99,6 +99,8 @@ void SUSY3L::initialize(){
     _vc->registerVar("LepGood_eInvMinusPInv"           );    //
     _vc->registerVar("LepGood_mediumMuonId"            );    //mva medium wp muon identification
     _vc->registerVar("LepGood_mvaIdPhys14"             );    //mva electron ID
+    _vc->registerVar("LepGood_mvaIdSpring15"           );    //updated mva electron ID
+    
      
     _vc->registerVar("nTauGood"                        );    //number of taus in event
     _vc->registerVar("TauGood_pdgId"                   );    //identifier for taus (15)
@@ -141,9 +143,8 @@ void SUSY3L::initialize(){
     _au->addCategory( kTauId, "tau Id");
     _au->addCategory( kJetId, "jet Id");
     _au->addCategory( kBJetId, "b-jet Id");
-    _au->addCategory( conZEvents, "Z events");
-    //_au->addCategory( kBase, "kBase"); 
-    //_au->addCategory( kWZ, "kWZ"); 
+    _au->addCategory( kBase, "kBase"); 
+    _au->addCategory( kWZ, "kWZ"); 
                 
     //config file input variables
     _pairmass = getCfgVarS("pairMass");
@@ -155,7 +156,7 @@ void SUSY3L::initialize(){
 
     //workflows
     //addWorkflow( kWZCR, "WZCR");
-    //addWorkflow( kSR, "SR");
+    addWorkflow( kSR, "SR");
     
     //SusyModule for common inputs and functions with RA5
     _susyMod = new SusyModule(_vc, _dbm);
@@ -169,6 +170,7 @@ void SUSY3L::modifyWeight() {
         parameters: none
         return: none
     */ 
+    
     if (_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
         _weight *= _vc->get("vtxWeight");
@@ -220,19 +222,19 @@ void SUSY3L::run(){
         return;
     }
     
-    //setWorkflow(kGlobal);
-    //counter("baseline");
+    setWorkflow(kGlobal);
+    counter("baseline");
 
     //fillSkimTree();
-    fillEventPlots("BR");
+    fillEventPlots();
 
     // initialization of signal region cuts, categorization of events passing the baseline 
     // selection into different signal regions, and filling of plots
     
     setSignalRegion();
     if(!srSelection()) return;
-    //setWorkflow(kSR);
-    fillEventPlots("SR");
+    setWorkflow(kSR);
+    fillEventPlots();
    
 }
 
@@ -253,16 +255,10 @@ void SUSY3L::defineOutput(){
     */
     
     //event based observables for baseline region 
-    _hm->addVariable("BR_HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
-    _hm->addVariable("BR_MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
-    _hm->addVariable("BR_NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
-    _hm->addVariable("BR_NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
- 
-    //event based observables for signal region 
-    _hm->addVariable("SR_HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
-    _hm->addVariable("SR_MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
-    _hm->addVariable("SR_NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
-    _hm->addVariable("SR_NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
+    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
+    _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
+    _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
 
     //additional observables
     _hm->addVariable("Zmass"            ,  150,     0.0,  150.0,    "Z candidate mass [GeV]"            );
@@ -1797,44 +1793,46 @@ bool SUSY3L::baseSelection(){
         parameters: none
         return: true (if event passes selection), false (else)
     */
+  
+    counter("denominator", kBase);
    
     //select events with certain lepton multiplicity of all flavor combinations
-    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR) ) return false;
+    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR, kBase) ) return false;
     //if(!makeCut<int>( _nMus , 1, "=" , "muon multiplicity", 0 ) ) return false;
     //if(!makeCut<int>( _nTaus, 1, ">=" , "tau multiplicity", 0 ) ) return false;
     
     //apply additional pt cuts on leptons
     bool has_hard_legs = hardLegSelection();
-    if(!makeCut( has_hard_legs , "hard leg selection", "=") ) return false;
+    if(!makeCut( has_hard_legs , "hard leg selection", "=", kBase) ) return false;
 
     //require at least two of the leptons to be tighter in multiiso
     //bool has_two_tighter_leptons = checkMultiIso();
     //if(!makeCut( has_two_tighter_leptons , "multiIso tightening", "=") ) return false;
 
     //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return false;
+    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
 
     //require minimum number of b-tagged jets
     //if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
-    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
+    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR, kBase) ) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
+    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR, kBase) ) return false;
 
     //find smallest invariant mass of ossf pair and reject event if this is below a cut value
     _mll = lowestOssfMll();
-    if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR) ) return false;
+    if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR, kBase) ) return false;
     fill("lowMll" , _mll        , _weight);
  
     //select on or off-Z events according to specification in config file
     bool is_reconstructed_Z = ZEventSelectionLoop();
     if(_pairmass == "off"){
-        if(!makeCut( !is_reconstructed_Z, "mll selection", "=") ) return false;
+        if(!makeCut( !is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
     }
     else if(_pairmass == "on"){
-        if(!makeCut( is_reconstructed_Z, "mll selection", "=") ) return false;
+        if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
     }
     
     //fill plots 
@@ -1860,7 +1858,7 @@ bool SUSY3L::baseSelection(){
     if(_nMus + _nEls + _nTaus == 3){
         _MT2 = getMT2();
         //cut on MT2
-        //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR) ) return false;
+        //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR, kBase) ) return false;
         fill("MT2" , _MT2        , _weight);
     }
 
@@ -2099,9 +2097,6 @@ bool SUSY3L::ZEventSelectionLoop(){
         return: true (if a Z can be reconstructed from 2 leptons and tranverse mass 
         requirement is fulfilled), false (else)
     */
-
-    //count reconstructed Z bosons
-    //counter("denominator", conZEvents);
 
     //Z mass
     float Zmass = 91.1876;
@@ -2372,11 +2367,13 @@ bool SUSY3L::srSelection(){
         return: true (if event passes selection), false (else)
     */
 
+    counter("denominator", kSR);
+
     // cut on the variables distriminating the signal regions
-    if(!makeCut<float>( _nBJets     , _valCutNBJetsSR, _cTypeNBJetsSR, "SR bjet multiplicity", _upValCutNBJetsSR) ) return false;
-    if(!makeCut<int>( _nJets       , _valCutNJetsSR , _cTypeNJetsSR , "SR jet multiplicity" , _upValCutNJetsSR ) ) return false;
-    if(!makeCut<float>( _HT          , _valCutHTSR    , _cTypeHTSR    , "SR HT selection"     , _upValCutHTSR    ) ) return false;
-    if(!makeCut<float>( _met->pt()   , _valCutMETSR   , _cTypeMETSR   , "SR MET selection"    , _upValCutMETSR   ) ) return false;
+    if(!makeCut<float>( _nBJets     , _valCutNBJetsSR, _cTypeNBJetsSR, "SR bjet multiplicity", _upValCutNBJetsSR, kSR) ) return false;
+    if(!makeCut<int>( _nJets       , _valCutNJetsSR , _cTypeNJetsSR , "SR jet multiplicity" , _upValCutNJetsSR, kSR ) ) return false;
+    if(!makeCut<float>( _HT          , _valCutHTSR    , _cTypeHTSR    , "SR HT selection"     , _upValCutHTSR, kSR    ) ) return false;
+    if(!makeCut<float>( _met->pt()   , _valCutMETSR   , _cTypeMETSR   , "SR MET selection"    , _upValCutMETSR, kSR   ) ) return false;
 
     return true;
 
@@ -2452,17 +2449,17 @@ float SUSY3L::getMT2(){
 * *****************************************************************************/
 
 //____________________________________________________________________________
-void SUSY3L::fillEventPlots(std::string kr){
+void SUSY3L::fillEventPlots(){
     /*
-        fills the control plots for event quantities
+        fills plots
         parameters: none
         return: none
     */
 
-    fill( kr + "_HT"        , _HT                    , _weight);
-    fill( kr + "_MET"       , _met->pt()             , _weight);
-    fill( kr + "_NBJets"    , _nBJets                , _weight);
-    fill( kr + "_NJets"     , _nJets                 , _weight);
+    fill("HT"        , _HT                    , _weight);
+    fill("MET"       , _met->pt()             , _weight);
+    fill("NBJets"    , _nBJets                , _weight);
+    fill("NJets"     , _nJets                 , _weight);
 
 }
 

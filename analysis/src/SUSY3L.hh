@@ -52,7 +52,7 @@ private:
     bool ZEventSelection();
     bool ZEventSelectionLoop();
     bool srSelection();
-    void fillEventPlots(std::string);
+    void fillEventPlots();
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll(bool ossf = true);
@@ -80,8 +80,8 @@ private:
         kGlobal=0,                                      //global counter
         kElId, kMuId, kTauId, kJetId, kBJetId,          //objects counter
         kBase,kWZ,
-        conZEvents                                     //Z cand. counter
-        //kWZCR, kSR                                //WZ control region counter
+        //kWZCR, 
+        kSR                                //WZ control region counter
         };
     
     SusyModule* _susyMod;
