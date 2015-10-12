@@ -42,8 +42,9 @@ private:
     bool goodJetSelection(int);
 
     bool baseSelection();
-    void wzCRSelection();
+    bool wzCRSelection();
     void setBaselineRegion();
+    void setWZControlRegion();
     void setSignalRegion();
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection();
@@ -80,8 +81,9 @@ private:
     enum {
         kGlobal=0,                                      //global counter
         kElId, kMuId, kTauId, kJetId, kBJetId,          //objects counter
+        kBase,kWZ,
         conZEvents,                                     //Z cand. counter
-        kWZCR                                           //WZ control region counter
+        kWZCR                                     //WZ control region counter
         };
 
     //cut variables
@@ -104,6 +106,13 @@ private:
     float _valCutNBJetsSR;
     float _valCutMllBR;
     float _valCutMT2BR;
+
+    float _valCutLepMultiplicityWZ;
+    float _valCutNJetsWZ;
+    float _valCutNBJetsWZ;
+    float _valCutHTWZ;
+    float _valCutMETWZ;
+    
     std::vector<std::string> _hltLines;
     
     std::string _cTypeLepMultiplicityBR;
@@ -117,6 +126,12 @@ private:
     std::string _cTypeMETSR;
     std::string _cTypeMllBR;
     std::string _cTypeMT2BR;
+    
+    std::string _cTypeLepMultiplicityWZ;
+    std::string _cTypeNJetsWZ;
+    std::string _cTypeNBJetsWZ;
+    std::string _cTypeHTWZ;
+    std::string _cTypeMETWZ;
 
     float _upValCutLepMultiplicityBR;
     float _upValCutNJetsBR;
@@ -129,7 +144,13 @@ private:
     float _upValCutMETSR;
     float _upValCutMllBR;
     float _upValCutMT2BR;
-
+    
+    float _upValCutLepMultiplicityWZ;
+    float _upValCutNJetsWZ;
+    float _upValCutNBJetsWZ;
+    float _upValCutHTWZ;
+    float _upValCutMETWZ;
+ 
     //vectors for electron, muon, and tau candidates
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;

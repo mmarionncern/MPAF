@@ -1,14 +1,14 @@
 MPAFDisplay md;
 
-void susy3l_data_25ns() {
+void susy3l_wzcr() {
     md.refresh();
 
 
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="multiLep_OnZ"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="multiLep_OnZ"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="wzcr"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="wzcr"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -18,7 +18,7 @@ void susy3l_data_25ns() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="3rdlepflavor";    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
+    string obs ="ht";    //njets, nbjets, met, ht, wzcr_ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
     string sigs = "none"; 
     bool data = true;
 
@@ -110,14 +110,7 @@ void susy3l_data_25ns() {
         md.dp.setObservables("Zmass");
         int binning=2;
         double rangeX[2]={60,120};
-        bool logYScale=false;
     }
-    if(obs == "3rdlepflavor"){
-        md.dp.setObservables("3rd_lepton_flavor");
-        int binning=1;
-        double rangeX[2]={-16,16};
-        bool logYScale=false;
-    }   
     if(obs == "zpt"){
         md.dp.setObservables("Zpt");
         int binning=10;
@@ -249,7 +242,7 @@ void susy3l_data_25ns() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=209.2; //pb-1 19470
+    float lumi=121.6; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
@@ -327,11 +320,11 @@ void susy3l_data_25ns() {
     
   //data
     if(data){
-    md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_256630_257599"       , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_256630_257599"              , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015D_v3_runs_256630_257599"     , "data"          , kBlack    );
-    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_257599"            , "data"          , kBlack    );
-    md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_256630_257599"            , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_256630_256843"       , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_256630_256843"              , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015D_v3_runs_256630_256843"     , "data"          , kBlack    );
+    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_256843"            , "data"          , kBlack    );
+    md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_256630_256843"            , "data"          , kBlack    );
     }
 
 
