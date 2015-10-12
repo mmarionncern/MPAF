@@ -156,7 +156,8 @@ void SUSY3L::initialize(){
     //workflows
     addWorkflow( kWZCR, "WZCR");
     
-
+    //SusyModule for common inputs and functions with RA5
+    _susyMod = new SusyModule(_vc, _dbm);
 }
 
 
@@ -193,8 +194,8 @@ void SUSY3L::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    //if(!passMultiLine(false)) return;
-    //counter("HLT");
+    if(!passMultiLine(false)) return;
+    counter("HLT");
 
     //initialize multiIso working points
     setMultiIsoWP();
@@ -210,14 +211,14 @@ void SUSY3L::run(){
     //if(!makeCut(baseSelection(),"base selection")){	
     if(!(baseSelection())){	
         //if event fails baseline selection check if it goes to WZ control region
-        setWZControlRegion();
-        if(!(wzCRSelection())){
-            setWorkflow(kGlobal);
-            return;
-        }
-        setWorkflow(kWZCR);
-        counter("wz control region");
-        fillEventPlots();
+        //setWZControlRegion();
+        //if(!(wzCRSelection())){
+        //    setWorkflow(kGlobal);
+        //    return;
+        //}
+        //setWorkflow(kWZCR);
+        //counter("wz control region");
+        //fillEventPlots();
         return;
     }
     
@@ -485,10 +486,14 @@ bool SUSY3L::electronSelection(int elIdx){
     //mva based electron ID
     bool elTightMvaID = electronMvaCut(elIdx, 1);
     if(!makeCut( elTightMvaID, "electron tight mva wp", "=", kElId)) return false;
+    //if(!makecut( !_susyMod->elIdSel(idx, SusyModule::kTight, SusyModule::kTight), "electron tight mva wp", "=", kElId) ) return false;
+    
     //3 variable isolation criteria: miniIso < A and (pt ratio > B or pt rel > C)
-    int wp = kMedium;
-    isolated = multiIsolation(elIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
-    if(!makeCut( isolated, "initial multiIso selection", "=", kElId)) return false;
+    //int wp = kMedium;
+    //isolated = multiIsolation(elIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
+    //if(!makeCut( isolated, "initial multiIso selection", "=", kElId)) return false;
+    if(!makeCut( !_susyMod->multiIsoSel(elIdx, SusyModule::kMedium), "multiIso selection", "=", kElId) ) return false;
+    
     //replaced by multiIsolation
     //if(!makeCut<float>( _vc->get("LepGood_relIso03", elIdx) , isolation_cut   , "<"  , "isolation "      , 0    , kElId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("LepGood_dz", elIdx)), vertex_dz_cut   , "<"  , "dz selection"    , 0    , kElId)) return false;
@@ -513,7 +518,7 @@ bool SUSY3L::electronSelection(int elIdx){
         }
     }
     //enable to clean on tight objects
-    //if(!makeCut( !muMatch, "dR selection (mu)", "=", kElId) ) return false;
+    //if(!makecut( !mumatch, "dr selection (mu)", "=", kelid) ) return false;
     
        
     return true;

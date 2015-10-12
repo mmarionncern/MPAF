@@ -14,6 +14,7 @@
 #define SUSY3L_HH
 
 #include "analysis/core/MPAF.hh"
+#include "analysis/modules/SusyModule.hh"
 
 class SUSY3L: public MPAF {
 
@@ -85,6 +86,8 @@ private:
         conZEvents,                                     //Z cand. counter
         kWZCR                                     //WZ control region counter
         };
+    
+    SusyModule* _susyMod;
 
     //cut variables
     float _valCutLepMultiplicityBR;
