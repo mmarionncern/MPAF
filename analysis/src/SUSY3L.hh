@@ -79,8 +79,8 @@ private:
     enum {
         kGlobal=0,                                      //global counter
         kElId, kMuId, kTauId, kJetId, kBJetId,          //objects counter
-        kBase,kWZ,
-        //kWZCR, 
+        kBase,kWZ,kSignalRegion,
+        kWZCR, 
         kSR                                //WZ control region counter
         };
     

@@ -143,8 +143,9 @@ void SUSY3L::initialize(){
     _au->addCategory( kTauId, "tau Id");
     _au->addCategory( kJetId, "jet Id");
     _au->addCategory( kBJetId, "b-jet Id");
-    _au->addCategory( kBase, "kBase"); 
-    _au->addCategory( kWZ, "kWZ"); 
+    _au->addCategory( kBase, "baseline selection"); 
+    _au->addCategory( kWZ, "wz control region"); 
+    _au->addCategory( kSignalRegion, "signal region"); 
                 
     //config file input variables
     _pairmass = getCfgVarS("pairMass");
@@ -155,7 +156,7 @@ void SUSY3L::initialize(){
     _SR = getCfgVarS("signalRegion");
 
     //workflows
-    //addWorkflow( kWZCR, "WZCR");
+    addWorkflow( kWZCR, "WZCR");
     addWorkflow( kSR, "SR");
     
     //SusyModule for common inputs and functions with RA5
@@ -171,10 +172,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    if (_vc->get("isData") != 1){
-        _weight *= _vc->get("genWeight");
-        _weight *= _vc->get("vtxWeight");
-    }
+    //if (_vc->get("isData") != 1){
+    //    _weight *= _vc->get("genWeight");
+    //    _weight *= _vc->get("vtxWeight");
+    //}
 
 }
 
@@ -211,14 +212,15 @@ void SUSY3L::run(){
     //if(!makeCut(baseSelection(),"base selection")){	
     if(!(baseSelection())){	
         //if event fails baseline selection check if it goes to WZ control region
-        //setWZControlRegion();
-        //if(!(wzCRSelection())){
-        //    setWorkflow(kGlobal);
-        //    return;
-        //}
-        //setWorkflow(kWZCR);
-        //counter("wz control region");
-        //fillEventPlots();
+        setWZControlRegion();
+        if(!(wzCRSelection())){
+            setWorkflow(kGlobal);
+            return;
+        }
+        setWorkflow(kWZCR);
+        counter("wz control region",kWZCR);
+        fillEventPlots();
+        setWorkflow(kGlobal);
         return;
     }
     
@@ -230,11 +232,17 @@ void SUSY3L::run(){
 
     // initialization of signal region cuts, categorization of events passing the baseline 
     // selection into different signal regions, and filling of plots
-    
     setSignalRegion();
-    if(!srSelection()) return;
+    if(!srSelection()){
+        setWorkflow(kGlobal);
+        return;
+    }
     setWorkflow(kSR);
     fillEventPlots();
+    counter("signal region", kSR);
+    setWorkflow(kGlobal);
+    counter("signal region");
+
 }
 
 
@@ -1917,7 +1925,7 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
 
 
     //WZ control region
-/*
+
 
     if(var == "LepMultiplicityWZ") {
         _valCutLepMultiplicityWZ   = valCut;
@@ -1944,7 +1952,7 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
         _cTypeMETWZ    = cType;
         _upValCutMETWZ = upValCut;
     }
-*/
+
 }
 
 
@@ -2060,8 +2068,8 @@ bool SUSY3L::wzCRSelection(){
         parameters: none
         return: none
     */
-    
 
+    return true;
     counter("denominator", kWZ);
 
     //lepton multiplicity
@@ -2086,13 +2094,6 @@ bool SUSY3L::wzCRSelection(){
     //select on-Z events
     bool is_reconstructed_Z = ZEventSelectionLoop();
     if(!makeCut( is_reconstructed_Z, "WZ: mll selection", "=", kWZ) ) return false;
-    
-    //fill plots 
-    if(is_reconstructed_Z){
-        fill("Zmass" , _Z->mass()      , _weight);
-        fill("Zpt"   , _Z->pt()        , _weight);
-    }
-    
     
     return true;
 }
@@ -2540,13 +2541,13 @@ bool SUSY3L::srSelection(){
         return: true (if event passes selection), false (else)
     */
 
-    counter("denominator", kSR);
+    counter("denominator", kSignalRegion);
 
     // cut on the variables distriminating the signal regions
-    if(!makeCut<float>( _nBJets     , _valCutNBJetsSR, _cTypeNBJetsSR, "SR bjet multiplicity", _upValCutNBJetsSR, kSR) ) return false;
-    if(!makeCut<int>( _nJets       , _valCutNJetsSR , _cTypeNJetsSR , "SR jet multiplicity" , _upValCutNJetsSR, kSR ) ) return false;
-    if(!makeCut<float>( _HT          , _valCutHTSR    , _cTypeHTSR    , "SR HT selection"     , _upValCutHTSR, kSR    ) ) return false;
-    if(!makeCut<float>( _met->pt()   , _valCutMETSR   , _cTypeMETSR   , "SR MET selection"    , _upValCutMETSR, kSR   ) ) return false;
+    if(!makeCut<float>( _nBJets     , _valCutNBJetsSR, _cTypeNBJetsSR, "SR bjet multiplicity", _upValCutNBJetsSR, kSignalRegion) ) return false;
+    if(!makeCut<int>( _nJets       , _valCutNJetsSR , _cTypeNJetsSR , "SR jet multiplicity" , _upValCutNJetsSR, kSignalRegion ) ) return false;
+    if(!makeCut<float>( _HT          , _valCutHTSR    , _cTypeHTSR    , "SR HT selection"     , _upValCutHTSR, kSignalRegion    ) ) return false;
+    if(!makeCut<float>( _met->pt()   , _valCutMETSR   , _cTypeMETSR   , "SR MET selection"    , _upValCutMETSR, kSignalRegion   ) ) return false;
 
     return true;
 
