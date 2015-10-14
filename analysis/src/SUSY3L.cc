@@ -1918,6 +1918,7 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
 
     //WZ control region
 /*
+
     if(var == "LepMultiplicityWZ") {
         _valCutLepMultiplicityWZ   = valCut;
         _cTypeLepMultiplicityWZ    = cType;
@@ -1962,11 +1963,11 @@ bool SUSY3L::baseSelection(){
         parameters: none
         return: true (if event passes selection), false (else)
     */
-  
+
     counter("denominator", kBase);
    
     //select events with certain lepton multiplicity of all flavor combinations
-    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR, kBase) ) return false;
+    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR, kBase ) ) return false;
     //if(!makeCut<int>( _nMus , 1, "=" , "muon multiplicity", 0 ) ) return false;
     //if(!makeCut<int>( _nTaus, 1, ">=" , "tau multiplicity", 0 ) ) return false;
     
@@ -2266,6 +2267,9 @@ bool SUSY3L::ZEventSelectionLoop(){
         return: true (if a Z can be reconstructed from 2 leptons and tranverse mass 
         requirement is fulfilled), false (else)
     */
+
+    //count reconstructed Z bosons
+    //counter("denominator", conZEvents);
 
     //Z mass
     float Zmass = 91.1876;
@@ -2682,7 +2686,6 @@ float SUSY3L::M_T(float pt_lepton, float met, float phi_lepton, float phi_met){
         m_t = sqrt(2 * pt_lepton * met * (1 - cos(deltaPhi) ));
         return m_t;
 }
-
 
 //____________________________________________________________________________
 float SUSY3L::MT2(Candidate* lep1, Candidate* lep2, Candidate* met, double mass_invisible){
