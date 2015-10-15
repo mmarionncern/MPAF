@@ -63,8 +63,11 @@ private:
   bool passCERNSelection();
   bool looseLepton(int idx, int pdgId);
   bool tightLepton(int idx, int pdgId);
-  bool fakableLepton(int idx, int pdgId);
+  bool fakableLepton(int idx, int pdgId, bool bypass);
   
+  bool hltSelection();
+  bool passHLT(std::string id);
+
   //==============================
   // Validation regions
   bool ttbarSelection();
@@ -74,6 +77,9 @@ private:
   //  bool WOSlSelection(){return false;};
   bool ZlSelection();
   
+  void fillhistos();
+  void fillValidationHistos(std::string reg);
+
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later
@@ -156,9 +162,14 @@ private:
   float _metPt;
   float _nJets;
   float _HT;
+
+  int _flav;
   
   //MM ugly
   std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
+
+  //HLT
+  bool _hltDLHT;
 
   //charge misId
   bool _isOS;
@@ -179,6 +190,12 @@ private:
 
   CandList _looseLepsVeto10;
   std::vector<unsigned int>  _looseLepsVeto10Idx;
+
+  CandList _jetCleanLeps10;
+  std::vector<unsigned int>  _jetCleanLeps10Idx;
+
+  CandList _jetCleanLepsVeto10;
+  std::vector<unsigned int>  _jetCleanLepsVeto10Idx;
 
   CandList _fakableLeps10;
   std::vector<unsigned int>  _fakableLeps10Idx;
@@ -234,8 +251,6 @@ private:
   vector<TVector2> _uncleanJets;
   vector<TVector2> _uncleanFwdJets;
   
-  void fillhistos();
-  void fillValidationHistos(std::string reg);
 };
 
 

@@ -27,6 +27,8 @@ class MPAFDisplay {
 private:
 
   bool _recompute;
+  bool _auto;
+  bool _histoSet;
 
   vector<string> _dsNames;
 

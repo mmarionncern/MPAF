@@ -20,6 +20,7 @@ public:
   bool elMvaSel(int elIdx, int wp) const;
   bool muIdSel(int idx, int wp) const;
   bool elIdSel(int idx, int wp, int mvaWp = kTight) const;
+  bool elHLTEmulSel(int idx, bool withIso) const;
   bool multiIsoSel(int idx, int wp) const;
   bool multiIsoSelCone(int idx, int wp) const;
   bool invMultiIsoSel(int idx, int wp) const;
@@ -55,6 +56,7 @@ public:
   enum {kDenom=0,
 	kVLoose,
 	kLoose,
+	kLooseHT,
 	kMedium,
 	kTight,
 	kVTight,
@@ -77,6 +79,7 @@ private:
   DataBaseManager* _dbm;
 
   vector<float> _cLostHitWP;
+  vector<float> _tChWP;
   vector<float> _dxyWP;
   vector<float> _dzWP;
   vector<float> _isoWP;
