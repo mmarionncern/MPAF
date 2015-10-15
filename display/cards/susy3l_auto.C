@@ -133,7 +133,7 @@ void susy3l_SIGNALREGION_PAIRSTATE() {
     
     //signal
     if(signal=="T1t412"){
-        md.anConf.addSample( "SMS_T1tttt_2J_mGl1200_mLSP800"    ,  "T1t412" , kBlue-3 );
+        md.anConf.addSample( "T1tttt_mGo1200_mChi800"       ,  "T1t412" , kBlue-3 );
     }
     if(signal=="T1t415"){
         md.anConf.addSample( "T1tttt_mGo1500_mChi100"       ,  "T1t415" , kBlue-7  );

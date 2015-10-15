@@ -212,15 +212,15 @@ void SUSY3L::run(){
     //if(!makeCut(baseSelection(),"base selection")){	
     if(!(baseSelection())){	
         //if event fails baseline selection check if it goes to WZ control region
-        setWZControlRegion();
-        if(!(wzCRSelection())){
-            setWorkflow(kGlobal);
-            return;
-        }
-        setWorkflow(kWZCR);
-        counter("wz control region",kWZCR);
-        fillEventPlots();
-        setWorkflow(kGlobal);
+        //setWZControlRegion();
+        //if(!(wzCRSelection())){
+        //    setWorkflow(kGlobal);
+        //    return;
+        //}
+        //setWorkflow(kWZCR);
+        //counter("wz control region",kWZCR);
+        //fillEventPlots();
+        //setWorkflow(kGlobal);
         return;
     }
     
@@ -1687,12 +1687,12 @@ if(_SR == "SR107") {
 //____________________________________________________________________________
 void SUSY3L::setSignalRegion() {
 
-if(_SR == "SR999") {
-   setCut("NBJetsSR", 0, ">=" );
-   setCut("METSR", 50, ">=" );
-   setCut("NJetsSR", 2, ">=" );
-   setCut("HTSR", 60, ">=" );
-}
+//if(_SR == "SR999") {
+//   setCut("NBJetsSR", 0, ">=" );
+//   setCut("METSR", 50, ">=" );
+//   setCut("NJetsSR", 2, ">=" );
+//   setCut("HTSR", 60, ">=" );
+//}
 
 if(_SR == "SR000") {
    setCut("NBJetsSR", 0, "[[", 1 );
@@ -1725,123 +1725,102 @@ if(_SR == "SR003") {
 if(_SR == "SR004") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 2, "[[", 5);
+   setCut("NJetsSR", 2, ">=");
    setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR005") {
-   setCut("NBJetsSR", 0, "[[", 1 );
-   setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
 }
 
 if(_SR == "SR006") {
    setCut("NBJetsSR", 1, "[[", 2 );
-   setCut("METSR", 50, "[[", 150 );
+   setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 2, ">=" );
    setCut("HTSR", 60, "[[", 400 );
 }
 
 if(_SR == "SR007") {
    setCut("NBJetsSR", 1, "[[", 2 );
-   setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 2, ">=" );
-   setCut("HTSR", 60, "[[", 400 );
-}
-
-if(_SR == "SR008") {
-   setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 2, "[[", 5);
    setCut("HTSR", 400, "[[", 600 );
 }
 
-if(_SR == "SR009") {
+if(_SR == "SR008") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, "[[", 5);
    setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR010") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 600 );
-}
-
-if(_SR == "SR011") {
-   setCut("NBJetsSR", 1, "[[", 2 );
-   setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 5, ">=");
    setCut("HTSR", 400, "[[", 600 );
 }
 
-if(_SR == "SR012") {
+if(_SR == "SR011") {
    setCut("NBJetsSR", 2, "[[", 3 );
    setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 2, ">=" );
    setCut("HTSR", 60, "[[", 400 );
 }
 
 if(_SR == "SR013") {
    setCut("NBJetsSR", 2, "[[", 3 );
-   setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 2, ">=" );
-   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR014") {
    setCut("NBJetsSR", 2, "[[", 3 );
    setCut("METSR", 50, "[[", 150 );
-   setCut("NJetsSR", 2, "[[", 5);
+   setCut("NJetsSR", 5, ">=");
    setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR015") {
    setCut("NBJetsSR", 2, "[[", 3 );
-   setCut("METSR", 50, "[[", 150 );
-   setCut("NJetsSR", 5, ">=");
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
    setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR016") {
-   setCut("NBJetsSR", 2, "[[", 3 );
-   setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("NBJetsSR", 3, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, "[[", 600 );
 }
 
 if(_SR == "SR017") {
-   setCut("NBJetsSR", 2, "[[", 3 );
-   setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 600 );
-}
-
-if(_SR == "SR018") {
-   setCut("NBJetsSR", 3, ">=");
-   setCut("METSR", 50, "[[", 300 );
-   setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 60, "[[", 400 );
-}
-
-if(_SR == "SR019") {
-   setCut("NBJetsSR", 3, ">=");
-   setCut("METSR", 50, "[[", 300 );
-   setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 400, "[[", 600 );
-}
-
-if(_SR == "SR020") {
    setCut("NBJetsSR", 1, ">=");
    setCut("METSR", 50, "[[", 300 );
    setCut("NJetsSR", 2, ">=");
    setCut("HTSR", 600, ">=");
 }
 
-if(_SR == "SR021") {
+if(_SR == "SR018") {
    setCut("NBJetsSR", 1, ">=");
    setCut("METSR", 300, ">=" );
    setCut("NJetsSR", 2, ">=");
