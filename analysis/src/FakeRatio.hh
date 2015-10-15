@@ -89,8 +89,11 @@ private:
   bool mrSelection();
   bool qcdSelection();
   bool skimSelection();
+  bool triggerEmulation(int idx, int label);
   bool triggerSelection();
+  bool triggerSelectionLite();
 
+  void fillTriggerTestPlots();
   void fillEventPlots();
   void fillEwkEventPlots();
   void fillEwkLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
@@ -112,7 +115,7 @@ private:
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later
-  enum {kGlobal=0, kEwkSel, kQcdSel, kTrigger, kDenEls, kDenMus, kNumEls, kNumMus, kVetEls, kVetMus, kGoodJets};
+  enum {kGlobal=0, kEwkSel, kQcdSel, kTrigger, kSync, kDenEls, kDenMus, kNumEls, kNumMus, kVetEls, kVetMus, kGoodJets};
 
   enum {kNoGenMatch=0, kMisMatchPdgId,
 	kMisChargePdgId, kGenMatched};
@@ -135,8 +138,11 @@ private:
   vector<int> _idxs;
   vector<int> _idxsmc;
 
+  bool _trel;
+  bool _trmu;
   bool _iso;
   vector<string> _TR_lines;
+  vector<string> _exts;
   int _TR_idx;
 
   vector<vector<string> > _vTR_lines_el_non;

@@ -117,10 +117,11 @@ void VarClass::reset() {
   uncmUL.clear();
   uncmD.clear();
   uncmF.clear();
-  
   cnt_.clear();
   varIds_.clear();
   initIds();
+
+  _friendBranches.clear();
 
 }
 
@@ -355,6 +356,9 @@ void VarClass::buildFriendTree(TTree* tree, bool bypass){
 	
 	// register branch
 	registerBranch(tree, name, type, t, len );
+
+	//link branch to main tree for skimming purposes
+	_friendBranches.push_back( name );
       }
     }
     lnk = lnk->Next(); 
@@ -785,6 +789,71 @@ double VarClass::get(string name, int idx) {
 
   return findValue(itVId_->second, idx);
 }
+
+
+
+//link functions for skimming =====================
+void VarClass::linkFriendBranches(TTree*& tree) {
+  _mTree=tree;
+
+  for(size_t ib=0;ib<_friendBranches.size();ib++) {
+    linkBranch( _friendBranches[ib]);
+  }
+  
+}
+
+
+void VarClass::linkBranch(string name) {
+
+  itVId_ = varIds_.find(name);
+  int id=itVId_->second;
+  int cType = (id/oC_);
+  int tType = ((id-cType*oC_)/oT_);
+  int key = (id-cType*oC_ - tType*oT_);
+
+  switch(cType) {
+  case kScalar: {linkScalarVal(name, tType, key); break; }
+  case kVector: {linkVectorVal(name, tType, key); break; }
+  case kArray: {linkArrayVal(name, tType, key); break; }
+  }
+  
+}
+
+void VarClass::linkScalarVal(string name, int tType, int key) {
+  switch(tType) {
+  case kInt:    {_mTree->Branch(name.c_str(),&(varmI[key]));break;}
+  case kUInt:   {_mTree->Branch(name.c_str(),&(varmUI[key]));break;}
+  case kULong:  {_mTree->Branch(name.c_str(),&(varmUL[key]));break;}
+  case kDouble: {cout<<&(varmD[key])<<endl;_mTree->Branch(name.c_str(),&(varmD[key]));break;}
+  case kFloat:  {_mTree->Branch(name.c_str(),&(varmF[key]));break;}
+  case kBool:   {_mTree->Branch(name.c_str(),&(varmB[key]));break;}
+  }
+}
+
+void VarClass::linkVectorVal(string name, int tType, int key) {
+  switch(tType) {
+  case kInt: {_mTree->Branch(name.c_str(),varmVI[key]);break;}
+  case kUInt: {_mTree->Branch(name.c_str(),varmVUI[key]);break;}
+  case kULong: {_mTree->Branch(name.c_str(),varmVUL[key]);break;}
+  case kDouble: {_mTree->Branch(name.c_str(),varmVD[key]);break;}
+  case kFloat: {_mTree->Branch(name.c_str(),varmVF[key]);break;}
+  case kBool: {_mTree->Branch(name.c_str(),varmVB[key]);break;}
+  }
+
+}
+
+void VarClass::linkArrayVal(string name, int tType, int key) {
+  switch(tType) {
+  case kInt:    {_mTree->Branch(name.c_str(),varmAI[key]);break;}
+  case kUInt:   {_mTree->Branch(name.c_str(),varmAUI[key]);break;}
+  case kULong:  {_mTree->Branch(name.c_str(),varmAUL[key]);break;}
+  case kDouble: {_mTree->Branch(name.c_str(),varmAD[key]);break;}
+  case kFloat:  {_mTree->Branch(name.c_str(),varmAF[key]);break;}
+  case kBool:   {_mTree->Branch(name.c_str(),varmAB[key]);break;}
+  }
+
+}
+
 
 //____________________________________________________________________________
 // bool VarClass::tryType(string name, string type) {

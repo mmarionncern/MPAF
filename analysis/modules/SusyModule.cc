@@ -161,7 +161,7 @@ SusyModule::elMvaSel(int idx, int wp) const {
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479) etaBin=1;
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5  ) etaBin=2;
 
-  if(_vc->get("LepGood_mvaIdPhys14", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
+  if(_vc->get("LepGood_mvaIdSpring15", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
     
   return true;
 }

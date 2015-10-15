@@ -13,7 +13,7 @@
 #include "analysis/core/MPAF.hh"
 
 
-
+#include <TObjArray.h>
 
 /*****************************************************************************
 ******************************************************************************
@@ -132,13 +132,14 @@ void MPAF::analyze(){
     }
 	
     // loop over entries
-    unsigned int nEvts = _datasets[i]->getNEvents();
-    if(_nEvtMax!=(size_t)-1) nEvts =  min(_nEvtMax+_nSkip,nEvts);
+    _nEvts[i] = _datasets[i]->getNEvents();
+    _nEvtsDs[i] = _nEvts[i];
+    if(_nEvtMax!=(size_t)-1) _nEvts[i] =  min(_nEvtMax+_nSkip,_nEvts[i]);
+    
+    cout<<" Starting processing dataset : "<<_sampleName<<"  (running on "<<_nEvts[i]<<" events)"<<endl;
 
-    cout<<" Starting processing dataset : "<<_sampleName<<"  (running on "<<nEvts<<" events)"<<endl;
-
-    boost::progress_display show_progress( nEvts );
-    for(_ie = _nSkip; _ie < nEvts; ++_ie) {
+    boost::progress_display show_progress( _nEvts[i] );
+    for(_ie = _nSkip; _ie < _nEvts[i]; ++_ie) {
       ++show_progress;
       stw.Start();
       
@@ -304,6 +305,8 @@ void MPAF::loadConfigurationFile(std::string cfg){
     dsName+=pfx;
 
     _datasets.push_back(new Dataset(dsName));
+    _nEvtsDs.push_back(0);
+    _nEvts.push_back(0);
     
     SampleId sId;
     sId.name = it->second.val; //was val
@@ -412,8 +415,9 @@ void MPAF::internalWriteOutput() {
   map<string, int> cnts;
   map<string, double> wgtcnts;
   for(unsigned int ids=0;ids<_datasets.size(); ++ids) {
-    cnts[ _datasets[ids]->getName() ] = _datasets[ids]->getNProcEvents();
-    wgtcnts[ _datasets[ids]->getName() ] = _datasets[ids]->getSumProcWgts();
+    float fact=(float)_nEvts[ids]/_nEvtsDs[ids];
+    cnts[ _datasets[ids]->getName() ] = _datasets[ids]->getNProcEvents() * fact;
+    wgtcnts[ _datasets[ids]->getName() ] = _datasets[ids]->getSumProcWgts() * fact;
   }
 
   cout << "writing output to disk" << endl;
@@ -668,8 +672,14 @@ void MPAF::initSkimming() {
   _datasets[_inds]->getTree()->LoadTree(0);
   if(_fullSkim) {
     _skimTree = (TTree*)_datasets[_inds]->getTree()->CloneTree(0);
+    //for friend tree merging
+    _vc->linkFriendBranches(_skimTree);
+
     _hnSkim =new TH1I( _hname.c_str(), _hname.c_str(), 1, 0, 1);
     _hnSkim->SetBinContent(1,_datasets[_inds]->getNProcEvents() );
+
+    _hnwSkim =new TH1D( _hwgtname.c_str(), _hwgtname.c_str(), 1, 0, 1);
+    _hnwSkim->SetBinContent(1,_datasets[_inds]->getSumProcWgts() );
   }
   else {
     TString name = _datasets[_inds]->getTree()->GetName();
@@ -687,6 +697,8 @@ void MPAF::finalizeSkimming() {
   _skimTree->Write();
   if(_hnSkim)
     _hnSkim->Write();
+  if(_hnwSkim)
+    _hnwSkim->Write();
   _oFile->Write();
   _oFile->Close();
 }

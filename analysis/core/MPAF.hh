@@ -192,6 +192,8 @@ protected:
  
 private:
 
+  vector<unsigned int> _nEvtsDs;
+  vector<unsigned int> _nEvts; 
   unsigned int _nEvtMax; 
   unsigned int _nSkip; 
   bool _summary;
@@ -202,6 +204,8 @@ private:
   TFile* _oFile;
   TTree* _skimTree;
   TH1I* _hnSkim;
+  TH1D* _hnwSkim;
+
 
   bool _skim;
   bool _fullSkim;

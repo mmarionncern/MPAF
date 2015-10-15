@@ -139,5 +139,5 @@ QCD_Pt80to120_EMEnriched	350000
 QCD_Pt120to170_EMEnriched	62964
 QCD_Pt170to300_EMEnriched	18810
 QCD_Pt300toInf_EMEnriched	1350
-TTWToLNu                0.6647
-TTZToLLNuNu             0.8565
+TTWToLNu                0.2043
+TTZToLLNuNu             0.2529
