@@ -97,6 +97,7 @@ void VarClass::reset() {
   varmI.clear();
   varmUI.clear();
   varmUL.clear();
+  varmUL64.clear();
   varmS.clear();
   varmB.clear();
   varmD.clear();
@@ -406,7 +407,7 @@ void VarClass::buildTree(TTree* tree, bool bypass) {
     if(leafcount) {
       len = leafcount->GetMaximum();
     }
-	
+    
     // failed to find the type of the variable automatically
     // if( type == "" ) {
     //   map<string,std::pair<string, int> >::const_iterator it = _varTypes.find( name );
@@ -423,7 +424,6 @@ void VarClass::buildTree(TTree* tree, bool bypass) {
 	
     // variable to be registered	
     if( isUsefulVar(name) ) {
-
       // enable status
       tree->SetBranchStatus( name.c_str() , 1);
 		  
@@ -702,6 +702,18 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     tree->SetBranchAddress( name.c_str() , &(varmD[ key ]) );
   }
 
+  //UL : unsigned long 64 bits
+  else if( t == 17 ) {  
+    if( varIds_.find(name) != varIds_.end() ) {
+      cout << " Warning, " << name << " already registered" << endl;
+      return;
+    }
+
+    setIds( name, kScalar, kULong64, key);
+    varmUL64[ key ] =0;
+    tree->SetBranchAddress( name.c_str() , &(varmUL64[ key ]) );
+  }
+
 }
 
 void 
@@ -744,6 +756,7 @@ double VarClass::findSVal(int tType, int key) {
   case kInt: {return (double)varmI[key];}
   case kUInt: {return (double)varmUI[key];}
   case kULong: {return (double)varmUL[key];}
+  case kULong64: {return (double)varmUL64[key];}
   case kDouble: {return (double)varmD[key];}
   case kFloat: {return (double)varmF[key];}
     //case kString: {return varmS[key];}
@@ -783,6 +796,9 @@ double VarClass::findAVal(int tType, int key, int idx) {
 
 double VarClass::get(string name, int idx) {
   
+  // for(itVId_=varIds_.begin();itVId_!=varIds_.end();itVId_++)
+  //   cout<<itVId_->first<<"   "<<itVId_->second<<endl;
+
   itVId_ = varIds_.find(name);
   if(itVId_ == varIds_.end() )
     cout << " error, no such variable " << name << endl;

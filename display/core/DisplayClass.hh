@@ -186,6 +186,7 @@ public:
 
   void reset();
   void softReset();
+  void refreshHistos();
 
   void configureDisplay(string YTitle, double rangeY[2], 
 			double rangeX[2], bool logYscale,
@@ -260,7 +261,6 @@ public:
   
 private:
 
-  void refreshHistos();
 
   vector<vector<TPad*> > preparePads();
   vector<vector<TPad*> > preparePadsWithRatio();
