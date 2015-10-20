@@ -124,14 +124,15 @@ void susy3l_SIGNALREGION_PAIRSTATE() {
     md.anConf.addSample( "DYJetsToLL_M10to50"               ,  "fake"    , kRed      );
     
     //t production
+    md.anConf.addSample( "T_tWch"                           ,  "fake"    , kRed+3      );
     md.anConf.addSample( "TBar_tWch"                        ,  "fake"    , kRed+3      );
-    md.anConf.addSample( "TToLeptons_sch_amcatnlo"          ,  "fake"    , kRed+2      );
+    md.anConf.addSample( "TbarToLeptons_tch"                ,  "fake"    , kRed+3      );
     md.anConf.addSample( "TTJets"                           ,  "fake"    , kRed+2      );
     md.anConf.addSample( "TToLeptons_tch"                   ,  "fake"    , kRed+2      );
-    md.anConf.addSample( "T_tWch"                           ,  "fake"    , kRed+3      );
-    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "fake"    , kRed+2      );
+    md.anConf.addSample( "TToLeptons_sch_amcatnlo"          ,  "fake"    , kRed+2      );
+    //md.anConf.addSample( "TTLLJets_m1to10"                  ,  "fake"    , kRed+2      );
     md.anConf.addSample( "TTGJets"                          ,  "fake"    , kRed+2      );
-    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "fake"    , kRed+2      );
+   
     
     //W+Jets
     md.anConf.addSample( "WJetsToLNu"                       ,  "fake"    , kRed-6      );
