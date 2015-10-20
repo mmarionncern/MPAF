@@ -53,6 +53,7 @@ private:
     bool ZEventSelectionLoop();
     bool srSelection();
     void fillEventPlots();
+    void fillControlPlots();
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll(bool ossf = true);

@@ -203,6 +203,7 @@ void SUSY3L::run(){
 
     // do the minimal selection and collect kinematic variables for events passing it
     collectKinematicObjects();
+    fillControlPlots();
 
     // initialization of baseline region cuts
     setBaselineRegion();
@@ -655,7 +656,7 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    3, ">="  )  ;     //number of isolated leptons
+        setCut("LepMultiplicity"   ,    2, ">="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs              = 0          ;     //harsher pT requirement for at least _nHardestLeptons (below)
@@ -665,7 +666,7 @@ void SUSY3L::setBaselineRegion(){
         setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,   60, ">=" )  ;     //sum of jet pT's
-        setCut("MET"                ,   50, ">=" )  ;     //missing transverse energy
+        setCut("MET"                ,    0, ">=" )  ;     //missing transverse energy
         setCut("Mll"                ,   12, ">=" )  ;     //invariant mass of ossf lepton pair
         setCut("MT2"                ,   55, "<" )  ;     //MT2 cut value
     }
@@ -1686,12 +1687,12 @@ if(_SR == "SR107") {
 //____________________________________________________________________________
 void SUSY3L::setSignalRegion() {
 
-//if(_SR == "SR999") {
-//   setCut("NBJetsSR", 0, ">=" );
-//   setCut("METSR", 50, ">=" );
-//   setCut("NJetsSR", 2, ">=" );
-//   setCut("HTSR", 60, ">=" );
-//}
+if(_SR == "SR999") {
+   setCut("NBJetsSR", 0, ">=" );
+   setCut("METSR", 50, ">=" );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, ">=" );
+}
 
 if(_SR == "SR000") {
    setCut("NBJetsSR", 0, "[[", 1 );
@@ -1711,21 +1712,21 @@ if(_SR == "SR002") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR003") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR004") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR005") {
@@ -1746,80 +1747,73 @@ if(_SR == "SR007") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR008") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR009") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR010") {
-   setCut("NBJetsSR", 1, "[[", 2 );
-   setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
 }
 
 if(_SR == "SR011") {
    setCut("NBJetsSR", 2, "[[", 3 );
-   setCut("METSR", 50, "[[", 150 );
+   setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 2, ">=" );
    setCut("HTSR", 60, "[[", 400 );
 }
 
 if(_SR == "SR012") {
    setCut("NBJetsSR", 2, "[[", 3 );
-   setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 2, ">=" );
-   setCut("HTSR", 60, "[[", 400 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR013") {
    setCut("NBJetsSR", 2, "[[", 3 );
    setCut("METSR", 50, "[[", 150 );
-   setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR014") {
    setCut("NBJetsSR", 2, "[[", 3 );
-   setCut("METSR", 50, "[[", 150 );
-   setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 700 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
 }
 
 if(_SR == "SR015") {
-   setCut("NBJetsSR", 2, "[[", 3 );
-   setCut("METSR", 150, "[[", 300 );
-   setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 400, "[[", 700 );
-}
-
-if(_SR == "SR016") {
    setCut("NBJetsSR", 3, ">=");
    setCut("METSR", 50, "[[", 300 );
    setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 60, "[[", 700 );
+   setCut("HTSR", 60, "[[", 600 );
 }
 
-if(_SR == "SR017") {
+if(_SR == "SR016") {
    setCut("NBJetsSR", 1, ">=");
    setCut("METSR", 50, "[[", 300 );
    setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 700, ">=");
+   setCut("HTSR", 600, ">=");
 }
 
-if(_SR == "SR018") {
+if(_SR == "SR017") {
    setCut("NBJetsSR", 1, ">=");
    setCut("METSR", 300, ">=" );
    setCut("NJetsSR", 2, ">=");
@@ -1992,52 +1986,38 @@ bool SUSY3L::baseSelection(){
     }
     
     //fill plots 
-//    if(is_reconstructed_Z){
-//        fill("Zmass" , _Z->mass()      , _weight);
-//        fill("Zpt"   , _Z->pt()        , _weight);
-//    }
+    if(is_reconstructed_Z){
+        fill("Zmass" , _Z->mass()      , _weight);
+        fill("Zpt"   , _Z->pt()        , _weight);
+    }
     
-//    fill("el_multiplicity" , _nEls , _weight);
-//    fill("mu_multiplicity" , _nMus , _weight);
-//    fill("tau_multiplicity" , _nTaus , _weight);
-//    fill("lep_multiplicity" , _nEls + _nMus + _nTaus , _weight);
+    fill("el_multiplicity" , _nEls , _weight);
+    fill("mu_multiplicity" , _nMus , _weight);
+    fill("tau_multiplicity" , _nTaus , _weight);
+    fill("lep_multiplicity" , _nEls + _nMus + _nTaus , _weight);
 
     //sort leptons by pt and fill pt plots
-//    sortSelectedLeps();
-//    fill("pt_1st_lepton" , _leps[0]->pt() , _weight);
-//    fill("pt_2nd_lepton" , _leps[1]->pt() , _weight);
-//    if(_nMus + _nEls + _nTaus > 2){
-//        fill("pt_3rd_lepton" , _leps[2]->pt() , _weight);
-//    }
+    sortSelectedLeps();
+    fill("pt_1st_lepton" , _leps[0]->pt() , _weight);
+    fill("pt_2nd_lepton" , _leps[1]->pt() , _weight);
+    if(_nMus + _nEls + _nTaus > 2){
+        fill("pt_3rd_lepton" , _leps[2]->pt() , _weight);
+    }
     
     //calculate MT2 and fill plot
-//    if(_nMus + _nEls + _nTaus == 3){
-//        _MT2 = getMT2();
+    if(_nMus + _nEls + _nTaus == 3){
+        _MT2 = getMT2();
         //cut on MT2
         //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR, kBase) ) return false;
-//        fill("MT2" , _MT2        , _weight);
-//    }
-/*
-    for(int mu=0;mu<_nMus;++mu){    
-        fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _muIdx[mu]))                  , _weight);
-        fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _muIdx[mu])*10000)            , _weight);
-        fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , _muIdx[mu])*10000)            , _weight);
-        fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatiov2", _muIdx[mu]))        , _weight);
-        fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _muIdx[mu]))            , _weight);
-        fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _muIdx[mu]))          , _weight);
+        fill("MT2" , _MT2        , _weight);
     }
+    
+    fillControlPlots();
 
-    for(int el=0;el<_nEls;++el){    
-        fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _elIdx[el]))        , _weight);
-        fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _elIdx[el])*10000)        , _weight);
-        fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , _elIdx[el])*10000)        , _weight);
-        fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatiov2" , _elIdx[el]))        , _weight);
-        fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _elIdx[el]))        , _weight);
-        fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _elIdx[el]))        , _weight);
-    }
-*/
     return true;
 }
+
+
 
 //____________________________________________________________________________
 bool SUSY3L::wzCRSelection(){
@@ -2617,8 +2597,34 @@ void SUSY3L::fillEventPlots(){
 
 }
 
+//____________________________________________________________________________
+void SUSY3L::fillControlPlots(){
+    /*
+        fills plots
+        parameters: none
+        return: none
+    */
+
+    for(int mu=0;mu<_nMus;++mu){    
+        fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _muIdx[mu]))                  , _weight);
+        fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _muIdx[mu])*10000)            , _weight);
+        fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , _muIdx[mu])*10000)            , _weight);
+        fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatiov2", _muIdx[mu]))        , _weight);
+        fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _muIdx[mu]))            , _weight);
+        fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _muIdx[mu]))          , _weight);
+    }
+
+    for(int el=0;el<_nEls;++el){    
+        fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _elIdx[el]))        , _weight);
+        fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _elIdx[el])*10000)        , _weight);
+        fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , _elIdx[el])*10000)        , _weight);
+        fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatiov2" , _elIdx[el]))        , _weight);
+        fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _elIdx[el]))        , _weight);
+        fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _elIdx[el]))        , _weight);
+    }
 
 
+}
 
 //____________________________________________________________________________
 float SUSY3L::DeltaPhi(float phi1, float phi2){
