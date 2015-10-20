@@ -172,10 +172,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    //if (_vc->get("isData") != 1){
-    //    _weight *= _vc->get("genWeight");
-    //    _weight *= _vc->get("vtxWeight");
-    //}
+    if (_vc->get("isData") != 1){
+        _weight *= _vc->get("genWeight");
+        _weight *= _vc->get("vtxWeight");
+    }
 
 }
 
@@ -204,8 +204,7 @@ void SUSY3L::run(){
     // do the minimal selection and collect kinematic variables for events passing it
     collectKinematicObjects();
 
-    // initialization of baseline region cuts, baseline event selection, and filling of
-    // event based observables in plots
+    // initialization of baseline region cuts
     setBaselineRegion();
 
     //check if event goes into baseline selection
@@ -1712,21 +1711,21 @@ if(_SR == "SR002") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR003") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR004") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR005") {
@@ -1747,28 +1746,28 @@ if(_SR == "SR007") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR008") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR009") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR010") {
    setCut("NBJetsSR", 1, "[[", 2 );
    setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR011") {
@@ -1789,35 +1788,35 @@ if(_SR == "SR013") {
    setCut("NBJetsSR", 2, "[[", 3 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 2, "[[", 5);
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR014") {
    setCut("NBJetsSR", 2, "[[", 3 );
    setCut("METSR", 50, "[[", 150 );
    setCut("NJetsSR", 5, ">=");
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR015") {
    setCut("NBJetsSR", 2, "[[", 3 );
    setCut("METSR", 150, "[[", 300 );
    setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 400, "[[", 600 );
+   setCut("HTSR", 400, "[[", 700 );
 }
 
 if(_SR == "SR016") {
    setCut("NBJetsSR", 3, ">=");
    setCut("METSR", 50, "[[", 300 );
    setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 60, "[[", 600 );
+   setCut("HTSR", 60, "[[", 700 );
 }
 
 if(_SR == "SR017") {
    setCut("NBJetsSR", 1, ">=");
    setCut("METSR", 50, "[[", 300 );
    setCut("NJetsSR", 2, ">=");
-   setCut("HTSR", 600, ">=");
+   setCut("HTSR", 700, ">=");
 }
 
 if(_SR == "SR018") {
@@ -2048,7 +2047,7 @@ bool SUSY3L::wzCRSelection(){
         return: none
     */
 
-    return true;
+    //return true;
     counter("denominator", kWZ);
 
     //lepton multiplicity
