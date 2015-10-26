@@ -12,6 +12,7 @@
 
 #include "analysis/src/SUSY3L_sync3.hh"
 
+
 /*****************************************************************************
 ******************************************************************************
 ** CLASS MEMBERS FOR RUNNING THE CODE                                       **
@@ -31,13 +32,13 @@ SUSY3L_sync3::SUSY3L_sync3(std::string cfg){
     startExecution(cfg);
     initialize();
 
-    //_hltLines.push_back("HLT_DoubleMu");
-    //_hltLines.push_back("HLT_DoubleEl");
-    //_hltLines.push_back("HLT_MuEG");
-    //_hltLines.push_back("HLT_DoubleMuHT");
-    //_hltLines.push_back("HLT_DoubleElHT");
-    //_hltLines.push_back("HLT_SingleMu");
-    //_hltLines.push_back("HLT_SingleEl");
+    _hltLines.push_back("HLT_DoubleMu");
+    _hltLines.push_back("HLT_DoubleEl");
+    _hltLines.push_back("HLT_MuEG");
+    _hltLines.push_back("HLT_DoubleMuHT");
+    _hltLines.push_back("HLT_DoubleElHT");
+    _hltLines.push_back("HLT_SingleMu");
+    _hltLines.push_back("HLT_SingleEl");
 
 }
 
@@ -76,9 +77,11 @@ void SUSY3L_sync3::initialize(){
     _vc->registerVar("LepGood_phi"                     );    //phi of leptons
     _vc->registerVar("LepGood_charge"                  );    //charge of lepton +1 or -1
     _vc->registerVar("LepGood_relIso03"                );    //relative isolation of the lepton, cone dimensions?
-    _vc->registerVar("LepGood_miniRelIso"              );    //relIso with smaller cone?
-    _vc->registerVar("LepGood_jetPtRatio"              );    //pt lepton over pt aka4 jet (cone size?)
+    _vc->registerVar("LepGood_miniRelIso"              );    //relIso with pt dependent cone
+    _vc->registerVar("LepGood_jetPtRatio"              );    //pt lepton over pt aka4 jet
+    _vc->registerVar("LepGood_jetPtRatiov2"            );   //
     _vc->registerVar("LepGood_jetPtRel"                );    //
+    _vc->registerVar("LepGood_jetPtRelv2"              );    //
     
     
     _vc->registerVar("LepGood_dz"                      );    //difference to reconstructed primary vertex in z direction
@@ -96,12 +99,13 @@ void SUSY3L_sync3::initialize(){
     _vc->registerVar("LepGood_eInvMinusPInv"           );    //
     _vc->registerVar("LepGood_mediumMuonId"            );    //mva medium wp muon identification
     _vc->registerVar("LepGood_mvaIdPhys14"             );    //mva electron ID
+    _vc->registerVar("LepGood_mvaIdSpring15"           );    //updated mva electron ID
+    
      
     _vc->registerVar("nTauGood"                        );    //number of taus in event
     _vc->registerVar("TauGood_pdgId"                   );    //identifier for taus (15)
     _vc->registerVar("TauGood_pt"                      );    //pT of tau
     _vc->registerVar("TauGood_eta"                     );    //eta of tau
-    _vc->registerVar("TauGood_dz"                      );    //dz of tau
     _vc->registerVar("TauGood_phi"                     );    //phi of tau
     _vc->registerVar("TauGood_charge"                  );    //charge of tau +1 or -1
     _vc->registerVar("TauGood_idAntiMu"                );     //tau muon discriminator
@@ -128,21 +132,21 @@ void SUSY3L_sync3::initialize(){
     _vc->registerVar("HLT_DoubleMuHT"                  );
     _vc->registerVar("HLT_DoubleElHT"                  );
     
-    _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
+    //_vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
+    //_vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
 
 
 
     //additional counter categories
     _au->addCategory( kElId, "el Id");
-    _au->addCategory( kElVeto, "veto El");
     _au->addCategory( kMuId, "muon Id");
-    _au->addCategory( kMuVeto, "veto Mu");
     _au->addCategory( kTauId, "tau Id");
-    _au->addCategory( kTauVeto, "veto tau");
     _au->addCategory( kJetId, "jet Id");
     _au->addCategory( kBJetId, "b-jet Id");
-    _au->addCategory( conZEvents, "Z events");
-                 
+    _au->addCategory( kBase, "baseline selection"); 
+    _au->addCategory( kWZ, "wz control region"); 
+    _au->addCategory( kSignalRegion, "signal region"); 
+                
     //config file input variables
     _pairmass = getCfgVarS("pairMass");
     _selectMuons = getCfgVarS("selectMuons");
@@ -151,7 +155,12 @@ void SUSY3L_sync3::initialize(){
     _BR = getCfgVarS("baselineRegion");
     _SR = getCfgVarS("signalRegion");
 
-
+    //workflows
+    addWorkflow( kWZCR, "WZCR");
+    addWorkflow( kSR, "SR");
+    
+    //SusyModule for common inputs and functions with RA5
+    _susyMod = new SusyModule(_vc, _dbm);
 }
 
 
@@ -162,9 +171,11 @@ void SUSY3L_sync3::modifyWeight() {
         parameters: none
         return: none
     */ 
-    if (_vc->get("isData") != 1){
-        _weight *= _vc->get("genWeight");
-    }
+    
+    //if (_vc->get("isData") != 1){
+    //    _weight *= _vc->get("genWeight");
+    //    _weight *= _vc->get("vtxWeight");
+    //}
 
 }
 
@@ -181,7 +192,7 @@ void SUSY3L_sync3::run(){
     _tauIdx.clear();
     _jets.clear();
     _bJets.clear();
-    _leps.clear(); 
+    _leps.clear();
     
     // increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -190,30 +201,47 @@ void SUSY3L_sync3::run(){
     //if(!passMultiLine(false)) return;
     //counter("HLT");
 
-    //initialize multiIso working points
-    setMultiIsoWP();
-
     // do the minimal selection and collect kinematic variables for events passing it
     collectKinematicObjects();
 
-    // initialization of baseline region cuts, baseline event selection, and filling of
-    // event based observables in plots
+    // initialization of baseline region cuts
     setBaselineRegion();
-    if(!baseSelection()) return;	
-    //fillSkimTree();
-    fillEventPlots("BR");
 
-    //printout for RA7 synchronization
-    int lumi = _vc->get("lumi");
-    //int evt = _vc->get("evt");
-    //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+    //check if event goes into baseline selection
+    //if(!makeCut(baseSelection(),"base selection")){	
+    if(!(baseSelection())){	
+        //if event fails baseline selection check if it goes to WZ control region
+        //setWZControlRegion();
+        //if(!(wzCRSelection())){
+        //    setWorkflow(kGlobal);
+        //    return;
+        //}
+        //setWorkflow(kWZCR);
+        //counter("wz control region",kWZCR);
+        //fillEventPlots();
+        //setWorkflow(kGlobal);
+        return;
+    }
+    
+    setWorkflow(kGlobal);
+    counter("baseline");
+
+    //fillSkimTree();
+    //fillControlPlots();
+    //fillEventPlots();
 
     // initialization of signal region cuts, categorization of events passing the baseline 
     // selection into different signal regions, and filling of plots
-    
     //setSignalRegion();
-    //if(!srSelection()) return;	
-    //fillEventPlots("SR");
+    //if(!srSelection()){
+    //    setWorkflow(kGlobal);
+    //    return;
+    //}
+    //setWorkflow(kSR);
+    //fillEventPlots();
+    //counter("signal region", kSR);
+    //setWorkflow(kGlobal);
+    //counter("signal region");
 
 }
 
@@ -234,42 +262,38 @@ void SUSY3L_sync3::defineOutput(){
     */
     
     //event based observables for baseline region 
-    _hm->addVariable("BR_HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
-    _hm->addVariable("BR_MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
-    _hm->addVariable("BR_NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
-    _hm->addVariable("BR_NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
-
-    //event based observables for signal region 
-    _hm->addVariable("SR_HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
-    _hm->addVariable("SR_MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
-    _hm->addVariable("SR_NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
-    _hm->addVariable("SR_NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
+    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
+    _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
+    _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
 
     //additional observables
     _hm->addVariable("Zmass"            ,  150,     0.0,  150.0,    "Z candidate mass [GeV]"            );
     _hm->addVariable("Zpt"              ,  150,     0.0,  150.0,    "Z candidate pt [GeV]"              );
     _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
     _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "MT [GeV]"                          );
-    _hm->addVariable("deltaR_elmu"      ,  500,     0.0,  10.0,     "delta R between el and mu"         );
-    _hm->addVariable("el_multiplicity"  ,  10,      0.0,  10.0,     "electron multiplicity"             );
-    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,  10.0,     "muon multiplicity"                 );
-    _hm->addVariable("tau_multiplicity" ,  10,      0.0,  10.0,     "tau multiplicity"                  );
-    _hm->addVariable("lep_multiplicity" ,  10,      0.0,  10.0,     "lepton multiplicity"               );
-    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "pt of hardest lepton [GeV]"        );
-    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "pt of second hardest lepton [GeV]" );
-    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "pt of softest lepton [GeV]"        );
+    _hm->addVariable("3rd_lepton_flavor",  40,      -20,   20.0,    "3rd lepton pdgId"                  );
+    _hm->addVariable("3rd_lepton_pt"    ,  200,       0,  200.0,    "3rd lepton pt"                     );
+    _hm->addVariable("deltaR_elmu"      ,  500,     0.0,   10.0,    "delta R between el and mu"         );
+    _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "electron multiplicity"             );
+    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "muon multiplicity"                 );
+    _hm->addVariable("tau_multiplicity" ,  10,      0.0,   10.0,    "tau multiplicity"                  );
+    _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "lepton multiplicity"               );
+    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "pt of leading lepton [GeV]"        );
+    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "pt of 2nd lepton [GeV]"            );
+    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "pt of 3rd lepton [GeV]"            );
     _hm->addVariable("lowMll"           ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]"      );
     _hm->addVariable("muon_SIP3d"       ,   50,     0.0,    5.0,    "muon SIP3d"                        );
     _hm->addVariable("muon_dxy"         ,  600,     0.0,  600.0,    "muon dxy [um]"                     );
     _hm->addVariable("muon_dz"          ,  600,     0.0,  600.0,    "muon dz [um]"                      );
-    _hm->addVariable("muon_JetPtRatio"  ,   60,     0.0,    1.2,    "muon jet pt ratio [GeV]"           );
-    _hm->addVariable("muon_JetPtRel"    ,   40,     0.0,   40.0,    "muon jet pt rel [GeV]"             );
+    _hm->addVariable("muon_JetPtRatio"  ,   60,     0.0,    2.0,    "muon jet pt ratio [GeV]"           );
+    _hm->addVariable("muon_JetPtRel"    ,   40,     0.0,  100.0,    "muon jet pt rel [GeV]"             );
     _hm->addVariable("muon_miniRelIso"  ,   40,     0.0,    0.4,    "muon isolation"                    );
     _hm->addVariable("el_SIP3d"         ,   50,     0.0,    5.0,    "electron SIP3d"                    );
     _hm->addVariable("el_dxy"           ,  600,     0.0,  600.0,    "electron dxy [um]"                 );
     _hm->addVariable("el_dz"            ,  600,     0.0,  600.0,    "electron dz [um]"                  );
-    _hm->addVariable("el_JetPtRatio"    ,   60,     0.0,    1.2,    "electron jet pt ratio [GeV]"       );
-    _hm->addVariable("el_JetPtRel"      ,   40,     0.0,   40.0,    "electron jet pt rel [GeV]"         );
+    _hm->addVariable("el_JetPtRatio"    ,   60,     0.0,    2.0,    "electron jet pt ratio [GeV]"       );
+    _hm->addVariable("el_JetPtRel"      ,   40,     0.0,  100.0,    "electron jet pt rel [GeV]"         );
     _hm->addVariable("el_miniRelIso"    ,   40,     0.0,    0.4,    "electron isolation"                );
 
 }
@@ -325,30 +349,12 @@ void SUSY3L_sync3::collectKinematicObjects(){
         return: none
     */
   
-   /* 
-    if(_vc->get("lumi") == 4524 && _vc->get("evt") == 52342){
-        cout << "--------------------------------------------------"<< endl; 
-        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose leptons: " <<  _vc->get("nLepGood") << endl;
-        for(int i = 0; i<_vc->get("nLepGood");i++){
-            cout << "lep " << i << ": " << _vc->get("LepGood_pt",i) << " " << _vc->get("LepGood_eta",i) << " " << _vc->get("LepGood_etaSc",i) << " " << _vc->get("LepGood_phi",i) << " " << _vc->get("LepGood_pdgId",i) <<endl;
-        }
-        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose jets: " <<  _vc->get("nJet") << endl;
-        for(int i = 0; i<_vc->get("nJet");i++){
-            cout << "jet " << i << ": " << _vc->get("Jet_pt",i) << " " << _vc->get("Jet_eta",i)<< " " << _vc->get("Jet_phi",i)  <<endl;
-        }
-        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose taus: " <<  _vc->get("nTauGood") << endl;
-        for(int i = 0; i<_vc->get("nTauGood");i++){
-            cout << "tau " << i << ": " << _vc->get("TauGood_pt",i) << " " << _vc->get("TauGood_eta",i)<< " " << _vc->get("TauGood_phi",i)  <<endl;
-        }
-    }
-    */
-
-    if(_selectMuons == "true"){
-	// loop over all nLepGood leptons in this event and select muons
+    if(_selectMuons == "true"){ 
+    // loop over all nLepGood leptons in this event and select muons
     for(int i = 0; i < _vc->get("nLepGood"); ++i){
         // check which of the nLepGood leptons are muons, identifier 13
         if(std::abs(_vc->get("LepGood_pdgId",i)) == 13){
-            //differentiate muons for muon selecton and veto muon selection
+            //select muons
             if(muonSelection(i)) {
                 _mus.push_back( Candidate::create(_vc->get("LepGood_pt", i),
                                                   _vc->get("LepGood_eta", i),
@@ -358,31 +364,18 @@ void SUSY3L_sync3::collectKinematicObjects(){
                                                   0.105) );     //muon mass
                 _muIdx.push_back(i);
             }
-            /*
-            else {
-                if(vetoMuonSelection(i))  {
-                    _vMus.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-                                                       _vc->get("LepGood_eta", i),
-                                                       _vc->get("LepGood_phi", i),
-                                                       _vc->get("LepGood_pdgId", i),
-                                                       _vc->get("LepGood_charge", i),
-                                                       0.105) );    //muon mass
-                }
-            }
-            */
         }
     }
     }
     //number of muons in event   
     _nMus = _mus.size();
-    //_nVMus = _vMus.size();
     
     if(_selectElectrons == "true"){ 
     // loop over all nLepGood leptons in this event and select electrons
     for(int i = 0; i < _vc->get("nLepGood"); ++i){
         // check which of the nLepGood leptons are electrons, identifier 11
         if(std::abs(_vc->get("LepGood_pdgId",i)) == 11){
-            //differentiate electrons for electron selecton and veto electron selection
+            //select electrons
             if(electronSelection(i)) {
                 //if electron passes electron selection, create electron candidate 
                 //with respective kinematic variables and append it to _els vector
@@ -394,27 +387,12 @@ void SUSY3L_sync3::collectKinematicObjects(){
                                                   0.0005) );    //electron mass
                 _elIdx.push_back(i);
             }
-            /*
-            else {
-                //if electron passes veto selection, create veto electron candidate
-                //and append to _vEls vector
-                if(vetoElectronSelection(i))  {
-                    _vEls.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-                                                       _vc->get("LepGood_eta", i),
-                                                       _vc->get("LepGood_phi", i),
-                                                       _vc->get("LepGood_pdgId", i),
-                                                       _vc->get("LepGood_charge", i),
-                                                       0.0005) );   //electron mass
-                }
-            }
-            */
         }
     }
     }
   
     //number of electrons in the event
     _nEls = _els.size();
-    //_nVEls = _vEls.size();
 
 
     if(_selectTaus == "true"){ 
@@ -422,7 +400,7 @@ void SUSY3L_sync3::collectKinematicObjects(){
     for(int i = 0; i < _vc->get("nTauGood"); ++i){
         // check which of the taus have tau identifier 15 (actually not needed)
         if(std::abs(_vc->get("TauGood_pdgId",i)) == 15){
-            //differentiate taus for tau selecton and veto tau selection
+            //select taus
             if(tauSelection(i)){
                 _taus.push_back( Candidate::create(_vc->get("TauGood_pt", i),
                                                    _vc->get("TauGood_eta", i),
@@ -432,23 +410,11 @@ void SUSY3L_sync3::collectKinematicObjects(){
                                                    1.777) );     //tau mass
                 _tauIdx.push_back(i);
             }
-            /*
-            else {
-                if(vetotauSelection(i)){
-                    _vTaus.push_back( Candidate::create(_vc->get("TauGood_pt", i),
-                                                        _vc->get("TauGood_eta", i),
-                                                        _vc->get("TauGood_phi", i),
-                                                        _vc->get("TauGood_pdgId", i),
-                                                        _vc->get("TauGood_charge", i),
-                                                        1.777) );    //tau mass
-                }
-            }*/
         }
     }
     }
     //number of taus in the event
     _nTaus = _taus.size();
-    //_vTaus = _taus.size();
 
 
     // loop over all jets of the event
@@ -497,51 +463,14 @@ bool SUSY3L_sync3::electronSelection(int elIdx){
     //count electron candidates
     counter("ElectronDenominator", kElId);
 
-    //define cuts for electrons
-    float pt_cut = 10.;
-    float eta_cut = 2.5;
-    float eta_veto_low = 1.4442;
-    float eta_veto_high = 1.566;
-    float isolation_cut = 0.15;
-    float vertex_dz_cut = 0.1;      //in cm
-    float vertex_dxy_cut = 0.05;    //in cm
-    float sip3d_cut = 4;
+    //cut for cleaning
     float deltaR = 0.1;
     
-    //multiIso working points
-    int kLoose = 0;
-    int kMedium = 1;
-    int kTight = 2;
-    int kVeryTight = 3;
-    int kHyperTight = 4;
- 
-    //apply the cuts
-    //makeCut(variable to cut on, cut value, direction of acception, name, 2nd cut value, counter)
-    if(!makeCut<float>( _vc->get("LepGood_pt", elIdx) , pt_cut, ">"  , "pt selection"    , 0    , kElId)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_eta", elIdx)), eta_cut  , "<"  , "eta selection"   , 0    , kElId)) return false;
-    //removed after RA7 sync round 2
-    //if(!makeCut<float>( std::abs(_vc->get("LepGood_eta", elIdx)), eta_veto_low, "[!]", "eta selection veto"   , eta_veto_high, kElId)) return false;
-    //removed after RA7 sync round 2
-    //if(!makeCut<int>( _vc->get("LepGood_eleCutIdCSA14_50ns_v1", elIdx) , 3     , ">=" , "POG CB WP-M Id " , 0    , kElId)) return false;
-    //mva based electron ID
-    bool elTightMvaID = electronMvaCut(elIdx, 1);
-    if(!makeCut( elTightMvaID, "electron tight mva wp", "=", kElId)) return false;
-    //3 variable isolation criteria: miniIso < A and (pt ratio > B or pt rel > C)
-    int wp = kMedium;
-    bool isolated = multiIsolation(elIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
-    if(!makeCut( isolated, "initial multiIso selection", "=", kElId)) return false;
-    //replaced by multiIsolation
-    //if(!makeCut<float>( _vc->get("LepGood_relIso03", elIdx) , isolation_cut   , "<"  , "isolation "      , 0    , kElId)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_dz", elIdx)), vertex_dz_cut   , "<"  , "dz selection"    , 0    , kElId)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_dxy", elIdx)), vertex_dxy_cut  , "<"  , "dxy selection"   , 0    , kElId)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_sip3d", elIdx)), sip3d_cut  , "<"  , "sip3d selection"   , 0    , kElId)) return false;
-    //removed after RA7 sync round 2
-    //if(!makeCut<int>( _vc->get("LepGood_tightCharge", elIdx) , 1     , ">"  , "charge selection", 0    , kElId)) return false;
-    //boolian variable if electron comes from gamma conversion or not (true if not from conversion)
-    bool not_conv = (_vc->get("LepGood_convVeto", elIdx)>0 && _vc->get("LepGood_lostHits", elIdx)==0);
-    if(!makeCut( not_conv, "conversion rejection", "=", kElId)) return false;
+    //apply the cuts via SusyModules
+    //NOTE: this selection includes a cut on tightCharge and vetos the ECal crack. Both cuts have not been used in the RA7 sync 2
+    if(!makeCut( _susyMod->elIdSel(elIdx, SusyModule::kTight, SusyModule::kTight), "electron selection", "=", kElId) ) return false;
+    if(!makeCut( _susyMod->multiIsoSel(elIdx, SusyModule::kMedium), "multiIso selection", "=", kElId) ) return false;
     
-    //removed after RA7 sync round 2
     //reject electrons which are within a cone of delta R around a muon candidate (potentially final state radiation, bremsstrahlung)
     bool muMatch = false;
     for(int im=0; im<_nMus; ++im){
@@ -554,15 +483,8 @@ bool SUSY3L_sync3::electronSelection(int elIdx){
         }
     }
     //enable to clean on tight objects
-    //if(!makeCut( !muMatch, "dR selection (mu)", "=", kElId) ) return false;
- 
-    fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , elIdx))        , _weight);
-    fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , elIdx)*10000)        , _weight);
-    fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , elIdx)*10000)        , _weight);
-    fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio" , elIdx))        , _weight);
-    fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRel" , elIdx))        , _weight);
-    fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , elIdx))        , _weight);
- 
+    //if(!makecut( !mumatch, "dr selection (mu)", "=", kelid) ) return false;
+       
     return true;
 }
 
@@ -578,46 +500,11 @@ bool SUSY3L_sync3::muonSelection(int muIdx){
     //count muon candidates
     counter("MuonDenominator", kMuId);
 
-    //define cut values
-    float pt_cut = 10.;
-    float eta_cut = 2.4;
-    float isolation_cut = 0.15;
-    float vertex_dz_cut = 0.1;
-    float vertex_dxy_cut = 0.05;
-    float sip3d_cut = 4;
-   
-    //multiIso working points
-    int kLoose = 0;
-    int kMedium = 1;
-    int kTight = 2;
-    int kVeryTight = 3;
-    int kHyperTight = 4;
-
-    //apply the cuts
-    if(!makeCut<float>( _vc->get("LepGood_pt", muIdx), pt_cut, ">", "pt selection"    , 0, kMuId)) return false;
-    if(!makeCut<float>( std::abs( _vc->get("LepGood_eta", muIdx)), eta_cut, "<", "eta selection", 0, kMuId)) return false;
-    //3 variable isolation criteria: miniIso < A and (pt ratio > B or pt rel > C)
-    int wp = kLoose;
-    bool isolated = multiIsolation(muIdx, _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2]);
-    if(!makeCut( isolated, "initial multiIso selection", "=", kMuId)) return false;
-    //replaced by multiIsolation
-    //if(!makeCut<float>( _vc->get("LepGood_relIso03", muIdx) , isolation_cut   , "<", "isolation "      , 0, kMuId)) return false;
-    //removed after RA7 sync round 2
-    //if(!makeCut<int>( _vc->get("LepGood_tightId", muIdx) , 1     , "=", "POG Tight Id "   , 0, kMuId)) return false;
-    //mva based muon id, medium working point
-    if(!makeCut<float>( _vc->get("LepGood_mediumMuonId", muIdx) , 1  , "=", "mva medium muon id", 0, kMuId)) return false;
-    if(!makeCut<float>(std::abs(_vc->get("LepGood_dz", muIdx)), vertex_dz_cut   , "<", "dz selection"    , 0, kMuId)) return false;
-    if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy", muIdx)), vertex_dxy_cut , "<", "dxy selection"   , 0, kMuId)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_sip3d", muIdx)), sip3d_cut  , "<"  , "sip3d selection"   , 0    , kMuId)) return false;
+    //apply the cuts via SusyModules
+    //NOTE: this selection includes a cut on tightCharge which was not used in the RA7 sync 2
+    if(!makeCut( _susyMod->muIdSel(muIdx, SusyModule::kTight), "muon selection", "=", kMuId) ) return false;
+    if(!makeCut( _susyMod->multiIsoSel(muIdx, SusyModule::kLoose), "multiIso selection", "=", kMuId) ) return false;
  
-    fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , muIdx))        , _weight);
-    fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , muIdx)*10000)        , _weight);
-    fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , muIdx)*10000)        , _weight);
-    fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatio" , muIdx))        , _weight);
-    fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRel" , muIdx))        , _weight);
-    fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , muIdx))        , _weight);
- 
-
     return true;
 }
 
@@ -636,13 +523,11 @@ bool SUSY3L_sync3::tauSelection(int tauIdx){
     //define cuts for electrons
     float pt_cut = 20.;
     float eta_cut = 2.3;
-    float dz_cut = 0.2;
     float deltaR = 0.3;
     
     //apply the cuts
     if(!makeCut<float>( _vc->get("TauGood_pt", tauIdx) , pt_cut, ">"  , "pt selection"    , 0    , kTauId)) return false;
     if(!makeCut<float>( std::abs(_vc->get("TauGood_eta", tauIdx)), eta_cut  , "<"  , "eta selection"   , 0    , kTauId)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("TauGood_dz", tauIdx)), dz_cut  , "<"  , "dz selection"   , 0    , kTauId)) return false;
     //removed after sync
     //if(!makeCut<int>( _vc->get("TauGood_idAntiMu", tauIdx) , 2     , "=" , "anti muon" , 0    , kTauId)) return false;
     //if(!makeCut<int>( _vc->get("TauGood_idAntiE", tauIdx) , 4     , ">=" , "anti electron" , 0    , kTauId)) return false;
@@ -674,57 +559,6 @@ bool SUSY3L_sync3::tauSelection(int tauIdx){
     return true;
 }
 
-
-//____________________________________________________________________________
-bool SUSY3L_sync3::vetoElectronSelection(int elIdx){
-    /*
-        selection of veto electrons
-        parameters: elIdx
-        return: true (if the electron is a veto electron), false (else)
-    */
-    
-    //count veto electron candidates
-    counter("vetoElDenominator", kElVeto);
-
-    //define cut values
-    float pt_cut = 5.;
-    float eta_cut = 2.4;
-    float eta_veto_low = 1.442;
-    float eta_veto_high = 1.566;
-    float isolation_cut = 0.2;
- 
-    //cuts like electron selection, only lower pt cut, looser electron identification id, looser isolation cut
-    if(!makeCut<float>( _vc->get("LepGood_pt", elIdx) , pt_cut   , ">"  , "pt selection"    , 0    , kElVeto)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_eta", elIdx)), eta_cut   , "<"  , "eta selection"   , 0    , kElVeto)) return false;
-    if(!makeCut<float>( std::abs(_vc->get("LepGood_eta", elIdx)), eta_veto_low, "[!]", "eta selection"   , eta_veto_high, kElVeto)) return false;
-    if(!makeCut<int>( _vc->get("LepGood_eleCutIdCSA14_50ns_v1", elIdx), 1, ">=" , "POG CB WP-L Id " , 0    , kElVeto)) return false;
-    if(!makeCut<float>( _vc->get("LepGood_relIso03", elIdx), isolation_cut    , "<"  , "isolation "      , 0    , kElVeto)) return false;
-
-    return true;
-}
-
-
-//____________________________________________________________________________
-bool SUSY3L_sync3::vetoMuonSelection(int muIdx){
-    /*
-        selection of veto muons
-        parameters: muIdx     
-        return: true (if the muon is a veto muon), false (else)
-    */
-    
-    //count veto muon candidates
-    counter("VetoMuonDenominator", kMuVeto);
-
-    //define cut values
-    float pt_cut = 5.;
-    float isolation_cut = 0.2;
-
-    if(!makeCut<int>(   _vc->get("LepGood_tightId", muIdx), 1  , "=", "POG Tight Id", 0, kMuVeto) ) return false;
-    if(!makeCut<float>( _vc->get("LepGood_relIso03", muIdx),  isolation_cut  , "<", "isolation "   , 0, kMuVeto)) return false;
-    if(!makeCut<float>(  _vc->get("LepGood_pt"     , muIdx), pt_cut, ">", "pt selection", 0, kMuVeto ) ) return false;
- 
-    return true;
-}
 
 //____________________________________________________________________________
 bool SUSY3L_sync3::goodJetSelection(int jetIdx){
@@ -796,8 +630,6 @@ bool SUSY3L_sync3::bJetSelection(int jetIdx){
 
     float btagCSV_cut = 0.814;
 
-    //TODO: change to pfCombinedInclusiveSecondaryVertexV2BJetTags > Medium WP: 0.814 
-    
     //b-jet needs to fulfill criteria for jets
     if(!makeCut(goodJetSelection(jetIdx), "jet Id", "=", kBJetId) ) return false;
     //cut on b-tagger parameter
@@ -816,24 +648,6 @@ bool SUSY3L_sync3::bJetSelection(int jetIdx){
 * *****************************************************************************/
 
 //____________________________________________________________________________
-void SUSY3L_sync3::setMultiIsoWP(){
-    /*
-        sets the cuts multiiso working point
-        parameters: none
-        return: none
-    */
- 
-    //multiIso working points
-    _multiIsoWP[0][0]=0.22;  _multiIsoWP[0][1]=0.63;  _multiIsoWP[0][2]=6.; //loose
-    _multiIsoWP[1][0]=0.14;  _multiIsoWP[1][1]=0.68;  _multiIsoWP[1][2]=6.7;//medium
-    _multiIsoWP[2][0]=0.10;  _multiIsoWP[2][1]=0.70;  _multiIsoWP[2][2]=7.; //tight
-    _multiIsoWP[3][0]=0.075; _multiIsoWP[3][1]=0.725; _multiIsoWP[3][2]=7.; //very tight
-    _multiIsoWP[4][0]=0.05;  _multiIsoWP[4][1]=0.725; _multiIsoWP[4][2]=8.; //hyper tight
-
-}
-
-
-//____________________________________________________________________________
 void SUSY3L_sync3::setBaselineRegion(){
     /*
         sets the cuts of the baseline region (_BR)
@@ -844,24 +658,43 @@ void SUSY3L_sync3::setBaselineRegion(){
     if(_BR == "BR0"){
         setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
+        _nHardestLeptons              = 0           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs              = 0          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
-        _M_T_3rdLep_MET_cut           =  40         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
+        _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
         setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,   60, ">=" )  ;     //sum of jet pT's
         setCut("MET"                ,   40, ">=" )  ;     //missing transverse energy
-        setCut("Mll"                ,   12, ">=" )  ;     //invariant mass of ossf lepton pair
-        setCut("MT2"                ,   55, "<" )  ;     //MT2 cut value
+        setCut("Mll"                ,    0, ">=" )  ;     //invariant mass of ossf lepton pair
+        setCut("MT2"                ,    0, "<" )   ;     //MT2 cut value
     }
 
 }
 
 
 //____________________________________________________________________________
-void SUSY3L_sync3::setSignalRegion() {
+void SUSY3L_sync3::setWZControlRegion(){
+    /*
+        sets the cuts of the WZ control region
+        parameters: none
+        return: none
+    */
+
+    setCut("LepMultiplicityWZ"    ,   3, "="   )        ;     //number of isolated leptons
+    _M_T_3rdLep_MET_cut           =   -1                ;     //minimum transverse mass of 3rd lepton and met in On-Z events
+    setCut("NJetsWZ"              ,    2, "[]", 3   )   ;     //number of jets in event
+    setCut("NBJetsWZ"             ,    0, "="   )       ;     //number of b-tagged jets in event
+    _ZMassWindow                  =   15.               ;     //width around Z mass to define on- or off-Z events
+    setCut("HTWZ"                 ,   60, "<", 400   )  ;     //sum of jet pT's
+    setCut("METWZ"                ,   50, "<", 150   )  ;     //missing transverse energy
+
+}
+
+
+//____________________________________________________________________________
+//void SUSY3L_sync3::setSignalRegion() {
   
     /*
         sets the cuts of the signal region (_SR)
@@ -869,219 +702,1501 @@ void SUSY3L_sync3::setSignalRegion() {
         return: none
     */
 
-    if(_SR == "SR00") {
+
+    // 30 SR as in PAS 013-008
+/*
+    if(_SR == "SR000") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR01") {
+    if(_SR == "SR001") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR02") {
+    if(_SR == "SR002") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 200, ">=" );
     } 
 
-    if(_SR == "SR03") {
+    if(_SR == "SR003") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR04") {
+    if(_SR == "SR004") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR05") {
+    if(_SR == "SR005") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 200, ">=" );
     }
 
-    if(_SR == "SR06") {
+    if(_SR == "SR006") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR07") {
+    if(_SR == "SR007") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR08") {
+    if(_SR == "SR008") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 200, ">=" );
     } 
 
-    if(_SR == "SR09") {
+    if(_SR == "SR009") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR10") {
+    if(_SR == "SR010") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR11") {
+    if(_SR == "SR011") {
         setCut("NBJetsSR", 1, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 200, ">=" );
     }
 
-    if(_SR == "SR12") {
+    if(_SR == "SR012") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR13") {
+    if(_SR == "SR013") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR14") {
+    if(_SR == "SR014") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 200, ">=" );
     } 
 
-    if(_SR == "SR15") {
+    if(_SR == "SR015") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR16") {
+    if(_SR == "SR016") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR17") {
+    if(_SR == "SR017") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 2, "[]", 3 );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 200, ">=" );
     }
 
-    if(_SR == "SR18") {
+    if(_SR == "SR018") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR19") {
+    if(_SR == "SR019") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR20") {
+    if(_SR == "SR020") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 200, ">=" );
     } 
 
-    if(_SR == "SR21") {
+    if(_SR == "SR021") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR22") {
+    if(_SR == "SR022") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR23") {
+    if(_SR == "SR023") {
         setCut("NBJetsSR", 2, "=" );
         setCut("NJetsSR", 4, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 200, ">=" );
     }
 
-    if(_SR == "SR24") {
+    if(_SR == "SR024") {
         setCut("NBJetsSR", 3, ">=" );
         setCut("NJetsSR", 2, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR25") {
+    if(_SR == "SR025") {
         setCut("NBJetsSR", 3, ">=" );
         setCut("NJetsSR", 2, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR26") {
+    if(_SR == "SR026") {
         setCut("NBJetsSR", 3, ">=" );
         setCut("NJetsSR", 2, ">=" );
-        setCut("HTSR", 60, "[]", 200 );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 60, "[[", 200 );
+        setCut("METSR", 200, ">=" );
     } 
 
-    if(_SR == "SR27") {
+    if(_SR == "SR027") {
         setCut("NBJetsSR", 3, ">=" );
         setCut("NJetsSR", 2, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 50, "[]", 100 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 50, "[[", 100 );
     }
  
-    if(_SR == "SR28") {
+    if(_SR == "SR028") {
         setCut("NBJetsSR", 3, ">=" );
         setCut("NJetsSR", 2, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 100, "]]", 200 );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 100, "[[", 200 );
     }   
  
-    if(_SR == "SR29") {
+    if(_SR == "SR029") {
         setCut("NBJetsSR", 3, ">=" );
         setCut("NJetsSR", 2, ">=" );
-        setCut("HTSR", 200, ">" );
-        setCut("METSR", 200, ">" );
+        setCut("HTSR", 200, ">=" );
+        setCut("METSR", 200, ">=" );
     }
 
 }
+*/
 
 
+//108 signal regions as of July
+/*
+//____________________________________________________________________________
+void SUSY3L_sync3::setSignalRegion() {
+
+if(_SR == "SR000") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR014") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR015") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR016") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR017") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR018") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR019") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR020") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR021") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR022") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR023") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR024") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR025") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR026") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR027") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR028") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR029") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR030") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR031") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR032") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR033") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR034") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR035") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR036") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR037") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR038") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR039") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR040") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR041") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR042") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR043") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR044") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR045") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR046") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR047") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR048") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR049") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR050") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR051") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR052") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR053") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR054") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR055") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR056") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR057") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR058") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR059") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR060") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR061") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR062") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR063") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR064") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR065") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR066") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR067") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR068") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR069") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR070") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR071") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR072") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR073") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR074") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR075") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR076") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR077") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR078") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR079") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR080") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR081") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR082") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR083") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR084") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR085") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR086") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR087") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR088") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR089") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR090") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR091") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR092") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR093") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR094") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR095") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR096") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR097") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR098") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR099") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR100") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR101") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR102") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR103") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR104") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+if(_SR == "SR105") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 2, "[[", 4 );
+}
+
+if(_SR == "SR106") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 4, "[[", 5 );
+}
+
+if(_SR == "SR107") {
+   setCut("NBJetsSR", 3, ">=" );
+   setCut("METSR", 300, ">=" );
+   setCut("HTSR", 600, ">=" );
+   setCut("NJetsSR", 5, ">=" );
+}
+
+
+}
+*/
+
+/*
+//____________________________________________________________________________
+void SUSY3L_sync3::setSignalRegion() {
+
+if(_SR == "SR999") {
+   setCut("NBJetsSR", 0, ">=" );
+   setCut("METSR", 50, ">=" );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, ">=" );
+}
+
+//18 SR, medium HT, medium MET: jet bins merged
+if(_SR == "SR000") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR014") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR015") {
+   setCut("NBJetsSR", 3, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, "[[", 600 );
+}
+
+if(_SR == "SR016") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 600, ">=");
+}
+
+if(_SR == "SR017") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 300, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+
+}
+*/
+
+/*
+//____________________________________________________________________________
+void SUSY3L_sync3::setSignalRegion() {
+
+if(_SR == "SR999") {
+   setCut("NBJetsSR", 0, ">=" );
+   setCut("METSR", 50, ">=" );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, ">=" );
+}
+
+//15 SR, no jet binning at all
+if(_SR == "SR000") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 3, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, "[[", 600 );
+}
+
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 600, ">=");
+}
+
+if(_SR == "SR014") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 300, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+}
+*/
+/*
+//____________________________________________________________________________
+void SUSY3L_sync3::setSignalRegion() {
+
+if(_SR == "SR999") {
+   setCut("NBJetsSR", 0, ">=" );
+   setCut("METSR", 50, ">=" );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, ">=" );
+}
+
+//21 SR, medium HT, medium MET: jet bins merged
+if(_SR == "SR000") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR014") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR015") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR016") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR017") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR018") {
+   setCut("NBJetsSR", 3, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, "[[", 600 );
+}
+
+if(_SR == "SR019") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 600, ">=");
+}
+
+if(_SR == "SR020") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 300, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+
+}
+*/
+
+void SUSY3L_sync3::setSignalRegion() {
+
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 500, ">=");
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 550, ">=");
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 600, ">=");
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 650, ">=");
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 700, ">=");
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 750, ">=");
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 800, ">=");
+}
+
+
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 250, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 300, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 350, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 400, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 450, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 500, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+
+
+}
 //____________________________________________________________________________
 void SUSY3L_sync3::setCut(std::string var, float valCut, std::string cType, float upValCut) {
     /*
@@ -1155,6 +2270,36 @@ void SUSY3L_sync3::setCut(std::string var, float valCut, std::string cType, floa
         _upValCutNBJetsSR = upValCut;
     }
 
+
+    //WZ control region
+
+
+    if(var == "LepMultiplicityWZ") {
+        _valCutLepMultiplicityWZ   = valCut;
+        _cTypeLepMultiplicityWZ    = cType;
+        _upValCutLepMultiplicityWZ = upValCut;
+    }
+    else if(var == "NJetsWZ") {
+        _valCutNJetsWZ   = valCut;
+        _cTypeNJetsWZ    = cType;
+        _upValCutNJetsWZ = upValCut;
+    }
+    else if(var == "NBJetsWZ") {
+        _valCutNBJetsWZ   = valCut;
+        _cTypeNBJetsWZ    = cType;
+        _upValCutNBJetsWZ = upValCut;
+    }
+    else if(var == "HTWZ") {
+        _valCutHTWZ   = valCut;
+        _cTypeHTWZ    = cType;
+        _upValCutHTWZ = upValCut;
+    }
+    else if(var == "METWZ") {
+        _valCutMETWZ   = valCut;
+        _cTypeMETWZ    = cType;
+        _upValCutMETWZ = upValCut;
+    }
+
 }
 
 
@@ -1173,99 +2318,54 @@ bool SUSY3L_sync3::baseSelection(){
         parameters: none
         return: true (if event passes selection), false (else)
     */
-    
-    //print event information before selection
 
-    /*    
-    if(_vc->get("lumi") ==  4524 && _vc->get("evt") == 52342){
-        cout << "--------------------------------------------------"<< endl; 
-        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " " << _nMus  << " "<<  _nEls << " " << _nTaus << " " << _nJets << " "  << _nBJets << endl;
-        for(int i =0;i<_nEls;i++){
-            cout << _els[i]->pt()<<endl;
-            cout << _els[i]->eta()<<endl;
-            cout << _els[i]->phi()<<endl;
-            cout << "--------" << endl;
-            }
-        cout << " muons " << endl;    
-        for(int i =0;i<_nMus;i++){
-            cout << _mus[i]->pt()<<endl;
-            cout << _mus[i]->eta()<<endl;
-            cout << _mus[i]->phi()<<endl;
-            cout << "--------" << endl;
-            //float dr = KineUtils::dR( _mus[i]->eta(), _els[0]->eta(), _mus[i]->phi(), _els[0]->phi());
-            //cout << "deltaR with electron " << dr << endl;
-            }
-        cout << " jets " << endl;    
-        for(int i =0;i<_nJets;i++){
-            cout << _jets[i]->pt()<<endl;
-            cout << _jets[i]->eta()<<endl;
-            cout << _jets[i]->phi()<<endl;
-            cout << "--------" << endl;
-            //float dr = KineUtils::dR( _mus[i]->eta(), _els[0]->eta(), _mus[i]->phi(), _els[0]->phi());
-            //cout << "deltaR with electron " << dr << endl;
-            }
-        cout << " taus " << endl;    
-        for(int i =0;i<_nTaus;i++){
-            cout << _taus[i]->pt()<<endl;
-            cout << _taus[i]->eta()<<endl;
-            cout << _taus[i]->phi()<<endl;
-            cout << "--------" << endl;
-            //float dr = KineUtils::dR( _mus[i]->eta(), _els[0]->eta(), _mus[i]->phi(), _els[0]->phi());
-            //cout << "deltaR with electron " << dr << endl;
-            }
-
-        cout << "--------------------------------------------------"<< endl; 
-
-    }
-    */
- 
+    counter("denominator", kBase);
+   
     //select events with certain lepton multiplicity of all flavor combinations
-    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR ) ) return false;
-    //if(!makeCut<int>( _nMus , 1, ">=" , "muon multiplicity", 0 ) ) return false;
-    //if(!makeCut<int>( _nTaus, 1, "=" , "tau multiplicity", 0 ) ) return false;
+    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR, kBase ) ) return false;
+    //if(!makeCut<int>( _nMus , 1, "=" , "muon multiplicity", 0 ) ) return false;
+    //if(!makeCut<int>( _nTaus, 1, ">=" , "tau multiplicity", 0 ) ) return false;
     
-    //require at least _nHardestLeptons to have higher pT than original cut
-    //bool has_hard_legs = hardLegSelection();
-    //if(!makeCut( has_hard_legs , "hard leg selection", "=") ) return false;
+    //apply additional pt cuts on leptons
+//    bool has_hard_legs = hardLegSelection();
+//    if(!makeCut( has_hard_legs , "hard leg selection", "=", kBase) ) return false;
 
     //require at least two of the leptons to be tighter in multiiso
     //bool has_two_tighter_leptons = checkMultiIso();
     //if(!makeCut( has_two_tighter_leptons , "multiIso tightening", "=") ) return false;
 
     //require minimum number of jets
-    //if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return false;
+//    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
 
     //require minimum number of b-tagged jets
-    //if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
+//    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
-    //if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return false;
+//    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR, kBase) ) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
-//    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return false;
+//    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR, kBase) ) return false;
 
     //find smallest invariant mass of ossf pair and reject event if this is below a cut value
-    //_mll = lowestOssfMll();
-    //if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR) ) return false;
+//    _mll = lowestOssfMll();
+//    if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR, kBase) ) return false;
+//        fill("lowMll" , _mll        , _weight);
  
-    
     //select on or off-Z events according to specification in config file
 //    bool is_reconstructed_Z = ZEventSelectionLoop();
-    
 //    if(_pairmass == "off"){
-//        if(!makeCut( !is_reconstructed_Z, "mll selection", "=") ) return false;
+//        if(!makeCut( !is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
 //    }
 //    else if(_pairmass == "on"){
-//        if(!makeCut( is_reconstructed_Z, "mll selection", "=") ) return false;
+//        if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
 //    }
-    
+/*    
     //fill plots 
-//    if(is_reconstructed_Z){
-//        fill("Zmass" , _Z->mass()      , _weight);
-//        fill("Zpt"   , _Z->pt()        , _weight);
-//    }
+    if(is_reconstructed_Z){
+        fill("Zmass" , _Z->mass()      , _weight);
+        fill("Zpt"   , _Z->pt()        , _weight);
+    }
     
-    fill("lowMll" , _mll        , _weight);
     fill("el_multiplicity" , _nEls , _weight);
     fill("mu_multiplicity" , _nMus , _weight);
     fill("tau_multiplicity" , _nTaus , _weight);
@@ -1280,22 +2380,62 @@ bool SUSY3L_sync3::baseSelection(){
     }
     
     //calculate MT2 and fill plot
-//    if(_nMus + _nEls + _nTaus == 3){
-//        _MT2 = getMT2();
+    if(_nMus + _nEls + _nTaus == 3){
+        _MT2 = getMT2();
         //cut on MT2
-        //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR) ) return false;
-//        fill("MT2" , _MT2        , _weight);
-//    }
-        
+        //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR, kBase) ) return false;
+        fill("MT2" , _MT2        , _weight);
+    }
+*/      
     return true;
 }
+
+
+
+//____________________________________________________________________________
+bool SUSY3L_sync3::wzCRSelection(){
+    /*
+        selects events for the WZ control region to estimate the WZ background from data
+        parameters: none
+        return: none
+    */
+
+    //return true;
+    counter("denominator", kWZ);
+
+    //lepton multiplicity
+    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityWZ, _cTypeLepMultiplicityWZ, "WZ: lepton multiplicity", _upValCutLepMultiplicityWZ, kWZ ) ) return false;
+    
+    //apply additional pt cuts on leptons
+    bool has_hard_legs = hardLegSelection();
+    if(!makeCut( has_hard_legs , "WZ: hard leg selection", "=", kWZ) ) return false;
+
+    //require minimum number of jets
+    if(!makeCut<int>( _nJets, _valCutNJetsWZ, _cTypeNJetsWZ, "WZ: jet multiplicity", _upValCutNJetsWZ, kWZ) ) return false;
+
+    //require minimum number of b-tagged jets
+    if(!makeCut<int>( _nBJets, _valCutNBJetsWZ, _cTypeNBJetsWZ, "WZ: b-jet multiplicity", _upValCutNBJetsWZ, kWZ) ) return false;
+    
+    //require minimum hadronic activity (sum of jet pT's)
+    if(!makeCut<float>( _HT, _valCutHTWZ, _cTypeHTWZ, "WZ: hadronic activity", _upValCutHTWZ), kWZ ) return false;
+
+    //require minimum missing transvers energy (actually missing momentum)
+    if(!makeCut<float>( _met->pt(), _valCutMETWZ, _cTypeMETWZ, "WZ: missing transverse energy", _upValCutMETWZ, kWZ) ) return false;
+
+    //select on-Z events
+    bool is_reconstructed_Z = ZEventSelectionLoop();
+    if(!makeCut( is_reconstructed_Z, "WZ: mll selection", "=", kWZ) ) return false;
+    
+    return true;
+}
+
+
 
 //____________________________________________________________________________
 bool SUSY3L_sync3::checkMultiIso(){
     /*
-        Checks if at least two of the selected leptons (ultra-loose in multiIso) 
-        are tigther in multiIso, where tighter can be different wp for muons and 
-        electrons  
+        Checks if at least two of the selected leptons are tigther in multiIso, 
+        where tighter can be a different wp for muons and electrons  
         return: true (if the event has 2 leptons which are tighter in multiIso)
         , false (else)
     */
@@ -1303,30 +2443,18 @@ bool SUSY3L_sync3::checkMultiIso(){
     //number of leptons fulfilling the tightened multiIso wp
     int tighter_leptons = 0;
 
-    //multiIso working points
-    int kLoose = 0;
-    int kMedium = 1;
-    int kTight = 2;
-    int kVeryTight = 3;
-    int kHyperTight = 4;
-    int wp = -1;
-    
     //check electrons
-    //multiIso working point
-    wp = kTight;
     //_elIdx is vector of electron positions in LepGood vector
     for(int ie=0; ie<_nEls; ++ie){
-        if(multiIsolation(_elIdx[ie], _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2])){
+        if( _susyMod->multiIsoSel(_elIdx[ie], SusyModule::kTight)){
             tighter_leptons += 1;
         }
     }
 
     //check muons
-    //multiIso working point
-    wp = kMedium;
     //_muIdx is vector of electron positions in LepGood vector
     for(int im=0; im<_nMus; ++im){
-        if(multiIsolation(_muIdx[im], _multiIsoWP[wp][0],  _multiIsoWP[wp][1], _multiIsoWP[wp][2])){
+        if( _susyMod->multiIsoSel(_muIdx[im], SusyModule::kTight)){
             tighter_leptons += 1;
         }
     }
@@ -1393,27 +2521,23 @@ float SUSY3L_sync3::lowestOssfMll(bool ossf){
     /*
         Checks if event has an ossf lepton pair and computes the lowest invariant mass of all ossf pairs
         parameters: ossf, true on default, if false all combinations of leptons are checked for the lowest invariant mass
-        return: smallest mll of ossf lepton pair if a pair is found, 999 if no pair is found
+        return: smallest mll of ossf lepton pair if a pair is found
     */
 
     bool pair_found = false;
-    float lowest_mll = 99999;
+    float mll = 99999;
 
    
     if(ossf == false){
-        //loop over combinations of a muon and a hardonic tau
-        for(int ie1=0; ie1 < _nMus; ie1++) {
-            for(int ie2 = 0; ie2 < _nTaus; ie2++) {
-                //continue if not an os pair
-                if( (_mus[ie1]->pdgId() * _taus[ie2]->pdgId()) > 0) continue;
-                //save mll if it is the smallest of all mll found so far
-                float mll_tmp = Candidate::create(_mus[ie1], _taus[ie2])->mass();
-                pair_found = true;
-                if(mll_tmp < lowest_mll){
-                    lowest_mll = mll_tmp;
-                }
+        //mll of muon with highest pt tau
+        float taupt = 0;
+        for(int i=0; i < _nTaus; i++) {
+            if(_taus[i]->pt()>taupt){
+                mll = Candidate::create(_taus[i], _mus[0])->mass();
+                taupt = _taus[i]->pt();
             }
         }
+        pair_found = true;
     }
 
     if(ossf == true){
@@ -1425,8 +2549,8 @@ float SUSY3L_sync3::lowestOssfMll(bool ossf){
                 //save mll if it is the smallest of all mll found so far
                 float mll_tmp = Candidate::create(_els[ie1], _els[ie2])->mass();
                 pair_found = true;
-                if(mll_tmp < lowest_mll){
-                    lowest_mll = mll_tmp;
+                if(mll_tmp < mll){
+                    mll = mll_tmp;
                 }
             }
         }   
@@ -1439,8 +2563,8 @@ float SUSY3L_sync3::lowestOssfMll(bool ossf){
                 //save mll if it is the smallest of all mll found so far
                 float mll_tmp = Candidate::create(_mus[im1], _mus[im2])->mass();
                 pair_found = true;
-                if(mll_tmp < lowest_mll){
-                    lowest_mll = mll_tmp;
+                if(mll_tmp < mll){
+                    mll = mll_tmp;
                 }
             }
         }
@@ -1453,15 +2577,15 @@ float SUSY3L_sync3::lowestOssfMll(bool ossf){
                 //save mll if it is the smallest of all mll found so far
                 float mll_tmp = Candidate::create(_taus[it1], _taus[it2])->mass();
                 pair_found = true;
-                if(mll_tmp < lowest_mll){
-                    lowest_mll = mll_tmp;
+                if(mll_tmp < mll){
+                    mll = mll_tmp;
                 }
             }
         }
     }
  
-    if(pair_found){return lowest_mll;}
-    else{return 999;}
+    if(pair_found){return mll;}
+    else{return false;}
 }
 
 
@@ -1477,10 +2601,10 @@ bool SUSY3L_sync3::ZEventSelectionLoop(){
     */
 
     //count reconstructed Z bosons
-    counter("denominator", conZEvents);
+    //counter("denominator", conZEvents);
 
     //Z mass
-    float Zmass = 91.;//.1876;
+    float Zmass = 91.1876;
     float diff = 1000000;
     bool Zevent = false;
     float pt_other = 0;
@@ -1527,9 +2651,6 @@ bool SUSY3L_sync3::ZEventSelectionLoop(){
             //keep Z candidate if smallest difference to Z mass
             if((std::abs(Ztmp->mass()-Zmass) < _ZMassWindow) && (std::abs(Ztmp->mass()-Zmass)<diff) ) {
                 _Z = Ztmp;
-                if(_vc->get("lumi") == 4524 && _vc->get("evt") == 52342){
-                }
-                
                 diff = std::abs(_Z->mass()-Zmass);
                 //a better Z candidate formed by muons is found
                 el_Zcand = false;
@@ -1583,6 +2704,8 @@ bool SUSY3L_sync3::ZEventSelectionLoop(){
                 }
                 pt_other = _els[ie]->pt();
                 phi_other = _els[ie]->phi();
+                fill("3rd_lepton_flavor", _els[ie]->pdgId(), _weight);
+                fill("3rd_lepton_pt", _els[ie]->pt(), _weight);
                 //calculate transverse mass of other lepton and met
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and mt critirion is fulfilled
@@ -1597,6 +2720,8 @@ bool SUSY3L_sync3::ZEventSelectionLoop(){
             for(int im=0; im < _nMus; im++){
                 pt_other = _mus[im]->pt();
                 phi_other = _mus[im]->phi();
+                fill("3rd_lepton_flavor", _mus[im]->pdgId(), _weight);
+                fill("3rd_lepton_pt", _mus[im]->pt(), _weight);
                 //calculate transverse mass of other lepton and met
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and mt critirion is fulfilled
@@ -1612,6 +2737,8 @@ bool SUSY3L_sync3::ZEventSelectionLoop(){
             for(int it=0; it < _nTaus; it++){
                 pt_other = _taus[it]->pt();
                 phi_other = _taus[it]->phi();
+                fill("3rd_lepton_flavor", _taus[it]->pdgId(), _weight);
+                fill("3rd_lepton_pt", _taus[it]->pt(), _weight);
                 //calculate transverse mass of other lepton and met
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and mt critirion is fulfilled
@@ -1745,11 +2872,13 @@ bool SUSY3L_sync3::srSelection(){
         return: true (if event passes selection), false (else)
     */
 
+    counter("denominator", kSignalRegion);
+
     // cut on the variables distriminating the signal regions
-    if(!makeCut<float>( _nBJets     , _valCutNBJetsSR, _cTypeNBJetsSR, "SR bjet multiplicity", _upValCutNBJetsSR) ) return false;
-    if(!makeCut<int>( _nJets       , _valCutNJetsSR , _cTypeNJetsSR , "SR jet multiplicity" , _upValCutNJetsSR ) ) return false;
-    if(!makeCut<float>( _HT          , _valCutHTSR    , _cTypeHTSR    , "SR HT selection"     , _upValCutHTSR    ) ) return false;
-    if(!makeCut<float>( _met->pt()   , _valCutMETSR   , _cTypeMETSR   , "SR MET selection"    , _upValCutMETSR   ) ) return false;
+    if(!makeCut<float>( _nBJets     , _valCutNBJetsSR, _cTypeNBJetsSR, "SR bjet multiplicity", _upValCutNBJetsSR, kSignalRegion) ) return false;
+    if(!makeCut<int>( _nJets       , _valCutNJetsSR , _cTypeNJetsSR , "SR jet multiplicity" , _upValCutNJetsSR, kSignalRegion ) ) return false;
+    if(!makeCut<float>( _HT          , _valCutHTSR    , _cTypeHTSR    , "SR HT selection"     , _upValCutHTSR, kSignalRegion    ) ) return false;
+    if(!makeCut<float>( _met->pt()   , _valCutMETSR   , _cTypeMETSR   , "SR MET selection"    , _upValCutMETSR, kSignalRegion   ) ) return false;
 
     return true;
 
@@ -1770,7 +2899,7 @@ float SUSY3L_sync3::getMT2(){
     int il2_save = -1;
 
     if(_nMus+_nEls != 3){
-        cout << "getMT2: compatible with 3 lepton events only" << endl;
+        return 0;
     }
    
     if(((signbit(_leps[0]->pdgId())) == (signbit(_leps[1]->pdgId()))) && ((signbit(_leps[0]->pdgId())) == (signbit(_leps[2]->pdgId())))){
@@ -1825,22 +2954,50 @@ float SUSY3L_sync3::getMT2(){
 * *****************************************************************************/
 
 //____________________________________________________________________________
-void SUSY3L_sync3::fillEventPlots(std::string kr){
+void SUSY3L_sync3::fillEventPlots(){
     /*
-        fills the control plots for event quantities
+        fills plots
         parameters: none
         return: none
     */
 
-    fill(kr + "_HT"        , _HT                    , _weight);
-    fill(kr + "_MET"       , _met->pt()             , _weight);
-    fill(kr + "_NBJets"    , _nBJets                , _weight);
-    fill(kr + "_NJets"     , _nJets                 , _weight);
+
+    fill("HT"        , _HT                    , _weight);
+    fill("MET"       , _met->pt()             , _weight);
+    fill("NBJets"    , _nBJets                , _weight);
+    fill("NJets"     , _nJets                 , _weight);
+
 
 }
 
+//____________________________________________________________________________
+void SUSY3L_sync3::fillControlPlots(){
+    /*
+        fills plots
+        parameters: none
+        return: none
+    */
+
+    for(int mu=0;mu<_nMus;++mu){    
+        fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _muIdx[mu]))                  , _weight);
+        fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _muIdx[mu])*10000)            , _weight);
+        fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , _muIdx[mu])*10000)            , _weight);
+        fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatiov2", _muIdx[mu]))        , _weight);
+        fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _muIdx[mu]))            , _weight);
+        fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _muIdx[mu]))          , _weight);
+    }
+
+    for(int el=0;el<_nEls;++el){    
+        fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _elIdx[el]))        , _weight);
+        fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _elIdx[el])*10000)        , _weight);
+        fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , _elIdx[el])*10000)        , _weight);
+        fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatiov2" , _elIdx[el]))        , _weight);
+        fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _elIdx[el]))        , _weight);
+        fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _elIdx[el]))        , _weight);
+    }
 
 
+}
 
 //____________________________________________________________________________
 float SUSY3L_sync3::DeltaPhi(float phi1, float phi2){
@@ -1887,52 +3044,6 @@ float SUSY3L_sync3::M_T(float pt_lepton, float met, float phi_lepton, float phi_
         m_t = sqrt(2 * pt_lepton * met * (1 - cos(deltaPhi) ));
         return m_t;
 }
-
-//____________________________________________________________________________
-bool SUSY3L_sync3::electronMvaCut(int idx, int wp){
-    /*
-        decides whether ot not an electron passes the loose or tight mva wp
-        parameters: idx (electron identification number), wp (worling point 0 for loose, 1 for tight)
-        return: true (if electron passes the wp), flase (else)
-    */
-
-        float _elMvaIdWP[3][2];
-        int kLoose = 0;
-        int kTight = 1;
-        _elMvaIdWP[0][kLoose]=0.35;  _elMvaIdWP[0][kTight]=0.73;
-        _elMvaIdWP[1][kLoose]=0.20;  _elMvaIdWP[1][kTight]=0.57;
-        _elMvaIdWP[2][kLoose]=-0.52; _elMvaIdWP[2][kTight]=0.05;
-
-        int etaBin=-1;
-        if(std::abs(_vc->get("LepGood_eta", idx)) < 0.8){ etaBin=0 ;}
-        else if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479) {etaBin=1;}
-        else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5) {etaBin=2;}
-        if(_vc->get("LepGood_mvaIdPhys14", idx) <  _elMvaIdWP[etaBin][wp]  ) {return false;}
-
-        return true;
-
-}
-
-
-//____________________________________________________________________________
-bool SUSY3L_sync3::multiIsolation(int idx, float miniRelIso_cut, float ptRatio_cut, float ptRel_cut){
-    /*
-        decides whether or not a lepton is isolated according to the 3 varibale isolation requirement.
-        lepton needs to pass miniRelIso cut and (ptratio or ptrel cut)
-        parameters: idx (possition of lepton in LepGood vector), miniRelIso_cut, ptRatio_cut, ptRel_cut
-        return: true (if lepton is isolated), flase (else)
-    */
-
-       if(_vc->get("LepGood_miniRelIso",idx) < miniRelIso_cut){
-           if((_vc->get("LepGood_jetPtRatio",idx) > ptRatio_cut) || (_vc->get("LepGood_jetPtRel",idx) > ptRel_cut)){ 
-               return true;
-           }
-       }
-
-       return false;
-
-}
-
 
 //____________________________________________________________________________
 float SUSY3L_sync3::MT2(Candidate* lep1, Candidate* lep2, Candidate* met, double mass_invisible){

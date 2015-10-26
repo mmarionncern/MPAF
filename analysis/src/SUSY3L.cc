@@ -2107,6 +2107,13 @@ if(_SR == "SR020") {
 
 void SUSY3L::setSignalRegion() {
 
+if(_SR == "SR999") {
+   setCut("NBJetsSR", 0, ">=");
+   setCut("METSR", 0, ">=" );
+   setCut("NJetsSR", 0, ">=");
+   setCut("HTSR", 0, ">=");
+}
+
 if(_SR == "SR001") {
    setCut("NBJetsSR", 1, ">=");
    setCut("METSR", 50, "[[", 300 );

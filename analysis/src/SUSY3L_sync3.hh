@@ -14,6 +14,7 @@
 #define SUSY3L_sync3_HH
 
 #include "analysis/core/MPAF.hh"
+#include "analysis/modules/SusyModule.hh"
 
 class SUSY3L_sync3: public MPAF {
 
@@ -33,18 +34,17 @@ private:
 
     void modifySkimming();
 
-    void setMultiIsoWP();
     void collectKinematicObjects();
     bool electronSelection(int);
     bool muonSelection(int);
     bool tauSelection(int);
-    bool vetoElectronSelection(int);
-    bool vetoMuonSelection(int);
     bool bJetSelection(int);
     bool goodJetSelection(int);
 
     bool baseSelection();
+    bool wzCRSelection();
     void setBaselineRegion();
+    void setWZControlRegion();
     void setSignalRegion();
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection();
@@ -52,9 +52,8 @@ private:
     bool ZEventSelection();
     bool ZEventSelectionLoop();
     bool srSelection();
-    bool electronMvaCut(int, int);
-    bool multiIsolation(int, float, float, float);
-    void fillEventPlots(std::string);
+    void fillEventPlots();
+    void fillControlPlots();
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll(bool ossf = true);
@@ -78,7 +77,15 @@ private:
 private:
 
     //counter categories, 0 is ALWAYS global (even if not specified later)
-    enum {kGlobal=0, kElId, kElVeto, kMuId, kMuVeto, kTauId, kTauVeto, kJetId, kBJetId, conZEvents};
+    enum {
+        kGlobal=0,                                      //global counter
+        kElId, kMuId, kTauId, kJetId, kBJetId,          //objects counter
+        kBase,kWZ,kSignalRegion,
+        kWZCR, 
+        kSR                                //WZ control region counter
+        };
+    
+    SusyModule* _susyMod;
 
     //cut variables
     float _valCutLepMultiplicityBR;
@@ -100,6 +107,13 @@ private:
     float _valCutNBJetsSR;
     float _valCutMllBR;
     float _valCutMT2BR;
+
+    float _valCutLepMultiplicityWZ;
+    float _valCutNJetsWZ;
+    float _valCutNBJetsWZ;
+    float _valCutHTWZ;
+    float _valCutMETWZ;
+    
     std::vector<std::string> _hltLines;
     
     std::string _cTypeLepMultiplicityBR;
@@ -113,6 +127,12 @@ private:
     std::string _cTypeMETSR;
     std::string _cTypeMllBR;
     std::string _cTypeMT2BR;
+    
+    std::string _cTypeLepMultiplicityWZ;
+    std::string _cTypeNJetsWZ;
+    std::string _cTypeNBJetsWZ;
+    std::string _cTypeHTWZ;
+    std::string _cTypeMETWZ;
 
     float _upValCutLepMultiplicityBR;
     float _upValCutNJetsBR;
@@ -125,7 +145,13 @@ private:
     float _upValCutMETSR;
     float _upValCutMllBR;
     float _upValCutMT2BR;
-
+    
+    float _upValCutLepMultiplicityWZ;
+    float _upValCutNJetsWZ;
+    float _upValCutNBJetsWZ;
+    float _upValCutHTWZ;
+    float _upValCutMETWZ;
+ 
     //vectors for electron, muon, and tau candidates
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;
