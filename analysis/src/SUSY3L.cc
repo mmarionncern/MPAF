@@ -193,7 +193,7 @@ void SUSY3L::run(){
     _jets.clear();
     _bJets.clear();
     _leps.clear();
-    
+
     // increment event counter, used as denominator for yield calculation
     counter("denominator");
 
@@ -417,6 +417,9 @@ void SUSY3L::collectKinematicObjects(){
     _nTaus = _taus.size();
 
 
+
+
+
     // loop over all jets of the event
     for(int i = 0; i < _vc->get("nJet"); ++i){
         //if jet passes good jet selection, create a jet candidate and fetch kinematics  
@@ -424,24 +427,18 @@ void SUSY3L::collectKinematicObjects(){
             _jets.push_back( Candidate::create(_vc->get("Jet_pt", i),
                                                _vc->get("Jet_eta", i),
                                                _vc->get("Jet_phi", i)));
+            if(bJetSelection(i) ) {
+                _bJets.push_back( Candidate::create(_vc->get("Jet_pt", i),
+                                                _vc->get("Jet_eta", i),
+                                                _vc->get("Jet_phi", i)));
+            } 
         }
     }
     //number of jets in event
     _nJets = _jets.size();
     
-    // loop over all jets of the event
-    for(int i = 0; i < _vc->get("nJet"); ++i){
-        //if jet passes bjet selection, create a b-jet candidate and fetch kinematics  
-        if(bJetSelection(i) ) {
-            _bJets.push_back( Candidate::create(_vc->get("Jet_pt", i),
-                                                _vc->get("Jet_eta", i),
-                                                _vc->get("Jet_phi", i)));
-        }
-    }
-
     //number of (b-)jets in the event
     _nBJets = _bJets.size();
-    _nJets = _jets.size();
    
     //compute sum of jet pT's 
     _HT = HT();
@@ -483,7 +480,7 @@ bool SUSY3L::electronSelection(int elIdx){
         }
     }
     //enable to clean on tight objects
-    //if(!makecut( !mumatch, "dr selection (mu)", "=", kelid) ) return false;
+    //if(!makeCut( !muMatch, "dr selection (mu)", "=", kElId) ) return false;
        
     return true;
 }
@@ -611,7 +608,7 @@ bool SUSY3L::goodJetSelection(int jetIdx){
         }
     }
     //enable to clean on tight objects
-    //if(!makeCut(!lepMatch,  "lepton cleaning", "=", kJetId) ) return false;
+    if(!makeCut(!lepMatch,  "lepton cleaning", "=", kJetId) ) return false;
     
     return true;
 }
@@ -631,7 +628,7 @@ bool SUSY3L::bJetSelection(int jetIdx){
     float btagCSV_cut = 0.814;
 
     //b-jet needs to fulfill criteria for jets
-    if(!makeCut(goodJetSelection(jetIdx), "jet Id", "=", kBJetId) ) return false;
+    //if(!makeCut(goodJetSelection(jetIdx), "jet selection", "=", kBJetId) ) return false;
     //cut on b-tagger parameter
     if(!makeCut<float>(_vc->get("Jet_btagCSV", jetIdx), btagCSV_cut, ">", "csv btag selection", 0, kBJetId) ) return false;
 
