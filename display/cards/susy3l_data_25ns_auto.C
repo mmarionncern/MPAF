@@ -7,8 +7,8 @@ void susy3l_data_25ns() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="3L_data_25ns"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3L_data_25ns"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="susy3l_data_25ns"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="susy3l_data_25ns"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -249,7 +249,7 @@ void susy3l_data_25ns() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=209.2; //pb-1 19470
+    float lumi=133.14; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
@@ -293,15 +293,15 @@ void susy3l_data_25ns() {
     md.anConf.addSample( "TTGJets"                          ,  "TT"    , kRed+2      );
 
   //W+Jets
-    md.anConf.addSample( "WJetsToLNu"            ,  "WJets"    , kRed-6      );
+    md.anConf.addSample( "WJetsToLNu"                       ,  "WJets"    , kRed-6      );
     //md.anConf.addSample( "WJetsToLNu_HT200to400"            ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "WJetsToLNu_HT400to600"            ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "WJetsToLNu_HT600toInf"            ,  "non-prompt e/#mu"    , kRed      );
 
   //Drell-Yan
     //md.anConf.addSample( "DYJetsToLL_LO_M50_50ns"        ,  "non-prompt e/#mu"    , kRed      );
-    md.anConf.addSample( "DYJetsToLL_M10to50"          ,  "DY"    , kRed     );
-    md.anConf.addSample( "DYJetsToLL_M50"              ,  "DY"    , kRed     );
+    md.anConf.addSample( "DYJetsToLL_M10to50"               ,  "DY"    , kRed     );
+    md.anConf.addSample( "DYJetsToLL_M50"                   ,  "DY"    , kRed     );
     //md.anConf.addSample( "DYJetsToLL_M50_HT200to400"        ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "DYJetsToLL_M50_HT400to600"        ,  "non-prompt e/#mu"    , kRed      );
     //md.anConf.addSample( "DYJetsToLL_M50_HT600toInf"        ,  "non-prompt e/#mu"    , kRed      );
@@ -329,9 +329,14 @@ void susy3l_data_25ns() {
     md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_256630_257599"          , "data"          , kBlack    );
     md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_256630_257599"        , "data"          , kBlack    );
     md.anConf.addSample( "MuonEG_Run2015D_v3_runs_256630_257599"            , "data"          , kBlack    );
-    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_257599"    ,"data"          , kBlack    );
+    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_257599"    , "data"          , kBlack    );
     md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_256630_257599"        , "data"          , kBlack    );
-    }
+    //md.anConf.addSample( "DoubleEG_Run2015D_v3_run_256926"                  , "data"          , kBlack    );
+    //md.anConf.addSample( "DoubleMuon_Run2015D_v3_run_256926"                , "data"          , kBlack    );
+    //md.anConf.addSample( "MuonEG_Run2015D_v3_run_256926"                    , "data"          , kBlack    );
+    //md.anConf.addSample( "SingleElectron_Run2015D_v3_run_256926"            , "data"          , kBlack    );
+    //md.anConf.addSample( "SingleMuon_Run2015D_v3_run_256926"                , "data"          , kBlack    );
+   }
 
 
 //    md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280_skim"  ,  "T5tttt (1000) * 20 sig" , kOrange-3 );

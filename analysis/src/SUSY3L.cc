@@ -203,7 +203,6 @@ void SUSY3L::run(){
 
     // do the minimal selection and collect kinematic variables for events passing it
     collectKinematicObjects();
-    fillControlPlots();
 
     // initialization of baseline region cuts
     setBaselineRegion();
@@ -228,6 +227,7 @@ void SUSY3L::run(){
     counter("baseline");
 
     //fillSkimTree();
+    //fillControlPlots();
     fillEventPlots();
 
     // initialization of signal region cuts, categorization of events passing the baseline 
@@ -656,7 +656,7 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    2, ">="  )  ;     //number of isolated leptons
+        setCut("LepMultiplicity"   ,    3, ">="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs              = 0          ;     //harsher pT requirement for at least _nHardestLeptons (below)
@@ -666,9 +666,9 @@ void SUSY3L::setBaselineRegion(){
         setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,   60, ">=" )  ;     //sum of jet pT's
-        setCut("MET"                ,    0, ">=" )  ;     //missing transverse energy
+        setCut("MET"                ,   50, ">=" )  ;     //missing transverse energy
         setCut("Mll"                ,   12, ">=" )  ;     //invariant mass of ossf lepton pair
-        setCut("MT2"                ,   55, "<" )  ;     //MT2 cut value
+        setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
     }
 
 }
@@ -682,13 +682,13 @@ void SUSY3L::setWZControlRegion(){
         return: none
     */
 
-    setCut("LepMultiplicityWZ"    ,   3, "="   )  ;     //number of isolated leptons
-    _M_T_3rdLep_MET_cut           =   -1           ;     //minimum transverse mass of 3rd lepton and met in On-Z events
-    setCut("NJetsWZ"              ,    2, "<"   )  ;     //number of jets in event
-    setCut("NBJetsWZ"             ,    0, "="   )  ;     //number of b-tagged jets in event
-    _ZMassWindow                  =   15.          ;     //width around Z mass to define on- or off-Z events
-    setCut("HTWZ"                 ,   60, "<"   )  ;     //sum of jet pT's
-    setCut("METWZ"                ,    0, ">"   )  ;     //missing transverse energy
+    setCut("LepMultiplicityWZ"    ,   3, "="   )        ;     //number of isolated leptons
+    _M_T_3rdLep_MET_cut           =   -1                ;     //minimum transverse mass of 3rd lepton and met in On-Z events
+    setCut("NJetsWZ"              ,    2, "[]", 3   )   ;     //number of jets in event
+    setCut("NBJetsWZ"             ,    0, "="   )       ;     //number of b-tagged jets in event
+    _ZMassWindow                  =   15.               ;     //width around Z mass to define on- or off-Z events
+    setCut("HTWZ"                 ,   60, "<", 400   )  ;     //sum of jet pT's
+    setCut("METWZ"                ,   50, "<", 150   )  ;     //missing transverse energy
 
 }
 
@@ -919,10 +919,11 @@ void SUSY3L::setWZControlRegion(){
 */
 
 
-//107 signal regions as of July
-//____________________________________________________________________________
-//void SUSY3L::setSignalRegion() {
+//108 signal regions as of July
 /*
+//____________________________________________________________________________
+void SUSY3L::setSignalRegion() {
+
 if(_SR == "SR000") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 50, "[[", 150 );
@@ -1681,9 +1682,9 @@ if(_SR == "SR107") {
 
 
 }
-
 */
-//merged SR
+
+/*
 //____________________________________________________________________________
 void SUSY3L::setSignalRegion() {
 
@@ -1694,6 +1695,7 @@ if(_SR == "SR999") {
    setCut("HTSR", 60, ">=" );
 }
 
+//18 SR, medium HT, medium MET: jet bins merged
 if(_SR == "SR000") {
    setCut("NBJetsSR", 0, "[[", 1 );
    setCut("METSR", 50, "[[", 150 );
@@ -1821,7 +1823,380 @@ if(_SR == "SR017") {
 }
 
 }
+*/
 
+/*
+//____________________________________________________________________________
+void SUSY3L::setSignalRegion() {
+
+if(_SR == "SR999") {
+   setCut("NBJetsSR", 0, ">=" );
+   setCut("METSR", 50, ">=" );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, ">=" );
+}
+
+//15 SR, no jet binning at all
+if(_SR == "SR000") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 3, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, "[[", 600 );
+}
+
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 600, ">=");
+}
+
+if(_SR == "SR014") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 300, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+}
+*/
+/*
+//____________________________________________________________________________
+void SUSY3L::setSignalRegion() {
+
+if(_SR == "SR999") {
+   setCut("NBJetsSR", 0, ">=" );
+   setCut("METSR", 50, ">=" );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, ">=" );
+}
+
+//21 SR, medium HT, medium MET: jet bins merged
+if(_SR == "SR000") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 0, "[[", 1 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 1, "[[", 2 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, ">=" );
+   setCut("HTSR", 60, "[[", 400 );
+}
+
+if(_SR == "SR014") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR015") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 50, "[[", 150 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR016") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 2, "[[", 5);
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR017") {
+   setCut("NBJetsSR", 2, "[[", 3 );
+   setCut("METSR", 150, "[[", 300 );
+   setCut("NJetsSR", 5, ">=");
+   setCut("HTSR", 400, "[[", 600 );
+}
+
+if(_SR == "SR018") {
+   setCut("NBJetsSR", 3, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, "[[", 600 );
+}
+
+if(_SR == "SR019") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 600, ">=");
+}
+
+if(_SR == "SR020") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 300, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+
+}
+*/
+
+void SUSY3L::setSignalRegion() {
+
+if(_SR == "SR001") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 500, ">=");
+}
+
+if(_SR == "SR002") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 550, ">=");
+}
+
+if(_SR == "SR003") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 600, ">=");
+}
+
+if(_SR == "SR004") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 650, ">=");
+}
+
+if(_SR == "SR005") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 700, ">=");
+}
+
+if(_SR == "SR006") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 750, ">=");
+}
+
+if(_SR == "SR007") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 50, "[[", 300 );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 800, ">=");
+}
+
+
+
+if(_SR == "SR008") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 250, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR009") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 300, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR010") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 350, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR011") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 400, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR012") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 450, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+if(_SR == "SR013") {
+   setCut("NBJetsSR", 1, ">=");
+   setCut("METSR", 500, ">=" );
+   setCut("NJetsSR", 2, ">=");
+   setCut("HTSR", 60, ">=");
+}
+
+
+}
 //____________________________________________________________________________
 void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upValCut) {
     /*
@@ -1974,7 +2349,7 @@ bool SUSY3L::baseSelection(){
     //find smallest invariant mass of ossf pair and reject event if this is below a cut value
     _mll = lowestOssfMll();
     if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR, kBase) ) return false;
-//    fill("lowMll" , _mll        , _weight);
+        fill("lowMll" , _mll        , _weight);
  
     //select on or off-Z events according to specification in config file
     bool is_reconstructed_Z = ZEventSelectionLoop();
@@ -1984,7 +2359,7 @@ bool SUSY3L::baseSelection(){
     else if(_pairmass == "on"){
         if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
     }
-    
+/*    
     //fill plots 
     if(is_reconstructed_Z){
         fill("Zmass" , _Z->mass()      , _weight);
@@ -2011,9 +2386,7 @@ bool SUSY3L::baseSelection(){
         //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR, kBase) ) return false;
         fill("MT2" , _MT2        , _weight);
     }
-    
-    fillControlPlots();
-
+*/      
     return true;
 }
 

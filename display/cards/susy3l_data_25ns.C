@@ -7,8 +7,8 @@ void susy3l_data_25ns() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="3L_data_25ns"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3L_data_25ns"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="susy3l_data_25ns"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="susy3l_data_25ns"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -249,7 +249,7 @@ void susy3l_data_25ns() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=209.2; //pb-1 19470
+    float lumi=133.14; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
@@ -329,8 +329,13 @@ void susy3l_data_25ns() {
     md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_256630_257599"          , "data"          , kBlack    );
     md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_256630_257599"        , "data"          , kBlack    );
     md.anConf.addSample( "MuonEG_Run2015D_v3_runs_256630_257599"            , "data"          , kBlack    );
-    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_257599"    ,"data"          , kBlack    );
+    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_257599"    , "data"          , kBlack    );
     md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_256630_257599"        , "data"          , kBlack    );
+    //md.anConf.addSample( "DoubleEG_Run2015D_v3_run_256926"                  , "data"          , kBlack    );
+    //md.anConf.addSample( "DoubleMuon_Run2015D_v3_run_256926"                , "data"          , kBlack    );
+    //md.anConf.addSample( "MuonEG_Run2015D_v3_run_256926"                    , "data"          , kBlack    );
+    //md.anConf.addSample( "SingleElectron_Run2015D_v3_run_256926"            , "data"          , kBlack    );
+    //md.anConf.addSample( "SingleMuon_Run2015D_v3_run_256926"                , "data"          , kBlack    );
     }
 
 
