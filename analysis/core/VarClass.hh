@@ -69,6 +69,7 @@ typedef map<int, bool* >::iterator itMapAB;
 typedef map<int, int > mapI;
 typedef map<int, unsigned int > mapUI;
 typedef map<int, unsigned long > mapUL;
+typedef map<int, unsigned long long > mapUL64;
 typedef map<int, double > mapD;
 typedef map<int, float > mapF;
 typedef map<int, bool > mapB;
@@ -79,6 +80,7 @@ typedef map<string, TBits* > mapTB;
 typedef map<int, int >::iterator itMapI;
 typedef map<int, unsigned int >::iterator itMapUI;
 typedef map<int, unsigned long >::iterator itMapUL;
+typedef map<int, unsigned long long >::iterator itMapUL64;
 typedef map<int, double >::iterator itMapD;
 typedef map<int, float >::iterator itMapF;
 typedef map<int, bool >::iterator itMapB;
@@ -367,11 +369,12 @@ private:
     kInt=1,
     kUInt=2,
     kULong=3,
-    kDouble=4,
-    kFloat=5,
-    kString=6,
-    kBool=7,
-    kNTypes=8
+    kULong64=4,
+    kDouble=5,
+    kFloat=6,
+    kString=7,
+    kBool=8,
+    kNTypes=9
   };
   //static string objectType[VarClass::kNTypes];
 	
@@ -414,6 +417,7 @@ private:
   mapI varmI;
   mapUI varmUI;
   mapUL varmUL;
+  mapUL64 varmUL64;
   mapS varmS;
   mapB varmB;
   mapD varmD;
@@ -440,6 +444,7 @@ private:
   itMapI itI;
   itMapUI itUI;
   itMapUL itUL;
+  itMapUL64 itUL64;
   itMapS itS;
   itMapB itB;
   itMapD itD;
