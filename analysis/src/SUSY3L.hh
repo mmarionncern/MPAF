@@ -81,10 +81,10 @@ private:
     //counter categories, 0 is ALWAYS global (even if not specified later)
     enum {
         kGlobal=0,                                      //global counter
-        kElId, kMuId, kTauId, kJetId, kBJetId,          //objects counter
+        kElId, kMuId, kTauId,                           //objects counter
         kBase,kWZ,kSignalRegion,
         kWZCR, 
-        kSR                                //WZ control region counter
+        kSR                                
         };
     
     SusyModule* _susyMod;
@@ -158,11 +158,11 @@ private:
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
-    //std::vector<unsigned int> _looseLepsIdx;
-    //std::vector<unsigned int> _looseLeps10Idx;
-    //std::vector<unsigned int> _jetCleanLeps10Idx;
-    //std::vector<unsigned int> _jetsIdx;
-    //std::vector<unsigned int> _bJetsIdx;
+    std::vector<unsigned int> _looseLepsIdx;
+    std::vector<unsigned int> _looseLeps10Idx;
+    std::vector<unsigned int> _jetCleanLeps10Idx;
+    std::vector<unsigned int> _jetsIdx;
+    std::vector<unsigned int> _bJetsIdx;
 
     //length of candiate vectors
     int _nEls;
@@ -178,22 +178,20 @@ private:
 
     //list of object candidates
     CandList _els;
-    CandList _vEls;
     CandList _mus;
-    CandList _vMus;
     CandList _taus;
-    CandList _vTaus;
     CandList _jets;
     CandList _bJets;
     CandList _leps;
-    Candidate* _met;
-    Candidate* _Z;
-    Candidate* _lep1;
-    Candidate* _lep2;
     CandList _looseLeps;
     CandList _looseLeps10;
     CandList _jetCleanLeps10;
 
+    Candidate* _met;
+    Candidate* _Z;
+    Candidate* _lep1;
+    Candidate* _lep2;
+    
     float _HT;
     float _MT2;
     float _deltaR;
