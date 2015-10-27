@@ -121,7 +121,20 @@ void SUSY3L::initialize(){
     _vc->registerVar("Jet_btagCSV"                     );     //b-tagging quantity (-1 or [0;1]
     _vc->registerVar("Jet_muEF"                        );     //fraction of muon pt in jet
     _vc->registerVar("Jet_mass"                        );     //jet mass
-    _vc->registerVar("nDiscJet"                        );     //number of discarded jets?
+    _vc->registerVar("Jet_rawPt"                       );
+
+    _vc->registerVar("nDiscJet"                        );
+    _vc->registerVar("DiscJet_id"                      );
+    _vc->registerVar("DiscJet_pt"                      );
+    _vc->registerVar("DiscJet_rawPt"                   );
+    _vc->registerVar("DiscJet_eta"                     );
+    _vc->registerVar("DiscJet_phi"                     );
+    _vc->registerVar("DiscJet_mass"                    );
+    _vc->registerVar("DiscJet_btagCSV"                 );
+
+    _vc->registerVar("nJetFwd"                         );
+    _vc->registerVar("JetFwd_pt"                       );
+    _vc->registerVar("JetFwd_phi"                      );
 
     _vc->registerVar("met_pt"                          );     //missing tranvers momentum
     _vc->registerVar("met_phi"                         );     //phi of missing transvers momentum
@@ -450,13 +463,7 @@ void SUSY3L::collectKinematicObjects(){
     
     //number of taus in the event
     _nTaus = _taus.size();
-
-    //select jets
-    _susyMod->cleanJets( &(_jetCleanLeps10), _jets, _jetsIdx, _bJets, _bJetsIdx);
-    
-    //get hadronic activity
-    _HT=_susyMod->HT( &(_jets) );
-    
+   
     /* 
     // loop over all jets of the event
     for(int i = 0; i < _vc->get("nJet"); ++i){
@@ -482,6 +489,14 @@ void SUSY3L::collectKinematicObjects(){
     //_HT = HT();
     */
 
+    //clean jets
+    _susyMod->cleanJets( &(_jetCleanLeps10), _jets, _jetsIdx, _bJets, _bJetsIdx);
+    _nJets = _jets.size();
+    _nBJets = _bJets.size();
+    
+    //get hadronic activity
+    _HT=_susyMod->HT( &(_jets) );
+ 
     //create met candidate for every event
     _met = Candidate::create(_vc->get("met_pt"), _vc->get("met_phi") );
 
@@ -745,7 +760,7 @@ void SUSY3L::setBaselineRegion(){
         setCut("LepMultiplicity"   ,    3, ">="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
-        _pt_cut_hard_legs              = 0          ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        _pt_cut_hard_legs             = 0           ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
