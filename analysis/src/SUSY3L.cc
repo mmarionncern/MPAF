@@ -415,7 +415,7 @@ void SUSY3L::collectKinematicObjects(){
     _nEls = _els.size();
 
     
-    //select loose leptons
+    //select loose leptons (note: not equivalent to LepGood)
     for(size_t il=0;il<_vc->get("nLepGood"); il++) {
         bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
         Candidate* cand=Candidate::create(_vc->get("LepGood_pt", il),
@@ -429,12 +429,13 @@ void SUSY3L::collectKinematicObjects(){
         _looseLeps.push_back(cand);
         _looseLepsIdx.push_back(il);
 
+        //additional pt requirement
         if(cand->pt()<10) continue;
         _looseLeps10.push_back(cand);
         _looseLeps10Idx.push_back(il);
     }  
     
-    //select leptons for jet cleaning
+    //select leptons for jet cleaning using a tigher fakable object selection
     for(size_t il=0;il<_looseLeps10.size();il++){
         if(!fakableLepton(_looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
         _jetCleanLeps10.push_back( _looseLeps10[il] );
@@ -567,15 +568,14 @@ bool SUSY3L::looseLepton(int idx, int pdgId) {
         parameters: position in LepGood, pdgId
         return: true (if leptons is selected as loose lepton), false (else)
     */
- 
     if(abs(pdgId)==13) {//mu case
         if(!_susyMod->muIdSel(idx, SusyModule::kLoose) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
         if(!_susyMod->elIdSel(idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
-        if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; //denom on purpose
-        if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; //_hltDLHT
+        if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
+        if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
     }
 
     return true;
@@ -588,7 +588,8 @@ bool SUSY3L::fakableLepton(int idx, int pdgId, bool bypass){
     /*
         selection of fakable leptons (applying a selection that is tighter than the
         loose one but not as tight as the tight selection 
-        parameters: 
+        parameters: idx (the position in the LepGood vector), pdgId, and boolean to choose
+        electron trigger emulation cuts (HT trigger or not)
         return: true (if the lepton fulfills the fakable lepton selection, false (else)
     */
 
@@ -597,10 +598,7 @@ bool SUSY3L::fakableLepton(int idx, int pdgId, bool bypass){
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
-        int elMva=_hltDLHT?SusyModule::kLooseHT:SusyModule::kLoose;
-        if(bypass) elMva=SusyModule::kLoose;
         bool hltDLHT=bypass?false:_hltDLHT;
-    
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
         if(!_susyMod->elHLTEmulSel(idx, hltDLHT ) ) return false;
     }
@@ -2446,7 +2444,7 @@ bool SUSY3L::baseSelection(){
     if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
 
     //require minimum number of b-tagged jets
-    //if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
+    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
     if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR, kBase) ) return false;
