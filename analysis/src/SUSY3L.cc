@@ -187,17 +187,19 @@ void SUSY3L::run(){
     _els.clear();
     _mus.clear();
     _taus.clear();
-    _looseLeps.clear();
-    _looseLeps10.clear();
-    _jetCleanLeps10.clear();
+    //_looseLeps.clear();
+    //_looseLeps10.clear();
+    //_jetCleanLeps10.clear();
     _elIdx.clear();
     _muIdx.clear();
     _tauIdx.clear();
-    _looseLepsIdx.clear();
-    _looseLeps10Idx.clear();
-    _jetCleanLeps10Idx.clear();
+    //_looseLepsIdx.clear();
+    //_looseLeps10Idx.clear();
+    //_jetCleanLeps10Idx.clear();
     _jets.clear();
     _bJets.clear();
+    //_jetsIdx.clear();
+    //_bJetsIdx.clear();
     _leps.clear();
 
     // increment event counter, used as denominator for yield calculation
@@ -546,13 +548,13 @@ bool SUSY3L::muonSelection(int muIdx){
 
 
 //____________________________________________________________________________
-bool SUSY3L::looseLepton(int idx, int pdgId) {
+//bool SUSY3L::looseLepton(int idx, int pdgId) {
     /*
         selection of loose leptons
         parameters: position in LepGood, pdgId
         return: true (if leptons is selected as loose lepton), false (else)
     */
- 
+/* 
     if(abs(pdgId)==13) {//mu case
         if(!_susyMod->muIdSel(idx, SusyModule::kLoose) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
@@ -565,18 +567,18 @@ bool SUSY3L::looseLepton(int idx, int pdgId) {
 
     return true;
 }
-
+*/
 
 
 //____________________________________________________________________________
-bool SUSY3L::fakableLepton(int idx, int pdgId, bool bypass){
+//bool SUSY3L::fakableLepton(int idx, int pdgId, bool bypass){
     /*
         selection of fakable leptons (applying a selection that is tighter than the
         loose one but not as tight as the tight selection 
         parameters: 
         return: true (if the lepton fulfills the fakable lepton selection, false (else)
     */
-
+/*
     if(abs(pdgId)==13) {//mu case
         if(!_susyMod->muIdSel(idx, SusyModule::kTight) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
@@ -592,7 +594,7 @@ bool SUSY3L::fakableLepton(int idx, int pdgId, bool bypass){
 
     return true;
 } 
-
+*/
 
 
 //____________________________________________________________________________

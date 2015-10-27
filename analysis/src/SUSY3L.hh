@@ -158,11 +158,11 @@ private:
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
-    std::vector<unsigned int> _looseLepsIdx;
-    std::vector<unsigned int> _looseLeps10Idx;
-    std::vector<unsigned int> _jetCleanLeps10Idx;
-    std::vector<unsigned int> _jetsIdx;
-    std::vector<unsigned int> _bJetsIdx;
+    //std::vector<unsigned int> _looseLepsIdx;
+    //std::vector<unsigned int> _looseLeps10Idx;
+    //std::vector<unsigned int> _jetCleanLeps10Idx;
+    //std::vector<unsigned int> _jetsIdx;
+    //std::vector<unsigned int> _bJetsIdx;
 
     //length of candiate vectors
     int _nEls;
