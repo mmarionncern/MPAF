@@ -64,7 +64,7 @@ private:
   float singleFit(string ext, TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
   void subtractPlots(string lep, int idx, vector<float> scales, string postfix);
   void subtractPlotsCERN(string lep, int idx, string postfix);
-  void subtractPrompts();
+  void subtractPromptsETH();
   void subtractPromptsCERN();
   void sumMaps();
   void sumTriggers();
@@ -73,6 +73,7 @@ private:
 
   void testEwkSub();
 
+  bool bJetSelection(int);
   void collectKinematicObjects();
   bool goodJetSelection(int);
   bool denominatorElectronSelection(int);
@@ -85,6 +86,7 @@ private:
   void setCut(std::string, float, std::string, float = 0);
   void setMeasurementRegion();
 
+  bool baseSelection();
   bool ewkSelection();
   bool mrSelection();
   bool qcdSelection();
@@ -93,7 +95,6 @@ private:
   bool triggerSelection();
   bool triggerSelectionLite();
 
-  void fillTriggerTestPlots();
   void fillEventPlots();
   void fillEwkEventPlots();
   void fillEwkLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
@@ -107,7 +108,8 @@ private:
   void fillQcdFakeRatioMaps();
   void fillQcdLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
   void fillQcdLeptonPlots();
-  vector<string> findTriggerExts();
+  void findTriggerExts();
+  void fillTriggerTestPlots();
   vector<int> findTriggerIdxs();
 
   float overflowPt(float);
@@ -143,12 +145,21 @@ private:
   bool _iso;
   vector<string> _TR_lines;
   vector<string> _exts;
+  vector<float> _trws;
   int _TR_idx;
 
   vector<vector<string> > _vTR_lines_el_non;
   vector<vector<string> > _vTR_lines_el_iso;
   vector<vector<string> > _vTR_lines_mu_non;
   vector<vector<string> > _vTR_lines_mu_iso;
+  vector<string> _vTR_psbh_el_non;
+  vector<string> _vTR_psbh_el_iso;
+  vector<string> _vTR_psbh_mu_non;
+  vector<string> _vTR_psbh_mu_iso;
+  vector<string> _vTR_psbl_el_non;
+  vector<string> _vTR_psbl_el_iso;
+  vector<string> _vTR_psbl_mu_non;
+  vector<string> _vTR_psbl_mu_iso;
   vector<float> _vTR_efflum_el_non;
   vector<float> _vTR_efflum_el_iso;
   vector<float> _vTR_efflum_mu_non;
@@ -170,7 +181,8 @@ private:
 
   string _norm;
   string _ewkSub;
-  bool _doEwkSub;
+  bool _doEwkSubETH;
+  bool _doEwkSubCERN;
 
   float _valCutNBJetsMR;
   std::string _cTypeNBJetsMR;
@@ -196,17 +208,21 @@ private:
   CandList _vetEls;
   CandList _vetLeps;
   CandList _vetMus;
+  CandList _bJets;
   CandList _goodJets;
 
-  vector<int> _denElsIdx;
-  vector<int> _denLepsIdx;
-  vector<int> _denMusIdx;
-  vector<int> _numElsIdx;
-  vector<int> _numLepsIdx;
-  vector<int> _numMusIdx;
-  vector<int> _vetElsIdx;
-  vector<int> _vetLepsIdx;
-  vector<int> _vetMusIdx;
+  vector<unsigned int> _denElsIdx;
+  vector<unsigned int> _denLepsIdx;
+  vector<unsigned int> _denMusIdx;
+  vector<unsigned int> _numElsIdx;
+  vector<unsigned int> _numLepsIdx;
+  vector<unsigned int> _isoLepsIdx;
+  vector<unsigned int> _numMusIdx;
+  vector<unsigned int> _vetElsIdx;
+  vector<unsigned int> _vetLepsIdx;
+  vector<unsigned int> _vetMusIdx;
+  vector<unsigned int> _bJetsIdx;
+  vector<unsigned int> _goodJetsIdx;
 
   Candidate * _met;
   float _HT;
@@ -215,6 +231,7 @@ private:
   string _nvert;
   string _leps;
   string _jets;
+  string _djets;
   string _mets;
 
   SusyModule* _susyMod;

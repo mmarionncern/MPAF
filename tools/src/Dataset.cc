@@ -143,8 +143,9 @@ Dataset::addFriend(string friendname){
 int
 Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
 
-  string p= string(getenv ("MPAF"))+"/workdir/data";
-  string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
+  if(dir=="") dir=path;
+  string p= string(getenv ("MPAF"))+"/workdir";
+  string NameF = p+"/data/"+dir+"/"+fileName+".root"; 
   if(path.find("psi.ch")!=(size_t)-1) {
     if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
     NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
@@ -171,8 +172,9 @@ Dataset::getNProcEvents(string path, string dir, string fileName, string hname) 
 
 double
 Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtname) {
-  string p= string(getenv ("MPAF"))+"/workdir/data";
-  string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
+  if(dir=="") dir=path;
+  string p= string(getenv ("MPAF"))+"/workdir";
+  string NameF = p+"/data/"+dir+"/"+fileName+".root"; 
   if(path.find("psi.ch")!=(size_t)-1) {
     if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
     NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";

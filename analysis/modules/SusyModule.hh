@@ -5,8 +5,11 @@
 #include "analysis/tools/Candidate.hh"
 #include "analysis/utils/KineUtils.hh"
 #include "analysis/utils/mt2_bisect.h"
+#include "analysis/utils/Tools.hh"
+#include "analysis/utils/Debug.cc"
 
 #include "tools/src/DataBaseManager.hh"
+
 
 class SusyModule {
 
@@ -18,17 +21,22 @@ public:
 
   
   bool elMvaSel(int elIdx, int wp) const;
-  bool muIdSel(int idx, int wp) const;
-  bool elIdSel(int idx, int wp, int mvaWp = kTight) const;
+  bool muIdSel(int idx, int wp, bool invSIP = false) const;
+  bool elIdSel(int idx, int wp, int mvaWp = kTight, bool invSIP = false) const;
+  bool elHLTEmulSel(int, bool) const;
+  bool elHLTEmulSelIso(int, int mvaWP = kLooseHT) const;
   bool multiIsoSel(int idx, int wp) const;
   bool multiIsoSelCone(int idx, int wp) const;
   bool invMultiIsoSel(int idx, int wp) const;
+  bool inSituFO(int idx, int wp) const;
   bool jetSel(int jetIdx) const;
   float HT(const CandList* jets);
 
+  void awayJets(CandList* leptons, 
+		 CandList& cleanJets, vector<unsigned int>& jetIdxs, float dR = 1.0);
   void cleanJets(CandList* leptons, 
 		 CandList& cleanJets, vector<unsigned int>& jetIdxs,
-		 CandList& cleanBJets, vector<unsigned int>& bJetIdxs );
+		 CandList& cleanBJets, vector<unsigned int>& bJetIdxs);
 
   bool mllVetoSelection(const Candidate* l1, const Candidate* l2,
 			const CandList* allLeps) const ;
@@ -54,16 +62,15 @@ public:
 
   enum {kDenom=0,
 	kVLoose,
+    kInSitu,
+    kInSituHT,
 	kLoose,
+    kLooseHT,
 	kMedium,
 	kTight,
 	kVTight,
 	kSpecFakeEl,
 	kSpecFakeMu,
-    kSpecFakeElNon,
-    kSpecFakeElIso,
-    kSpecFakeMuNon,
-    kSpecFakeMuIso,
 	kNWPs};
 
   enum {kMiniIso=0,kPtRatio,kPtRel};
@@ -81,6 +88,7 @@ private:
   DataBaseManager* _dbm;
 
   vector<float> _cLostHitWP;
+  vector<float> _tChWP;
   vector<float> _dxyWP;
   vector<float> _dzWP;
   vector<float> _isoWP;

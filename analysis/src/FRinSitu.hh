@@ -14,6 +14,7 @@
 #define FRinSitu_HH
 
 #include "analysis/core/MPAF.hh"
+#include "analysis/modules/SusyModule.hh"
 
 class FRinSitu: public MPAF {
 
@@ -37,66 +38,94 @@ private:
   void writeOutput();
   void modifySkimming();
 
-  void divideFRMap(string kr, string postpend);
-  void divideFRMaps(string kr, string lep);
+  void divideFRMap(string postpend);
+  void divideFRMaps();
   void registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis);
+  void registerTriggerVars();
+  void registerVariable(string var, int nBin, float min, float max, string Xleg, bool isglb=true, bool prof=false, string type="m");
+  void registerVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY, float maxY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
+  void registerVariable(string var, int nBinX, vector<float> binsX, int nBinY, vector<float> binsY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
+
+  void sumMaps();
+  void sumTriggers();
+  void sumTriggerPlots(string obs, int ds, string ext);
 
   void collectKinematicObjects();
-  bool goodJetSelection(int);
-  bool looseElectronSelection(int);
-  bool looseMuonSelection(int);
-  bool tightElectronSelection(int);
-  bool tightMuonSelection(int);
-  bool vetoElectronSelection(int);
-  bool vetoMuonSelection(int);
-
-  bool barrelEtaCut(Candidate * lep);
-  bool electronCutId(int elIdx, int cat, float sip, bool tight = false, bool mvatight = false, bool sipdo = true);
-  bool electronMvaCut(int elIdx, bool tight = false);
-  bool electronMvaId(int elIdx, int cat);
-  bool isolationCut(int lepIdx, bool tight = false, int pdg = 11);
-  bool muonCutId(int lepIdx, int cat, float sip, bool tight = false, bool sipdo = true);
-  bool muonMvaId(int lepIdx, int cat);
-
-  int findHadrTau();
-  bool fromHadrTau(int);
-  bool heppyFake(int);
-  bool noLeptonicDecay(string collection, int partIdx);
+  bool denominatorElectronSelection(unsigned int);
+  bool denominatorMuonSelection(unsigned int);
+  bool goodJetSelection(unsigned int);
+  bool numeratorElectronSelection(unsigned int);
+  bool numeratorMuonSelection(unsigned int);
+  bool signalRegionElectronSelection(unsigned int);
+  bool signalRegionMuonSelection(unsigned int);
+  bool vetoElectronSelection(unsigned int);
+  bool vetoMuonSelection(unsigned int);
 
   void setCut(std::string, float, std::string, float = 0); 
   void setMeasurementRegion();
 
   bool baseSelection();
-  bool genSelection();
-  bool mllVetoSelection();
-  bool mllLMGVeto(Candidate * cand, Candidate * veto);
-  bool mllZVeto(Candidate * cand, Candidate * veto);
-  bool skimSelection();
   bool mrSelection();
-  bool ssEventSelection();
-  bool vetoEventSelection();
+  bool skimSelection();
+  bool triggerSelection();
 
-  void fillEventPlots(std::string);
-  void fillLepPlots(std::string, Candidate*, int);
-  void fillLeptonPlots(std::string);
-  void fillFRMaps(std::string, int);
-  void fillFakeRatioMaps(std::string);
+  void fillEventPlots();
+  void fillLepPlots(std::string, Candidate*, unsigned int, int);
+  void fillLeptonPlots();
+  void fillFRMaps(std::string, unsigned int, int);
+  void fillFakeRatioMaps();
 
-  float HT();
-  float ptMIso(int);
-  float ptMIso2(int);
-  float closestJetPt(int);
+  string findLepAbbr(Candidate*);
+  string findLepAbbr(unsigned int);
+  int findLepWP(Candidate*);
+  int findLepWP(unsigned int);
+  void findTriggerExts();
+  bool genMatchedToFake(unsigned int);
   float overflowPt(float);
-  int eventCharge();
 
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later)
-  enum {kGlobal=0, kLElId, kTElId, kVElId, kLMuId, kTMuId, kVMuId, kJetId, kVetoLepSel, kLMGVetoLepSel, kZVetoLepSel};
+  enum {kGlobal=0, kTrigger, kDenEls, kDenMus, kNumEls, kNumMus, kSigEls, kSigMus, kVetEls, kVetMus, kGoodJets};
 
   enum {kNoGenMatch=0, kMisMatchPdgId,
 	kMisChargePdgId, kGenMatched};
+
+  float _vtxWeight;
+
+  int _idx_data;
+  int _idx_datacorrETH;
+  int _idx_datacorrCERN;
+  int _idx_ewk;
+  int _idx_ewk_dy;
+  int _idx_ewk_tt;
+  int _idx_ewk_wj;
+  int _idx_qcd;
+  int _idx_qcd_em;
+  int _idx_qcd_bc;
+  int _idx_qcd_mu15;
+  int _idx_qcd_mu5;
+
+  vector<int> _idxs;
+  vector<int> _idxsmc;
+
+  bool _iso;
+  vector<string> _TR_lines;
+  vector<string> _exts;
+  vector<float> _trws;
+  
+  vector<string> _vTR_lines_non;
+  vector<string> _vTR_lines_iso;
+  vector<string> _vTR_psb_non;
+  vector<string> _vTR_psb_iso;
+  vector<float> _vTR_efflum_non;
+  vector<float> _vTR_efflum_iso;
+
+  vector<float> _vFR_bins_pt_el;
+  vector<float> _vFR_bins_pt_mu;
+  vector<float> _vFR_bins_eta_el;
+  vector<float> _vFR_bins_eta_mu;
 
   float _valCutHTSB;
   float _valCutMETSB;
@@ -122,70 +151,61 @@ private:
   float _upValCutNJetsSB;
   float _upValCutNBJetsSB;
 	
-  std::vector<int> _lElIdx;
-  std::vector<int> _lLepIdx;
-  std::vector<int> _lMuIdx;
-  std::vector<int> _lntElIdx;
-  std::vector<int> _lntLepIdx;
-  std::vector<int> _lntMuIdx;
-  std::vector<int> _tElIdx;
-  std::vector<int> _tLepIdx;
-  std::vector<int> _tMuIdx;
-  std::vector<int> _vElIdx;
-  std::vector<int> _vLepIdx;
-  std::vector<int> _vMuIdx;
+  std::vector<unsigned int> _denElsIdx;
+  std::vector<unsigned int> _denLepsIdx;
+  std::vector<unsigned int> _denMusIdx;
+  std::vector<unsigned int> _isoLepsIdx;
+  std::vector<unsigned int> _numElsIdx;
+  std::vector<unsigned int> _numLepsIdx;
+  std::vector<unsigned int> _numMusIdx;
+  std::vector<unsigned int> _sigLepsIdx;
+  std::vector<unsigned int> _vetLepsIdx;
+  std::vector<unsigned int> _goodJetsIdx;
+  std::vector<unsigned int> _bJetsIdx;
 
-  int _nLEls;
-  int _nLLeps;
-  int _nLMus;
-  int _nLNTEls;
-  int _nLNTLeps;
-  int _nLNTMus;
-  int _nTEls;
-  int _nTLeps;
-  int _nTMus;
-  int _nVEls;
-  int _nVLeps;
-  int _nVMus;
-  int _nJets;
+  unsigned int _nDenEls;
+  unsigned int _nDenLeps;
+  unsigned int _nDenMus;
+  unsigned int _nNumEls;
+  unsigned int _nNumLeps;
+  unsigned int _nNumMus;
+  unsigned int _nSigLeps;
+  unsigned int _nVetLeps;
+  unsigned int _nGoodJets;
+  unsigned int _nBJets;
 
-  CandList _lEls;
-  CandList _lLeps;
-  CandList _lMus;
-  CandList _lntEls;
-  CandList _lntLeps;
-  CandList _lntMus;
-  CandList _tEls;
-  CandList _tLeps;
-  CandList _tMus;
-  CandList _vEls;
-  CandList _vLeps;
-  CandList _vMus;
-  CandList _jets;
+  CandList _denEls;
+  CandList _denLeps;
+  CandList _denMus;
+  CandList _numEls;
+  CandList _numLeps;
+  CandList _numMus;
+  CandList _sigLeps;
+  CandList _vetLeps;
+  CandList _goodJets;
+  CandList _bJets;
+
   Candidate * _met;
+  Candidate * _lep1;
+  Candidate * _lep2;
 
-  Candidate * _first;
-  Candidate * _second;
-  int _lep_idx1;
-  int _lep_idx2; 
-  int _promptId;
-  int _fakeId;
-
+  int _lep1idx;
+  int _lep2idx;
  
   float _HT;
 
-
-  string _btag;
-  string _etabin;
-  string _fakes;
-  string _lepflav;
-  string _lepid;
-  string _lepiso;
-  string _leppt;
-  string _xpol;
   string _MR;
-  string _lepptcut;
+  string _norm;
+  float _genMatching;
 
+  string _bvar;
+  string _nvert;
+  string _leps;
+  string _jets;
+  string _djets;
+  string _mets;
+
+  SusyModule* _susyMod;
 
 };
 
