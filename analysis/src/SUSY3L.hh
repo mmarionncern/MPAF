@@ -40,7 +40,9 @@ private:
     bool tauSelection(int);
     bool bJetSelection(int);
     bool goodJetSelection(int);
-
+    bool looseLepton(int idx, int pdgId);
+    bool fakableLepton(int idx, int pdgId, bool bypass);
+    
     bool baseSelection();
     bool wzCRSelection();
     void setBaselineRegion();
@@ -156,6 +158,11 @@ private:
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
+    std::vector<unsigned int> _looseLepsIdx;
+    std::vector<unsigned int> _looseLeps10Idx;
+    std::vector<unsigned int> _jetCleanLeps10Idx;
+    std::vector<unsigned int> _jetsIdx;
+    std::vector<unsigned int> _bJetsIdx;
 
     //length of candiate vectors
     int _nEls;
@@ -183,12 +190,17 @@ private:
     Candidate* _Z;
     Candidate* _lep1;
     Candidate* _lep2;
+    CandList _looseLeps;
+    CandList _looseLeps10;
+    CandList _jetCleanLeps10;
 
     float _HT;
     float _MT2;
     float _deltaR;
     float _mll;
-  
+    
+    //HLT
+    bool _hltDLHT; 
     
 };
 
