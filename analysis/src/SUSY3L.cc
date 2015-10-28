@@ -218,7 +218,7 @@ void SUSY3L::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    if(!passMultiLine(false)) return;
+    if(!passMultiLine(false, true)) return;
     counter("HLT");
 
     // do the minimal selection and collect kinematic variables for events passing it
@@ -3232,7 +3232,7 @@ bool SUSY3L::passHLTLine(string line){
 
 
 //____________________________________________________________________________
-bool SUSY3L::passMultiLine(bool doubleOnly){
+bool SUSY3L::passMultiLine(bool doubleOnly, bool isolatedOnly){
     /*
         checks if the event has been triggerd by any of the HLT trigger lines
         parameters: doubleOnly if only dilepton paths should be checked
@@ -3241,6 +3241,7 @@ bool SUSY3L::passMultiLine(bool doubleOnly){
 
     for(size_t ih=0;ih<7;ih++) {
         if(doubleOnly && ih>5) continue;
+        if(isolatedOnly && (ih == 3 || ih == 4)) continue;
         if(passHLTLine(_hltLines[ih])) return true;
     }
 

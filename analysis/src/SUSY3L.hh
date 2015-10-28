@@ -59,7 +59,7 @@ private:
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll(bool ossf = true);
-    bool passMultiLine(bool doubleOnly);
+    bool passMultiLine(bool doubleOnly, bool isolatedOnly);
     bool passHLTLine(string line);
 
     float HT();
