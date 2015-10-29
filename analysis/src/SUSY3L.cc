@@ -83,7 +83,6 @@ void SUSY3L::initialize(){
     _vc->registerVar("LepGood_jetPtRel"                );    //
     _vc->registerVar("LepGood_jetPtRelv2"              );    //
     
-    
     _vc->registerVar("LepGood_dz"                      );    //difference to reconstructed primary vertex in z direction
     _vc->registerVar("LepGood_dxy"                     );    //difference to reconstructed primary vertex in xy plane
     _vc->registerVar("LepGood_sip3d"                   );    //similar observable as dxy, also vertex cut
@@ -100,7 +99,9 @@ void SUSY3L::initialize(){
     _vc->registerVar("LepGood_mediumMuonId"            );    //mva medium wp muon identification
     _vc->registerVar("LepGood_mvaIdPhys14"             );    //mva electron ID
     _vc->registerVar("LepGood_mvaIdSpring15"           );    //updated mva electron ID
-    
+    _vc->registerVar("LepGood_ecalPFClusterIso"        );    
+    _vc->registerVar("LepGood_hcalPFClusterIso"        );    
+    _vc->registerVar("LepGood_dr03TkSumPt"             );    
      
     _vc->registerVar("nTauGood"                        );    //number of taus in event
     _vc->registerVar("TauGood_pdgId"                   );    //identifier for taus (15)
@@ -304,14 +305,14 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "pt of 3rd lepton [GeV]"            );
     _hm->addVariable("lowMll"           ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]"      );
     _hm->addVariable("muon_SIP3d"       ,   50,     0.0,    5.0,    "muon SIP3d"                        );
-    _hm->addVariable("muon_dxy"         ,  600,     0.0,  600.0,    "muon dxy [um]"                     );
-    _hm->addVariable("muon_dz"          ,  600,     0.0,  600.0,    "muon dz [um]"                      );
+    _hm->addVariable("muon_dxy"         ,  200,     0.0,    0.2,    "muon dxy [cm]"                     );
+    _hm->addVariable("muon_dz"          ,  200,     0.0,    0.2,    "muon dz [cm]"                      );
     _hm->addVariable("muon_JetPtRatio"  ,   60,     0.0,    2.0,    "muon jet pt ratio [GeV]"           );
     _hm->addVariable("muon_JetPtRel"    ,   40,     0.0,  100.0,    "muon jet pt rel [GeV]"             );
     _hm->addVariable("muon_miniRelIso"  ,   40,     0.0,    0.4,    "muon isolation"                    );
     _hm->addVariable("el_SIP3d"         ,   50,     0.0,    5.0,    "electron SIP3d"                    );
-    _hm->addVariable("el_dxy"           ,  600,     0.0,  600.0,    "electron dxy [um]"                 );
-    _hm->addVariable("el_dz"            ,  600,     0.0,  600.0,    "electron dz [um]"                  );
+    _hm->addVariable("el_dxy"           ,  200,     0.0,    0.2,    "electron dxy [cm]"                 );
+    _hm->addVariable("el_dz"            ,  200,     0.0,    0.2,    "electron dz [cm]"                  );
     _hm->addVariable("el_JetPtRatio"    ,   60,     0.0,    2.0,    "electron jet pt ratio [GeV]"       );
     _hm->addVariable("el_JetPtRel"      ,   40,     0.0,  100.0,    "electron jet pt rel [GeV]"         );
     _hm->addVariable("el_miniRelIso"    ,   40,     0.0,    0.4,    "electron isolation"                );
@@ -368,53 +369,7 @@ void SUSY3L::collectKinematicObjects(){
         parameters: none
         return: none
     */
-  
-    if(_selectMuons == "true"){ 
-    // loop over all nLepGood leptons in this event and select muons
-    for(int i = 0; i < _vc->get("nLepGood"); ++i){
-        // check which of the nLepGood leptons are muons, identifier 13
-        if(std::abs(_vc->get("LepGood_pdgId",i)) == 13){
-            //select muons
-            if(muonSelection(i)) {
-                _mus.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-                                                  _vc->get("LepGood_eta", i),
-                                                  _vc->get("LepGood_phi", i),
-                                                  _vc->get("LepGood_pdgId", i),
-                                                  _vc->get("LepGood_charge", i),
-                                                  0.105) );     //muon mass
-                _muIdx.push_back(i);
-            }
-        }
-    }
-    }
-    //number of muons in event   
-    _nMus = _mus.size();
-    
-    if(_selectElectrons == "true"){ 
-    // loop over all nLepGood leptons in this event and select electrons
-    for(int i = 0; i < _vc->get("nLepGood"); ++i){
-        // check which of the nLepGood leptons are electrons, identifier 11
-        if(std::abs(_vc->get("LepGood_pdgId",i)) == 11){
-            //select electrons
-            if(electronSelection(i)) {
-                //if electron passes electron selection, create electron candidate 
-                //with respective kinematic variables and append it to _els vector
-                _els.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-                                                  _vc->get("LepGood_eta", i),
-                                                  _vc->get("LepGood_phi", i),
-                                                  _vc->get("LepGood_pdgId", i),
-                                                  _vc->get("LepGood_charge", i),
-                                                  0.0005) );    //electron mass
-                _elIdx.push_back(i);
-            }
-        }
-    }
-    }
-  
-    //number of electrons in the event
-    _nEls = _els.size();
-
-    
+   
     //select loose leptons (note: not equivalent to LepGood)
     for(size_t il=0;il<_vc->get("nLepGood"); il++) {
         bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
@@ -425,7 +380,7 @@ void SUSY3L::collectKinematicObjects(){
                       _vc->get("LepGood_charge", il),
                       isMu?0.105:0.0005);
     
-        if(!looseLepton(il, cand->pdgId() ) ) continue;
+        if(!looseLepton(cand, il, cand->pdgId() ) ) continue;
         _looseLeps.push_back(cand);
         _looseLepsIdx.push_back(il);
 
@@ -437,11 +392,37 @@ void SUSY3L::collectKinematicObjects(){
     
     //select leptons for jet cleaning using a tigher fakable object selection
     for(size_t il=0;il<_looseLeps10.size();il++){
-        if(!fakableLepton(_looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
+        if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
         _jetCleanLeps10.push_back( _looseLeps10[il] );
         _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
     } 
-    
+
+    //select tight muons and electrons
+    for(size_t il=0;il<_looseLeps.size();il++){
+        if(_selectMuons == "true"){ 
+            // loop over all loose leptons in this event and select muons
+            if(std::abs(_looseLeps[il]->pdgId()) == 13){
+                if(muonSelection(_looseLeps[il], il)) {
+                    _mus.push_back(_looseLeps[il]);
+                    _muIdx.push_back(_looseLepsIdx[il]);
+                }
+            }
+        }
+        if(_selectElectrons == "true"){ 
+            // loop over all loose leptons in this event and select electrons
+            if(std::abs(_looseLeps[il]->pdgId()) == 11){
+                if(electronSelection(_looseLeps[il], il)) {
+                    _els.push_back(_looseLeps[il]);
+                    _elIdx.push_back(_looseLepsIdx[il]);
+                }
+            }
+        }
+    }
+     
+    //number of muons and electrons in event   
+    _nMus = _mus.size();
+    _nEls = _els.size();
+
     //select taus
     if(_selectTaus == "true"){ 
     // loop over all taus and apply selection
@@ -491,7 +472,7 @@ void SUSY3L::collectKinematicObjects(){
     */
 
     //clean jets
-    _susyMod->cleanJets( &(_jetCleanLeps10), _jets, _jetsIdx, _bJets, _bJetsIdx);
+    _susyMod->cleanJets( &(_jetCleanLeps10), _jets, _jetsIdx, _bJets, _bJetsIdx, _jetThreshold, _bjetThreshold);
     _nJets = _jets.size();
     _nBJets = _bJets.size();
     
@@ -505,7 +486,7 @@ void SUSY3L::collectKinematicObjects(){
 
 
 //____________________________________________________________________________
-bool SUSY3L::electronSelection(int elIdx){
+bool SUSY3L::electronSelection(const Candidate* c, int elIdx){
     /*
         selection of electrons
         parameters: elIdx
@@ -517,10 +498,12 @@ bool SUSY3L::electronSelection(int elIdx){
 
     //cut for cleaning
     float deltaR = 0.1;
-    
+    float pt_cut = 10.;
+
     //apply the cuts via SusyModules
-    //NOTE: this selection includes a cut on tightCharge and vetos the ECal crack. Both cuts have not been used in the RA7 sync 2
-    if(!makeCut( _susyMod->elIdSel(elIdx, SusyModule::kTight, SusyModule::kTight), "electron selection", "=", kElId) ) return false;
+    if(!makeCut( _susyMod->elHLTEmulSel(elIdx, true), "trigger emulation  selection", "=", kElId) ) return false;
+    if(!makeCut<float>( _vc->get("LepGood_pt", elIdx) , pt_cut, ">"  , "pt selection"    , 0    , kElId)) return false;
+    if(!makeCut( _susyMod->elIdSel(c, elIdx, SusyModule::kTight, SusyModule::kTight, false), "electron selection", "=", kElId) ) return false;
     if(!makeCut( _susyMod->multiIsoSel(elIdx, SusyModule::kMedium), "multiIso selection", "=", kElId) ) return false;
     
     //reject electrons which are within a cone of delta R around a muon candidate (potentially final state radiation, bremsstrahlung)
@@ -542,7 +525,7 @@ bool SUSY3L::electronSelection(int elIdx){
 
 
 //____________________________________________________________________________
-bool SUSY3L::muonSelection(int muIdx){
+bool SUSY3L::muonSelection(const Candidate* c, int muIdx){
     /*
         selection of muons
         parameters: muIdx
@@ -551,10 +534,13 @@ bool SUSY3L::muonSelection(int muIdx){
     
     //count muon candidates
     counter("MuonDenominator", kMuId);
+    
+    //cut values
+    float pt_cut = 10.;
 
     //apply the cuts via SusyModules
-    //NOTE: this selection includes a cut on tightCharge which was not used in the RA7 sync 2
-    if(!makeCut( _susyMod->muIdSel(muIdx, SusyModule::kTight), "muon selection", "=", kMuId) ) return false;
+    if(!makeCut<float>( _vc->get("LepGood_pt", muIdx) , pt_cut, ">"  , "pt selection"    , 0    , kMuId)) return false;
+    if(!makeCut( _susyMod->muIdSel(c, muIdx, SusyModule::kTight, false), "muon selection", "=", kMuId) ) return false;
     if(!makeCut( _susyMod->multiIsoSel(muIdx, SusyModule::kLoose), "multiIso selection", "=", kMuId) ) return false;
  
     return true;
@@ -562,18 +548,18 @@ bool SUSY3L::muonSelection(int muIdx){
 
 
 //____________________________________________________________________________
-bool SUSY3L::looseLepton(int idx, int pdgId) {
+bool SUSY3L::looseLepton(const Candidate* c, int idx, int pdgId) {
     /*
         selection of loose leptons
         parameters: position in LepGood, pdgId
         return: true (if leptons is selected as loose lepton), false (else)
     */
     if(abs(pdgId)==13) {//mu case
-        if(!_susyMod->muIdSel(idx, SusyModule::kLoose) ) return false;
+        if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
-        if(!_susyMod->elIdSel(idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
+        if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
         if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
     }
@@ -584,7 +570,7 @@ bool SUSY3L::looseLepton(int idx, int pdgId) {
 
 
 //____________________________________________________________________________
-bool SUSY3L::fakableLepton(int idx, int pdgId, bool bypass){
+bool SUSY3L::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass){
     /*
         selection of fakable leptons (applying a selection that is tighter than the
         loose one but not as tight as the tight selection 
@@ -594,7 +580,7 @@ bool SUSY3L::fakableLepton(int idx, int pdgId, bool bypass){
     */
 
     if(abs(pdgId)==13) {//mu case
-        if(!_susyMod->muIdSel(idx, SusyModule::kTight) ) return false;
+        if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
@@ -768,6 +754,8 @@ void SUSY3L::setBaselineRegion(){
         setCut("MET"                ,   50, ">=" )  ;     //missing transverse energy
         setCut("Mll"                ,   12, ">=" )  ;     //invariant mass of ossf lepton pair
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
+        _jetThreshold                 = 30.         ;     //jet threshold
+        _bjetThreshold                = 30.         ;     //bjet threshold
     }
 
 }
@@ -3086,8 +3074,8 @@ void SUSY3L::fillControlPlots(){
 
     for(int mu=0;mu<_nMus;++mu){    
         fill("muon_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _muIdx[mu]))                  , _weight);
-        fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _muIdx[mu])*10000)            , _weight);
-        fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , _muIdx[mu])*10000)            , _weight);
+        fill("muon_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _muIdx[mu]))            , _weight);
+        fill("muon_dz"      , std::abs(_vc->get("LepGood_dz"    , _muIdx[mu]))            , _weight);
         fill("muon_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatiov2", _muIdx[mu]))        , _weight);
         fill("muon_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _muIdx[mu]))            , _weight);
         fill("muon_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _muIdx[mu]))          , _weight);
@@ -3095,8 +3083,8 @@ void SUSY3L::fillControlPlots(){
 
     for(int el=0;el<_nEls;++el){    
         fill("el_SIP3d"   , std::abs(_vc->get("LepGood_sip3d" , _elIdx[el]))        , _weight);
-        fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _elIdx[el])*10000)        , _weight);
-        fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , _elIdx[el])*10000)        , _weight);
+        fill("el_dxy"     , std::abs(_vc->get("LepGood_dxy"   , _elIdx[el]))        , _weight);
+        fill("el_dz"      , std::abs(_vc->get("LepGood_dz"    , _elIdx[el]))        , _weight);
         fill("el_JetPtRatio" , std::abs(_vc->get("LepGood_jetPtRatiov2" , _elIdx[el]))        , _weight);
         fill("el_JetPtRel" , std::abs(_vc->get("LepGood_jetPtRelv2" , _elIdx[el]))        , _weight);
         fill("el_miniRelIso" , std::abs(_vc->get("LepGood_miniRelIso" , _elIdx[el]))        , _weight);

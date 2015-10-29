@@ -35,13 +35,13 @@ private:
     void modifySkimming();
 
     void collectKinematicObjects();
-    bool electronSelection(int);
-    bool muonSelection(int);
+    bool electronSelection(const Candidate* c, int);
+    bool muonSelection(const Candidate* c, int);
     bool tauSelection(int);
     bool bJetSelection(int);
     bool goodJetSelection(int);
-    bool looseLepton(int idx, int pdgId);
-    bool fakableLepton(int idx, int pdgId, bool bypass);
+    bool looseLepton(const Candidate* c, int idx, int pdgId);
+    bool fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass);
     
     bool baseSelection();
     bool wzCRSelection();
@@ -66,6 +66,8 @@ private:
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
+    void printBefore();
+    void printAfter();
 
     string _selectMuons;
     string _selectElectrons;
@@ -196,6 +198,14 @@ private:
     float _MT2;
     float _deltaR;
     float _mll;
+   
+    float _jetThreshold;
+    float _bjetThreshold;
+    float _evt1;
+    float _evt2;
+    float _lumi1;
+    float _lumi2;
+    bool _debug;
     
     //HLT
     bool _hltDLHT; 
