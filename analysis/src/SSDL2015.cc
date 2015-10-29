@@ -17,8 +17,8 @@ SSDL2015::~SSDL2015(){
 
 void
 SSDL2015::initialize(){
-
-
+  fillEvents();
+  
   _vc->registerVar("run"                          );
   _vc->registerVar("lumi"                         );
   //_vc->registerVar("evt"                          );
@@ -56,6 +56,8 @@ SSDL2015::initialize(){
   //_vc->registerVar("LepGood_jetPtRel"             );
   _vc->registerVar("LepGood_jetPtRelv2"           );
   _vc->registerVar("LepGood_jetBTagCSV"           );
+  _vc->registerVar("LepGood_jetRawPt"             );
+  _vc->registerVar("LepGood_jetCorrFactor_L1L2L3Res");
   _vc->registerVar("LepGood_miniRelIso"           );
   _vc->registerVar("LepGood_dxy"                  );
   _vc->registerVar("LepGood_dz"                   );
@@ -142,25 +144,25 @@ SSDL2015::initialize(){
   
   //pileup
   _vc->registerVar("puWeight"                     );
+  _vc->registerVar("vtxWeight"                    );
 
-  
   _susyMod = new SusyModule(_vc, _dbm);
   
-  int nCateg=238; //n*(1+78) + 1  
+  int nCateg=237; //n*(1+78) + 1  
   _categs.resize(nCateg);
-  string srs[238]={ 
+  string srs[237]={ 
 
-    "SR1A", "SR2A", "SR3A", "SR4A", "SR5A", "SR6A", "SR7A", "SR8A",
-    "SR9A", "SR10A", "SR11A", "SR12A", "SR13A", "SR14A", "SR15A", "SR16A",
-    "SR17A", "SR18A", "SR19A", "SR20A", "SR21A", "SR22A", "SR23A", "SR24A",
-    "SR25A", "SR26A", "SR27A", "SR28A", "SR29A", "SR30A", "SR31A", "SR32A",
+    "HH SR1", "HH SR2", "HH SR3", "HH SR4", "HH SR5", "HH SR6", "HH SR7", "HH SR8",
+    "HH SR9", "HH SR10", "HH SR11", "HH SR12", "HH SR13", "HH SR14", "HH SR15", "HH SR16",
+    "HH SR17", "HH SR18", "HH SR19", "HH SR20", "HH SR21", "HH SR22", "HH SR23", "HH SR24",
+    "HH SR25", "HH SR26", "HH SR27", "HH SR28", "HH SR29", "HH SR30", "HH SR31", "HH SR32",
     
-    "SR1B", "SR2B", "SR3B", "SR4B", "SR5B", "SR6B", "SR7B", "SR8B",
-    "SR9B", "SR10B", "SR11B", "SR12B", "SR13B", "SR14B", "SR15B", "SR16B",
-    "SR17B", "SR18B", "SR19B", "SR20B", "SR21B", "SR22B", "SR23B", "SR24B",
-    "SR25B","SR26B",
+    "HL SR1", "HL SR2", "HL SR3", "HL SR4", "HL SR5", "HL SR6", "HL SR7", "HL SR8",
+    "HL SR9", "HL SR10", "HL SR11", "HL SR12", "HL SR13", "HL SR14", "HL SR15", "HL SR16",
+    "HL SR17", "HL SR18", "HL SR19", "HL SR20", "HL SR21", "HL SR22", "HL SR23", "HL SR24",
+    "HL SR25","HL SR26",
     
-    "SR1C", "SR2C", "SR3C", "SR4C", "SR5C", "SR6C", "SR7C", "SR8C",
+    "LL SR1", "LL SR2", "LL SR3", "LL SR4", "LL SR5", "LL SR6", "LL SR7", "LL SR8",
 
     //"BR0H", "BR0M", "BR0L",
 
@@ -171,17 +173,17 @@ SSDL2015::initialize(){
     
     // //fake workflows ==================================================
 
-    "SR1A_Fake", "SR2A_Fake", "SR3A_Fake", "SR4A_Fake", "SR5A_Fake", "SR6A_Fake", "SR7A_Fake", "SR8A_Fake",
-    "SR9A_Fake", "SR10A_Fake", "SR11A_Fake", "SR12A_Fake", "SR13A_Fake", "SR14A_Fake", "SR15A_Fake", "SR16A_Fake",
-    "SR17A_Fake", "SR18A_Fake", "SR19A_Fake", "SR20A_Fake", "SR21A_Fake", "SR22A_Fake", "SR23A_Fake", "SR24A_Fake",
-    "SR25A_Fake", "SR26A_Fake", "SR27A_Fake", "SR28A_Fake", "SR29A_Fake", "SR30A_Fake", "SR31A_Fake", "SR32A_Fake",
+    "HH SR1_Fake", "HH SR2_Fake", "HH SR3_Fake", "HH SR4_Fake", "HH SR5_Fake", "HH SR6_Fake", "HH SR7_Fake", "HH SR8_Fake",
+    "HH SR9_Fake", "HH SR10_Fake", "HH SR11_Fake", "HH SR12_Fake", "HH SR13_Fake", "HH SR14_Fake", "HH SR15_Fake", "HH SR16_Fake",
+    "HH SR17_Fake", "HH SR18_Fake", "HH SR19_Fake", "HH SR20_Fake", "HH SR21_Fake", "HH SR22_Fake", "HH SR23_Fake", "HH SR24_Fake",
+    "HH SR25_Fake", "HH SR26_Fake", "HH SR27_Fake", "HH SR28_Fake", "HH SR29_Fake", "HH SR30_Fake", "HH SR31_Fake", "HH SR32_Fake",
     
-    "SR1B_Fake", "SR2B_Fake", "SR3B_Fake", "SR4B_Fake", "SR5B_Fake", "SR6B_Fake", "SR7B_Fake", "SR8B_Fake",
-    "SR9B_Fake", "SR10B_Fake", "SR11B_Fake", "SR12B_Fake", "SR13B_Fake", "SR14B_Fake", "SR15B_Fake", "SR16B_Fake",
-    "SR17B_Fake", "SR18B_Fake", "SR19B_Fake", "SR20B_Fake", "SR21B_Fake", "SR22B_Fake", "SR23B_Fake", "SR24B_Fake",
-    "SR25B_Fake","SR26B_Fake",
+    "HL SR1_Fake", "HL SR2_Fake", "HL SR3_Fake", "HL SR4_Fake", "HL SR5_Fake", "HL SR6_Fake", "HL SR7_Fake", "HL SR8_Fake",
+    "HL SR9_Fake", "HL SR10_Fake", "HL SR11_Fake", "HL SR12_Fake", "HL SR13_Fake", "HL SR14_Fake", "HL SR15_Fake", "HL SR16_Fake",
+    "HL SR17_Fake", "HL SR18_Fake", "HL SR19_Fake", "HL SR20_Fake", "HL SR21_Fake", "HL SR22_Fake", "HL SR23_Fake", "HL SR24_Fake",
+    "HL SR25_Fake","HL SR26_Fake",
     
-    "SR1C_Fake", "SR2C_Fake", "SR3C_Fake", "SR4C_Fake", "SR5C_Fake", "SR6C_Fake", "SR7C_Fake", "SR8C_Fake",
+    "LL SR1_Fake", "LL SR2_Fake", "LL SR3_Fake", "LL SR4_Fake", "LL SR5_Fake", "LL SR6_Fake", "LL SR7_Fake", "LL SR8_Fake",
 
 
 
@@ -193,17 +195,17 @@ SSDL2015::initialize(){
 
     // //misId workflows ==================================================
 
-    "SR1A_mId", "SR2A_mId", "SR3A_mId", "SR4A_mId", "SR5A_mId", "SR6A_mId", "SR7A_mId", "SR8A_mId",
-    "SR9A_mId", "SR10A_mId", "SR11A_mId", "SR12A_mId", "SR13A_mId", "SR14A_mId", "SR15A_mId", "SR16A_mId",
-    "SR17A_mId", "SR18A_mId", "SR19A_mId", "SR20A_mId", "SR21A_mId", "SR22A_mId", "SR23A_mId", "SR24A_mId",
-    "SR25A_mId", "SR26A_mId", "SR27A_mId", "SR28A_mId", "SR29A_mId", "SR30A_mId", "SR31A_mId", "SR32A_mId",
+    "HH SR1_mId", "HH SR2_mId", "HH SR3_mId", "HH SR4_mId", "HH SR5_mId", "HH SR6_mId", "HH SR7_mId", "HH SR8_mId",
+    "HH SR9_mId", "HH SR10_mId", "HH SR11_mId", "HH SR12_mId", "HH SR13_mId", "HH SR14_mId", "HH SR15_mId", "HH SR16_mId",
+    "HH SR17_mId", "HH SR18_mId", "HH SR19_mId", "HH SR20_mId", "HH SR21_mId", "HH SR22_mId", "HH SR23_mId", "HH SR24_mId",
+    "HH SR25_mId", "HH SR26_mId", "HH SR27_mId", "HH SR28_mId", "HH SR29_mId", "HH SR30_mId", "HH SR31_mId", "HH SR32_mId",
     
-    "SR1B_mId", "SR2B_mId", "SR3B_mId", "SR4B_mId", "SR5B_mId", "SR6B_mId", "SR7B_mId", "SR8B_mId",
-    "SR9B_mId", "SR10B_mId", "SR11B_mId", "SR12B_mId", "SR13B_mId", "SR14B_mId", "SR15B_mId", "SR16B_mId",
-    "SR17B_mId", "SR18B_mId", "SR19B_mId", "SR20B_mId", "SR21B_mId", "SR22B_mId", "SR23B_mId", "SR24B_mId",
-    "SR25B_mId","SR26B_mId",
+    "HL SR1_mId", "HL SR2_mId", "HL SR3_mId", "HL SR4_mId", "HL SR5_mId", "HL SR6_mId", "HL SR7_mId", "HL SR8_mId",
+    "HL SR9_mId", "HL SR10_mId", "HL SR11_mId", "HL SR12_mId", "HL SR13_mId", "HL SR14_mId", "HL SR15_mId", "HL SR16_mId",
+    "HL SR17_mId", "HL SR18_mId", "HL SR19_mId", "HL SR20_mId", "HL SR21_mId", "HL SR22_mId", "HL SR23_mId", "HL SR24_mId",
+    "HL SR25_mId","HL SR26_mId",
     
-    "SR1C_mId", "SR2C_mId", "SR3C_mId", "SR4C_mId", "SR5C_mId", "SR6C_mId", "SR7C_mId", "SR8C_mId",
+    "LL SR1_mId", "LL SR2_mId", "LL SR3_mId", "LL SR4_mId", "LL SR5_mId", "LL SR6_mId", "LL SR7_mId", "LL SR8_mId",
 
 
 
@@ -212,8 +214,12 @@ SSDL2015::initialize(){
     "BR20H_mId", "BR20M_mId", "BR20L_mId",
     "BR30H_mId", "BR30M_mId", "BR30L_mId",
 
+    "Fake", //global fake
+    "mId", // global mId
+    "WZCR" //WZ CR
  
   };
+
   _categs.assign(srs, srs+nCateg);
 
   for(size_t ic=0;ic< _categs.size();ic++) {
@@ -226,24 +232,31 @@ SSDL2015::initialize(){
   addWorkflow( kGlobalFake, "Fake" );
   addWorkflow( kGlobalmId, "mId" );
   addWorkflow( kWZCR, "WZCR");
-  
+
   //extra input variables
-  _lepflav = getCfgVarS("LEPFLAV");
-  _leppt   = getCfgVarS("LEPPT"  );
-  _SR      = getCfgVarS("SR"     );
-  _FR      = getCfgVarS("FR"     );
-  _LHESYS = getCfgVarS("LHESYS");
-  _categorization = getCfgVarI("categorization");
-  _DoValidationPlots = getCfgVarI("ValidationPlots");
+  _lepflav = getCfgVarS("LEPFLAV", "all");
+  _leppt   = getCfgVarS("LEPPT"  , "all");
+  _SR      = getCfgVarS("SR"     , "BR02H");
+  _FR      = getCfgVarS("FR"     , "FO2C");
+  _LHESYS = getCfgVarS("LHESYS", "");
+  _categorization = getCfgVarI("categorization", 1);
+  _DoValidationPlots = getCfgVarI("ValidationPlots", 0);
 
 //  vector<string> jess;
 //  jess.push_back("Jet_pt");
 //  addSystSource("JES",SystUtils::kNone, "%", jess, "JES8TeV.db", "" );
-  
+
   //FR databases
   if(_FR=="FO2C") {
-    _dbm->loadDb("El","MaySync/CH_FRFile_090615.root","qcdel/nosel/FRisoidRElPtMIso2");
-    _dbm->loadDb("Mu","MaySync/CH_FRFile_090615.root","qcdmu/nosel/FRisoRMuPtMIso2");
+    _dbm->loadDb("ElNIso","FR_Oct21.root","FRElPtCorr_ETH_non");
+    _dbm->loadDb("MuNIso","FR_Oct21.root","FRMuPtCorr_ETH_non");
+    _dbm->loadDb("ElIso","FR_Oct21.root","FRElPtCorr_ETH_iso");
+    _dbm->loadDb("MuIso","FR_Oct21.root","FRMuPtCorr_ETH_iso");
+
+    _dbm->loadDb("ElNIsoMC","FR_Oct21.root","FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMC","FR_Oct21.root","FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMC","FR_Oct21.root","FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMC","FR_Oct21.root","FRMuPtCorr_qcd_iso");
   }
   if(_FR=="FO4C") {
     _dbm->loadDb("El","MaySync/CH_FRFile_090615.root","tt/nosel/FRISisofo4RElPtMIso2");
@@ -251,9 +264,12 @@ SSDL2015::initialize(){
   }
 
   //chargeflip DB
-  //_dbm->loadDb("chargeMId","superDB.db");
+  // _dbm->loadDb("chargeMId","ChargeMisIdProb.root","chargeMisId");
+  // _dbm->loadDb("chargeMIdMC","ChargeMisIdProb_MC.root","chargeMisId");
+  _dbm->loadDb("chargeMId","comissioning_data.root","chargeMisId");
+  _dbm->loadDb("chargeMIdMC","comissioning_data.root","chargeMisId");
   
-  
+ 
   int ilhe = (int)atoi(_LHESYS.c_str());
   bool tmp_ismux = ilhe >= 1001 && ilhe <= 1009;
   bool tmp_ispdf = ilhe >= 2001 && ilhe <= 2100;
@@ -267,17 +283,17 @@ SSDL2015::initialize(){
 void
 SSDL2015::modifyWeight() {
 
-  // if (_vc->get("isData") != 1) {
-  //   //generator weights
-  //   if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}
-  //   else {_weight *= lheWeight();}
-  //   //pileup weights
-  //   _weight *= _vc->get("puWeight");
-  // }
+  if (_vc->get("isData") != 1) {
+    //generator weights
+    if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}///23443.423;}
+    else {_weight *= lheWeight();}
+    //pileup weights
+    _weight *= _vc->get("vtxWeight");
+  }
 
 }
 
-double
+double        
 SSDL2015::lheWeight() {
 
 
@@ -304,7 +320,6 @@ SSDL2015::lheWeight() {
 
 void
 SSDL2015::modifySkimming() {
-
 }
 
 
@@ -320,6 +335,8 @@ SSDL2015::defineOutput() {
   _hm->addVariable("MT"    , 200, 0. , 200, "min(M_{T,1}, M_{T,2}) [GeV]"        );
   _hm->addVariable("NBJets",   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)");
   _hm->addVariable("NJets" ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)"          );
+
+  _hm->addVariable("mass" ,   200,0, 200, "m_{ll} [GeV]"  );
   
   if(!_DoValidationPlots) return; 
   ///////////////////////////////////////////////////////////////////////////
@@ -371,23 +388,34 @@ SSDL2015::writeOutput() {
 
 void
 SSDL2015::run() {
-  
-  // if(_vc->get("evt")!=75368//  && _vc->get("evt")!=17245 && _vc->get("evt")!=82965 &&
+  //cout<<" ================== new event ================== "<<endl;
+  //if(_vc->get("evt")!=69430384  && _vc->get("evt")!=37738763 && _vc->get("evt")!=58845792 // &&
   //    // _vc->get("evt")!=72951 && _vc->get("evt")!=142649
-  //    ) return;
+  //  ) return;
   
-  //if(_vc->get("evt")!=418394 ) return;
+  //if(_vc->get("evt")!=375924 ) return;
   
   //if(_vc->get("evt")!=103973 )  return;
   //if(_vc->get("evt")!=142649 && _vc->get("evt")!=72951 ) return;
   //if(_vc->get("evt")!=72688 && _vc->get("evt")!=49205) return;
-  //cout<<" =================================="<< _sampleName <<endl;
+  ////cout<<" =================================="<< _sampleName <<endl;
+ 
+  // bool find=false;
+  // for(size_t ii=0;ii<_events.size();ii++)
+  //   if(_events[ii]==_vc->get("evt")) {
+  //     find=true;
+  //     break;
+  //   }
+
+  // if(!find) return;
+
   counter("denominator");
-  //cout<<_vc->get("evt")<<endl;
+  //cout<<" ============================== "<<_vc->get("evt")<<" ============================== "<<endl;
   
   retrieveObjects();
-  
  
+ 
+    
   if(_DoValidationPlots) {
     if (ttbarSelection())   fillValidationHistos("ttbar");
     if (ZlSelection())      fillValidationHistos("Zl");
@@ -396,57 +424,59 @@ SSDL2015::run() {
     if (ZEESelection())     fillValidationHistos("ZEE");
   }
   
-  //  return;
-  bool ssLepSel=ssLeptonSelection();
+   bool ssLepSel=ssLeptonSelection();
+   if(_vc->get("isData") && !_isOS && !_isFake) return; //blinding of signal regions
+ 
   if(!ssLepSel) { //!makeCut(ssLeptonSelection(),"SS Selection")
     // failed same-sign lepton selection, fill WZ control region
     wzCRSelection(); 
     setWorkflow(kGlobal); //MANDATORY (otherwise double counting in other categories)
     return;
   }
-  //cout<<" ssLepSel "<<ssLepSel<<endl;
-  counter("SS selection");
-  _flav=std::abs(_l1Cand->pdgId()+_l2Cand->pdgId());
-  
-  if(!hltSelection() ) return;
-  counter("HLT");
-
-  //Scale factors =======================
-  _susyMod->applySingleLepSF(_l1Cand, _weight);
-  _susyMod->applySingleLepSF(_l2Cand, _weight);
-  // ====================================
-
-  fillSkimTree();
-  //  return;
-  //cout<<" pouet "<<endl;
-  //===============================
-  _mTmin=min( Candidate::create(_l1Cand, _met)->mass(),
-	      Candidate::create(_l2Cand, _met)->mass() );
-  //===============================
-
-  // if (_vc->get("isData") != 1) {
-  //   //lepton scale factors -> MM: trying to find a good way to handle it
-  //   //if(!passGenSelection() ) return;
-  //   counter("genselection");
-  // }
-
-  //MC check for FR --> one fake only
+   counter("SS like pair");
+   //===============================================
   if(!_isFake && !_isOS) {
-    setWorkflow(kGlobal); //MANDATORY (otherwise double counting in other categories)
-    
-    // if(!genMatchedToFake(_idxL1) && genMatchedToFake(_idxL2) ) {
-    //   _idxFake=_idxL2;
-    // }
-    // else if(genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2)) {
-    //   _idxFake=_idxL1;
-    // }
-    // else return; //no only one fake
+    setWorkflow(kGlobal);
+    counter("dispatching");
+    advancedSelection( kGlobal );
   }
-  else if(_isFake) setWorkflow(kGlobalFake);
-  else if(_isOS) setWorkflow(kGlobalmId);
-  
-  
-  //cout<<" pouet1 "<<endl;
+  else {
+    
+    vector<float> frs=getFRs();
+    int n=0;
+    for(unsigned int ip=0;ip<_auxPairs.size();ip++) {
+      _l1Cand = _auxPairs[ip][0];
+      _l2Cand = _auxPairs[ip][1];
+      _idxL1 = _auxIdxs[ip][0];
+      _idxL2 = _auxIdxs[ip][1];
+
+      if(_auxFlags[ip]==kIsOS) {
+	setWorkflow(kGlobalmId);
+	counter("dispatching");
+	chargeFlipProb();
+	advancedSelection( kGlobalmId );
+      }
+      if(_auxFlags[ip]==kIsFake || _auxFlags[ip]==kIsDFake ) {
+	setWorkflow(kGlobalFake);
+	counter("dispatching");
+	getFRProb(_auxFlags[ip], kIsDFake?0:frs[n] );
+	advancedSelection( kGlobalFake );
+	if(_auxFlags[ip]==kIsFake) n++;
+      }
+    }
+  }
+}
+
+
+void 
+SSDL2015::advancedSelection(int WF) {
+
+  int offset=0;
+  if(WF==kGlobalFake) offset=kBR30L;
+  if(WF==kGlobalmId)  offset=kBR30L_Fake;
+
+  counter("weigthing");
+
   if (_leppt=="hh" && _l1Cand->pt()<25.) return;
   if (_leppt=="hh" && _l2Cand->pt()<25.) return;
   if (_leppt=="hl" && (_l1Cand->pt()<25. && _l2Cand->pt()<25.) ) return;
@@ -454,56 +484,50 @@ SSDL2015::run() {
   if (_leppt=="ll" && _l1Cand->pt()>25.) return;
   if (_leppt=="ll" && _l2Cand->pt()>25.) return;
   
-  if(!_isFake) {
-    if(_lepflav=="mm" && std::abs(_vc->get("LepGood_pdgId", _idxFake))!=13) return;
-    if(_lepflav=="ee" && std::abs(_vc->get("LepGood_pdgId", _idxFake))!=11) return;
-  }
-  else {
-    //setWorkflow(kGlobalFake);
-    _idxFake=_idxL2;
-    if(_lepflav=="mm" && std::abs(_l2Cand->pdgId())!=13 ) return;
-    if(_lepflav=="ee" && std::abs(_l2Cand->pdgId())!=11 ) return;
-  }
-  
-  counter("ptflav");
+  if(_lepflav=="mm" &&
+     (std::abs(_l1Cand->pdgId())!=13 || std::abs(_l2Cand->pdgId())!=13 ) ) return;
+  if(_lepflav=="ee" && 
+     (std::abs(_l1Cand->pdgId())!=11 || std::abs(_l2Cand->pdgId())!=11 ) ) return;
+  if(_lepflav=="em" && std::abs(_l1Cand->pdgId())==std::abs(_l2Cand->pdgId()) ) return;
 
+  counter("ptflav");
+   Candidate* Z=Candidate::create(_l1Cand, _l2Cand);
+  fill("mass",Z->mass(),_weight);
+ 
+  if (_vc->get("isData") != 1) {
+    if(!passGenSelection() ) return;
+  }
+  counter("genselection");
+ 
+  _flav=std::abs(_l1Cand->pdgId())+std::abs(_l2Cand->pdgId());
+
+  if(!hltSelection() ) return;
+  counter("HLT");
+ 
+  //Scale factors =======================
+  _susyMod->applySingleLepSF(_l1Cand, _weight);
+  _susyMod->applySingleLepSF(_l2Cand, _weight);
+  // ====================================
+
+  //===============================
+  _mTmin=min( Candidate::create(_l1Cand, _met)->mass(),
+	      Candidate::create(_l2Cand, _met)->mass() );
+  //===============================
 
   counter("lepton baseline");
-  //cout<<" pouet "<<endl;
+  
   //default cuts for baseline
   if(_HT<80) return;
   if( (_HT<500 && _metPt < 30) ) return;
   if(_nJets<2) return;
 
   counter("std baseline");
-
-  //cout<<" pouet 2 "<<_isFake<<"  "<<_isOS<<endl;
-  if(_isFake) {
-    return; //temporary FIXME
-    if(!_dFake) oneIsoSel();
-    else twoIsoSel();
-  }
-  if(_isOS) {
-    return; //temporary FIXME
-    chargeFlipProb();
-  }
   
-  counter("weigthing");
-  //cout<<" pouet 3"<<endl;
-
-  fillhistos();//fill histos for kGlobal and kGlobalFake
-  //  fillValidationHistos();
-
+  fillhistos();//fill histos for kGlobal, kGlobalFake, kGlobalmId
+ 
   if(_categorization) {
     categorize();
-    
-    if(_isFake) {
-      setWorkflow(getCurrentWorkflow()+kBR30L); //MM to be done in a better way
-    }
-    if(_isOS) {
-      setWorkflow(getCurrentWorkflow()+kBR30L_Fake); //MM to be done in a better way
-    }
-
+    setWorkflow(getCurrentWorkflow()+offset);
     counter("region splitting");
   }
   else {
@@ -511,51 +535,132 @@ SSDL2015::run() {
   }
 
   counter("selected");
-  
   if(_categorization) {
     fillhistos();//fill histos for SR and BR  (and the SR_Fake and BR_Fake)
   }
-  //cout<<" workflow "<<getCurrentWorkflow()<<endl;
-  if( getCurrentWorkflow()==0) return; //getCurrentWorkflow()==100 ||
-  if( getCurrentWorkflow()>kSR32A 
-      && getCurrentWorkflow()!=kBR00H
-      && getCurrentWorkflow()!=kBR10H
-      && getCurrentWorkflow()!=kBR20H
-      && getCurrentWorkflow()!=kBR30H
-      ) return;
-  //cout<<_vc->get("evt")<<"   "<<_jets[0]->pt()<<endl;
 
-  int run=_vc->get("run");
-  int lumi=_vc->get("lumi");
-  int event=_vc->get("evt");
-  int nLep = _looseLepsVeto.size();//_vc->get("nLepGood_Mini");
-  // cout<<" <====> "<<_vc->get("nLepGood_Mini")<<"  "<<_looseLepsVeto.size()<<"  "<<_looseLeps.size()<<endl;
-  int id1 = _l1Cand->pdgId();
-  double pt1 = _l1Cand->pt();
-  int id2 = _l2Cand->pdgId();
-  double pt2 = _l2Cand->pt();
-  int njet = _nJets;
-  int nbjet = _nBJets;
-  double met = _met->pt();
-  double HT = _HT;
-  int sr = ((getCurrentWorkflow()<kBR00H)?(getCurrentWorkflow()):(0));
+  // if( getCurrentWorkflow()==0) return; //getCurrentWorkflow()==100 ||
+  // if( getCurrentWorkflow()>kSR32A 
+  //     && getCurrentWorkflow()!=kBR00H
+  //     && getCurrentWorkflow()!=kBR10H
+  //     && getCurrentWorkflow()!=kBR20H
+  //     && getCurrentWorkflow()!=kBR30H
+  //     ) return;
 
-  if(getCurrentWorkflow()==kBR00H || getCurrentWorkflow()==kBR10H || getCurrentWorkflow()==kBR20H || getCurrentWorkflow()==kBR30H) sr=0;
+  // int run=_vc->get("run");
+  // int lumi=_vc->get("lumi");
+  // int event=_vc->get("evt");
+  // int nLep = _looseLeps.size();//_looseLepsVeto.size();//_vc->get("nLepGood_Mini");
+  // // cout<<" <====> "<<_vc->get("nLepGood_Mini")<<"  "<<_looseLepsVeto.size()<<"  "<<_looseLeps.size()<<endl;
+  // int id1 = _l1Cand->pdgId();
+  // double pt1 = _l1Cand->pt();
+  // int id2 = _l2Cand->pdgId();
+  // double pt2 = _l2Cand->pt();
+  // int njet = _nJets;
+  // int nbjet = _nBJets;
+  // double met = _met->pt();
+  // double HT = _HT;
+  // int sr = ((getCurrentWorkflow()<kBR00H)?(getCurrentWorkflow()):(0));
+
+  // if(getCurrentWorkflow()==kBR00H || getCurrentWorkflow()==kBR10H || getCurrentWorkflow()==kBR20H || getCurrentWorkflow()==kBR30H) sr=0;
   
-  cout << Form("%1d %9d %12d\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d",
-  	       run, lumi, event, nLep,
-  	       id1, pt1, id2, pt2,
-  	       njet, nbjet, met, HT,
-  	       sr ) << endl;
+  // cout << Form("%1d %9d %12d\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d",
+  // 	       run, lumi, event, nLep,
+  // 	       id1, pt1, id2, pt2,
+  // 	       njet, nbjet, met, HT,
+  // 	       sr ) << endl;
+
+  // if(_auxPairs.size()==1 && _auxFlags[0]==kIsFake) {
+  //   unsigned long int event=_vc->get("evt");
+  //   float lepPt = _vc->get("LepGood_pt",_idxL2);
+  //   float conePt = _l2Cand->pt();
+  //   float pTrel = _vc->get("LepGood_jetPtRelv2",_idxL2);
+  //   float jetPt = _vc->get("LepGood_jetRawPt",_idxL2)*_vc->get("LepGood_jetCorrFactor_L1L2L3Res",_idxL2);
+
+  //   cout<<Form("%1d\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t",event,lepPt,conePt, pTrel, jetPt)<<_categs[getCurrentWorkflow()-offset-1]<<endl; 
+  // }
+
+
+}
+
+vector<float> 
+SSDL2015::getFRs() {
+
+  vector<float> frs;
+  for(unsigned int ip=0;ip<_auxPairs.size();ip++) {
+    if(_auxFlags[ip]!=kIsFake ) continue;
+    float fr=getFR(_auxPairs[ip][1], _auxIdxs[ip][1]);
+    frs.push_back(fr);
+  }
+  
+  vector<float> probs;
+  if(frs.size()==0) return probs;
+  probs.push_back(frs[0]);
+  for(unsigned int i=1;i<frs.size();i++) {
+    float prob = frs[i]/(1-frs[i]);
+    for(unsigned int j=0;j<i;j++) {
+      //cout<<" computing proba :"<<i<<"  "<<j<<" prob "<<prob<<"  "<<(1-frs[i])<<endl;
+      prob*=(1-frs[i]);
+    }
+    probs.push_back(prob);
+  }
+  return probs;
+
+}
+
+void
+SSDL2015::getFRProb(int flag, float fr) {
+
+  float p=0;
+  if(flag==kIsFake) {
+    // float fr=getFR(_l2Cand, _idxL2);
+    // p=fr/(1-fr);
+    p=fr;
+  }
+  else {
+    float fr1=getFR(_l1Cand, _idxL1);
+    float fr2=getFR(_l2Cand, _idxL2);
+    p=fr1*fr2/(1-fr1*fr2);
+  }
+  _weight *= p;
+}
+
+
+void
+SSDL2015::getFRProb() {
+
+  CandList fObj1,fObj2;
+  vector<unsigned int> fIdx1, fIdx2;
+
+  float w=0;
+  for(unsigned int i=0;i<_auxPairs.size();i++) {
+
+    if(_auxFlags[i]==kIsFake && _auxFlags[i]!=kIsDFake) {
+      fObj1.push_back(_auxPairs[i][1]);
+      fIdx1.push_back(_auxIdxs[i][1]);
+    }
+    if(_auxFlags[i]!=kIsFake && _auxFlags[i]==kIsDFake) {
+      fObj2.push_back(_auxPairs[i][0]);
+      fIdx2.push_back(_auxIdxs[i][0]);
+      fObj2.push_back(_auxPairs[i][1]);
+      fIdx2.push_back(_auxIdxs[i][1]);
+      
+    }
+  }
+
+  float p1=getProbAtLeastNIso( fObj1, fIdx1, 1);
+  float p2=getProbAtLeastNIso( fObj2, fIdx2, 2);
+  
+  _weight *= (p1+p2)/(1-p1-p2);
 
 }
 
 bool
 SSDL2015::noIsoSel() {
   
-  if( _fakableLepsVeto10.size()!=0 ) return false;
+  if( _fakableLepsPtCutVeto.size()!=0 ) return false;
   
-  float p=getProbAtLeastNIso( _fakableLepsVeto10 ,_fakableLepsVeto10Idx , 2);
+  float p=getProbAtLeastNIso( _fakableLepsPtCutVeto ,_fakableLepsPtCutVetoIdx , 2);
   _weight *= p/(1-p);
   return true;
 }
@@ -563,9 +668,9 @@ SSDL2015::noIsoSel() {
 bool
 SSDL2015::oneIsoSel() {
   
-  if( _fakableLepsVeto10.size()!=1 ) return false;
+  if( _fakableLepsPtCutVeto.size()!=1 ) return false;
 
-  float p=getProbAtLeastNIso( _fakableLepsVeto10 ,_fakableLepsVeto10Idx , 1);
+  float p=getProbAtLeastNIso( _fakableLepsPtCutVeto ,_fakableLepsPtCutVetoIdx , 1);
   _weight *= p/(1-p);
 
   return true;
@@ -574,9 +679,9 @@ SSDL2015::oneIsoSel() {
 bool
 SSDL2015::twoIsoSel() {
   
-  if( _fakableLepsVeto10.size()!=2 ) return false;
+  if( _fakableLepsPtCutVeto.size()!=2 ) return false;
 
-  float p=getProbAtLeastNIso( _fakableLepsVeto10 ,_fakableLepsVeto10Idx , 2);
+  float p=getProbAtLeastNIso( _fakableLepsPtCutVeto ,_fakableLepsPtCutVetoIdx , 2);
   _weight *= p/(1-p);
 
   return true;
@@ -637,29 +742,42 @@ SSDL2015::retrieveObjects(){
   _looseLeps10.clear();
   _looseLeps10Idx.clear();
 
-  _looseLepsVeto.clear();
-  _looseLepsVetoIdx.clear();
+  _looseLepsPtCut.clear();
+  _looseLepsPtCutIdx.clear();
 
-  _looseLepsVeto10.clear();
-  _looseLepsVeto10Idx.clear();
+  // _looseLepsVeto.clear();
+  // _looseLepsVetoIdx.clear();
+
+  _looseLepsPtCutVeto.clear();
+  _looseLepsPtCutVetoIdx.clear();
+
+  _looseLepsPtCorrCutVeto.clear();
+  _looseLepsPtCorrCutVetoIdx.clear();
+
+  _looseLepsPtCorrCut.clear();
+  _looseLepsPtCorrCutIdx.clear();
 
   _jetCleanLeps10.clear();
   _jetCleanLeps10Idx.clear();
-
-  _jetCleanLepsVeto10.clear();
-  _jetCleanLepsVeto10Idx.clear();
-
-  _fakableLeps10.clear();
-  _fakableLeps10Idx.clear();
-
-  _fakableLepsVeto10.clear();
-  _fakableLepsVeto10Idx.clear();
   
-  _tightLeps10.clear();
-  _tightLeps10Idx.clear();
+  _fakableLepsPtCutVeto.clear();
+  _fakableLepsPtCutVetoIdx.clear();
+  
+  _tightLepsPtCut.clear();
+  _tightLepsPtCutIdx.clear();
 
-  _tightLepsVeto10.clear();
-  _tightLepsVeto10Idx.clear();
+  _tightLepsPtCutVeto.clear();
+  _tightLepsPtCutVetoIdx.clear();
+
+
+  //background vectors
+  _tightLepsOSPtCut.clear();
+  _tightLepsOSPtCutIdx.clear();
+
+  _auxPairs.clear();
+  _auxFlags.clear();
+  _auxIdxs.clear();
+  //===================
 
   selectLeptons();
 
@@ -675,7 +793,7 @@ SSDL2015::retrieveObjects(){
     _met = Candidate::create( _vc->get("met_pt"), _vc->get("met_phi") );
 
   _metPt = _met->pt();
-
+  //cout<<" coinon"<<endl;
   //MET and MT
  
 
@@ -687,306 +805,118 @@ bool
 SSDL2015::ssLeptonSelection() {
   _isFake=false;
   _isOS=false;
- 
+  _dFake=false;
+
+  //cout<<" size "<<_tightLepsVeto10.size()<<endl;
   // 2Tight ===============================
-  //cout<<_tightLepsVeto10.size()<<" ... "<<_isFake<<"  "<<_isOS<<endl;
-  if(_tightLepsVeto10.size()>=2) { //main
-    _isFake=false;
-    _isOS=false;
-
-    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);// cout<<" leppair"<<lepPair.size()<<endl;
-    if(lepPair.size()<2) return false;
-    _l1Cand = lepPair[0];
-    _l2Cand = lepPair[1];
-
-    if(_l1Cand==nullptr || _l2Cand==nullptr) return false; //case with less than two leptons or no valid pair
-    //cout<<" 1"<<endl;
-    _idxL1 = _tightLepsVeto10Idx[_idxL1];
-    _idxL2 = _tightLepsVeto10Idx[_idxL2];
- 
-    if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
-    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
-    //cout<<" youpia "<<endl;
-    return true;
-  } //MM: validated 2T selection -> sync with CB
+  bool isGoodPair=false;
+  if(_tightLepsPtCutVeto.size()>=2) { //main
+    // _isFake=false;
+    // _isOS=false;
    
-  // 2Tight, opposite charge ===================
+    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsPtCutVeto), true, false, false, 10, 15, _idxL1, _idxL2);
+    if(lepPair.size()>=2) {
+      _l1Cand = lepPair[0];
+      _l2Cand = lepPair[1];
+      if(_l1Cand!=nullptr && _l2Cand!=nullptr) {
+      	_idxL1 = _tightLepsPtCutVetoIdx[_idxL1];
+	_idxL2 = _tightLepsPtCutVetoIdx[_idxL2];
+	isGoodPair=true;
+      }
+    }    
 
-  if(_tightLepsVeto10.size()>=2) { //main
-    _isFake=false;
-    _isOS=true;
-
-    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsVeto10), true, false, 10, _idxL1, _idxL2);
-    if(lepPair.size()<2) return false;
-    _l1Cand = lepPair[0];
-    _l2Cand = lepPair[1];
-
-    if(_l1Cand==nullptr || _l2Cand==nullptr) return false; //case with less than two leptons or no valid pair
-
-    _idxL1 = _tightLepsVeto10Idx[_idxL1];
-    _idxL2 = _tightLepsVeto10Idx[_idxL2];
-  
-    if( _l1Cand->charge()*_l2Cand->charge()>0) return false;
-    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
-   
-    return true;
   }
-   
+  if(isGoodPair) return true;
+  
+  //====================================
+  //=== backgrond stuff ================
+  //====================================
+  vector<int> idxs1,idxs2;
+
+  // 2Tight, opposite charge ===================
+  if(_tightLepsOSPtCut.size()>=2) {
+    //_isFake=false;
+    
+    CandList lepPair=_susyMod->bestSSPair( (&_tightLepsOSPtCut), true, false, true, 10, 15, _idxL1, _idxL2);
+    if(lepPair.size()>=2) { 
+      _l1Cand = lepPair[0];
+      _l2Cand = lepPair[1];
+    
+      if(_l1Cand!=nullptr && _l2Cand!=nullptr) {
+  	_idxL1 = _tightLepsOSPtCutIdx[_idxL1];
+  	_idxL2 = _tightLepsOSPtCutIdx[_idxL2];
+    	_isOS=true;
+
+	_auxPairs.push_back(lepPair);
+	_auxFlags.push_back(kIsOS);
+	_auxIdxs.push_back( vector<int>({_idxL1, _idxL2}) );
+      }
+    }
+  }
 
   //fake stuff==========================================================================================
-
   // 1Tight 1Loose ====================================
-  if(_tightLepsVeto10.size()==1 && _fakableLepsVeto10.size()>=1) { // && _fakableLepsVeto10.size()>=1
-    _isFake=true;
-    _isOS=false;
-    _dFake=false;
-
-    CandList lepPair=_susyMod->bestSSPair(_tightLepsVeto10[0], (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
+  vector<CandList> lepPairs;
+  if(_tightLepsPtCutVeto.size()>=1 && _fakableLepsPtCutVeto.size()>=1) { 
+    lepPairs=_susyMod->buildSSPairs( (&_tightLepsPtCutVeto), (&_fakableLepsPtCutVeto), true, false, false, 10, 15, idxs1, idxs2);
+ 
+    //filling =======================
+    for(unsigned int i=0;i<lepPairs.size();i++) {
+      _isFake=true;
     
-    if(lepPair.size()<2) return false;
-    _l1Cand = lepPair[0];
-    _l2Cand = lepPair[1];
-
-    if(_l1Cand==nullptr || _l2Cand==nullptr) return false; //case with less than two leptons or no valid pair
-    _idxL1 = _tightLepsVeto10Idx[0];
-    _idxL2 = _fakableLepsVeto10Idx[_idxL2];
+      _auxPairs.push_back(lepPairs[i]);
+      _auxFlags.push_back(kIsFake);
     
-    _l1Cand = _tightLepsVeto10[0];
-    _l2Cand = _fakableLepsVeto10[0];
-      
-    if(_l1Cand==nullptr || _l2Cand==nullptr) return false;
-      
-    //    if(!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) return false;
-    //if(genMatchedToFake(_idxL1) && genMatchedToFake(_idxL2) ) return false;
-
-    if( _l1Cand->charge()*_l2Cand->charge()<0) return false;
-    if(!_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false)) return false;
-
-    return true;
+      _idxL1 = _tightLepsPtCutVetoIdx[idxs1[i]];
+      _idxL2 = _fakableLepsPtCutVetoIdx[idxs2[i]];
+      vector<int> tmp;
+      tmp.push_back(_idxL1);
+      tmp.push_back(_idxL2);
+      _auxIdxs.push_back(tmp);
+    
+    }
   }
+  //======================================================
 
   // 0Tight any loose ====================================
-  if(_tightLepsVeto10.size()==0 && _fakableLepsVeto10.size()>=2) {
-    _isFake=true;
-    _isOS=false;
-    _dFake=true;
+  if(_tightLepsPtCutVeto.size()==0 && _fakableLepsPtCutVeto.size()==2) {
+    vector<CandList> lepPairs=_susyMod->buildSSPairs( (&_fakableLepsPtCutVeto), true, false, false, 10, 15, idxs1, idxs2);
     
-    CandList lepPair=_susyMod->bestSSPair( (&_fakableLepsVeto10), true, false, 10, _idxL1, _idxL2);
-    if(lepPair.size()<2) return false;
+    for(unsigned int i=0;i<lepPairs.size();i++) {
+      _isFake=true;
 
-    _l1Cand = lepPair[0];
-    _l2Cand = lepPair[1];
+      _auxPairs.push_back(lepPairs[i]);
+      _auxFlags.push_back(kIsDFake);
 
-    if(_l1Cand==nullptr || _l2Cand==nullptr) return false; //case with less than two leptons or no valid pair
-
-    _idxL1 = _tightLepsVeto10Idx[_idxL1];
-    _idxL2 = _tightLepsVeto10Idx[_idxL2];
-    
-    //    if(!genMatchedToFake(_idxL1) || !genMatchedToFake(_idxL2) ) return false;
-
-    if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-    if(!makeCut(_susyMod->passMllSingleVeto(_l1Cand, _l2Cand, 0, 8, false), "mll veto") ) return false;
-
-    return true;
-
+      _idxL1 = _fakableLepsPtCutVetoIdx[ idxs1[i] ];
+      _idxL2 = _fakableLepsPtCutVetoIdx[ idxs2[i] ];
+      vector<int> tmp;
+      tmp.push_back(_idxL1);
+      tmp.push_back(_idxL2);
+      _auxIdxs.push_back(tmp);
+      
+    }
   }
 
-  // for(unsigned int il1 = 0; il1 < _tightLeps10Veto.size(); ++il1) {
-  //   for(unsigned int il2 = 0; il2 < _looseLeps10Veto.size(); ++il2){
-     
-  //     if(
-
-  //     //one of the two is a fake
-  //     if(!genMatchedToFake(_looseLeps10VetoIdx[il2]) || !genMatchedToFake(_tightLeps10VetoIdx[il1]) ) continue;
-      
-  //     if(_tightLeps10Veto[il1]->charge()*_looseLeps10Veto[il2]->charge()<0) continue;
-  //     if(
-
-  //   }
-  // }
-
-
-  //   //only one fake for now MM: to be fixed
-  //   if(!makeCut( _l1Cand!=nullptr, "leading lepton" ) ) return false;
-  //   if(!makeCut(_fakableObjects.size()==1, "trailing lepton" ) ) return false;
-  //   _l2Cand = _fakableObjects[0];
-  //   _idxL2 = _fakableObjectsIdx[0];
-
-  //   //check the vetos MM: to be fixed
-  //   if(!_susyMod->mllLMGVeto(_l1Cand, _l2Cand) ) return false;
-  //   if(!_susyMod->mllZVeto(_l1Cand, _l2Cand) ) return false;
-
-  //   if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "same sign" ) ) return false;
-    
-  //   return true;
-  // }
-  
-
+  if(_isOS || _isFake) return true;
   return false;
 }
 
-// bool
-// SSDL2015::alternateSSEventSelection(bool switchWF) {
-  
-//   // //MM: could be done in one round, but safer and easier to understand that way 
-
-//   // // SF: CHOOSE a SS PAIR, maximizing the number of muons and then pT
-//   // int charge = 0;
-//   // int flavor = 0;
-//   // int flavortmp = 0;
-//   // bool isSS = false;
-//   // _idxL1=-1;
-//   // _idxL2=-1;
-
-//   // _nIso=-1;
-//   // int nOSPairs=0;
-//   // _nSelPair2Iso=0;
-//   // _nSelPair1Iso=0;
-//   // _nSelPair0Iso=0;
-
-//   // //========================================================================
-//   // //first fully identified leptons => signal
-//   // for(unsigned int il1 = 0; il1 < _fullIdLeps.size(); ++il1){
-//   //   for(unsigned int il2 = il1+1; il2 < _fullIdLeps.size(); ++il2){
-
-//   //     // if (_leppt=="hh" && _fullIdLeps[il1]->pt()<25.) continue;
-//   //     // if (_leppt=="hh" && _fullIdLeps[il2]->pt()<25.) continue;
-//   //     // if (_leppt=="hl" && (_leptons[il1]->pt()>25. && _leptons[il2]->pt()>25.) ) continue;
-//   //     // if (_leppt=="hl" && (_leptons[il1]->pt()<25. && _leptons[il2]->pt()<25.) ) continue;
-//   //     // if (_leppt=="ll" && _fullIdLeps[il1]->pt()>25.) continue;
-//   //     // if (_leppt=="ll" && _fullIdLeps[il2]->pt()>25.) continue;
-
-//   //     charge = _fullIdLeps[il1]->charge()*_fullIdLeps[il2]->charge();
-//   //     if(charge<0) continue; // if the pair is OS skip
-//   //     else nOSPairs++;
-
-//   //     flavortmp = std::abs(_fullIdLeps[il1]->pdgId())+std::abs( _fullIdLeps[il2]->pdgId());
-//   //     if(_lepflav=="mm" && flavortmp!=26 ) continue;
-//   //     if(_lepflav=="ee" && flavortmp!=22 ) continue;
-//   //     if( (_lepflav=="em" || _lepflav=="me") && flavortmp!=24 ) continue;
-//   //     //if(flavor>flavortmp) continue; // if the new pair has less muons skip.
-
-//   //     flavor = flavortmp;
-      
-//   //     _l1Cand = _fullIdLeps[il1];   _idxL1 = _tmpLepIdx[il1];
-//   //     _l2Cand = _fullIdLeps[il2];   _idxL2 = _tmpLepIdx[il2]; 
-//   //     isSS = true;
-//   //     _nSelPair2Iso++;
-//   //   }
-//   // }
-  
-//   // if(isSS) {_nIso=2; 
-//   //   if(switchWF) setWorkflow(kGlobal);
-//   //   return true;
-//   // }
-  
-//   // return false; //MM: non isolated sideband disabled for now, workflows have to be fully duplicated
-//   // //if(nOSPairs!=0) return false;
-//   // //=======================================================================
-//   // //now, mixing events with isolated and non isolated leptons
-//   // for(unsigned int il1 = 0; il1 < _fullIdLeps.size(); ++il1){
-//   //   for(unsigned int il2 = 0; il2 < _nonFullIdLeps.size(); ++il2){
-      
-//   //     // if (_leppt=="hh" && _fullIdLeps[il1]->pt()<25.) continue;
-//   //     // if (_leppt=="hh" && _nonFullIdLeps[il2]->pt()<25.) continue;
-//   //     // if (_leppt=="hl" && !(_fullIdLeps[il1]->pt()<25. && _nonFullIdLeps[il2]->pt()>25.) ) continue;
-//   //     // if (_leppt=="hl" && !(_fullIdLeps[il1]->pt()>25. && _nonFullIdLeps[il2]->pt()<25.) ) continue;
-//   //     // if (_leppt=="ll" && _fullIdLeps[il1]->pt()>25.) continue;
-//   //     // if (_leppt=="ll" && _nonFullIdLeps[il2]->pt()>25.) continue;
-
-//   //     if(!genMatchedToFake(_nonFullIdLepsIdx[il2]) && !genMatchedToFake(_tmpLepIdx[il1]) ) continue;
-
-//   //     charge = _fullIdLeps[il1]->charge()*_nonFullIdLeps[il2]->charge();
-//   //     if(charge<0) continue; // if the pair is OS skip
-
-//   //     flavortmp = std::abs(_fullIdLeps[il1]->pdgId())+std::abs( _nonFullIdLeps[il2]->pdgId());
-//   //     if(_lepflav=="mm"  && flavortmp!=26 ) continue;
-//   //     if(_lepflav=="ee"  && flavortmp!=22 ) continue;
-//   //     if( (_lepflav=="em" || _lepflav=="me")  && flavortmp!=24 ) continue;
-  
-//   //     if( find(_lepsForFR.begin(),_lepsForFR.end(),_nonFullIdLeps[il2])==_lepsForFR.end()) {
-//   // 	_lepsForFR.push_back(_nonFullIdLeps[il2]);
-//   // 	_lepsForFRIdx.push_back(_nonFullIdLepsIdx[il2]);
-//   //     }
-      
-//   //     flavor = flavortmp;
-      
-//   //     _l1Cand = _fullIdLeps[il1];   _idxL1 = _tmpLepIdx[il1];
-//   //     _l2Cand = _nonFullIdLeps[il2];   _idxL2 = _nonFullIdLepsIdx[il2]; 
-    
-//   //     isSS = true;
-//   //     _nSelPair1Iso++;
-
-//   //   }
-//   // }
- 
-//   // if(isSS) { _nIso=1; 
-//   //   if(switchWF) setWorkflow(kOneIso); 
-//   //   return true;
-//   // }
-
-//   // //=======================================================================
-//   // //now, mixing events with isolated and non isolated leptons
-//   // for(unsigned int il1 = 0; il1 < _nonFullIdLeps.size(); ++il1){
-//   //   for(unsigned int il2 = il1+1; il2 < _nonFullIdLeps.size(); ++il2){
-
-//   //     // if (_leppt=="hh" && _nonFullIdLeps[il1]->pt()<25.) continue;
-//   //     // if (_leppt=="hh" && _nonFullIdLeps[il2]->pt()<25.) continue;
-//   //     // if (_leppt=="hl" && !(_nonFullIdLeps[il1]->pt()<25 && _nonFullIdLeps[il2]->pt()>25) ) continue;
-//   //     // if (_leppt=="hl" && !(_nonFullIdLeps[il1]->pt()>25 && _nonFullIdLeps[il2]->pt()<25) ) continue;
-//   //     // if (_leppt=="ll" && _nonFullIdLeps[il1]->pt()>25.) continue;
-//   //     // if (_leppt=="ll" && _nonFullIdLeps[il2]->pt()>25.) continue;
-
-//   //     charge = _nonFullIdLeps[il1]->charge()*_nonFullIdLeps[il2]->charge();
-//   //     if(charge<0) continue; // if the pair is OS skip
-
-//   //     flavortmp = std::abs(_nonFullIdLeps[il1]->pdgId())+std::abs( _nonFullIdLeps[il2]->pdgId());
-//   //     if(_lepflav=="mm"  && flavortmp!=26 ) continue;
-//   //     if(_lepflav=="ee"  && flavortmp!=22 ) continue;
-//   //     if( (_lepflav=="em" || _lepflav=="me")  && flavortmp!=24 ) continue;
- 
-//   //     if( find(_lepsForFR.begin(),_lepsForFR.end(),_nonFullIdLeps[il1])==_lepsForFR.end()) {
-//   // 	_lepsForFR.push_back(_nonFullIdLeps[il1]);
-//   //     _lepsForFRIdx.push_back(_nonFullIdLepsIdx[il1]);
-//   //   }
-
-//   //     if( find(_lepsForFR.begin(),_lepsForFR.end(),_nonFullIdLeps[il2])==_lepsForFR.end()) {
-//   // 	_lepsForFR.push_back(_nonFullIdLeps[il2]);
-//   // 	_lepsForFRIdx.push_back(_nonFullIdLepsIdx[il2]);
-//   //     }
-
-//   //     flavor = flavortmp;
-      
-//   //     _l1Cand = _nonFullIdLeps[il1];   _idxL1 = _nonFullIdLepsIdx[il1];
-//   //     _l2Cand = _nonFullIdLeps[il2];   _idxL2 = _nonFullIdLepsIdx[il2]; 
- 
-//   //     isSS = true;
-//   //     _nSelPair0Iso++;
-//   //   }
-//   // }
-
-//   // if(isSS) {_nIso=0;
-//   //   if(switchWF) setWorkflow(kNoIso);
-//   //   return true;
-//   // }
-
-//   return false;
-// }
 void 
 SSDL2015::wzCRSelection() {
   
   setWorkflow(kWZCR);
   
-  if(!makeCut(_tightLeps10.size()>=2,"Two leptons")) return;
+  if(!makeCut(_tightLepsPtCut.size()>=2,"Two leptons")) return;
   _isFake=false;
     
-  CandList lepPair=_susyMod->bestSSPair( (&_tightLeps10), true, false, 10, _idxL1, _idxL2);
+  CandList lepPair=_susyMod->bestSSPair( (&_tightLepsPtCut), true, false, false, 10,15, _idxL1, _idxL2);
   _l1Cand = lepPair[0];
   _l2Cand = lepPair[1];
       
   if(_l1Cand==nullptr || _l2Cand==nullptr) return; //case with less than two leptons or no valid pair
-  _idxL1 = _tightLeps10Idx[_idxL1];
-  _idxL2 = _tightLeps10Idx[_idxL2];
+  _idxL1 = _tightLepsPtCutIdx[_idxL1];
+  _idxL2 = _tightLepsPtCutIdx[_idxL2];
   
   if(!makeCut( _l1Cand->charge()*_l2Cand->charge()>0, "Same-Sign" ) ) return;
   
@@ -1039,120 +969,120 @@ SSDL2015::setSignalRegions() {
 
   //HH-regions =============================================================
   //0b-jet =================================================================
-  if( _SR== "SR1A" ) {
+  if( _SR== "HH SR1" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:<:300");
   }
-  else if( _SR== "SR2A" ) {
+  else if( _SR== "HH SR2" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR3A" ) {
+  else if( _SR== "HH SR3" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:<:300");
     setSelLine("LL:=:hh|NB:=:0|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:<:300");
     setSelLine("LL:=:hh|NB:=:0|MT:>=:120|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR4A" ) {
+  else if( _SR== "HH SR4" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR5A" ) {
+  else if( _SR== "HH SR5" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR6A" ) {
+  else if( _SR== "HH SR6" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR7A" ) {
+  else if( _SR== "HH SR7" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:>=:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR8A" ) {
+  else if( _SR== "HH SR8" ) {
     setSelLine("LL:=:hh|NB:=:0|MT:>=:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
     setSelLine("LL:=:hh|NB:=:0|MT:>=:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
 
  //1b-jet =================================================================
-  else if( _SR== "SR9A" ) {
+  else if( _SR== "HH SR9" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:<:300");
   }
-  else if( _SR== "SR10A" ) {
+  else if( _SR== "HH SR10" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR11A" ) {
+  else if( _SR== "HH SR11" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:<:300");
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:<:300");
     setSelLine("LL:=:hh|NB:=:1|MT:>=:120|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR12A" ) {
+  else if( _SR== "HH SR12" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR13A" ) {
+  else if( _SR== "HH SR13" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR14A" ) {
+  else if( _SR== "HH SR14" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR15A" ) {
+  else if( _SR== "HH SR15" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:>=:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR16A" ) {
+  else if( _SR== "HH SR16" ) {
     setSelLine("LL:=:hh|NB:=:1|MT:>=:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
     setSelLine("LL:=:hh|NB:=:1|MT:>=:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
   
   //2b-jet =================================================================
- else if( _SR== "SR17A" ) {
+ else if( _SR== "HH SR17" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:<:300");
   }
-  else if( _SR== "SR18A" ) {
+  else if( _SR== "HH SR18" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR19A" ) {
+  else if( _SR== "HH SR19" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:<:300");
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:<:300");
     setSelLine("LL:=:hh|NB:=:2|MT:>=:120|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR20A" ) {
+  else if( _SR== "HH SR20" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR21A" ) {
+  else if( _SR== "HH SR21" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR22A" ) {
+  else if( _SR== "HH SR22" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR23A" ) {
+  else if( _SR== "HH SR23" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:>=:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR24A" ) {
+  else if( _SR== "HH SR24" ) {
     setSelLine("LL:=:hh|NB:=:2|MT:>=:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
     setSelLine("LL:=:hh|NB:=:2|MT:>=:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
   
   //3b-jet =================================================================
-  else if( _SR== "SR25A" ) {
+  else if( _SR== "HH SR25" ) {
     setSelLine("LL:=:hh|NB:>=:3|MT:<:120|MET:[]:50:200|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR26A" ) {
+  else if( _SR== "HH SR26" ) {
     setSelLine("LL:=:hh|NB:>=:3|MT:<:120|MET:[]:50:200|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR27A" ) {
+  else if( _SR== "HH SR27" ) {
     setSelLine("LL:=:hh|NB:>=:3|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR28A" ) {
+  else if( _SR== "HH SR28" ) {
     setSelLine("LL:=:hh|NB:>=:3|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR29A" ) {
+  else if( _SR== "HH SR29" ) {
     setSelLine("LL:=:hh|NB:>=:3|MT:>=:120|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR30A" ) {
+  else if( _SR== "HH SR30" ) {
     setSelLine("LL:=:hh|NB:>=:3|MT:>=:120|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
   
   //inclusive H-MET ==========================================================
-  else if( _SR== "SR31A" ) {
+  else if( _SR== "HH SR31" ) {
     //setSelLine("LL:=:hh|MET:>=:500|NJ:>=:2|HT:>=:300"); //10fb-1
     setSelLine("LL:=:hh|MET:>=:300|NJ:>=:2|HT:>=:300"); //3 fb-1
   }
 
   //inclusive H-HT ==========================================================
-  else if( _SR== "SR32A" ) {
+  else if( _SR== "HH SR32" ) {
     //setSelLine("LL:=:hh|MET:[]:50:500|NJ:>=:2|HT:>=:1600"); //10fb-1
     setSelLine("LL:=:hh|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:>=:1125"); //3 fb-1
   }
@@ -1160,125 +1090,125 @@ SSDL2015::setSignalRegions() {
   
   //HL-regions =============================================================
   //0b-jet =================================================================
-  else if( _SR== "SR1B" ) {
+  else if( _SR== "HL SR1" ) {
     setSelLine("LL:=:hl|NB:=:0|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:<:300");
   }
-  else if( _SR== "SR2B" ) {
+  else if( _SR== "HL SR2" ) {
     setSelLine("LL:=:hl|NB:=:0|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR3B" ) {
+  else if( _SR== "HL SR3" ) {
     setSelLine("LL:=:hl|NB:=:0|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:<:300");
     setSelLine("LL:=:hl|NB:=:0|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR4B" ) {
+  else if( _SR== "HL SR4" ) {
     setSelLine("LL:=:hl|NB:=:0|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR5B" ) {
+  else if( _SR== "HL SR5" ) {
     setSelLine("LL:=:hl|NB:=:0|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR6B" ) {
+  else if( _SR== "HL SR6" ) {
     setSelLine("LL:=:hl|NB:=:0|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
   
   //1b-jet =================================================================
- else if( _SR== "SR7B" ) {
+ else if( _SR== "HL SR7" ) {
     setSelLine("LL:=:hl|NB:=:1|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:<:300");
   }
-  else if( _SR== "SR8B" ) {
+  else if( _SR== "HL SR8" ) {
     setSelLine("LL:=:hl|NB:=:1|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR9B" ) {
+  else if( _SR== "HL SR9" ) {
     setSelLine("LL:=:hl|NB:=:1|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:<:300");
     setSelLine("LL:=:hl|NB:=:1|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR10B" ) {
+  else if( _SR== "HL SR10" ) {
     setSelLine("LL:=:hl|NB:=:1|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR11B" ) {
+  else if( _SR== "HL SR11" ) {
     setSelLine("LL:=:hl|NB:=:1|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR12B" ) {
+  else if( _SR== "HL SR12" ) {
     setSelLine("LL:=:hl|NB:=:1|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
   
   //2b-jet =================================================================
-  else if( _SR== "SR13B" ) {
+  else if( _SR== "HL SR13" ) {
     setSelLine("LL:=:hl|NB:=:2|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:<:300");
   }
-  else if( _SR== "SR14B" ) {
+  else if( _SR== "HL SR14" ) {
     setSelLine("LL:=:hl|NB:=:2|MT:<:120|MET:[]:50:200|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR15B" ) {
+  else if( _SR== "HL SR15" ) {
     setSelLine("LL:=:hl|NB:=:2|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:<:300");
     setSelLine("LL:=:hl|NB:=:2|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR16B" ) {
+  else if( _SR== "HL SR16" ) {
     setSelLine("LL:=:hl|NB:=:2|MT:<:120|MET:[]:50:200|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR17B" ) {
+  else if( _SR== "HL SR17" ) {
     setSelLine("LL:=:hl|NB:=:2|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:[]:2:4|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR18B" ) {
+  else if( _SR== "HL SR18" ) {
     setSelLine("LL:=:hl|NB:=:2|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:5|HT:[]:300:"+HThighBound);
   }
 
   //3+b-jet =================================================================
-  else if( _SR== "SR19B" ) {
+  else if( _SR== "HL SR19" ) {
     setSelLine("LL:=:hl|NB:>=:3|MT:<:120|MET:[]:50:200|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR20B" ) {
+  else if( _SR== "HL SR20" ) {
     setSelLine("LL:=:hl|NB:>=:3|MT:<:120|MET:[]:50:200|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
-  else if( _SR== "SR21B" ) {
+  else if( _SR== "HL SR21" ) {
     setSelLine("LL:=:hl|NB:>=:3|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR22B" ) {
+  else if( _SR== "HL SR22" ) {
     setSelLine("LL:=:hl|NB:>=:3|MT:<:120|MET:[]:200:"+METhighBound+"|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
 
   //inclusive H-MT =============================================================
-  else if( _SR== "SR23B" ) {
+  else if( _SR== "HL SR23" ) {
     setSelLine("LL:=:hl|MT:>=:120|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:<:300");
   }
-  else if( _SR== "SR24B" ) {
+  else if( _SR== "HL SR24" ) {
     setSelLine("LL:=:hl|MT:>=:120|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:[]:300:"+HThighBound);
   }
   
   //inclusive H-MET ==========================================================
-  else if( _SR== "SR25B" ) {
+  else if( _SR== "HL SR25" ) {
     setSelLine("LL:=:hl|MET:>=:"+METhighBound+"|NJ:>=:2|HT:>=:300");
   }
   
   //inclusive H-HT ==========================================================
-  else if( _SR== "SR26B" ) {
+  else if( _SR== "HL SR26" ) {
     //setSelLine("LL:=:hl|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:>=:1600"); //10 fb-1
     setSelLine("LL:=:hl|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:>=:1125"); //3 fb-1
   }
 
 
   //LL-regions =============================================================
-  else if( _SR== "SR1C" ) {
+  else if( _SR== "LL SR1" ) {
     setSelLine("LL:=:ll|NB:=:0|MT:<:120|MET:[]:50:200|NJ:>=:2|HT:>:300");
   }
-  else if( _SR== "SR2C" ) {
+  else if( _SR== "LL SR2" ) {
     setSelLine("LL:=:ll|NB:=:0|MT:<:120|MET:>:200|NJ:>=:2|HT:>:300");
   }
-  else if( _SR== "SR3C" ) {
+  else if( _SR== "LL SR3" ) {
     setSelLine("LL:=:ll|NB:=:1|MT:<:120|MET:[]:50:200|NJ:>=:2|HT:>:300");
   }
-  else if( _SR== "SR4C" ) {
+  else if( _SR== "LL SR4" ) {
     setSelLine("LL:=:ll|NB:=:1|MT:<:120|MET:>:200|NJ:>=:2|HT:>:300");
   }
-  else if( _SR== "SR5C" ) {
+  else if( _SR== "LL SR5" ) {
     setSelLine("LL:=:ll|NB:=:2|MT:<:120|MET:[]:50:200|NJ:>=:2|HT:>:300");
   }
-  else if( _SR== "SR6C" ) {
+  else if( _SR== "LL SR6" ) {
     setSelLine("LL:=:ll|NB:=:2|MT:<:120|MET:>:200|NJ:>=:2|HT:>:300");
   }
- else if( _SR== "SR7C" ) {
+ else if( _SR== "LL SR7" ) {
     setSelLine("LL:=:ll|NB:>=:3|MT:<:120|MET:>=:50|NJ:>=:2|HT:>:300");
   }
-  else if( _SR== "SR8C" ) {
+  else if( _SR== "LL SR8" ) {
     setSelLine("LL:=:ll|MT:>=:120|MET:>=:50|NJ:>=:2|HT:>:300");
   }
 
@@ -1392,10 +1322,10 @@ SSDL2015::setSelLine(string str) {
 bool 
 SSDL2015::genMatchedToFake(int idx) {
 
-  if (_vc->get("isData") == 1) return false;
+  if (_vc->get("isData")==1) return false;
 
   int id1  = _vc->get("LepGood_mcMatchId" ,idx); 
-  if(id1==0) return true;
+  if(id1==0 || id1==100) return true;
 
   return false;
 }
@@ -1403,28 +1333,21 @@ SSDL2015::genMatchedToFake(int idx) {
 bool
 SSDL2015::genMatchedMisCharge() {
 
-  if (_vc->get("isData") == 1) return false;
-    
-  int nGenL=_vc->get("nGenPart");
-  int pdgId1=0;
-  int pdgId2=0;
+  if (_vc->get("isData")==1) return false;
   
-  for(int ig=0;ig<nGenL;++ig) {
-    
-    if(pdgId1==0 && KineUtils::dR(_vc->get("LepGood_eta",_idxL1), _vc->get("GenPart_eta", ig),
-		     _vc->get("LepGood_phi",_idxL1), _vc->get("GenPart_phi", ig))<0.05) { 
-      pdgId1 = _vc->get("GenPart_pdgId",ig);
-    }
-    if(pdgId2==0 &&KineUtils::dR(_vc->get("LepGood_eta",_idxL2), _vc->get("GenPart_eta", ig),
-		     _vc->get("LepGood_phi",_idxL2), _vc->get("GenPart_phi", ig))<0.05) { 
-      pdgId2 = _vc->get("GenPart_pdgId",ig);
-    }
-    
-    if(pdgId1!=0 && pdgId2!=0)
-      break;
+  int mid1=_vc->get("LepGood_mcMatchId" ,_idxL1);
+  int mid2=_vc->get("LepGood_mcMatchId" ,_idxL2);
+  
+  //DY case
+  if(mid1==23 && mid2==23 && 
+     _l1Cand->pdgId()*_l2Cand->pdgId()>0 ) {
+    return true;
   }
-  if(pdgId1*pdgId2<0) return true;
-  
+  if(std::abs(mid1)==24 && std::abs(mid2)==24 &&
+     _l1Cand->pdgId()*_l2Cand->pdgId()>0 ) {
+    return true;
+  }
+   
   return false;
 }
 
@@ -1454,38 +1377,21 @@ bool
 SSDL2015::passGenSelection() {
 
   if( _sampleName.find("DYJets")!=(size_t)-1 || _sampleName.find("TTJets")!=(size_t)-1 ) {
-    //ugly
-    // int lep1Id=genMatchCateg(_l1Cand);
-    // int lep2Id=genMatchCateg(_l1Cand);
     
     if(_sampleName.find("charge")!=(size_t)-1) {
       if( !genMatchedMisCharge() )
-	  //( (lep1Id == kMisChargePdgId && lep2Id >= kMisChargePdgId) || 
-	  //  (lep2Id == kMisChargePdgId && lep1Id >= kMisChargePdgId) ) ) 
 	return false;
     }
     else if(_sampleName.find("fake")!=(size_t)-1) {
-      // if( lep1Id > kMisMatchPdgId &&
-      // 	  lep2Id > kMisMatchPdgId ) return false;
       if(!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) return false;
-
     }
     else {
-      if( (!genMatchedToFake(_idxL1) && !genMatchedToFake(_idxL2) ) && !genMatchedMisCharge() ) {
-	// // cout<<" coincoin "<<"  "<<genMatchedMisCharge()<<endl;
-	// // cout<<_vc->get("LepGood_mcMatchId" ,_idxL1)<<"  "<<_vc->get("LepGood_mcMatchId" ,_idxL2)<<" --> "<<endl;
-	// int nGenL=_vc->get("nGenPart");
-	// for(int ig=0;ig<nGenL;++ig) {
-	//   cout<<_vc->get("GenPart_pdgId",ig)<<"   "<<_vc->get("LepGood_eta",_idxL1)<<" <> "<<_vc->get("LepGood_eta",_idxL2)<<" <> "<<_vc->get("GenPart_eta", ig)<<" : "<<_vc->get("GenPart_pt", ig)<<" -> "<<_vc->get("GenPart_motherId", ig)<<endl;
-	// }
-      }
+      //if( genMatchedToFake(_idxL1) || genMatchedToFake(_idxL2) ) return false;
+      //cout<<" passing prompt "<<endl;
     }
-    // if(_sampleName.find("prompt")!=(size_t)-1) {
-    //   if( lep1Id != kGenMatched ||
-    // 	  lep2Id != kGenMatched ) return false;
-    // }
-  }
 
+  }
+  
   return true;
 }
 
@@ -1494,18 +1400,22 @@ float
 SSDL2015::getFR(Candidate* cand, int idx) {
   string db;
   //int wp=SusyModule::kTight;
-  
+  float ptM=10;
   if( std::abs(cand->pdgId())==13) db="Mu";
-  else  db="El";
+  else { db="El"; ptM=15;}
   
+  if(_HT<300) db+= "Iso";
+  else db += "NIso";
+
+  if(_vc->get("isData")!=1) db +="MC";
 
   float ptVal=cand->pt();
   float etaVal=std::abs(cand->eta());
   
-  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx), (float)10.);
+  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx), (float)ptM);
   if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
-  ptVal=std::max(ptVal, (float)10.);
+  ptVal=std::max(ptVal, ptM);
   // cout<<" ====> "<<cand->pt()<<" / "<<cand->eta()<<" => "<<_dbm->getDBValue(db, std::min( ptVal,(float)69.9),
   // 									    std::min(std::abs(cand->eta()),(float)2.49) )<<endl;
 
@@ -1523,10 +1433,23 @@ SSDL2015::getFR(Candidate* cand, int idx) {
 void
 SSDL2015::chargeFlipProb() {
 
-  float p1=_dbm->getDBValue("chargeMId", std::abs(_l1Cand->eta()), _l1Cand->pt());
-  float p2=_dbm->getDBValue("chargeMId", std::abs(_l2Cand->eta()), _l2Cand->pt());
-  float w=p1+p2-2*p1*p2;
+  string db="chargeMId";
+  if(!_vc->get("isData") ) db="chargeMIdMC";
 
+  float w=0;
+  for(unsigned int i=0;i<_auxPairs.size();i++) {
+
+    if(_auxFlags[i]!=kIsOS) continue;
+
+    float p1=_dbm->getDBValue(db, _auxPairs[i][0]->pt(), std::abs(_auxPairs[i][0]->eta()));
+    float p2=_dbm->getDBValue(db, _auxPairs[i][1]->pt(), std::abs(_auxPairs[i][1]->eta()));
+
+    if(p1>0.01) p1=0.0005;
+    if(p2>0.01) p2=0.0005;
+
+    w += (p1+p2-2*p1*p2)/(p1*p2+(1-p1)*(1-p2) );
+  }
+  
   _weight *= w;
 }
 
@@ -1585,7 +1508,7 @@ SSDL2015::categorize() {
     if(testRegion() ) {setWorkflow(ic+offset); return;}
   }
   std::cout << "WARNING: SSDL2015::categorize() did not find any workflow that matches this event. The workflow returns to kGlobal what may cause problems with the histograms" << std::endl;
-  std::cout<<"====> "<<_looseLepsVeto.size()<<" / "<<_tightLeps10.size()<<" / "<<_nJets<<" / "<<_nBJets<<" / "<<hltSelection()<<" / "<<_met->pt()<<" / "<<_HT<<" / "<<_vc->get("evt")<<" / "<<_vc->get("lumi")<<std::endl;
+  std::cout<<"====> "<<_looseLepsPtCut.size()<<" / "<<_tightLepsPtCut.size()<<" / "<<_nJets<<" / "<<_nBJets<<" / "<<hltSelection()<<" / "<<_met->pt()<<" / "<<_HT<<" / "<<_vc->get("evt")<<" / "<<_vc->get("lumi")<<std::endl;
   setWorkflow(kGlobal);
 }
 
@@ -1625,6 +1548,7 @@ SSDL2015::hltSelection() {
   mm= (_flav==26 &&((_vc->get("HLT_DoubleMu") || _HT>300) && (_vc->get("HLT_DoubleMuHT") || _HT<300)) );
   em= (_flav==24 &&((_vc->get("HLT_MuEG") || _HT>300) && (_vc->get("HLT_MuEGHT") || _HT<300)));
   
+  //cout<<_flav<<"  "<<ee<<"  "<<mm<<"  "<<em<<"  "<<_isOS<<endl;
   
 
   if(ee|| mm || em) return true;
@@ -1651,14 +1575,14 @@ SSDL2015::passHLT(string id) {
 
 
 bool 
-SSDL2015::looseLepton(int idx, int pdgId) {
+SSDL2015::looseLepton(const Candidate* c, int idx, int pdgId) {
 
   if(abs(pdgId)==13) {//mu case
-    if(!_susyMod->muIdSel(idx, SusyModule::kLoose) ) return false;
+    if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
   }
   else {
-    if(!_susyMod->elIdSel(idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
+    if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; //denom on purpose
     if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; //_hltDLHT
   }
@@ -1667,16 +1591,18 @@ SSDL2015::looseLepton(int idx, int pdgId) {
 }
 
 bool 
-SSDL2015::tightLepton(int idx, int pdgId) {
+SSDL2015::tightLepton(const Candidate*c, int idx, int pdgId) {
 
   if(abs(pdgId)==13) {//mu case
-    if(!_susyMod->muIdSel(idx, SusyModule::kTight) ) return false;
+    if(!_susyMod->muIdSel(c, idx, SusyModule::kTight) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
   }
   else {
-    if(!_susyMod->elIdSel(idx, SusyModule::kTight, SusyModule::kTight) ) return false;
-    if(!_susyMod->multiIsoSel(idx, SusyModule::kTight) ) return false;
+    //cout<<" 0 "<<endl;
+    if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight) ) return false; //   cout<<" 1 "<<endl;
+    if(!_susyMod->multiIsoSel(idx, SusyModule::kTight) ) return false;  //  cout<<" 2 "<<endl;
     if(!_susyMod->elHLTEmulSel(idx, (_HT<300) ) ) return false; //_hltDLHT
+    //cout<<" 3 "<<endl;
   }
 
   return true;
@@ -1684,18 +1610,18 @@ SSDL2015::tightLepton(int idx, int pdgId) {
 
 
 bool 
-SSDL2015::fakableLepton(int idx, int pdgId, bool bypass) {
+SSDL2015::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
 
   if(abs(pdgId)==13) {//mu case
-    if(!_susyMod->muIdSel(idx, SusyModule::kTight) ) return false;
+    if(!_susyMod->muIdSel(c, idx, SusyModule::kTight) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     
     if(_FR.find("FO4")!=string::npos && !_susyMod->invMultiIsoSel(idx, SusyModule::kSpecFakeMu) ) return false;
   }
   else {
-    int elMva=_hltDLHT?SusyModule::kLooseHT:SusyModule::kLoose;
+    int elMva=(_HT<300)?SusyModule::kLooseHT:SusyModule::kLoose;
     if(bypass) elMva=SusyModule::kLoose;
-    bool hltDLHT=bypass?false:_hltDLHT;
+    bool hltDLHT=bypass?false:(_HT<300);//_hltDLHT;
     
     // cout<<idx<<" ===> "<<_susyMod->multiIsoSel(idx, SusyModule::kDenom)<<"  "
     // 	<<_susyMod->elHLTEmulSel(idx, hltDLHT )<<"   "
@@ -1703,10 +1629,12 @@ SSDL2015::fakableLepton(int idx, int pdgId, bool bypass) {
     // 	<<_susyMod->elIdSel(idx, SusyModule::kTight, elMva )<<endl;
 
   
-    if(_FR.find("FO2")==string::npos && !_susyMod->elIdSel(idx, SusyModule::kTight, SusyModule::kTight )) return false;
-    if(_FR.find("FO2")!=string::npos && !_susyMod->elIdSel(idx, SusyModule::kTight, elMva )) return false;
-    if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
-    if(!_susyMod->elHLTEmulSel(idx, hltDLHT ) ) return false;
+    if(_FR.find("FO2")==string::npos && !_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight )) return false;
+    //cout<<" passing 1 "<<_hltDLHT<<" == "<<hltDLHT<<"   "<<(_HT<300)<<endl;
+     if(_FR.find("FO2")!=string::npos && !_susyMod->elIdSel(c, idx, SusyModule::kTight, elMva )) return false;
+     //cout<<" passing 2"<<endl;
+     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;  //cout<<" passing 3"<<endl;
+     if(!_susyMod->elHLTEmulSel(idx, hltDLHT ) ) return false;   //cout<<" passing 4"<<endl;
     
     if(_FR.find("FO4")!=string::npos && !_susyMod->invMultiIsoSel(idx, SusyModule::kSpecFakeEl) ) return false;
   }
@@ -1756,7 +1684,7 @@ SSDL2015::passCERNSelection() {
      bool elId= ( _vc->get("LepGood_mvaIdPhys14",_idxL1) >=0.73+(0.57-0.73)*(abs(_l1Cand->eta())>0.8)+(+0.05-0.57)*(abs(_l1Cand->eta())>1.479) || abs(_l1Cand->pdgId()) == 13) && 
      ( _vc->get("LepGood_mvaIdPhys14",_idxL2) >=0.73+(0.57-0.73)*(abs(_l2Cand->eta())>0.8)+(+0.05-0.57)*(abs(_l2Cand->eta())>1.479) || abs(_l2Cand->pdgId()) == 13); 
 
-     cout<<_vc->get("LepGood_mvaIdPhys14",_idxL1)<<"   "<<_l1Cand->eta()<<"   "<<_vc->get("LepGood_mvaIdPhys14",_idxL2)<<"   "<<_l2Cand->eta()<<endl;
+     //cout<<_vc->get("LepGood_mvaIdPhys14",_idxL1)<<"   "<<_l1Cand->eta()<<"   "<<_vc->get("LepGood_mvaIdPhys14",_idxL2)<<"   "<<_l2Cand->eta()<<endl;
 
      if(!makeCut(elId, "elId") ) return false;
 
@@ -1926,12 +1854,162 @@ bool SSDL2015::ZEESelection(){
 }
 
 //===========================================================================
+// void
+// SSDL2015::selectLeptons() {
+
+//   for(size_t il=0;il<_vc->get("nLepGood"); il++) {
+
+//     bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
+
+//     Candidate* cand=Candidate::create(_vc->get("LepGood_pt", il),
+// 				      _vc->get("LepGood_eta", il),
+// 				      _vc->get("LepGood_phi", il),
+// 				      _vc->get("LepGood_pdgId", il),
+// 				      _vc->get("LepGood_charge", il),
+// 				      isMu?0.105:0.0005);
+    
+//      // cout<<il<<" ---> "<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()
+//      // 	<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "
+//      // 	<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<"   "<<_vc->get("LepGood_tightCharge", il)<<"   "<<_vc->get("LepGood_sip3d",il)<<endl;
+
+//     if(!looseLepton(cand, il, cand->pdgId() ) ) continue;
+//     _looseLeps.push_back(cand);
+//     _looseLepsIdx.push_back(il);
+    
+//     //cout<<" -> selected"<<endl;
+//     //continue;
+//     //if((isMu && cand->pt()<10) || (!isMu && cand->pt()<15)) continue;
+//     _looseLeps10.push_back(cand);
+//     _looseLeps10Idx.push_back(il);
+    
+//   }
+
+//   //Fake case with pt corrected ========================
+//   //cout<<" =================== "<<endl;
+//   for(size_t il=0;il<_vc->get("nLepGood"); il++) {
+
+//     bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
+//     Candidate* cand=Candidate::create( _susyMod->conePt(il),   //_vc->get("LepGood_pt", il),
+// 				       _vc->get("LepGood_eta", il),
+// 				       _vc->get("LepGood_phi", il),
+// 				       _vc->get("LepGood_pdgId", il),
+// 				       _vc->get("LepGood_charge", il),
+// 				       isMu?0.105:0.0005);
+
+//     Candidate* cand2=Candidate::create( _vc->get("LepGood_pt", il),
+// 					_vc->get("LepGood_eta", il),
+// 					_vc->get("LepGood_phi", il),
+// 					_vc->get("LepGood_pdgId", il),
+// 					_vc->get("LepGood_charge", il),
+// 					isMu?0.105:0.0005);
+    
+//     if(!looseLepton(cand, il, cand2->pdgId() ) ) continue;
+
+//     if((isMu && cand2->pt()<10) continue;
+//     if((isMu && cand->pt()<10) || (!isMu && cand->pt()<15)) continue;
+//     _looseLepsPtCorr10.push_back(cand);
+//     _looseLepsPtCorr10Idx.push_back(il);    
+//   }
+//   //cout<<" =================== end"<<endl;
+
+//   //OS case with no Z Veto!======================
+//   for(size_t il=0;il<_looseLeps10.size();il++) {
+//     if(!tightLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId())) continue;
+//     if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
+    
+//     _tightLepsOS10.push_back(_looseLeps10[il]);
+//     _tightLepsOS10Idx.push_back(_looseLeps10Idx[il]);
+//   }
+
+//   //veto on loose leptons =====================
+//   for(size_t il=0;il<_looseLeps.size();il++) {
+
+//     // cout<<" pt:"<<_looseLeps[il]->pt()<<"  selected"<<"  "<<_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 76, 106, true)<<"  "<<_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 0, 12, true)<<endl;
+
+//     if(!_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 76, 106, true) ||
+//        !_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 0, 12, true) ) continue;
+    
+//     _looseLepsVeto.push_back( _looseLeps[il]);
+//     _looseLepsVetoIdx.push_back(_looseLepsIdx[il]);
+//   }
+//   //  return;
+//   //veto on loose leptons 10, likely the one to use for the fakes =====================
+//   for(size_t il=0;il<_looseLeps10.size();il++) {
+//     if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
+//        !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
+
+//     _looseLepsVeto10.push_back(_looseLeps10[il]);
+//     _looseLepsVeto10Idx.push_back(_looseLeps10Idx[il]);
+//   }
+
+//   for(size_t il=0;il<_looseLeps10.size();il++) {
+//     if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
+    
+//     _jetCleanLeps10.push_back( _looseLeps10[il] );
+//     _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
+    
+//     if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
+//        !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
+//       _jetCleanLepsVeto10.push_back( _looseLeps10[il] );
+//       _jetCleanLepsVeto10Idx.push_back( _looseLeps10Idx[il] );
+//   }
+
+//   _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx);//was looselep10 before
+//   _HT=_susyMod->HT( &(_jets) );
+  
+
+//   //fakable leptons definitions ========================
+//   //cout<<" =================== qui"<<endl;
+//   for(size_t il=0;il<_looseLepsPtCorr10.size();il++) {
+//     // cout<<" new lepton === "<<_looseLepsPtCorr10[il]->pt()<<"  "<<_vc->get("LepGood_pt",_looseLepsPtCorr10Idx[il])<<endl;
+//     // cout<<"lepfake "<<il<<" : "<<_looseLepsPtCorr10[il]->pdgId()<<" ==>  "<<tightLepton(_looseLepsPtCorr10[il], _looseLepsPtCorr10Idx[il], _looseLepsPtCorr10[il]->pdgId())
+//     // 	<<"    "<<fakableLepton(_looseLepsPtCorr10[il], _looseLepsPtCorr10Idx[il], _looseLepsPtCorr10[il]->pdgId(),false)
+//     // 	<<"    "<<_susyMod->passMllMultiVeto( _looseLepsPtCorr10[il], &_looseLeps, 76, 106, true)
+//     // 	<<"    "<<_susyMod->passMllMultiVeto( _looseLepsPtCorr10[il], &_looseLeps, 0, 12, true)<<endl;
+
+//     if(!tightLepton(_looseLepsPtCorr10[il], _looseLepsPtCorr10Idx[il], _looseLepsPtCorr10[il]->pdgId())) {
+//       if(!fakableLepton(_looseLepsPtCorr10[il], _looseLepsPtCorr10Idx[il], _looseLepsPtCorr10[il]->pdgId(),false)) continue; //not a fakable object
+
+//       _fakableLeps10.push_back(_looseLepsPtCorr10[il]);
+//       _fakableLeps10Idx.push_back(_looseLepsPtCorr10Idx[il]);
+    
+//       if(!_susyMod->passMllMultiVeto( _looseLepsPtCorr10[il], &_looseLeps, 76, 106, true) ||
+// 	 !_susyMod->passMllMultiVeto( _looseLepsPtCorr10[il], &_looseLeps, 0, 12, true) ) continue;
+//       _fakableLepsVeto10.push_back(_looseLepsPtCorr10[il]);
+//       _fakableLepsVeto10Idx.push_back(_looseLepsPtCorr10Idx[il]);
+    
+//     }
+//   }
+  
+//   //====================================================
+
+ 
+//   //tight leptons definitions =================
+//   //cout<<" =================== blu"<<endl;
+//   for(size_t il=0;il<_looseLeps10.size();il++) {
+
+//     if(!tightLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId()))  continue;
+//     if(std::abs(_looseLeps10Idx[il]->pdgId())==11 && _looseLeps10Idx[il]->pt()<15) continue;
+    
+//     _tightLeps10.push_back(_looseLeps10[il]);
+//     _tightLeps10Idx.push_back(_looseLeps10Idx[il]);
+    
+//     if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
+//        !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
+    
+//     _tightLepsVeto10.push_back(_looseLeps10[il]);
+//     _tightLepsVeto10Idx.push_back(_looseLeps10Idx[il]);
+      
+//   }// lepton loop
+//   //cout<<" =================== blu end"<<endl;
+//   //cout<<" size lepton ================== "<<_tightLepsVeto10.size()<<endl;
+// }
+
 void
 SSDL2015::selectLeptons() {
+
   for(size_t il=0;il<_vc->get("nLepGood"); il++) {
-
     bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
-
     Candidate* cand=Candidate::create(_vc->get("LepGood_pt", il),
 				      _vc->get("LepGood_eta", il),
 				      _vc->get("LepGood_phi", il),
@@ -1939,95 +2017,104 @@ SSDL2015::selectLeptons() {
 				      _vc->get("LepGood_charge", il),
 				      isMu?0.105:0.0005);
     
-    // cout<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()
-    // 	<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "
-    // 	<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<"   "<<_vc->get("LepGood_tightCharge", il)<<"   "<<_vc->get("LepGood_sip3d",il)<<endl;
+     // cout<<il<<" ---> "<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()
+     // 	<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "
+     // 	<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<"   "<<_vc->get("LepGood_tightCharge", il)<<"   "<<_vc->get("LepGood_sip3d",il)<<endl;
 
-    if(!looseLepton(il, cand->pdgId() ) ) continue;
+    if(!looseLepton(cand, il, cand->pdgId() ) ) continue;
     _looseLeps.push_back(cand);
     _looseLepsIdx.push_back(il);
     
-    //cout<<" -> selected"<<endl;
-
     if(cand->pt()<10) continue;
     _looseLeps10.push_back(cand);
     _looseLeps10Idx.push_back(il);
+
+    if((isMu && cand->pt()>10) || (!isMu && cand->pt()>15)) {
+      _looseLepsPtCut.push_back(cand);
+      _looseLepsPtCutIdx.push_back(il);
+    }
+    if((isMu && _susyMod->conePt(il)>10) || (!isMu && _susyMod->conePt(il)>15)) {
+      _looseLepsPtCorrCut.push_back(cand);
+      _looseLepsPtCorrCutIdx.push_back(il);
+    }    
+  }
+
+   //OS case with no Z Veto!======================
+  for(size_t il=0;il<_looseLepsPtCut.size();il++) {
+    if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId())) continue;
+    if(!_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 0, 12, true) ) continue;
     
+     _tightLepsOSPtCut.push_back(_looseLepsPtCut[il]);
+     _tightLepsOSPtCutIdx.push_back(_looseLepsPtCutIdx[il]);
   }
 
-  //veto on loose leptons =====================
-  for(size_t il=0;il<_looseLeps.size();il++) {
-
-    // cout<<" pt:"<<_looseLeps[il]->pt()<<"  selected"<<"  "<<_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 76, 106, true)<<"  "<<_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 0, 12, true)<<endl;
-
-    if(!_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 76, 106, true) ||
-       !_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 0, 12, true) ) continue;
-
-   
-
-    _looseLepsVeto.push_back( _looseLeps[il]);
-    _looseLepsVetoIdx.push_back(_looseLepsIdx[il]);
+  //veto on loose leptons ptcut =====================
+  for(size_t il=0;il<_looseLepsPtCut.size();il++) {
+    
+    if(!_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 76, 106, true) ||
+       !_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 0, 12, true) ) continue;
+    
+    _looseLepsPtCutVeto.push_back( _looseLepsPtCut[il]);
+    _looseLepsPtCutVetoIdx.push_back(_looseLepsPtCutIdx[il]);
   }
 
-  //veto on loose leptons 10, likely the one to use for the fakes =====================
+  //veto on loose leptons ptCorr cut ================
+  for(size_t il=0;il<_looseLepsPtCorrCut.size();il++) {
+    
+    bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
+    Candidate* cand=Candidate::create(_vc->get("LepGood_pt", _looseLepsPtCorrCutIdx[il]),
+				      _vc->get("LepGood_eta", _looseLepsPtCorrCutIdx[il]),
+				      _vc->get("LepGood_phi", _looseLepsPtCorrCutIdx[il]),
+				      _vc->get("LepGood_pdgId", _looseLepsPtCorrCutIdx[il]),
+				      _vc->get("LepGood_charge", _looseLepsPtCorrCutIdx[il]),
+				      isMu?0.105:0.0005);
+
+    if(!_susyMod->passMllMultiVeto( cand, &_looseLeps, 76, 106, true) ||
+       !_susyMod->passMllMultiVeto( cand, &_looseLeps, 0, 12, true) ) continue;
+    
+    _looseLepsPtCorrCutVeto.push_back( _looseLepsPtCorrCut[il]);
+    _looseLepsPtCorrCutVetoIdx.push_back(_looseLepsPtCorrCutIdx[il]);
+  }
+
+  //jet cleaning leptons =============================
   for(size_t il=0;il<_looseLeps10.size();il++) {
-    if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
-       !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
-
-    _looseLepsVeto10.push_back(_looseLeps10[il]);
-    _looseLepsVeto10Idx.push_back(_looseLeps10Idx[il]);
-  }
-
-  for(size_t il=0;il<_looseLeps10.size();il++) {
-    if(!fakableLepton(_looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
+    if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
     
     _jetCleanLeps10.push_back( _looseLeps10[il] );
     _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
-    
-      if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
-	 !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
-      _jetCleanLepsVeto10.push_back( _looseLeps10[il] );
-      _jetCleanLepsVeto10Idx.push_back( _looseLeps10Idx[il] );
   }
 
-  _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx);//was looselep10 before
+  _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx, 40, 15);
   _HT=_susyMod->HT( &(_jets) );
   
- 
-  //tight leptons definitions =================
-
-  for(size_t il=0;il<_looseLeps10.size();il++) {
-
-    // bool tightLepSel=tightLepton(_looseLeps10Idx[il], _looseLeps10[il]->pdgId());
-    // bool fakableLepSel=fakableLepton(_looseLeps10Idx[il], _looseLeps10[il]->pdgId(),false);
+  //fakable leptons definitions =======================
+  for(size_t il=0;il<_looseLepsPtCorrCutVeto.size();il++) {
+    if(tightLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il],
+		   _looseLepsPtCorrCutVeto[il]->pdgId())) continue;
+    if(!fakableLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il], _looseLepsPtCorrCutVeto[il]->pdgId(),false)) continue; //not a fakable object
     
-    if(!tightLepton(_looseLeps10Idx[il], _looseLeps10[il]->pdgId())) {
-      if(!fakableLepton(_looseLeps10Idx[il], _looseLeps10[il]->pdgId(),false)) continue; //not a fakable object
+    _fakableLepsPtCutVeto.push_back(_looseLepsPtCorrCutVeto[il]);
+    _fakableLepsPtCutVetoIdx.push_back(_looseLepsPtCorrCutVetoIdx[il]);
+  }
 
-      _fakableLeps10.push_back(_looseLeps10[il]);
-      _fakableLeps10Idx.push_back(_looseLeps10Idx[il]);
-      
-      if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
-	 !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
-      _fakableLepsVeto10.push_back(_looseLeps10[il]);
-      _fakableLepsVeto10Idx.push_back(_looseLeps10Idx[il]);
+  //tight leptons definitions =========================
+  for(size_t il=0;il<_looseLepsPtCut.size();il++) {
+
+    if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId()))  continue;
     
-      continue;
-    }
+    _tightLepsPtCut.push_back(_looseLepsPtCut[il]);
+    _tightLepsPtCutIdx.push_back(_looseLepsPtCutIdx[il]);
 
-    _tightLeps10.push_back(_looseLeps10[il]);
-    _tightLeps10Idx.push_back(_looseLeps10Idx[il]);
-      
-    //cout<<_looseLeps10[il]->pt()<<" ==> "<<_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true)<<"   "<<_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true)<<endl;
-
-    if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
-       !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
+    if(!_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 76, 106, true) ||
+       !_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 0, 12, true) ) continue;
     
-    _tightLepsVeto10.push_back(_looseLeps10[il]);
-    _tightLepsVeto10Idx.push_back(_looseLeps10Idx[il]);
+    _tightLepsPtCutVeto.push_back(_looseLepsPtCut[il]);
+    _tightLepsPtCutVetoIdx.push_back(_looseLepsPtCutIdx[il]);
       
-  }// lepton loop
-  //cout<<" size lepton ================== "<<_tightLepsVeto10.size()<<endl;
+  }
+
+
+
 }
 
 
@@ -2105,5 +2192,460 @@ void SSDL2015::fillValidationHistos(string reg){
   fill(reg+"_NBJetsTight40"  , _vc->get("nBJetTight40")  , _weight);
   fill(reg+"_NJets40"        , _vc->get("nJet40")        , _weight);
 }  
+
+
+void
+SSDL2015::fillEvents() {
+// _events.push_back(1331274);
+// _events.push_back(1860357);
+//_events.push_back(4094628);//===
+// _events.push_back(6000097);
+// _events.push_back(6896086);
+// _events.push_back(7729497);
+// _events.push_back(7828608);
+// _events.push_back(8053721);
+// _events.push_back(8957199);
+// _events.push_back(12178508);
+// _events.push_back(12345756);
+// _events.push_back(14329928);
+// _events.push_back(14532696);
+// _events.push_back(17800601);
+// _events.push_back(20254586);
+// _events.push_back(20860562);
+// _events.push_back(23936240);
+// _events.push_back(25929216);
+// _events.push_back(26939364);
+// _events.push_back(27332219);
+// _events.push_back(28410914);
+//_events.push_back(28910203);//===
+// _events.push_back(32279981);
+// _events.push_back(34525287);
+//_events.push_back(34552720);//===
+// _events.push_back(37553041);
+// _events.push_back(38279201);
+_events.push_back(41670828);//===
+// _events.push_back(42499509);
+// _events.push_back(43097002);
+// _events.push_back(43139094);
+// _events.push_back(44502365);
+// _events.push_back(44711996);
+// _events.push_back(45684115);
+// _events.push_back(49452519);
+// _events.push_back(51484564);
+// _events.push_back(53418499);
+// _events.push_back(53700482);
+// _events.push_back(54635962);
+// _events.push_back(56003125);
+// _events.push_back(57622365);
+//_events.push_back(62830693);//===
+// _events.push_back(64505165);
+// _events.push_back(64919594);
+// _events.push_back(66450770);
+// _events.push_back(66702675);
+//_events.push_back(67804145);//===
+// _events.push_back(69314356);
+// _events.push_back(69990204);
+// _events.push_back(71391223);
+// _events.push_back(75325264);
+// _events.push_back(76832152);
+// _events.push_back(78632943);
+// _events.push_back(85554780);
+// _events.push_back(87643214);
+// _events.push_back(88489265);
+// _events.push_back(89102191);
+// _events.push_back(91613825);
+// _events.push_back(93606874);
+// _events.push_back(95893452);
+// _events.push_back(96438695);
+// _events.push_back(100186367);
+// _events.push_back(101906465);
+// _events.push_back(103716364);
+// _events.push_back(104031278);
+// _events.push_back(105341710);
+//_events.push_back(105857275);//===
+// _events.push_back(110235537);
+// _events.push_back(110723109);
+// _events.push_back(111837109);
+// _events.push_back(112281886);
+// _events.push_back(113029657);
+// _events.push_back(114858440);
+// _events.push_back(115775184);
+// _events.push_back(116606504);
+// _events.push_back(116683124);
+// _events.push_back(117654396);
+// _events.push_back(122775293);
+// _events.push_back(123730894);
+// _events.push_back(124210711);
+// _events.push_back(125659235);
+// _events.push_back(127272170);
+// _events.push_back(129508122);
+//_events.push_back(129785483);//===
+// _events.push_back(132001490);
+// _events.push_back(134084501);
+// _events.push_back(135382435);
+// _events.push_back(135941923);
+// _events.push_back(137653648);
+// _events.push_back(139171125);
+// _events.push_back(141909616);
+// _events.push_back(142298027);
+// _events.push_back(142821640);
+// _events.push_back(143036233);
+// _events.push_back(143481471);
+// _events.push_back(143776242);
+// _events.push_back(144000353);
+// _events.push_back(145019121);
+// _events.push_back(145711469);
+// _events.push_back(146093398);
+// _events.push_back(147293780);
+// _events.push_back(147742290);
+// _events.push_back(148376760);
+// _events.push_back(148475994);
+// _events.push_back(149195930);
+// _events.push_back(150352010);
+// _events.push_back(150496507);
+// _events.push_back(154148347);
+// _events.push_back(154240851);
+// _events.push_back(155951853);
+// _events.push_back(156439531);
+// _events.push_back(156652831);
+// _events.push_back(157459759);
+// _events.push_back(167588262);
+// _events.push_back(168300493);
+// _events.push_back(170247707);
+// _events.push_back(170569344);
+// _events.push_back(172299855);
+// _events.push_back(172987826);
+// _events.push_back(173400911);
+// _events.push_back(174198918);
+// _events.push_back(175116290);
+// _events.push_back(175323397);
+// _events.push_back(175400241);
+// _events.push_back(176448647);
+// _events.push_back(178095239);
+// _events.push_back(179181624);
+// _events.push_back(179871044);
+// _events.push_back(180745074);
+// _events.push_back(180911876);
+// _events.push_back(180946110);
+// _events.push_back(183038953);
+// _events.push_back(184014008);
+// _events.push_back(186228327);
+// _events.push_back(186676475);
+// _events.push_back(191706176);
+// _events.push_back(194910875);
+// _events.push_back(195862214);
+// _events.push_back(196853711);
+// _events.push_back(198210931);
+// _events.push_back(198405264);
+// _events.push_back(198551847);
+// _events.push_back(200081035);
+// _events.push_back(201059053);
+//_events.push_back(204175862);//===
+// _events.push_back(208741072);
+// _events.push_back(209605728);
+// _events.push_back(211490444);
+// _events.push_back(212278481);
+// _events.push_back(213930242);
+// _events.push_back(214440558);
+// _events.push_back(214693398);
+// _events.push_back(215711614);
+// _events.push_back(222568243);
+// _events.push_back(223606286);
+// _events.push_back(224390098);
+// _events.push_back(225289746);
+// _events.push_back(226882728);
+// _events.push_back(228434130);
+// _events.push_back(230427564);
+// _events.push_back(231008038);
+// _events.push_back(232328777);
+// _events.push_back(234030431);
+// _events.push_back(234898423);
+// _events.push_back(237605104);
+// _events.push_back(243431990);
+// _events.push_back(247167327);
+// _events.push_back(251315970);
+// _events.push_back(252778623);
+// _events.push_back(256144502);
+// _events.push_back(256554985);
+// _events.push_back(260204571);
+// _events.push_back(261542212);
+// _events.push_back(264084284);
+// _events.push_back(266114597);
+// _events.push_back(269673912);
+// _events.push_back(272669267);
+// _events.push_back(273717411);
+// _events.push_back(275726009);
+// _events.push_back(277717896);
+//_events.push_back(279812117);//===
+// _events.push_back(279829322);
+//_events.push_back(282590520);//===
+// _events.push_back(282859921);
+// _events.push_back(283086381);
+// _events.push_back(283350576);
+// _events.push_back(288987292);
+// _events.push_back(290088881);
+// _events.push_back(294067730);
+// _events.push_back(294178609);
+// _events.push_back(295077991);
+//_events.push_back(298540660);//===
+// _events.push_back(300464702);
+// _events.push_back(304308844);
+// _events.push_back(304347230);
+// _events.push_back(304528702);
+// _events.push_back(307147325);
+// _events.push_back(307266129);
+// _events.push_back(308443047);
+// _events.push_back(310150909);
+// _events.push_back(310493025);
+// _events.push_back(312056304);
+// _events.push_back(312512265);
+// _events.push_back(315038738);
+// _events.push_back(323710044);
+// _events.push_back(323853220);
+// _events.push_back(324195247);
+// _events.push_back(333617928);
+// _events.push_back(334681314);
+// _events.push_back(335463451);
+// _events.push_back(340391000);
+// _events.push_back(342064801);
+// _events.push_back(344796134);
+// _events.push_back(346264918);
+// _events.push_back(347081999);
+// _events.push_back(349929810);
+// _events.push_back(351913537);
+// _events.push_back(355321199);
+// _events.push_back(355797460);
+// _events.push_back(356720560);
+// _events.push_back(356781745);
+// _events.push_back(358684823);
+//_events.push_back(359985861);//===
+// _events.push_back(360783267);
+// _events.push_back(362527488);
+// _events.push_back(366245496);
+// _events.push_back(374376453);
+// _events.push_back(378052141);
+// _events.push_back(380894273);
+// _events.push_back(387457310);
+// _events.push_back(389574551);
+//_events.push_back(390161294);//===
+// _events.push_back(392569022);
+// _events.push_back(393656765);
+//_events.push_back(395654227);//===
+// _events.push_back(396478392);
+// _events.push_back(396723825);
+// _events.push_back(398885382);
+// _events.push_back(402476172);
+// _events.push_back(406072305);
+// _events.push_back(411764048);
+// _events.push_back(414389200);
+// _events.push_back(415552078);
+// _events.push_back(421072700);
+// _events.push_back(432724628);
+// _events.push_back(437211991);
+// _events.push_back(442200164);
+// _events.push_back(443742829);
+// _events.push_back(449520955);
+// _events.push_back(455361628);
+// _events.push_back(456654966);
+// _events.push_back(460735951);
+// _events.push_back(464026149);
+// _events.push_back(466844957);
+// _events.push_back(472142146);
+// _events.push_back(473589594);
+// _events.push_back(474147471);
+// _events.push_back(474722621);
+// _events.push_back(477275800);
+// _events.push_back(478019637);
+// _events.push_back(480943811);
+// _events.push_back(487426910);
+// _events.push_back(494052683);
+// _events.push_back(496520517);
+// _events.push_back(497149152);
+// _events.push_back(499281419);
+// _events.push_back(503858299);
+// _events.push_back(504758093);
+// _events.push_back(507090357);
+// _events.push_back(509231380);
+// _events.push_back(512009019);
+// _events.push_back(516047243);
+// _events.push_back(517988015);
+// _events.push_back(527640107);
+// _events.push_back(527759255);
+// _events.push_back(527845354);
+// _events.push_back(528697562);
+// _events.push_back(533401119);
+// _events.push_back(540176981);
+// _events.push_back(546453280);
+// _events.push_back(554343056);
+// _events.push_back(569366193);
+// _events.push_back(570538045);
+// _events.push_back(579495286);
+// _events.push_back(579648445);
+// _events.push_back(581742888);
+// _events.push_back(583172424);
+// _events.push_back(586017378);
+// _events.push_back(587079596);
+// _events.push_back(589994934);
+// _events.push_back(590916404);
+// _events.push_back(593070534);
+// _events.push_back(595605386);
+// _events.push_back(596942563);
+// _events.push_back(602111888);
+// _events.push_back(603866158);
+// _events.push_back(605105024);
+// _events.push_back(607911096);
+// _events.push_back(608806131);
+// _events.push_back(615396600);
+//_events.push_back(620691394);//===
+// _events.push_back(622817539);
+// _events.push_back(630231280);
+// _events.push_back(631643814);
+// _events.push_back(633390336);
+// _events.push_back(640560734);
+// _events.push_back(641621982);
+// _events.push_back(650916046);
+// _events.push_back(651236199);
+// _events.push_back(651710754);
+// _events.push_back(651885742);
+// _events.push_back(653667552);
+// _events.push_back(656624028);
+// _events.push_back(663964953);
+// _events.push_back(674552058);
+// _events.push_back(676889360);
+// _events.push_back(682445206);
+// _events.push_back(690853250);
+// _events.push_back(700924080);
+// _events.push_back(701882359);
+// _events.push_back(703663750);
+// _events.push_back(707849069);
+// _events.push_back(708761805);
+// _events.push_back(712578306);
+// _events.push_back(715041088);
+// _events.push_back(715645174);
+// _events.push_back(718842092);
+// _events.push_back(725861965);
+// _events.push_back(742443751);
+// _events.push_back(743522399);
+// _events.push_back(745003410);
+// _events.push_back(746601549);
+// _events.push_back(751492002);
+// _events.push_back(755984797);
+// _events.push_back(756833521);
+// _events.push_back(764289373);
+// _events.push_back(771802121);
+// _events.push_back(773289567);
+// _events.push_back(780190279);
+// _events.push_back(796443338);
+// _events.push_back(800428806);
+// _events.push_back(805213514);
+// _events.push_back(805707744);
+// _events.push_back(816364906);
+// _events.push_back(817052800);
+// _events.push_back(827739745);
+// _events.push_back(844760159);
+// _events.push_back(848632675);
+// _events.push_back(856895774);
+// _events.push_back(858619928);
+// _events.push_back(868592539);
+// _events.push_back(875744382);
+// _events.push_back(882349142);
+// _events.push_back(906826045);
+// _events.push_back(908927239);
+// _events.push_back(914487106);
+// _events.push_back(919601876);
+// _events.push_back(920875586);
+// _events.push_back(948825660);
+// _events.push_back(957883468);
+// _events.push_back(970910134);
+// _events.push_back(973885891);
+// _events.push_back(974971817);
+// _events.push_back(986836050);
+// _events.push_back(1000347317);
+//_events.push_back(1002719591);//===
+// _events.push_back(1006007346);
+// _events.push_back(1009330326);
+// _events.push_back(1009920621);
+// _events.push_back(1017022119);
+// _events.push_back(1049401651);
+// _events.push_back(1051773927);
+// _events.push_back(1065391213);
+// _events.push_back(1069747745);
+// _events.push_back(1076570460);
+// _events.push_back(1081725694);
+// _events.push_back(1086795015);
+// _events.push_back(1087252333);
+// _events.push_back(1087529625);
+// _events.push_back(1095763179);
+// _events.push_back(1111123283);
+// _events.push_back(1120410610);
+// _events.push_back(1122660619);
+// _events.push_back(1129602034);
+// _events.push_back(1143184518);
+// _events.push_back(1143358728);
+// _events.push_back(1147962333);
+// _events.push_back(1148818907);
+// _events.push_back(1158277580);
+// _events.push_back(1169160045);
+// _events.push_back(1171259675);
+// _events.push_back(1182340134);
+// _events.push_back(1186177131);
+// _events.push_back(1189421089);
+// _events.push_back(1201161311);
+// _events.push_back(1231011115);
+// _events.push_back(1247212923);
+// _events.push_back(1258816156);
+// _events.push_back(1411782924);
+// _events.push_back(1424695132);
+// _events.push_back(1437885113);
+// _events.push_back(1441309553);
+// _events.push_back(1443408045);
+// _events.push_back(1447683845);
+// _events.push_back(1511143126);
+// _events.push_back(1532089884);
+// _events.push_back(1536894706);
+// _events.push_back(1560328263);
+// _events.push_back(1594220271);
+// _events.push_back(1602226705);
+// _events.push_back(1602535573);
+// _events.push_back(1606325836);
+// _events.push_back(1606819848);
+// _events.push_back(1607256848);
+// _events.push_back(1618818705);
+// _events.push_back(1619964478);
+// _events.push_back(1630510904);
+// _events.push_back(1639165004);
+// _events.push_back(1659387605);
+// _events.push_back(1669149626);
+// _events.push_back(1679302902);
+// _events.push_back(1700333538);
+// _events.push_back(1716233011);
+// _events.push_back(1718480138);
+// _events.push_back(1732416923);
+// _events.push_back(1760107277);
+// _events.push_back(1832369763);
+// _events.push_back(1859480457);
+// _events.push_back(1889888226);
+// _events.push_back(1927420608);
+// _events.push_back(1958708727);
+// _events.push_back(1968870257);
+// _events.push_back(2070733437);
+// _events.push_back(2077929541);
+// _events.push_back(2099877074);
+// _events.push_back(2127815492);
+// _events.push_back(2135222886);
+// _events.push_back(2161726539);
+// _events.push_back(2164682397);
+// _events.push_back(2215174560);
+// _events.push_back(2245298726);
+// _events.push_back(2258661207);
+// _events.push_back(2293500450);
+// _events.push_back(2455576182);
+// _events.push_back(2485783744);
+// _events.push_back(2489004462);
+// _events.push_back(2502964461);
+// _events.push_back(2517030287);
+// _events.push_back(2521631475);
+// _events.push_back(2540713621);
+}
 
 
