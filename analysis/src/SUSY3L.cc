@@ -781,10 +781,10 @@ void SUSY3L::setWZControlRegion(){
         return: none
     */
 
-    setCut("LepMultiplicityWZ"    ,   3, "="   )        ;     //number of isolated leptons
+    setCut("LepMultiplicityWZ"    ,    3, "="       )   ;     //number of isolated leptons
     _M_T_3rdLep_MET_cut           =   -1                ;     //minimum transverse mass of 3rd lepton and met in On-Z events
     setCut("NJetsWZ"              ,    2, "[]", 3   )   ;     //number of jets in event
-    setCut("NBJetsWZ"             ,    0, "="   )       ;     //number of b-tagged jets in event
+    setCut("NBJetsWZ"             ,    0, "="       )   ;     //number of b-tagged jets in event
     _ZMassWindow                  =   15.               ;     //width around Z mass to define on- or off-Z events
     setCut("HTWZ"                 ,   60, "<", 400   )  ;     //sum of jet pT's
     setCut("METWZ"                ,   50, "<", 150   )  ;     //missing transverse energy
@@ -2444,7 +2444,7 @@ bool SUSY3L::baseSelection(){
     if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
 
     //require minimum number of b-tagged jets
-    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return false;
+    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR, kBase) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
     if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR, kBase) ) return false;

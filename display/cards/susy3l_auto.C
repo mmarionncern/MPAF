@@ -202,7 +202,7 @@ void susy3l_SIGNALREGION_PAIRSTATE() {
     md.doPlot();
 
     md.makeSingleDataCard(signal, "global", "signal region", fileList+"_"+signal);
-
+    md.getStatistics("global");
 
     //md.doStatisticsPlot();
     //md.savePlot("SUSY3L");
