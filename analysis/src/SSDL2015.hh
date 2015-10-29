@@ -31,6 +31,9 @@ private:
   bool noIsoSel();
   bool oneIsoSel();
   bool twoIsoSel();
+  void getFRProb();
+  void getFRProb(int flag, float fr);
+  std::vector<float> getFRs();
   float getProbAtLeastNIso(CandList fObjs, vector<unsigned int> idxs, int nIso);
   bool genMatchedMisCharge();
   int genMatchCateg(const Candidate* cand);
@@ -61,12 +64,14 @@ private:
   void categorize();
 
   bool passCERNSelection();
-  bool looseLepton(int idx, int pdgId);
-  bool tightLepton(int idx, int pdgId);
-  bool fakableLepton(int idx, int pdgId, bool bypass);
+  bool looseLepton(const Candidate*c, int idx, int pdgId);
+  bool tightLepton(const Candidate*c, int idx, int pdgId);
+  bool fakableLepton(const Candidate*c, int idx, int pdgId, bool bypass);
   
   bool hltSelection();
   bool passHLT(std::string id);
+
+  void advancedSelection(int WF);
 
   //==============================
   // Validation regions
@@ -81,6 +86,8 @@ private:
   void fillValidationHistos(std::string reg);
 
 private: 
+
+  enum {kIsOS=0,kIsFake, kIsDFake};
 
   //counter categories, 0 is ALWAYS global (even if not specified later
   //enum {kGlobal=0,kLowMETMT,kGenFake,kGenMisCharge,kOneIso,kNoIso, kSelId};
@@ -185,29 +192,36 @@ private:
   CandList _looseLeps10;
   std::vector<unsigned int>  _looseLeps10Idx;
 
-  CandList _looseLepsVeto;
-  std::vector<unsigned int>  _looseLepsVetoIdx;
+  CandList _looseLepsPtCut;
+  std::vector<unsigned int>  _looseLepsPtCutIdx;
 
-  CandList _looseLepsVeto10;
-  std::vector<unsigned int>  _looseLepsVeto10Idx;
+  // CandList _looseLepsVeto;
+  // std::vector<unsigned int>  _looseLepsVetoIdx;
+
+  CandList _looseLepsPtCutVeto;
+  std::vector<unsigned int>  _looseLepsPtCutVetoIdx;
+
+  CandList _looseLepsPtCorrCut;
+  std::vector<unsigned int>  _looseLepsPtCorrCutIdx;
+ 
+ CandList _looseLepsPtCorrCutVeto;
+  std::vector<unsigned int>  _looseLepsPtCorrCutVetoIdx;
+
 
   CandList _jetCleanLeps10;
   std::vector<unsigned int>  _jetCleanLeps10Idx;
 
-  CandList _jetCleanLepsVeto10;
-  std::vector<unsigned int>  _jetCleanLepsVeto10Idx;
-
-  CandList _fakableLeps10;
-  std::vector<unsigned int>  _fakableLeps10Idx;
-
-  CandList _fakableLepsVeto10;
-  std::vector<unsigned int>  _fakableLepsVeto10Idx;
+  CandList _fakableLepsPtCutVeto;
+  std::vector<unsigned int>  _fakableLepsPtCutVetoIdx;
   
-  CandList _tightLeps10;
-  std::vector<unsigned int>  _tightLeps10Idx;
+  CandList _tightLepsPtCut;
+  std::vector<unsigned int>  _tightLepsPtCutIdx;
 
-  CandList _tightLepsVeto10;
-  std::vector<unsigned int>  _tightLepsVeto10Idx;
+  CandList _tightLepsPtCutVeto;
+  std::vector<unsigned int>  _tightLepsPtCutVetoIdx;
+
+  CandList _tightLepsOSPtCut;
+  std::vector<unsigned int>  _tightLepsOSPtCutIdx;
 
   CandList _jets;
   std::vector<unsigned int>  _jetsIdx;
@@ -250,7 +264,16 @@ private:
 
   vector<TVector2> _uncleanJets;
   vector<TVector2> _uncleanFwdJets;
-  
+
+
+  //background pairs===============
+  vector<CandList> _auxPairs;
+  vector<int> _auxFlags;
+  vector<vector<int> > _auxIdxs;
+
+  vector<unsigned int> _events;
+  void fillEvents();
+
 };
 
 
