@@ -251,10 +251,10 @@ SSDL2015::initialize(){
   _categorization = getCfgVarI("categorization", 1);
   _DoValidationPlots = getCfgVarI("ValidationPlots", 0);
 
-   vector<string> jess;
-   jess.push_back("Jet_pt");
+   // vector<string> jess;
+   // jess.push_back("Jet_pt");
    //jess.push_back("LepGood_jetCorrFactor_L1L2L3Res");
-   addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(Jet_eta):Jet_pt", "" );
+   //addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(Jet_eta):Jet_pt", "" );
    //addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(LepGood_jetLepAwareJEC_eta):LepGood_jetLepAwareJEC_pt", "" );
 
   //FR databases
