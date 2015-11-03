@@ -302,6 +302,15 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
   if(tmptree != nullptr ) {
     _chain->Add( (NameF+"/"+objName).c_str() ); 
 
+    //cleaning friends if needed
+    TList* lfriends = _chain->GetListOfFriends();
+    TIter next(lfriends);
+    TObject* fr = 0;
+    while ((fr = next())) {
+      _chain->RemoveFriend((TTree*)fr);
+    }
+
+
     // adding friend-trees
     for (size_t ft=0; ft<_friends.size(); ft++){
       string NameFr = p+"/data/"+dir+"/"+_friends[ft]+"/evVarFriend_"+sname+".root";
@@ -356,7 +365,7 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
     map<string, TH1*> tmp;
     
     //MM FIXME, jsut take a too long time to load everything, should be done in a better way thatn disabling everything 
-    if(varName.find("Fake")!=string::npos || varName.find("SR")!=string::npos) continue;
+    //if(varName.find("SR")!=string::npos) continue;
   
 
     if(optCat!="") {

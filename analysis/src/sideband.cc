@@ -145,14 +145,14 @@ void sideband::initialize(){
 
   //extra input variables
 
-  _lepflav = getCfgVarS("LEPFLAV");
-  _lepid   = getCfgVarS("LEPID"  );
-  _lepiso  = getCfgVarS("LEPISO" );
-  _leppt   = getCfgVarS("LEPPT"  );
-  _leptl   = getCfgVarS("LEPTL"  );
-  _SB      = getCfgVarS("SB"     );
-  _fakes   = getCfgVarS("FAKES"  );
-  _etabin  = getCfgVarS("ETABIN" );
+  _lepflav = getCfgVarS("LEPFLAV", "");
+  _lepid   = getCfgVarS("LEPID"  , "");
+  _lepiso  = getCfgVarS("LEPISO" , "");
+  _leppt   = getCfgVarS("LEPPT"  , "");
+  _leptl   = getCfgVarS("LEPTL"  , "");
+  _SB      = getCfgVarS("SB"     , "");
+  _fakes   = getCfgVarS("FAKES"  , "");
+  _etabin  = getCfgVarS("ETABIN" , "");
   
 }
 

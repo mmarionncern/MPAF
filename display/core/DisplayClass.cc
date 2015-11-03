@@ -27,6 +27,7 @@ _c(0),_leg(0),_empty(0),_hMC(0),_hData(0),_gData(0)
   _isProf=false;
 
   _comSyst=true;
+  _mcSystComputed=false;
 
   _userYScale=false;
 
@@ -113,6 +114,7 @@ DisplayClass::reset() {
   _gBin =  _binningSave;
 
   _cNames.clear();
+  _mcSystComputed=false;
 
 }
 
@@ -160,6 +162,8 @@ DisplayClass::softReset() {
 
   _cNames.clear();
 
+  _mcSystComputed=false;
+
 }
 
 void
@@ -194,7 +198,7 @@ DisplayClass::refreshHistos() {
   _hData=NULL;
   _gData=NULL;
   _hCoords.clear();
-
+  _mcSystComputed=false;
 }
 
 void
@@ -667,6 +671,7 @@ DisplayClass::drawDistribution() {
     bool f=true;
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
+      cout<<nh<<endl;
       if( !_sSignal && nh.find("sig")!=(size_t)-1) 
         sigs.push_back(i);
       else {
@@ -691,12 +696,14 @@ DisplayClass::drawDistribution() {
   }
   
   // systematic uncertainties now ============
+  cout<<" systematics? "<<_addSyst<<endl;
   if(_addSyst && !_is2D && _hMC) {
     if(_comSyst) {
       computeSystematics(_isProf,true);
     }
     
     if(_addSyst) {
+      cout<<" ========== adding systematic uncertainties =================== "<<endl;
       TGraphAsymmErrors* mcUnc = (TGraphAsymmErrors*) _mcUncert.back()->Clone();
       
       mcUnc->SetMarkerSize(0); 
@@ -1963,8 +1970,11 @@ DisplayClass::residualData(const hObs* theObs) {
   
   //systematic uncertainties =============
   if(_addSyst && _hMC) {
-    computeSystematics(_isProf);
-   
+    if(!_mcSystComputed) {
+      computeSystematics(_isProf);
+      _mcSystComputed=true;
+    }   
+
     TGraphAsymmErrors* mcUnc = (TGraphAsymmErrors*) _mcUncert.back()->Clone();
       
     double x,y;
@@ -2110,14 +2120,19 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
 
 	float eyl2=pow(vals[ic].second[id][2],2) + ((_mcSyst)?pow(vals[ic].second[id][1],2):0);
 	float eyh2=pow(vals[ic].second[id][3],2) + ((_mcSyst)?pow(vals[ic].second[id][1],2):0);
-
+	//cout<<" || "<<vals[ic].second[id][2]<<"  "<<<<" --> "<<eyl2<<"   "<<eyh2<<" ==> "<<sqrt(eyl2)<<"  "<<sqrt(eyh2)<<endl;
        	mcUncert->SetPointError( ic, 0.25,0.25, sqrt(eyl2), sqrt(eyh2) );
       }
       else if(id==idat) { //data
+	//cout<<"  ===> "<<vals[ic].second[id][0]<<endl;
         hData->SetBinContent( ic+1, vals[ic].second[id][0] );
 	hData->SetBinError( ic+1, vals[ic].second[id][1] );	
       }
       else {
+	// _itCol = _colors.find( _names[_nhmc-id-1] );
+	// hMC[nDs-id-1]->SetLineColor( _itCol->second );
+	// hMC[nDs-id-1]->SetFillColor( _itCol->second );
+
         if( !_sSignal && dsnames[id].find("sig") == (size_t)-1){
           float sum = vals[ic].second[id][0];
           float sum2 = pow(vals[ic].second[id][1],2);
@@ -2173,10 +2188,17 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
   emptyH->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   emptyH->GetYaxis()->SetNdivisions(_Ydiv[0],_Ydiv[1],_Ydiv[2]);
   emptyH->GetYaxis()->SetTitle(_ytitle.c_str());
+  //emptyH->GetXaxis()->RotateTitle(90);
   for(size_t ib=0;ib<cNames.size();ib++) {
     emptyH->GetXaxis()->SetBinLabel(ib+1, cNames[ib].c_str() );
+    for(size_t ih=0;ih<hMC.size();ih++)
+      hMC[ih]->GetXaxis()->SetBinLabel(ib+1, cNames[ib].c_str() );
+
   }
-  
+  emptyH->GetXaxis()->LabelsOption("v");
+  for(size_t ih=0;ih<hMC.size();ih++)  
+    hMC[ih]->GetXaxis()->LabelsOption("v");
+
   hMCt->SetLineWidth(2);
   hMCt->SetLineColor(kBlack);
   hMCt->SetFillStyle(0);
@@ -2187,6 +2209,8 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
   _hData = hData;
   _gData = gData;
   _mcUncert.push_back( mcUncert );
+  _nhmc=hMC.size();
+  _mcSystComputed=true;
   
   _cNames = cNames;
 

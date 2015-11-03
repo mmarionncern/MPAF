@@ -131,7 +131,13 @@ private:
 
   template<typename T> inline vector<float> convertVal(T* vals) {
     
-    vector<float> vf(vals, vals + sizeof(vals) / sizeof(vals[0]));
+    //vector<float> vf(vals, vals + sizeof(vals) / sizeof(vals[0]));
+    vector<float> vf;
+    int sa=sizeof(vals)/sizeof(vals[0]);
+    for(size_t iv=0; iv<sa; ++iv) {
+      vf.push_back( (float)vals[iv] );
+    }
+
     return vf;
   };
 
@@ -316,7 +322,8 @@ public:
   //systematic ucnertainty propagation     ============
   void applySystVar(string name, int dir, string mvar, float mag, string type);
   void applySystVar(string name, int dir, string mvar, 
-		    vector<string> vars, string db, string type);
+		    vector<string> vars, vector<bool> specVars,
+		    string db, string type);
   void backPortVar(int mvar);
   void backPortAllVars();
   // void applyWSystVar(string name, int dir, float& w, vector<string> vars, 

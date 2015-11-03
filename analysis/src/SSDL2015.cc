@@ -17,7 +17,7 @@ SSDL2015::~SSDL2015(){
 
 void
 SSDL2015::initialize(){
-  fillEvents();
+  //  fillEvents();
   
   _vc->registerVar("run"                          );
   _vc->registerVar("lumi"                         );
@@ -72,9 +72,14 @@ SSDL2015::initialize(){
   _vc->registerVar("LepGood_dPhiScTrkIn"          );
   _vc->registerVar("LepGood_hadronicOverEm"       );
   _vc->registerVar("LepGood_eInvMinusPInv"        );
-  _vc->registerVar("LepGood_ecalPFClusterIso"          );
-  _vc->registerVar("LepGood_hcalPFClusterIso"          );
-  _vc->registerVar("LepGood_dr03TkSumPt"               );
+  _vc->registerVar("LepGood_ecalPFClusterIso"     );
+  _vc->registerVar("LepGood_hcalPFClusterIso"     );
+  _vc->registerVar("LepGood_dr03TkSumPt"          );
+  _vc->registerVar("LepGood_jetLepAwareJEC_pt"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_eta"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_phi"    );
+  _vc->registerVar("LepGood_jetLepAwareJEC_energy"    );
+  _vc->registerVar("LepGood_jetCorrFactor_L1L2L3Res"    );
 
   _vc->registerVar("met_pt"                       );
   _vc->registerVar("met_eta"                      );
@@ -95,6 +100,10 @@ SSDL2015::initialize(){
   _vc->registerVar("Jet_phi"                      );
   _vc->registerVar("Jet_mass"                     );
   _vc->registerVar("Jet_btagCSV"                  );
+
+  _vc->registerVar("Jet_CorrFactor_L1"            );
+  _vc->registerVar("Jet_CorrFactor_L1L2L3Res"     );
+
 
   _vc->registerVar("nDiscJet"                     );
   _vc->registerVar("DiscJet_id"                   );
@@ -242,9 +251,11 @@ SSDL2015::initialize(){
   _categorization = getCfgVarI("categorization", 1);
   _DoValidationPlots = getCfgVarI("ValidationPlots", 0);
 
-//  vector<string> jess;
-//  jess.push_back("Jet_pt");
-//  addSystSource("JES",SystUtils::kNone, "%", jess, "JES8TeV.db", "" );
+   vector<string> jess;
+   jess.push_back("Jet_pt");
+   //jess.push_back("LepGood_jetCorrFactor_L1L2L3Res");
+   addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(Jet_eta):Jet_pt", "" );
+   //addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(LepGood_jetLepAwareJEC_eta):LepGood_jetLepAwareJEC_pt", "" );
 
   //FR databases
   if(_FR=="FO2C") {
@@ -388,12 +399,16 @@ SSDL2015::writeOutput() {
 
 void
 SSDL2015::run() {
+ 
+  if(_vc->get("isData") && !checkDoubleCount()) return;
+  //cout<<" passing protection "<<endl;
   //cout<<" ================== new event ================== "<<endl;
   //if(_vc->get("evt")!=69430384  && _vc->get("evt")!=37738763 && _vc->get("evt")!=58845792 // &&
   //    // _vc->get("evt")!=72951 && _vc->get("evt")!=142649
   //  ) return;
   
-  //if(_vc->get("evt")!=375924 ) return;
+  //if(_vc->get("evt")!=215711614) return;
+  //&& _vc->get("evt")!=92537991 ) return;
   
   //if(_vc->get("evt")!=103973 )  return;
   //if(_vc->get("evt")!=142649 && _vc->get("evt")!=72951 ) return;
@@ -413,9 +428,9 @@ SSDL2015::run() {
   //cout<<" ============================== "<<_vc->get("evt")<<" ============================== "<<endl;
   
   retrieveObjects();
+  //return;
  
- 
-    
+  //cout<<" leptons! "<<_tightLepsOSPtCut[0]->pdgId()<<"  "<<_tightLepsOSPtCut[1]->pdgId()<<endl;
   if(_DoValidationPlots) {
     if (ttbarSelection())   fillValidationHistos("ttbar");
     if (ZlSelection())      fillValidationHistos("Zl");
@@ -434,6 +449,8 @@ SSDL2015::run() {
     return;
   }
    counter("SS like pair");
+   //cout<<" passing SSPair "<<endl;
+   //if(!_isFake) return;
    //===============================================
   if(!_isFake && !_isOS) {
     setWorkflow(kGlobal);
@@ -489,7 +506,7 @@ SSDL2015::advancedSelection(int WF) {
   if(_lepflav=="ee" && 
      (std::abs(_l1Cand->pdgId())!=11 || std::abs(_l2Cand->pdgId())!=11 ) ) return;
   if(_lepflav=="em" && std::abs(_l1Cand->pdgId())==std::abs(_l2Cand->pdgId()) ) return;
-
+  //cout<<" passing ptflav "<<endl;
   counter("ptflav");
    Candidate* Z=Candidate::create(_l1Cand, _l2Cand);
   fill("mass",Z->mass(),_weight);
@@ -498,12 +515,12 @@ SSDL2015::advancedSelection(int WF) {
     if(!passGenSelection() ) return;
   }
   counter("genselection");
- 
+  //cout<<" passing gen "<<endl;
   _flav=std::abs(_l1Cand->pdgId())+std::abs(_l2Cand->pdgId());
 
   if(!hltSelection() ) return;
   counter("HLT");
- 
+  //cout<<" passing HLT "<<endl;
   //Scale factors =======================
   _susyMod->applySingleLepSF(_l1Cand, _weight);
   _susyMod->applySingleLepSF(_l2Cand, _weight);
@@ -513,14 +530,14 @@ SSDL2015::advancedSelection(int WF) {
   _mTmin=min( Candidate::create(_l1Cand, _met)->mass(),
 	      Candidate::create(_l2Cand, _met)->mass() );
   //===============================
-
+  //cout<<" passing lepton "<<endl;
   counter("lepton baseline");
   
   //default cuts for baseline
   if(_HT<80) return;
   if( (_HT<500 && _metPt < 30) ) return;
   if(_nJets<2) return;
-
+  //cout<<" passing baseline "<<endl;
   counter("std baseline");
   
   fillhistos();//fill histos for kGlobal, kGlobalFake, kGlobalmId
@@ -546,7 +563,6 @@ SSDL2015::advancedSelection(int WF) {
   //     && getCurrentWorkflow()!=kBR20H
   //     && getCurrentWorkflow()!=kBR30H
   //     ) return;
-
   // int run=_vc->get("run");
   // int lumi=_vc->get("lumi");
   // int event=_vc->get("evt");
@@ -560,9 +576,9 @@ SSDL2015::advancedSelection(int WF) {
   // int nbjet = _nBJets;
   // double met = _met->pt();
   // double HT = _HT;
-  // int sr = ((getCurrentWorkflow()<kBR00H)?(getCurrentWorkflow()):(0));
+  // int sr = ((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset-1):(0));
 
-  // if(getCurrentWorkflow()==kBR00H || getCurrentWorkflow()==kBR10H || getCurrentWorkflow()==kBR20H || getCurrentWorkflow()==kBR30H) sr=0;
+  // if(getCurrentWorkflow()==kBR00H_Fake || getCurrentWorkflow()==kBR10H_Fake || getCurrentWorkflow()==kBR20H_Fake || getCurrentWorkflow()==kBR30H_Fake) sr=0;
   
   // cout << Form("%1d %9d %12d\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d",
   // 	       run, lumi, event, nLep,
@@ -570,15 +586,17 @@ SSDL2015::advancedSelection(int WF) {
   // 	       njet, nbjet, met, HT,
   // 	       sr ) << endl;
 
-  // if(_auxPairs.size()==1 && _auxFlags[0]==kIsFake) {
-  //   unsigned long int event=_vc->get("evt");
+  //if(_auxPairs.size()>=1 && offset==kBR30L_Fake) { // && _auxFlags[0]==kIsFake) {
+  //if(_auxPairs.size()==1 && _auxFlags[0]==kIsFake) {
+  // unsigned long int event=(unsigned long int )_vc->get("evt");
+  //   float lepPtT = _vc->get("LepGood_pt",_idxL1);
   //   float lepPt = _vc->get("LepGood_pt",_idxL2);
   //   float conePt = _l2Cand->pt();
   //   float pTrel = _vc->get("LepGood_jetPtRelv2",_idxL2);
-  //   float jetPt = _vc->get("LepGood_jetRawPt",_idxL2)*_vc->get("LepGood_jetCorrFactor_L1L2L3Res",_idxL2);
-
-  //   cout<<Form("%1d\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t",event,lepPt,conePt, pTrel, jetPt)<<_categs[getCurrentWorkflow()-offset-1]<<endl; 
-  // }
+  //   float jetPt = _susyMod->closestJetPt(_idxL2); //_vc->get("LepGood_jetRawPt",_idxL2)*_vc->get("LepGood_jetCorrFactor_L1L2L3Res",_idxL2);
+  //   float w = _weight;
+  //   cout<<Form("%1d\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%5.5f\t",event,lepPtT, lepPt,conePt, pTrel, jetPt, w)<<_categs[getCurrentWorkflow()-offset-1]<<endl; 
+    //}
 
 
 }
@@ -620,7 +638,7 @@ SSDL2015::getFRProb(int flag, float fr) {
   else {
     float fr1=getFR(_l1Cand, _idxL1);
     float fr2=getFR(_l2Cand, _idxL2);
-    p=fr1*fr2/(1-fr1*fr2);
+    p=-fr1*fr2/(1+fr1*fr2);
   }
   _weight *= p;
 }
@@ -730,9 +748,14 @@ SSDL2015::getProbAtLeastNIso(CandList fObjs, vector<unsigned int> fObjIdx,
 void 
 SSDL2015::retrieveObjects(){
   
+
+  //uncertainties
+  _jetLepACorFactor.clear();
+  _jetLepACorFactor.resize( _vc->get("nLepGood") );
+
+  
   _jets.clear();
   
-
   _l1Cand=nullptr;
   _l2Cand=nullptr;
   
@@ -783,9 +806,8 @@ SSDL2015::retrieveObjects(){
 
   _nJets=_jets.size();
   _nBJets=_bJets.size();
- 
-
-  if(false) {
+  
+  if(true) {
     TVector2 met = varyMET();
     _met = Candidate::create( met.Mod(), met.Phi() );
   }
@@ -858,8 +880,10 @@ SSDL2015::ssLeptonSelection() {
   // 1Tight 1Loose ====================================
   vector<CandList> lepPairs;
   if(_tightLepsPtCutVeto.size()>=1 && _fakableLepsPtCutVeto.size()>=1) { 
-    lepPairs=_susyMod->buildSSPairs( (&_tightLepsPtCutVeto), (&_fakableLepsPtCutVeto), true, false, false, 10, 15, idxs1, idxs2);
- 
+    lepPairs=_susyMod->buildSSPairs( (&_tightLepsPtCutVeto), (&_fakableLepsPtCutVeto), 
+				     _tightLepsPtCutVetoIdx, _fakableLepsPtCutVetoIdx,
+				     true, false, false, 10, 15, idxs1, idxs2);
+    //cout<<" pair size "<<lepPairs.size()<<endl;
     //filling =======================
     for(unsigned int i=0;i<lepPairs.size();i++) {
       _isFake=true;
@@ -879,9 +903,11 @@ SSDL2015::ssLeptonSelection() {
   //======================================================
 
   // 0Tight any loose ====================================
-  if(_tightLepsPtCutVeto.size()==0 && _fakableLepsPtCutVeto.size()==2) {
-    vector<CandList> lepPairs=_susyMod->buildSSPairs( (&_fakableLepsPtCutVeto), true, false, false, 10, 15, idxs1, idxs2);
-    
+  if(_fakableLepsPtCutVeto.size()==2) {
+    vector<CandList> lepPairs=_susyMod->buildSSPairs( (&_fakableLepsPtCutVeto), 
+						      _fakableLepsPtCutVetoIdx,
+						      true, false, false, 10, 15, idxs1, idxs2);
+    //cout<<" pair size "<<lepPairs.size()<<endl;
     for(unsigned int i=0;i<lepPairs.size();i++) {
       _isFake=true;
 
@@ -1084,7 +1110,7 @@ SSDL2015::setSignalRegions() {
   //inclusive H-HT ==========================================================
   else if( _SR== "HH SR32" ) {
     //setSelLine("LL:=:hh|MET:[]:50:500|NJ:>=:2|HT:>=:1600"); //10fb-1
-    setSelLine("LL:=:hh|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:>=:1125"); //3 fb-1
+    setSelLine("LL:=:hh|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:>=:"+HThighBound); //3 fb-1
   }
 
   
@@ -1411,8 +1437,10 @@ SSDL2015::getFR(Candidate* cand, int idx) {
 
   float ptVal=cand->pt();
   float etaVal=std::abs(cand->eta());
-  
-  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx), (float)ptM);
+
+  int wp=std::abs(cand->pdgId()==11)?SusyModule::kTight:SusyModule::kMedium;
+
+  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (float)ptM);
   if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
   ptVal=std::max(ptVal, ptM);
@@ -1576,7 +1604,7 @@ SSDL2015::passHLT(string id) {
 
 bool 
 SSDL2015::looseLepton(const Candidate* c, int idx, int pdgId) {
-
+  
   if(abs(pdgId)==13) {//mu case
     if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
@@ -1584,7 +1612,7 @@ SSDL2015::looseLepton(const Candidate* c, int idx, int pdgId) {
   else {
     if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; //denom on purpose
-    if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; //_hltDLHT
+    if(!_susyMod->elHLTEmulSel(idx, false) ) return false; //_hltDLHT
   }
 
   return true;
@@ -1592,7 +1620,7 @@ SSDL2015::looseLepton(const Candidate* c, int idx, int pdgId) {
 
 bool 
 SSDL2015::tightLepton(const Candidate*c, int idx, int pdgId) {
-
+  
   if(abs(pdgId)==13) {//mu case
     if(!_susyMod->muIdSel(c, idx, SusyModule::kTight) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
@@ -1611,7 +1639,7 @@ SSDL2015::tightLepton(const Candidate*c, int idx, int pdgId) {
 
 bool 
 SSDL2015::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
-
+  
   if(abs(pdgId)==13) {//mu case
     if(!_susyMod->muIdSel(c, idx, SusyModule::kTight) ) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
@@ -1853,158 +1881,6 @@ bool SSDL2015::ZEESelection(){
   return true;
 }
 
-//===========================================================================
-// void
-// SSDL2015::selectLeptons() {
-
-//   for(size_t il=0;il<_vc->get("nLepGood"); il++) {
-
-//     bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
-
-//     Candidate* cand=Candidate::create(_vc->get("LepGood_pt", il),
-// 				      _vc->get("LepGood_eta", il),
-// 				      _vc->get("LepGood_phi", il),
-// 				      _vc->get("LepGood_pdgId", il),
-// 				      _vc->get("LepGood_charge", il),
-// 				      isMu?0.105:0.0005);
-    
-//      // cout<<il<<" ---> "<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()
-//      // 	<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "
-//      // 	<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<"   "<<_vc->get("LepGood_tightCharge", il)<<"   "<<_vc->get("LepGood_sip3d",il)<<endl;
-
-//     if(!looseLepton(cand, il, cand->pdgId() ) ) continue;
-//     _looseLeps.push_back(cand);
-//     _looseLepsIdx.push_back(il);
-    
-//     //cout<<" -> selected"<<endl;
-//     //continue;
-//     //if((isMu && cand->pt()<10) || (!isMu && cand->pt()<15)) continue;
-//     _looseLeps10.push_back(cand);
-//     _looseLeps10Idx.push_back(il);
-    
-//   }
-
-//   //Fake case with pt corrected ========================
-//   //cout<<" =================== "<<endl;
-//   for(size_t il=0;il<_vc->get("nLepGood"); il++) {
-
-//     bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
-//     Candidate* cand=Candidate::create( _susyMod->conePt(il),   //_vc->get("LepGood_pt", il),
-// 				       _vc->get("LepGood_eta", il),
-// 				       _vc->get("LepGood_phi", il),
-// 				       _vc->get("LepGood_pdgId", il),
-// 				       _vc->get("LepGood_charge", il),
-// 				       isMu?0.105:0.0005);
-
-//     Candidate* cand2=Candidate::create( _vc->get("LepGood_pt", il),
-// 					_vc->get("LepGood_eta", il),
-// 					_vc->get("LepGood_phi", il),
-// 					_vc->get("LepGood_pdgId", il),
-// 					_vc->get("LepGood_charge", il),
-// 					isMu?0.105:0.0005);
-    
-//     if(!looseLepton(cand, il, cand2->pdgId() ) ) continue;
-
-//     if((isMu && cand2->pt()<10) continue;
-//     if((isMu && cand->pt()<10) || (!isMu && cand->pt()<15)) continue;
-//     _looseLepsPtCorr10.push_back(cand);
-//     _looseLepsPtCorr10Idx.push_back(il);    
-//   }
-//   //cout<<" =================== end"<<endl;
-
-//   //OS case with no Z Veto!======================
-//   for(size_t il=0;il<_looseLeps10.size();il++) {
-//     if(!tightLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId())) continue;
-//     if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
-    
-//     _tightLepsOS10.push_back(_looseLeps10[il]);
-//     _tightLepsOS10Idx.push_back(_looseLeps10Idx[il]);
-//   }
-
-//   //veto on loose leptons =====================
-//   for(size_t il=0;il<_looseLeps.size();il++) {
-
-//     // cout<<" pt:"<<_looseLeps[il]->pt()<<"  selected"<<"  "<<_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 76, 106, true)<<"  "<<_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 0, 12, true)<<endl;
-
-//     if(!_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 76, 106, true) ||
-//        !_susyMod->passMllMultiVeto( _looseLeps[il], &_looseLeps, 0, 12, true) ) continue;
-    
-//     _looseLepsVeto.push_back( _looseLeps[il]);
-//     _looseLepsVetoIdx.push_back(_looseLepsIdx[il]);
-//   }
-//   //  return;
-//   //veto on loose leptons 10, likely the one to use for the fakes =====================
-//   for(size_t il=0;il<_looseLeps10.size();il++) {
-//     if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
-//        !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
-
-//     _looseLepsVeto10.push_back(_looseLeps10[il]);
-//     _looseLepsVeto10Idx.push_back(_looseLeps10Idx[il]);
-//   }
-
-//   for(size_t il=0;il<_looseLeps10.size();il++) {
-//     if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
-    
-//     _jetCleanLeps10.push_back( _looseLeps10[il] );
-//     _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
-    
-//     if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
-//        !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
-//       _jetCleanLepsVeto10.push_back( _looseLeps10[il] );
-//       _jetCleanLepsVeto10Idx.push_back( _looseLeps10Idx[il] );
-//   }
-
-//   _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx);//was looselep10 before
-//   _HT=_susyMod->HT( &(_jets) );
-  
-
-//   //fakable leptons definitions ========================
-//   //cout<<" =================== qui"<<endl;
-//   for(size_t il=0;il<_looseLepsPtCorr10.size();il++) {
-//     // cout<<" new lepton === "<<_looseLepsPtCorr10[il]->pt()<<"  "<<_vc->get("LepGood_pt",_looseLepsPtCorr10Idx[il])<<endl;
-//     // cout<<"lepfake "<<il<<" : "<<_looseLepsPtCorr10[il]->pdgId()<<" ==>  "<<tightLepton(_looseLepsPtCorr10[il], _looseLepsPtCorr10Idx[il], _looseLepsPtCorr10[il]->pdgId())
-//     // 	<<"    "<<fakableLepton(_looseLepsPtCorr10[il], _looseLepsPtCorr10Idx[il], _looseLepsPtCorr10[il]->pdgId(),false)
-//     // 	<<"    "<<_susyMod->passMllMultiVeto( _looseLepsPtCorr10[il], &_looseLeps, 76, 106, true)
-//     // 	<<"    "<<_susyMod->passMllMultiVeto( _looseLepsPtCorr10[il], &_looseLeps, 0, 12, true)<<endl;
-
-//     if(!tightLepton(_looseLepsPtCorr10[il], _looseLepsPtCorr10Idx[il], _looseLepsPtCorr10[il]->pdgId())) {
-//       if(!fakableLepton(_looseLepsPtCorr10[il], _looseLepsPtCorr10Idx[il], _looseLepsPtCorr10[il]->pdgId(),false)) continue; //not a fakable object
-
-//       _fakableLeps10.push_back(_looseLepsPtCorr10[il]);
-//       _fakableLeps10Idx.push_back(_looseLepsPtCorr10Idx[il]);
-    
-//       if(!_susyMod->passMllMultiVeto( _looseLepsPtCorr10[il], &_looseLeps, 76, 106, true) ||
-// 	 !_susyMod->passMllMultiVeto( _looseLepsPtCorr10[il], &_looseLeps, 0, 12, true) ) continue;
-//       _fakableLepsVeto10.push_back(_looseLepsPtCorr10[il]);
-//       _fakableLepsVeto10Idx.push_back(_looseLepsPtCorr10Idx[il]);
-    
-//     }
-//   }
-  
-//   //====================================================
-
- 
-//   //tight leptons definitions =================
-//   //cout<<" =================== blu"<<endl;
-//   for(size_t il=0;il<_looseLeps10.size();il++) {
-
-//     if(!tightLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId()))  continue;
-//     if(std::abs(_looseLeps10Idx[il]->pdgId())==11 && _looseLeps10Idx[il]->pt()<15) continue;
-    
-//     _tightLeps10.push_back(_looseLeps10[il]);
-//     _tightLeps10Idx.push_back(_looseLeps10Idx[il]);
-    
-//     if(!_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 76, 106, true) ||
-//        !_susyMod->passMllMultiVeto( _looseLeps10[il], &_looseLeps, 0, 12, true) ) continue;
-    
-//     _tightLepsVeto10.push_back(_looseLeps10[il]);
-//     _tightLepsVeto10Idx.push_back(_looseLeps10Idx[il]);
-      
-//   }// lepton loop
-//   //cout<<" =================== blu end"<<endl;
-//   //cout<<" size lepton ================== "<<_tightLepsVeto10.size()<<endl;
-// }
-
 void
 SSDL2015::selectLeptons() {
 
@@ -2016,11 +1892,18 @@ SSDL2015::selectLeptons() {
 				      _vc->get("LepGood_pdgId", il),
 				      _vc->get("LepGood_charge", il),
 				      isMu?0.105:0.0005);
+    int wp=isMu?SusyModule::kMedium:SusyModule::kTight;
+    Candidate* candPtCorr=Candidate::create( _susyMod->conePt(il,wp),
+					     _vc->get("LepGood_eta", il),
+					     _vc->get("LepGood_phi", il),
+					     _vc->get("LepGood_pdgId", il),
+					     _vc->get("LepGood_charge", il),
+					     isMu?0.105:0.0005);
     
-     // cout<<il<<" ---> "<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()
-     // 	<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "
-     // 	<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<"   "<<_vc->get("LepGood_tightCharge", il)<<"   "<<_vc->get("LepGood_sip3d",il)<<endl;
-
+    // cout<<il<<" ---> "<<" pt: "<<cand->pt()<<"  eta: "<<cand->eta()<<"   phi: "<<cand->phi()
+    // 	<<"  pdgId: "<<_vc->get("LepGood_pdgId", il)<<"   dxy: "
+    // 	<<_vc->get("LepGood_dxy",il)<<"  dz: "<<_vc->get("LepGood_dz",il)<<"   "<<_vc->get("LepGood_tightCharge", il)<<"   "<<_vc->get("LepGood_sip3d",il)<<endl;
+     
     if(!looseLepton(cand, il, cand->pdgId() ) ) continue;
     _looseLeps.push_back(cand);
     _looseLepsIdx.push_back(il);
@@ -2034,20 +1917,11 @@ SSDL2015::selectLeptons() {
       _looseLepsPtCutIdx.push_back(il);
     }
     if((isMu && _susyMod->conePt(il)>10) || (!isMu && _susyMod->conePt(il)>15)) {
-      _looseLepsPtCorrCut.push_back(cand);
+      _looseLepsPtCorrCut.push_back(candPtCorr);
       _looseLepsPtCorrCutIdx.push_back(il);
     }    
   }
-
-   //OS case with no Z Veto!======================
-  for(size_t il=0;il<_looseLepsPtCut.size();il++) {
-    if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId())) continue;
-    if(!_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 0, 12, true) ) continue;
-    
-     _tightLepsOSPtCut.push_back(_looseLepsPtCut[il]);
-     _tightLepsOSPtCutIdx.push_back(_looseLepsPtCutIdx[il]);
-  }
-
+  
   //veto on loose leptons ptcut =====================
   for(size_t il=0;il<_looseLepsPtCut.size();il++) {
     
@@ -2057,7 +1931,7 @@ SSDL2015::selectLeptons() {
     _looseLepsPtCutVeto.push_back( _looseLepsPtCut[il]);
     _looseLepsPtCutVetoIdx.push_back(_looseLepsPtCutIdx[il]);
   }
-
+ 
   //veto on loose leptons ptCorr cut ================
   for(size_t il=0;il<_looseLepsPtCorrCut.size();il++) {
     
@@ -2075,7 +1949,7 @@ SSDL2015::selectLeptons() {
     _looseLepsPtCorrCutVeto.push_back( _looseLepsPtCorrCut[il]);
     _looseLepsPtCorrCutVetoIdx.push_back(_looseLepsPtCorrCutIdx[il]);
   }
-
+ 
   //jet cleaning leptons =============================
   for(size_t il=0;il<_looseLeps10.size();il++) {
     if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
@@ -2083,9 +1957,23 @@ SSDL2015::selectLeptons() {
     _jetCleanLeps10.push_back( _looseLeps10[il] );
     _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
   }
-
+  
   _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx, 40, 15);
   _HT=_susyMod->HT( &(_jets) );
+  
+   //OS case with no Z Veto!======================
+  for(size_t il=0;il<_looseLepsPtCut.size();il++) {
+    // cout<<il<<"  "<<_looseLepsPtCut[il]->pt()
+    // 	<<"   "<<tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId())
+    // 	<<"   "<<_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 0, 12, true)<<endl;
+
+      if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId())) continue;
+      //if(!_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 0, 12, true) ) continue;
+    
+     _tightLepsOSPtCut.push_back(_looseLepsPtCut[il]);
+     _tightLepsOSPtCutIdx.push_back(_looseLepsPtCutIdx[il]);
+  }
+  //cout<<_tightLepsOSPtCut.size()<<"  <====>  "<<_looseLeps.size()<<endl;
   
   //fakable leptons definitions =======================
   for(size_t il=0;il<_looseLepsPtCorrCutVeto.size();il++) {
@@ -2095,6 +1983,7 @@ SSDL2015::selectLeptons() {
     
     _fakableLepsPtCutVeto.push_back(_looseLepsPtCorrCutVeto[il]);
     _fakableLepsPtCutVetoIdx.push_back(_looseLepsPtCorrCutVetoIdx[il]);
+
   }
 
   //tight leptons definitions =========================
@@ -2113,7 +2002,7 @@ SSDL2015::selectLeptons() {
       
   }
 
-
+  //  cout<<_fakableLepsPtCutVeto.size()<<"   "<<_tightLepsPtCutVeto.size()<<endl;
 
 }
 
@@ -2157,6 +2046,43 @@ SSDL2015::varyMET() {
   return met;
 }
 
+Candidate*
+SSDL2015::varyJetLepAware(Candidate* lep, int idx) {
+  
+  if(!isInUncProc() ) {
+    _jetLepACorFactor[idx]=_vc->get("LepGood_jetCorrFactor_L1L2L3Res",idx);
+  }
+
+  TLorentzVector jetA(0,0,0,0);
+  jetA.SetPtEtaPhiE( _vc->get("LepGood_jetLepAwareJEC_pt",idx),
+		     _vc->get("LepGood_jetLepAwareJEC_eta",idx),
+		     _vc->get("LepGood_jetLepAwareJEC_phi",idx),
+		     _vc->get("LepGood_jetLepAwareJEC_energy",idx) );
+  
+  TLorentzVector hadCorr = (jetA-lep->p4());
+  if(hadCorr.Rho()<0.0001) {
+    Candidate* jetVar=Candidate::create(jetA.Pt(), jetA.Eta(), jetA.Phi() );
+    return jetVar;
+  }
+
+  float f=1;
+  if(isInUncProc() ) {
+    f =1 +  ((getUncDir()==SystUtils::kUp)?1:-1)*
+      _dbm->getDBValue("JES",std::abs(_vc->get("LepGood_jetLepAwareJEC_eta",idx)),
+		       _vc->get("LepGood_jetLepAwareJEC_pt",idx) );  
+  }
+  //cout<<"factor = "<<f<<endl;
+  hadCorr *= f;
+  
+  Candidate* jetVar=Candidate::create((hadCorr+lep->p4()).Pt(),
+				      (hadCorr+lep->p4()).Eta(), 
+				      (hadCorr+lep->p4()).Phi() );
+  return jetVar;
+}
+
+
+//====================================================================
+
 void SSDL2015::fillhistos() {
   fill("l1Pt", (_idxFake==_idxL2)?(_l1Cand->pt()):_l2Cand->pt(), _weight );
   fill("l2Pt", (_idxFake==_idxL2)?(_l2Cand->pt()):_l1Cand->pt(), _weight );
@@ -2194,458 +2120,34 @@ void SSDL2015::fillValidationHistos(string reg){
 }  
 
 
-void
-SSDL2015::fillEvents() {
-// _events.push_back(1331274);
-// _events.push_back(1860357);
-//_events.push_back(4094628);//===
-// _events.push_back(6000097);
-// _events.push_back(6896086);
-// _events.push_back(7729497);
-// _events.push_back(7828608);
-// _events.push_back(8053721);
-// _events.push_back(8957199);
-// _events.push_back(12178508);
-// _events.push_back(12345756);
-// _events.push_back(14329928);
-// _events.push_back(14532696);
-// _events.push_back(17800601);
-// _events.push_back(20254586);
-// _events.push_back(20860562);
-// _events.push_back(23936240);
-// _events.push_back(25929216);
-// _events.push_back(26939364);
-// _events.push_back(27332219);
-// _events.push_back(28410914);
-//_events.push_back(28910203);//===
-// _events.push_back(32279981);
-// _events.push_back(34525287);
-//_events.push_back(34552720);//===
-// _events.push_back(37553041);
-// _events.push_back(38279201);
-_events.push_back(41670828);//===
-// _events.push_back(42499509);
-// _events.push_back(43097002);
-// _events.push_back(43139094);
-// _events.push_back(44502365);
-// _events.push_back(44711996);
-// _events.push_back(45684115);
-// _events.push_back(49452519);
-// _events.push_back(51484564);
-// _events.push_back(53418499);
-// _events.push_back(53700482);
-// _events.push_back(54635962);
-// _events.push_back(56003125);
-// _events.push_back(57622365);
-//_events.push_back(62830693);//===
-// _events.push_back(64505165);
-// _events.push_back(64919594);
-// _events.push_back(66450770);
-// _events.push_back(66702675);
-//_events.push_back(67804145);//===
-// _events.push_back(69314356);
-// _events.push_back(69990204);
-// _events.push_back(71391223);
-// _events.push_back(75325264);
-// _events.push_back(76832152);
-// _events.push_back(78632943);
-// _events.push_back(85554780);
-// _events.push_back(87643214);
-// _events.push_back(88489265);
-// _events.push_back(89102191);
-// _events.push_back(91613825);
-// _events.push_back(93606874);
-// _events.push_back(95893452);
-// _events.push_back(96438695);
-// _events.push_back(100186367);
-// _events.push_back(101906465);
-// _events.push_back(103716364);
-// _events.push_back(104031278);
-// _events.push_back(105341710);
-//_events.push_back(105857275);//===
-// _events.push_back(110235537);
-// _events.push_back(110723109);
-// _events.push_back(111837109);
-// _events.push_back(112281886);
-// _events.push_back(113029657);
-// _events.push_back(114858440);
-// _events.push_back(115775184);
-// _events.push_back(116606504);
-// _events.push_back(116683124);
-// _events.push_back(117654396);
-// _events.push_back(122775293);
-// _events.push_back(123730894);
-// _events.push_back(124210711);
-// _events.push_back(125659235);
-// _events.push_back(127272170);
-// _events.push_back(129508122);
-//_events.push_back(129785483);//===
-// _events.push_back(132001490);
-// _events.push_back(134084501);
-// _events.push_back(135382435);
-// _events.push_back(135941923);
-// _events.push_back(137653648);
-// _events.push_back(139171125);
-// _events.push_back(141909616);
-// _events.push_back(142298027);
-// _events.push_back(142821640);
-// _events.push_back(143036233);
-// _events.push_back(143481471);
-// _events.push_back(143776242);
-// _events.push_back(144000353);
-// _events.push_back(145019121);
-// _events.push_back(145711469);
-// _events.push_back(146093398);
-// _events.push_back(147293780);
-// _events.push_back(147742290);
-// _events.push_back(148376760);
-// _events.push_back(148475994);
-// _events.push_back(149195930);
-// _events.push_back(150352010);
-// _events.push_back(150496507);
-// _events.push_back(154148347);
-// _events.push_back(154240851);
-// _events.push_back(155951853);
-// _events.push_back(156439531);
-// _events.push_back(156652831);
-// _events.push_back(157459759);
-// _events.push_back(167588262);
-// _events.push_back(168300493);
-// _events.push_back(170247707);
-// _events.push_back(170569344);
-// _events.push_back(172299855);
-// _events.push_back(172987826);
-// _events.push_back(173400911);
-// _events.push_back(174198918);
-// _events.push_back(175116290);
-// _events.push_back(175323397);
-// _events.push_back(175400241);
-// _events.push_back(176448647);
-// _events.push_back(178095239);
-// _events.push_back(179181624);
-// _events.push_back(179871044);
-// _events.push_back(180745074);
-// _events.push_back(180911876);
-// _events.push_back(180946110);
-// _events.push_back(183038953);
-// _events.push_back(184014008);
-// _events.push_back(186228327);
-// _events.push_back(186676475);
-// _events.push_back(191706176);
-// _events.push_back(194910875);
-// _events.push_back(195862214);
-// _events.push_back(196853711);
-// _events.push_back(198210931);
-// _events.push_back(198405264);
-// _events.push_back(198551847);
-// _events.push_back(200081035);
-// _events.push_back(201059053);
-//_events.push_back(204175862);//===
-// _events.push_back(208741072);
-// _events.push_back(209605728);
-// _events.push_back(211490444);
-// _events.push_back(212278481);
-// _events.push_back(213930242);
-// _events.push_back(214440558);
-// _events.push_back(214693398);
-// _events.push_back(215711614);
-// _events.push_back(222568243);
-// _events.push_back(223606286);
-// _events.push_back(224390098);
-// _events.push_back(225289746);
-// _events.push_back(226882728);
-// _events.push_back(228434130);
-// _events.push_back(230427564);
-// _events.push_back(231008038);
-// _events.push_back(232328777);
-// _events.push_back(234030431);
-// _events.push_back(234898423);
-// _events.push_back(237605104);
-// _events.push_back(243431990);
-// _events.push_back(247167327);
-// _events.push_back(251315970);
-// _events.push_back(252778623);
-// _events.push_back(256144502);
-// _events.push_back(256554985);
-// _events.push_back(260204571);
-// _events.push_back(261542212);
-// _events.push_back(264084284);
-// _events.push_back(266114597);
-// _events.push_back(269673912);
-// _events.push_back(272669267);
-// _events.push_back(273717411);
-// _events.push_back(275726009);
-// _events.push_back(277717896);
-//_events.push_back(279812117);//===
-// _events.push_back(279829322);
-//_events.push_back(282590520);//===
-// _events.push_back(282859921);
-// _events.push_back(283086381);
-// _events.push_back(283350576);
-// _events.push_back(288987292);
-// _events.push_back(290088881);
-// _events.push_back(294067730);
-// _events.push_back(294178609);
-// _events.push_back(295077991);
-//_events.push_back(298540660);//===
-// _events.push_back(300464702);
-// _events.push_back(304308844);
-// _events.push_back(304347230);
-// _events.push_back(304528702);
-// _events.push_back(307147325);
-// _events.push_back(307266129);
-// _events.push_back(308443047);
-// _events.push_back(310150909);
-// _events.push_back(310493025);
-// _events.push_back(312056304);
-// _events.push_back(312512265);
-// _events.push_back(315038738);
-// _events.push_back(323710044);
-// _events.push_back(323853220);
-// _events.push_back(324195247);
-// _events.push_back(333617928);
-// _events.push_back(334681314);
-// _events.push_back(335463451);
-// _events.push_back(340391000);
-// _events.push_back(342064801);
-// _events.push_back(344796134);
-// _events.push_back(346264918);
-// _events.push_back(347081999);
-// _events.push_back(349929810);
-// _events.push_back(351913537);
-// _events.push_back(355321199);
-// _events.push_back(355797460);
-// _events.push_back(356720560);
-// _events.push_back(356781745);
-// _events.push_back(358684823);
-//_events.push_back(359985861);//===
-// _events.push_back(360783267);
-// _events.push_back(362527488);
-// _events.push_back(366245496);
-// _events.push_back(374376453);
-// _events.push_back(378052141);
-// _events.push_back(380894273);
-// _events.push_back(387457310);
-// _events.push_back(389574551);
-//_events.push_back(390161294);//===
-// _events.push_back(392569022);
-// _events.push_back(393656765);
-//_events.push_back(395654227);//===
-// _events.push_back(396478392);
-// _events.push_back(396723825);
-// _events.push_back(398885382);
-// _events.push_back(402476172);
-// _events.push_back(406072305);
-// _events.push_back(411764048);
-// _events.push_back(414389200);
-// _events.push_back(415552078);
-// _events.push_back(421072700);
-// _events.push_back(432724628);
-// _events.push_back(437211991);
-// _events.push_back(442200164);
-// _events.push_back(443742829);
-// _events.push_back(449520955);
-// _events.push_back(455361628);
-// _events.push_back(456654966);
-// _events.push_back(460735951);
-// _events.push_back(464026149);
-// _events.push_back(466844957);
-// _events.push_back(472142146);
-// _events.push_back(473589594);
-// _events.push_back(474147471);
-// _events.push_back(474722621);
-// _events.push_back(477275800);
-// _events.push_back(478019637);
-// _events.push_back(480943811);
-// _events.push_back(487426910);
-// _events.push_back(494052683);
-// _events.push_back(496520517);
-// _events.push_back(497149152);
-// _events.push_back(499281419);
-// _events.push_back(503858299);
-// _events.push_back(504758093);
-// _events.push_back(507090357);
-// _events.push_back(509231380);
-// _events.push_back(512009019);
-// _events.push_back(516047243);
-// _events.push_back(517988015);
-// _events.push_back(527640107);
-// _events.push_back(527759255);
-// _events.push_back(527845354);
-// _events.push_back(528697562);
-// _events.push_back(533401119);
-// _events.push_back(540176981);
-// _events.push_back(546453280);
-// _events.push_back(554343056);
-// _events.push_back(569366193);
-// _events.push_back(570538045);
-// _events.push_back(579495286);
-// _events.push_back(579648445);
-// _events.push_back(581742888);
-// _events.push_back(583172424);
-// _events.push_back(586017378);
-// _events.push_back(587079596);
-// _events.push_back(589994934);
-// _events.push_back(590916404);
-// _events.push_back(593070534);
-// _events.push_back(595605386);
-// _events.push_back(596942563);
-// _events.push_back(602111888);
-// _events.push_back(603866158);
-// _events.push_back(605105024);
-// _events.push_back(607911096);
-// _events.push_back(608806131);
-// _events.push_back(615396600);
-//_events.push_back(620691394);//===
-// _events.push_back(622817539);
-// _events.push_back(630231280);
-// _events.push_back(631643814);
-// _events.push_back(633390336);
-// _events.push_back(640560734);
-// _events.push_back(641621982);
-// _events.push_back(650916046);
-// _events.push_back(651236199);
-// _events.push_back(651710754);
-// _events.push_back(651885742);
-// _events.push_back(653667552);
-// _events.push_back(656624028);
-// _events.push_back(663964953);
-// _events.push_back(674552058);
-// _events.push_back(676889360);
-// _events.push_back(682445206);
-// _events.push_back(690853250);
-// _events.push_back(700924080);
-// _events.push_back(701882359);
-// _events.push_back(703663750);
-// _events.push_back(707849069);
-// _events.push_back(708761805);
-// _events.push_back(712578306);
-// _events.push_back(715041088);
-// _events.push_back(715645174);
-// _events.push_back(718842092);
-// _events.push_back(725861965);
-// _events.push_back(742443751);
-// _events.push_back(743522399);
-// _events.push_back(745003410);
-// _events.push_back(746601549);
-// _events.push_back(751492002);
-// _events.push_back(755984797);
-// _events.push_back(756833521);
-// _events.push_back(764289373);
-// _events.push_back(771802121);
-// _events.push_back(773289567);
-// _events.push_back(780190279);
-// _events.push_back(796443338);
-// _events.push_back(800428806);
-// _events.push_back(805213514);
-// _events.push_back(805707744);
-// _events.push_back(816364906);
-// _events.push_back(817052800);
-// _events.push_back(827739745);
-// _events.push_back(844760159);
-// _events.push_back(848632675);
-// _events.push_back(856895774);
-// _events.push_back(858619928);
-// _events.push_back(868592539);
-// _events.push_back(875744382);
-// _events.push_back(882349142);
-// _events.push_back(906826045);
-// _events.push_back(908927239);
-// _events.push_back(914487106);
-// _events.push_back(919601876);
-// _events.push_back(920875586);
-// _events.push_back(948825660);
-// _events.push_back(957883468);
-// _events.push_back(970910134);
-// _events.push_back(973885891);
-// _events.push_back(974971817);
-// _events.push_back(986836050);
-// _events.push_back(1000347317);
-//_events.push_back(1002719591);//===
-// _events.push_back(1006007346);
-// _events.push_back(1009330326);
-// _events.push_back(1009920621);
-// _events.push_back(1017022119);
-// _events.push_back(1049401651);
-// _events.push_back(1051773927);
-// _events.push_back(1065391213);
-// _events.push_back(1069747745);
-// _events.push_back(1076570460);
-// _events.push_back(1081725694);
-// _events.push_back(1086795015);
-// _events.push_back(1087252333);
-// _events.push_back(1087529625);
-// _events.push_back(1095763179);
-// _events.push_back(1111123283);
-// _events.push_back(1120410610);
-// _events.push_back(1122660619);
-// _events.push_back(1129602034);
-// _events.push_back(1143184518);
-// _events.push_back(1143358728);
-// _events.push_back(1147962333);
-// _events.push_back(1148818907);
-// _events.push_back(1158277580);
-// _events.push_back(1169160045);
-// _events.push_back(1171259675);
-// _events.push_back(1182340134);
-// _events.push_back(1186177131);
-// _events.push_back(1189421089);
-// _events.push_back(1201161311);
-// _events.push_back(1231011115);
-// _events.push_back(1247212923);
-// _events.push_back(1258816156);
-// _events.push_back(1411782924);
-// _events.push_back(1424695132);
-// _events.push_back(1437885113);
-// _events.push_back(1441309553);
-// _events.push_back(1443408045);
-// _events.push_back(1447683845);
-// _events.push_back(1511143126);
-// _events.push_back(1532089884);
-// _events.push_back(1536894706);
-// _events.push_back(1560328263);
-// _events.push_back(1594220271);
-// _events.push_back(1602226705);
-// _events.push_back(1602535573);
-// _events.push_back(1606325836);
-// _events.push_back(1606819848);
-// _events.push_back(1607256848);
-// _events.push_back(1618818705);
-// _events.push_back(1619964478);
-// _events.push_back(1630510904);
-// _events.push_back(1639165004);
-// _events.push_back(1659387605);
-// _events.push_back(1669149626);
-// _events.push_back(1679302902);
-// _events.push_back(1700333538);
-// _events.push_back(1716233011);
-// _events.push_back(1718480138);
-// _events.push_back(1732416923);
-// _events.push_back(1760107277);
-// _events.push_back(1832369763);
-// _events.push_back(1859480457);
-// _events.push_back(1889888226);
-// _events.push_back(1927420608);
-// _events.push_back(1958708727);
-// _events.push_back(1968870257);
-// _events.push_back(2070733437);
-// _events.push_back(2077929541);
-// _events.push_back(2099877074);
-// _events.push_back(2127815492);
-// _events.push_back(2135222886);
-// _events.push_back(2161726539);
-// _events.push_back(2164682397);
-// _events.push_back(2215174560);
-// _events.push_back(2245298726);
-// _events.push_back(2258661207);
-// _events.push_back(2293500450);
-// _events.push_back(2455576182);
-// _events.push_back(2485783744);
-// _events.push_back(2489004462);
-// _events.push_back(2502964461);
-// _events.push_back(2517030287);
-// _events.push_back(2521631475);
-// _events.push_back(2540713621);
+bool
+SSDL2015::checkDoubleCount() {
+  int run=_vc->get("run");
+  int lumi=_vc->get("lumi");
+  unsigned long int evt=(unsigned long int)_vc->get("evt");
+  
+  bool doubleCount=false;
+  std::pair<int,unsigned long int> tmp(lumi,evt);
+  std::pair<int, std::pair<int,unsigned long int> > tmp2(run, tmp);
+  _itEvt = _events.find( tmp2 );
+  if(_itEvt != _events.end() ) {
+    doubleCount=true;
+    //abort(); ?? FIXME -> no abort by default
+  }
+  int nT = 1;
+  if(doubleCount)
+    { 
+      //cout<<" ==> multiple counting "<< _ids<<"  "<<run<<"  "<<event<<"  "<< anConf.getDataset(_ids)->findProcess(_ie)<<endl;
+      nT = _itEvt->second.second +1;
+      return false;
+    }
+  
+ 
+  string t1("");
+  std::pair<string,int> tt( t1, nT );
+	  
+  _events[ tmp2 ] = tt;
+  //_evtsInFile.push_back(event);
+   
+  return true;
 }
-
-

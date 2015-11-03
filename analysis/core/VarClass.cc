@@ -320,7 +320,7 @@ void VarClass::buildFriendTree(TTree* tree, bool bypass){
       len = -1;
       type = "";
       t = (EDataType) -1;
-
+    
       name = (string)( ((*branches)[ib])->GetName());
       ((TBranchSTL*)((*branches)[ib]))->GetExpectedType(cc,t);	
       
@@ -373,29 +373,29 @@ void VarClass::buildTree(TTree* tree, bool bypass) {
     default where all branches are disabled)
     return: none
   */
-
+  
   TObjArray* branches =  tree->GetListOfBranches();
   string name;
 	
   EDataType t;
   TClass* cc;
   string type;
-	
+  
   //for arrays
   TObjArray *leaves = tree->GetListOfLeaves();
   TLeaf *leaf;
   TLeaf *leafcount;
   int len;
-  
+
   for(int ib = 0; ib < branches->GetEntries(); ++ib) {
 
     len = -1;
     type = "";
     t = (EDataType) -1;
-
+    
     name = (string)( ((*branches)[ib])->GetName());
     ((TBranchSTL*)((*branches)[ib]))->GetExpectedType(cc,t);	
-	
+    
     //determine if it is array
     leaf = (TLeaf*)leaves->UncheckedAt(ib);
     leafcount =leaf->GetLeafCount();
@@ -421,14 +421,15 @@ void VarClass::buildTree(TTree* tree, bool bypass) {
     // by default, status disabled
     if( !bypass )
       tree->SetBranchStatus( name.c_str() , 0);
-	
+    
     // variable to be registered	
     if( isUsefulVar(name) ) {
       // enable status
       tree->SetBranchStatus( name.c_str() , 1);
-		  
+    
       // register branch
       registerBranch(tree, name, type, t, len );
+    
     }
   }
 }
@@ -840,7 +841,7 @@ void VarClass::linkScalarVal(string name, int tType, int key) {
   case kInt:    {_mTree->Branch(name.c_str(),&(varmI[key]));break;}
   case kUInt:   {_mTree->Branch(name.c_str(),&(varmUI[key]));break;}
   case kULong:  {_mTree->Branch(name.c_str(),&(varmUL[key]));break;}
-  case kDouble: {cout<<&(varmD[key])<<endl;_mTree->Branch(name.c_str(),&(varmD[key]));break;}
+  case kDouble: {_mTree->Branch(name.c_str(),&(varmD[key]));break;}
   case kFloat:  {_mTree->Branch(name.c_str(),&(varmF[key]));break;}
   case kBool:   {_mTree->Branch(name.c_str(),&(varmB[key]));break;}
   }
@@ -1124,7 +1125,7 @@ void VarClass::applySystVar(string name, int dir, string mvar, float mag, string
 
 //____________________________________________________________________________
 void
-VarClass::applySystVar(string name, int dir, string mvar, vector<string> vars, string db, string type) {
+VarClass::applySystVar(string name, int dir, string mvar, vector<string> vars, vector<bool> specVars, string db, string type) {
   
   int id = varIds_.find(mvar)->second;
   backPortVar(id);
@@ -1133,6 +1134,13 @@ VarClass::applySystVar(string name, int dir, string mvar, vector<string> vars, s
   for(size_t iv=0;iv<vars.size();iv++) {
     int vid = varIds_.find(vars[iv])->second;
     vector<float> p = getUnivF( vid );
+    if(specVars[iv]) {
+      for(unsigned int ii=0;ii<p.size();ii++) {
+	p[ii] = std::abs(p[ii]);
+      }
+    }
+
+    //cout<<" ========= "<<vars[iv]<<"   "<<p[0]<<"  "<<p[1]<<"  "<<p.size()<<endl;
     vals.push_back(p);
   }
 
@@ -1141,15 +1149,22 @@ VarClass::applySystVar(string name, int dir, string mvar, vector<string> vars, s
   int key = (id-cType*oC_ - tType*oT_);
   
   switch(cType) {
-  case kScalar:
+  case kScalar: {
+
+    vector<float> redVals(vals.size(),0);
+    for(size_t ii=0;ii<vals.size();ii++) {
+      redVals[ii]=vals[ii][0];
+    }
+    
     switch(tType) {
-    case kInt:    {_su->systOp<int>(name, dir, type, varmI[key], db, vals); break;}
-    case kUInt:   {_su->systOp<unsigned int>(name, dir, type, varmUI[key], db, vals); break;}
-    case kULong:  {_su->systOp<unsigned long>(name, dir, type, varmUL[key], db, vals); break;}
-    case kDouble: {_su->systOp<double>(name, dir, type, varmD[key], db, vals); break;}
-    case kFloat:  {_su->systOp<float>(name, dir, type, varmF[key], db, vals); break;}
+    case kInt:    {_su->systOp<int>(name, dir, type, varmI[key], 0, db, redVals); break;}
+    case kUInt:   {_su->systOp<unsigned int>(name, dir, type, varmUI[key], 0, db, redVals); break;}
+    case kULong:  {_su->systOp<unsigned long>(name, dir, type, varmUL[key], 0, db, redVals); break;}
+    case kDouble: {_su->systOp<double>(name, dir, type, varmD[key], 0, db, redVals); break;}
+    case kFloat:  {_su->systOp<float>(name, dir, type, varmF[key], 0, db, redVals); break;}
       //   case kBool:   {_su->systOpA<bool>(name, dir, type, varmAB[key], db, vals); break;}
     }
+  }
   case kVector:
     switch(tType) {
     case kInt:    {_su->systOpV<int>(name, dir, type, varmVI[key], db, vals); break;}
@@ -1268,7 +1283,6 @@ VarClass::getUnivF(int id) {
     }
   }
   }
-    
   return vf;
 }
 

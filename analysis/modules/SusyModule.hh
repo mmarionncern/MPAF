@@ -39,8 +39,8 @@ public:
 
   
   bool elMvaSel(int elIdx, int wp) const;
-  bool muIdSel(const Candidate* c, int idx, int wp, bool chCut=true) const;
-  bool elIdSel(const Candidate* c, int idx, int wp, int mvaWp = kTight, bool chCut=true) const;
+  bool muIdSel(const Candidate* c, int idx, int wp, bool chCut=true ) const;
+  bool elIdSel(const Candidate* c, int idx, int wp, int mvaWp = kTight, bool chCut=true ) const;
   bool elHLTEmulSel(int idx, bool withIso) const;
   bool multiIsoSel(int idx, int wp) const;
   bool multiIsoSelCone(int idx, int wp) const;
@@ -52,6 +52,10 @@ public:
 		 CandList& cleanJets, vector<unsigned int>& jetIdxs,
 		 CandList& cleanBJets, vector<unsigned int>& bJetIdxs,
 		 float thr, float bthr);
+
+  const Candidate* jetLepAware(const Candidate* lep);
+  float pTRatio(const Candidate* lep, const Candidate* jet);
+  float pTRel(const Candidate* lep, const Candidate* jet);
 
   bool mllVetoSelection(const Candidate* l1, const Candidate* l2,
 			const CandList* allLeps) const ;
@@ -72,10 +76,13 @@ public:
   CandList bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 		      bool bypassMV, bool os, float pTthrMu, float pTthrEl,
 		      int& idx1, int& idx2);
-  vector<CandList> buildSSPairs(const CandList* leps, bool byflav,
+  vector<CandList> buildSSPairs(const CandList* leps, vector<unsigned int> idxs, bool byflav,
 				bool bypassMV, bool os, float pTthrMu, float pTthrEl,
 				vector<int>& idx1, vector<int>& idx2);
-  vector<CandList> buildSSPairs(const CandList* leps1, const CandList* leps2,bool byflav,
+  vector<CandList> buildSSPairs(const CandList* leps1, const CandList* leps2,
+				vector<unsigned int> idxs1,
+				vector<unsigned int> idxs2,
+				bool byflav,
 				bool bypassMV, bool os, float pTthrMu, float pTthrEl,
 				vector<int>& idx1, vector<int>& idx2);
   

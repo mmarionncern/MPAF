@@ -137,12 +137,12 @@ void synchRA5::initialize(){
   _au->addCategory( kVetoLepSel, "vetoLepSel" );
 
   //extra input variables
-  _lepflav = getCfgVarS("LEPFLAV");
-  _mva     = getCfgVarS("LEPID"  );
-  _btag    = getCfgVarS("BTAG"   );
-  _PT      = getCfgVarS("PT"     );
-  _BR      = getCfgVarS("BR"     );
-  _SR      = getCfgVarS("SR"     );
+  _lepflav = getCfgVarS("LEPFLAV", "");
+  _mva     = getCfgVarS("LEPID"  , "");
+  _btag    = getCfgVarS("BTAG"   , "");
+  _PT      = getCfgVarS("PT"     , "");
+  _BR      = getCfgVarS("BR"     , "");
+  _SR      = getCfgVarS("SR"     , "");
   
 }
 

@@ -46,6 +46,7 @@ private:
   void chargeFlipProb();
 
   TVector2 varyMET();
+  Candidate* varyJetLepAware(Candidate* lep, int idx);
 
   //============================
   void retrieveObjects();
@@ -84,6 +85,8 @@ private:
   
   void fillhistos();
   void fillValidationHistos(std::string reg);
+
+  bool checkDoubleCount();
 
 private: 
 
@@ -271,8 +274,16 @@ private:
   vector<int> _auxFlags;
   vector<vector<int> > _auxIdxs;
 
-  vector<unsigned int> _events;
-  void fillEvents();
+  // vector<unsigned int> _events;
+  // void fillEvents();
+
+  //double counting====
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> > _events;
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> >::iterator _itEvt;
+
+
+  vector<float> _jetLepACorFactor;
+
 
 };
 

@@ -144,12 +144,12 @@ void SUSY3L::initialize(){
     _au->addCategory( conZEvents, "Z events");
                  
     //config file input variables
-    _pairmass = getCfgVarS("pairMass");
-    _selectMuons = getCfgVarS("selectMuons");
-    _selectElectrons = getCfgVarS("selectElectrons");
-    _selectTaus = getCfgVarS("selectTaus");
-    _BR = getCfgVarS("baselineRegion");
-    _SR = getCfgVarS("signalRegion");
+    _pairmass = getCfgVarS("pairMass", "");
+    _selectMuons = getCfgVarS("selectMuons", "");
+    _selectElectrons = getCfgVarS("selectElectrons", "");
+    _selectTaus = getCfgVarS("selectTaus", "");
+    _BR = getCfgVarS("baselineRegion", "");
+    _SR = getCfgVarS("signalRegion", "");
 
     //workflows
     addWorkflow( kWZCR, "WZCR");

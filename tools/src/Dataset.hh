@@ -77,7 +77,7 @@ public:
   int getColor(){ return _color;};
 	
   bool isDataset(std::string name){return _name==name;};
-  bool isPPcolDataset(){ return _isData;};
+  bool isPPcolDataset() const { return _isData;};
 
   int hasSample(string sname) const;
 	

@@ -4,6 +4,8 @@ ClassImp(MPAFDisplay)
 
 using namespace std;
 
+
+
 MPAFDisplay::MPAFDisplay() {
 
   _hm=new HistoManager();
@@ -119,7 +121,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
   
   if(filename=="") return;
  
-  
+  vector<std::pair<CatId, ValId> > catMap;
   string ndb = filename;
   ifstream fDb( ndb.c_str(), ios::in );
   
@@ -171,9 +173,9 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	  }
 	  categ +=tks[i];
 	}
-
+	//cout<<" uncertainty tag "<<uncTag<<endl;
 	if(categ!="global" || uncTag!="") {
-	  if(uncTag!="")
+	  if(uncTag=="")
 	    _au->addCategory(icat, categ);
 	  else
 	    _au->addCategory(icat, categ, uncTag);
@@ -197,41 +199,105 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	    cname += tks[n-1];
 
         sname = tks[n];
-	if(categ.find("global_")!=string::npos) ext = categ.substr(7, categ.size()-7);
-    	if(ext=="") {
-	  dss=anConf.findDSS( sname );
-	  //extDs=nullptr;
+	size_t pos=categ.rfind("_");
+	string redCateg=categ;
+	if(pos!=string::npos && categ.substr(pos+1, categ.size()-pos-1).find("R")==string::npos) {
+	  ext=categ.substr(pos+1, categ.size()-pos-1);
+	  redCateg=categ.substr(0, categ.size()-ext.size()-1);
 	}
-	else {
-	  dss=anConf.findDSS( sname );
-	  //extDs=anConf.findDS( sname, ext );
-	  extDss=anConf.findDSS( sname, ext );
-
-	  //fixme, for cards need to overwrite the yields in the main category...
-	  //dss=anConf.findDSS( sname );
-	}
-	//if(ds==nullptr) continue;
 	
         yield  = atof( tks[n+1].c_str() );
         gen = atoi( tks[n+2].c_str() );
         eyield = atof( tks[n+3].c_str() );
 
-	for(unsigned int i=0;i<dss.size();i++) {
-	  //  cout<<"std ds "<<dss[i]->getName()<<"   "<<cname<<"   "<<sname<<"   "<<categ<<endl;
-	  storeStatNums(dss[i], yield, eyield, gen, icat, cname, sname,
-			categ, uncTag, upVar, ext);
-	}
+	if(ext!="")
+	  extDss=anConf.findDSS( sname, ext );
+	
+	CatId id;
+	id.categ = categ;
+	id.cname = cname;
+	id.sname = sname;
+	id.useExt=(extDss.size()!=0);
+	id.redCateg = redCateg;
+	id.ext = ext;
+	id.uncTag = uncTag;
+	id.upVar = upVar;
+	
+	ValId vals;
+	vals.yield = yield;
+	vals.eyield = eyield;
+	vals.gen = gen;
+	catMap.push_back(std::make_pair(id, vals));
 
-	//if(extDs==nullptr) continue;
-	for(unsigned int i=0;i<extDss.size();i++) {
-	  //cout<<"ext ds "<<extDss[i]->getName()<<"   "<<cname<<"   "<<sname<<"   "<<categ<<endl;
-	  storeStatNums(extDss[i], yield, eyield, gen, icat, cname, sname, categ,
-		      uncTag, upVar, ext);
-	}
       }
 
-    }
+    } //end while line
     fDb.close();
+
+
+    //Now overwritte when needed and fill the internal DB
+    int n=0;
+    vector<std::pair<CatId, ValId> >::const_iterator it;
+    for(it=catMap.begin();it!=catMap.end();++it) {
+
+      n++;
+     
+      if(!it->first.useExt) continue;
+     
+      CatId tmpId;
+      tmpId.categ = it->first.redCateg;
+      tmpId.cname = it->first.cname;
+      tmpId.sname = it->first.sname;
+      tmpId.useExt= false;
+      tmpId.redCateg = it->first.redCateg;
+      tmpId.ext = "";
+      tmpId.uncTag = it->first.uncTag;
+      tmpId.upVar = it->first.upVar;
+      
+      bool found=false;
+      for(size_t ii=0;ii<catMap.size();ii++) {
+	if(catMap[ii].first.categ==tmpId.categ && 
+	   catMap[ii].first.cname==tmpId.cname && 
+	   catMap[ii].first.sname==tmpId.sname && 
+	   catMap[ii].first.useExt==false && 
+	   catMap[ii].first.redCateg==tmpId.redCateg && 
+	   catMap[ii].first.ext=="" && 
+	   catMap[ii].first.uncTag==tmpId.uncTag && 
+	   catMap[ii].first.upVar==tmpId.upVar ) {
+	  catMap[ii].second = it->second;
+	  found=true;
+	  break;
+	}
+      }//end catMap
+      
+      if(!found) {//category missing, need to add it
+	std::pair<CatId, ValId> p(tmpId, it->second);
+	//adding it at the end should work 
+	catMap.push_back(p);
+      }
+    }
+
+    //now filling
+    n=0;
+
+    for(size_t ic=0;ic<catMap.size();++ic) {
+      
+      dss=anConf.findDSS( catMap[ic].first.sname );
+      int icat=_au->getCategId( catMap[ic].first.categ );
+      for(unsigned int i=0;i<dss.size();i++) {
+	// if(catMap[ic].first.redCateg.find("SR9")!=string::npos)
+	//   cout<<n<<"  "<<dss[i]->getName()<<" ====> "<<catMap[ic].first.categ<<"   "
+	//         <<catMap[ic].first.cname<<"   "<<catMap[ic].first.sname
+	//       <<"   "<<catMap[ic].second.yield<<"   "<<catMap[ic].first.uncTag<<"  "<<catMap[ic].first.upVar<<endl;
+	storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+		      catMap[ic].second.gen, icat,
+		      catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
+		      catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
+      }
+    
+      n++;
+    }
+
   }
   else {
     cout<<"Warning, statistics file "<<filename<<" not loaded"<<endl;
@@ -243,7 +309,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 void
 MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen,
 			   int icat, string cname, string sname, string categ,
-			   string uncTag, int upVar, string ext) {
+			   string uncTag, int upVar, string ext, bool skipNominal) {
 
   int idx=-1;
   for(size_t id=0;id<_dsNames.size();id++ ) {
@@ -253,10 +319,9 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
     }
   }
 
-  float w = ds->getWeight(sname)*anConf.getLumi();
-  //cout<<idx<<"   "<<_dsNames.size()<<endl;
-  // if(cname=="selected" && ext=="SR1A")
-  //   cout<<idx<<"  "<<ds->getName()<<"  "<<_dsNames[idx-1]<<"   "<<w<<"   "<<yield<<" -> "<<yield*w<<"  "<<eyield/yield<<"   ->>> "<<ext<<"   "<<categ<<endl;
+  float w =ds->getWeight(sname);
+  if(!ds->isPPcolDataset()) w *= anConf.getLumi();
+  
   yield *=w;
   eyield *=w;
  
@@ -266,16 +331,16 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
   _sfVals[p]=true;
   if(idx==-1) return;
   
-  if(uncTag=="")
-    _au->setEffFromStat(idx,cname,icat,yield,eyield,gen);
+  if(uncTag=="") {
+     _au->setEffFromStat(idx,cname,icat,yield,eyield,gen);
+  }
   else {
-    //to store separately the unc yields
-    //_au->setEffFromStat(idx,cname,icat,yield,eyield,gen);
-    icat = _au->getCategId(categ);
+     icat = _au->getCategId(categ);
     _au->setSystematics(idx, cname, icat, uncTag, upVar!=SystUtils::kDown,
 			upVar!=SystUtils::kUp, yield);
   }  
 
+  //  if(skipNominal) return;
   //nominal category ===================
   //identified category for nominal
   if( ds->getSample(sname)->getCR()!=ext ) return; 
@@ -285,6 +350,48 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
     _au->setSystematics(idx, cname, AUtils::kNominal,uncTag,
 			upVar!=SystUtils::kDown , upVar!=SystUtils::kUp, yield);
 }
+
+
+void
+MPAFDisplay::addExternalSystUnc(string dsName, string uncTag, float Up, float Do, string categ, string cname) {
+ 
+  int idx=-1;
+  for(size_t id=0;id<_dsNames.size();id++ ) {
+    if(_dsNames[id]==dsName ) {
+      idx = id+1; 
+      break;
+    }
+  }
+  
+  if(idx==-1) {
+    cout<<"WARNING, dataset "<<dsName<<" not found, no external systematic uncertainty "<<uncTag<<" added "<<endl;
+    return;
+  }
+
+  if(cname!="" && categ!="") {
+    int icat=_au->getCategId(categ);
+    float yield=_au->getYield(idx, cname, icat);
+  
+    _au->setSystematics(idx, cname, icat, uncTag, true, false,yield*(1+Up/100.) );
+    _au->setSystematics(idx, cname, icat, uncTag, false, true,yield*(1+Do/100.) );
+  }
+  else { //applied everywhere
+    vector<string> categs=_au->getCategories();
+    for(int ic=0;ic<categs.size();ic++) {
+      int icat=_au->getCategId(categs[ic]);
+      vector<string> sels=_au->getSelections(idx, icat);
+      
+      for(int is=0;is<sels.size();is++) {
+	cname = sels[is];
+	float yield=_au->getYield(idx, cname, icat);
+	_au->setSystematics(idx, cname, icat, uncTag, true, false,yield*(1+Up/100.) );
+	_au->setSystematics(idx, cname, icat, uncTag, false, true,yield*(1+Do/100.) );
+      }
+    }
+  }
+  
+}
+
 
 void
 MPAFDisplay::associateSystUncs() {
@@ -375,11 +482,11 @@ MPAFDisplay::setHistograms() {
       vector<string> samples= ds->getSamples();
       for(size_t is=0;is<samples.size(); is++) {
 	float w = ds->getWeight(is);
-	
+
 	if(ds->getSample(samples[is])->isNorm()) {
 	  w=ds->getSample(samples[is])->getNorm()/(anConf.getLumi()*ds->getHisto( obss[io], samples[is] )->Integral(0,1000000));
 	} 
-	
+
 	if(is==0) {
 	  htmp = ds->getHisto( obss[io], samples[is] );
 	  htmp->Scale( w );

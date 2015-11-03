@@ -164,7 +164,8 @@ private:
   //uncertainties
   bool _uncDet;
   vector<string> _uncNames;
-
+  bool _mcSystComputed;
+  
   bool _comSyst;
 
   //plot format
@@ -177,8 +178,7 @@ private:
   bool _cumulative;
   
   vector<string> _cNames;
-
-
+  
 public:
 
   DisplayClass();

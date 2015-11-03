@@ -141,6 +141,9 @@ AnaConfig::findDSNames(string channel, string crName) {
   vector<string> names;
   map<string, Dataset* >::const_iterator itDs;
   for(itDs=_datasets.begin(); itDs!=_datasets.end();itDs++) {
+    // cout<<itDs->second->getName()<<"   "<<channel<<endl;
+    // if(itDs->second->hasSample(channel)!=-1)
+    //   cout<<" --> "<<itDs->second->getSample(channel)->getCR()<<"  "<<crName<<endl;
     if(itDs->second->hasSample(channel)!=-1 && itDs->second->getSample(channel)->getCR()==crName )
       names.push_back(itDs->first);
   }
@@ -154,7 +157,7 @@ AnaConfig::findDSNames(string channel) {
   vector<string> names;
   map<string, Dataset* >::const_iterator itDs;
   for(itDs=_datasets.begin(); itDs!=_datasets.end();itDs++) {
-    if(itDs->second->hasSample(channel)!=-1 && itDs->second->getSample(channel)->getCR()=="" )
+    if(itDs->second->hasSample(channel)!=-1)// && itDs->second->getSample(channel)->getCR()=="" )
       names.push_back(itDs->first);
   }
   
@@ -297,7 +300,7 @@ AnaConfig::parseSampleId(string str) {
   //sample name ========
   sId.name=tmpStr;
 
-  //cout<<sId.norm<<"  "<<sId.dd<<"  "<<sId.cr<<"  "<<sId.name<<endl;
+  cout<<sId.norm<<"  "<<sId.dd<<"  "<<sId.cr<<"  "<<sId.name<<endl;
 
   return sId;
 }
@@ -315,8 +318,9 @@ AnaConfig::addSample( string str, string sname, int col, bool loadH) {
   if( sId.cr!="" ) {
     _csData.push_back( pair<string, float>(sId.name,sId.norm) );
   }
-  
-  
+
+  //for setting data...
+    
   _itDs=_datasets.find(dsName);
   
   if(_itDs==_datasets.end() ) {
@@ -326,6 +330,7 @@ AnaConfig::addSample( string str, string sname, int col, bool loadH) {
   }
   
   if(sname=="data" || sname=="Data" || sId.dd ) {
+    sId.dd=true;
     _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
 				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1., 1., 1., loadH);
     //_samplenames.push_back(str);
