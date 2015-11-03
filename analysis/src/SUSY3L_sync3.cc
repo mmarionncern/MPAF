@@ -246,10 +246,10 @@ void SUSY3L_sync3::run(){
     
     int lumi = _vc->get("lumi");
     int evt = _vc->get("evt");
-    _lumi1 = 996; 
-    _evt1 = 329692;
-    _lumi2 = 1263;
-    _evt2 = 418003;
+    _lumi1 = 1104; 
+    _evt1 = 365448;
+    _lumi2 = -1;
+    _evt2 = -1;
     _debug = false;
     cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
 
@@ -413,7 +413,7 @@ void SUSY3L_sync3::collectKinematicObjects(){
         if(_selectMuons == "true"){ 
             // loop over all loose leptons in this event and select muons
             if(std::abs(_looseLeps[il]->pdgId()) == 13){
-                if(muonSelection(_looseLeps[il], il)) {
+                if(muonSelection(_looseLeps[il], _looseLepsIdx[il])) {
                     _mus.push_back(_looseLeps[il]);
                     _muIdx.push_back(_looseLepsIdx[il]);
                 }
@@ -422,7 +422,7 @@ void SUSY3L_sync3::collectKinematicObjects(){
         if(_selectElectrons == "true"){ 
             // loop over all loose leptons in this event and select electrons
             if(std::abs(_looseLeps[il]->pdgId()) == 11){
-                if(electronSelection(_looseLeps[il], il)) {
+                if(electronSelection(_looseLeps[il], _looseLepsIdx[il])) {
                     _els.push_back(_looseLeps[il]);
                     _elIdx.push_back(_looseLepsIdx[il]);
                 }
@@ -514,7 +514,7 @@ bool SUSY3L_sync3::electronSelection(const Candidate* c, int elIdx){
     float pt_cut = 10.;
 
     //apply the cuts via SusyModules
-    if(!makeCut<float>( _vc->get("LepGood_pt", elIdx) , pt_cut, ">"  , "pt selection"    , 0    , kElId)) return false;
+    if(!makeCut<float>( c->pt() , pt_cut, ">"  , "pt selection"    , 0    , kElId)) return false;
     if(!makeCut( _susyMod->elIdSel(c, elIdx, SusyModule::kTight, SusyModule::kTight, false), "electron selection", "=", kElId) ) return false;
     if(!makeCut( _susyMod->multiIsoSel(elIdx, SusyModule::kMedium), "multiIso selection", "=", kElId) ) return false;
     
@@ -550,10 +550,14 @@ bool SUSY3L_sync3::muonSelection(const Candidate* c, int muIdx){
     //cut values
     float pt_cut = 10.;
 
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering muon selection " << c->pt() << " " << muIdx << endl;}}
     //apply the cuts via SusyModules
-    if(!makeCut<float>( _vc->get("LepGood_pt", muIdx) , pt_cut, ">"  , "pt selection"    , 0    , kMuId)) return false;
+    if(!makeCut<float>( c->pt() , pt_cut, ">"  , "pt selection"    , 0    , kMuId)) return false;
+    if(_debug){if(_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1){cout << "pass pt" << endl;}}
     if(!makeCut( _susyMod->muIdSel(c, muIdx, SusyModule::kTight, false), "muon selection", "=", kMuId) ) return false;
+    if(_debug){if(_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1){cout << "pass muIdSel" << endl;}}
     if(!makeCut( _susyMod->multiIsoSel(muIdx, SusyModule::kLoose), "multiIso selection", "=", kMuId) ) return false;
+    if(_debug){if(_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1){cout << "pass multiIso in class" << endl;}}
  
     return true;
 }
@@ -566,6 +570,7 @@ bool SUSY3L_sync3::looseLepton(const Candidate* c, int idx, int pdgId) {
         parameters: position in LepGood, pdgId
         return: true (if leptons is selected as loose lepton), false (else)
     */
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering loose lepton selection " << c->pt() << endl;}}
     if(abs(pdgId)==13) {//mu case
         if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
@@ -591,6 +596,7 @@ bool SUSY3L_sync3::fakableLepton(const Candidate* c, int idx, int pdgId, bool by
         return: true (if the lepton fulfills the fakable lepton selection, false (else)
     */
 
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering fo selection " << c->pt() << endl;}}
     if(abs(pdgId)==13) {//mu case
         if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
@@ -3256,7 +3262,7 @@ void SUSY3L_sync3::printBefore(){
         cout << "-------------------------------------------------------------------------"<< endl; 
         cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose leptons: " <<  _vc->get("nLepGood") << endl;
         for(int i = 0; i<_vc->get("nLepGood");i++){
-            cout << "lep " << i << ": pt " << _vc->get("LepGood_pt",i) << ", eta " << _vc->get("LepGood_eta",i) <<  ", phi " << _vc->get("LepGood_phi",i) << ", pdgId " << _vc->get("LepGood_pdgId",i)  << ", pt rel " << _vc->get("LepGood_jetPtRelv2",i) << ", pt ratio: " << _vc->get("LepGood_jetPtRatiov2",i)<<endl;
+            cout << "lep " << i << ": pt " << _vc->get("LepGood_pt",i) << ", eta " << _vc->get("LepGood_eta",i) <<  ", phi " << _vc->get("LepGood_phi",i) << ", pdgId " << _vc->get("LepGood_pdgId",i) << ", miniIso " << _vc->get("LepGood_miniRelIso", i)  << ", pt rel " << _vc->get("LepGood_jetPtRelv2",i) << ", pt ratio: " << _vc->get("LepGood_jetPtRatiov2",i)<<endl;
         }
         //cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose jets: " <<  _vc->get("nJet") << endl;
         //for(int i = 0; i<_vc->get("nJet");i++){

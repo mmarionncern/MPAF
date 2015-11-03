@@ -133,7 +133,9 @@ SusyModule::multiIsoSel(int idx, int wp) const {
   // cout<<_vc->get("LepGood_miniRelIso", idx)<<"/"<<_vc->get("LepGood_jetPtRatiov2", idx)<<"/"<<_vc->get("LepGood_jetPtRelv2", idx)<<"  -->  "<<_multiIsoWP[kMiniIso][wp] <<"/"<<_multiIsoWP[kPtRatio][wp]<<"/"<<_multiIsoWP[kPtRel][wp]<<endl;
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
       (_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ){
+        //if(_vc->get("lumi") == 1104 && _vc->get("evt") == 365448){cout << "pass multiIso " << idx << " " << _vc->get("LepGood_miniRelIso", idx) << " " << _vc->get("LepGood_jetPtRatiov2", idx) << " " << _vc->get("LepGood_jetPtRelv2", idx)<< endl;}
+        return true;}
   
   return false;
 }
@@ -177,16 +179,25 @@ bool
 SusyModule::muIdSel(const Candidate*c, int idx, int wp, bool chCut) const {
 
   int wpIso = kDenom;
+  int lumi = 1104;
+  int evt = 365448;
   // if(         _vc->get("LepGood_pt"          , idx)  < _ptWP[kMu][wp]) return false; //cout<<" pt"<<endl;
   //if(   c->pt()  < _ptWP[kMu][wp]) return false; //cout<<" pt"<<endl;
   //if(std::abs(_vc->get("LepGood_eta"         , idx)) >  2.4          ) return false;//cout<<" eta"<<endl;
   if(std::abs(c->eta() ) >  2.4          ) return false;//cout<<" eta"<<endl;
+  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass eta" << endl;}
   if(         _vc->get("LepGood_mediumMuonId", idx)  < _muIdWP[wp]   ) return false;//cout<<" id"<<endl;
+  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass muon id" << endl;}
   if( chCut && _vc->get("LepGood_tightCharge" , idx)  <= 1 ) return false;//cout<<" tc"<<endl;
+  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass tight charge" << endl;}
   if(         _vc->get("LepGood_sip3d"       , idx)  > _sipWP[wp]    ) return false;//cout<<" sip"<<endl;
+  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass sip" << endl;}
   if(std::abs(_vc->get("LepGood_dz"          , idx)) > _dzWP[wp]     ) return false;//cout<<" dz"<<endl;
+  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass dz" << endl;}
   if(std::abs(_vc->get("LepGood_dxy"         , idx)) > _dxyWP[wp]    ) return false;//cout<<" dxy"<<endl;
+  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass dxy" << endl;}
   if(!multiIsoSel(idx, wpIso)                                        ) return false;//cout<<" iso"<<endl;
+  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass iso denom" << endl;}
   //cout<<" youpi ID "<<idx<<endl;
   return true;
 

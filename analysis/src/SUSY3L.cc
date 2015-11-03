@@ -392,7 +392,7 @@ void SUSY3L::collectKinematicObjects(){
     
     //select leptons for jet cleaning using a tigher fakable object selection
     for(size_t il=0;il<_looseLeps10.size();il++){
-        if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(),true)) continue;
+        if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(), true)) continue;
         _jetCleanLeps10.push_back( _looseLeps10[il] );
         _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
     } 
@@ -402,7 +402,7 @@ void SUSY3L::collectKinematicObjects(){
         if(_selectMuons == "true"){ 
             // loop over all loose leptons in this event and select muons
             if(std::abs(_looseLeps[il]->pdgId()) == 13){
-                if(muonSelection(_looseLeps[il], il)) {
+                if(muonSelection(_looseLeps[il], _looseLepsIdx[il])) {
                     _mus.push_back(_looseLeps[il]);
                     _muIdx.push_back(_looseLepsIdx[il]);
                 }
@@ -411,7 +411,7 @@ void SUSY3L::collectKinematicObjects(){
         if(_selectElectrons == "true"){ 
             // loop over all loose leptons in this event and select electrons
             if(std::abs(_looseLeps[il]->pdgId()) == 11){
-                if(electronSelection(_looseLeps[il], il)) {
+                if(electronSelection(_looseLeps[il], _looseLepsIdx[il])) {
                     _els.push_back(_looseLeps[il]);
                     _elIdx.push_back(_looseLepsIdx[il]);
                 }
@@ -501,8 +501,7 @@ bool SUSY3L::electronSelection(const Candidate* c, int elIdx){
     float pt_cut = 10.;
 
     //apply the cuts via SusyModules
-    if(!makeCut( _susyMod->elHLTEmulSel(elIdx, true), "trigger emulation  selection", "=", kElId) ) return false;
-    if(!makeCut<float>( _vc->get("LepGood_pt", elIdx) , pt_cut, ">"  , "pt selection"    , 0    , kElId)) return false;
+    if(!makeCut<float>( c->pt() , pt_cut, ">"  , "pt selection"    , 0    , kElId)) return false;
     if(!makeCut( _susyMod->elIdSel(c, elIdx, SusyModule::kTight, SusyModule::kTight, false), "electron selection", "=", kElId) ) return false;
     if(!makeCut( _susyMod->multiIsoSel(elIdx, SusyModule::kMedium), "multiIso selection", "=", kElId) ) return false;
     
@@ -539,7 +538,7 @@ bool SUSY3L::muonSelection(const Candidate* c, int muIdx){
     float pt_cut = 10.;
 
     //apply the cuts via SusyModules
-    if(!makeCut<float>( _vc->get("LepGood_pt", muIdx) , pt_cut, ">"  , "pt selection"    , 0    , kMuId)) return false;
+    if(!makeCut<float>( c->pt() , pt_cut, ">"  , "pt selection"    , 0    , kMuId)) return false;
     if(!makeCut( _susyMod->muIdSel(c, muIdx, SusyModule::kTight, false), "muon selection", "=", kMuId) ) return false;
     if(!makeCut( _susyMod->multiIsoSel(muIdx, SusyModule::kLoose), "multiIso selection", "=", kMuId) ) return false;
  
@@ -561,7 +560,7 @@ bool SUSY3L::looseLepton(const Candidate* c, int idx, int pdgId) {
     else {
         if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
-        if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
+        if(!_susyMod->elHLTEmulSel(idx, true ) ) return false; 
     }
 
     return true;
