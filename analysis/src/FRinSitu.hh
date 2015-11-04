@@ -41,10 +41,12 @@ private:
   void divideFRMap(string postpend);
   void divideFRMaps();
   void registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis);
+  void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, string xaxis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis);
   void registerTriggerVars();
   void registerVariable(string var, int nBin, float min, float max, string Xleg, bool isglb=true, bool prof=false, string type="m");
   void registerVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY, float maxY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
+  void registerVariable(string var, int nBinX, vector<float> binsX, string Xleg, bool isglb=true, bool prof=false, string type="m");
   void registerVariable(string var, int nBinX, vector<float> binsX, int nBinY, vector<float> binsY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
 
   void sumMaps();
@@ -52,6 +54,8 @@ private:
   void sumTriggerPlots(string obs, int ds, string ext);
 
   void collectKinematicObjects();
+  bool cleanElectronSelection(unsigned int);
+  bool cleanMuonSelection(unsigned int);
   bool denominatorElectronSelection(unsigned int);
   bool denominatorMuonSelection(unsigned int);
   bool goodJetSelection(unsigned int);
@@ -87,7 +91,7 @@ private:
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later)
-  enum {kGlobal=0, kTrigger, kDenEls, kDenMus, kNumEls, kNumMus, kSigEls, kSigMus, kVetEls, kVetMus, kGoodJets};
+  enum {kGlobal=0, kTrigger, kDenEls, kDenMus, kNumEls, kNumMus, kSigEls, kSigMus, kVetEls, kVetMus, kClEls, kClMus, kGoodJets};
 
   enum {kNoGenMatch=0, kMisMatchPdgId,
 	kMisChargePdgId, kGenMatched};
@@ -160,6 +164,7 @@ private:
   std::vector<unsigned int> _numMusIdx;
   std::vector<unsigned int> _sigLepsIdx;
   std::vector<unsigned int> _vetLepsIdx;
+  std::vector<unsigned int> _clLepsIdx;
   std::vector<unsigned int> _goodJetsIdx;
   std::vector<unsigned int> _bJetsIdx;
 
@@ -171,6 +176,7 @@ private:
   unsigned int _nNumMus;
   unsigned int _nSigLeps;
   unsigned int _nVetLeps;
+  unsigned int _nClLeps;
   unsigned int _nGoodJets;
   unsigned int _nBJets;
 
@@ -182,6 +188,7 @@ private:
   CandList _numMus;
   CandList _sigLeps;
   CandList _vetLeps;
+  CandList _clLeps;
   CandList _goodJets;
   CandList _bJets;
 

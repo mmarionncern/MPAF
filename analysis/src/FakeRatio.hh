@@ -51,21 +51,28 @@ private:
   void divideFRMaps();
   void doEwkSub();
   vector<float> doubleFit(string ext, TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin = 0, float hmax = 0); 
-  vector<float> getScalesETH(string obs, float lumi);
+  vector<float> getScalesETH (string obs, float lumi);
+  vector<float> getScalesUCSX(string obs, float lumi);
+  vector<float> getScalesUCSXlite(string obs, float lumi);
   void modifySkimming();
   void modifyWeight();
   vector<float> prepareHists(TH1* h_data, TH1* h_ewk, TH1* h_qcd);
   void registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis);
+  void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, string xaxis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis);
   void registerTriggerVars();
   void registerVariable(string var, int nBin, float min, float max, string Xleg, bool isglb=true, bool prof=false, string type="m");
   void registerVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY, float maxY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
+  void registerVariable(string var, int nBinX, vector<float> binsX, string Xleg, bool isglb=true, bool prof=false, string type="m");
   void registerVariable(string var, int nBinX, vector<float> binsX, int nBinY, vector<float> binsY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
+  void setBinErrors(TH1*, TH1*, TH1*);
   float singleFit(string ext, TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
+  void singleFit(vector<float>& scales, string ext, TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
   void subtractPlots(string lep, int idx, vector<float> scales, string postfix);
   void subtractPlotsCERN(string lep, int idx, string postfix);
-  void subtractPromptsETH();
   void subtractPromptsCERN();
+  void subtractPromptsETH();
+  void subtractPromptsUCSX();
   void sumMaps();
   void sumTriggers();
   void sumTriggerPlots(string obs, int ds, string ext);
@@ -94,6 +101,7 @@ private:
   bool triggerEmulation(int idx, int label);
   bool triggerSelection();
   bool triggerSelectionLite();
+  bool ucsxEwkSelection();
 
   void fillEventPlots();
   void fillEwkEventPlots();
@@ -108,6 +116,9 @@ private:
   void fillQcdFakeRatioMaps();
   void fillQcdLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
   void fillQcdLeptonPlots();
+  void fillUcsxEwkEventPlots();
+  void fillUcsxEwkLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
+  void fillUcsxEwkLeptonPlots();
   void findTriggerExts();
   void fillTriggerTestPlots();
   vector<int> findTriggerIdxs();
@@ -117,7 +128,7 @@ private:
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later
-  enum {kGlobal=0, kEwkSel, kQcdSel, kTrigger, kSync, kDenEls, kDenMus, kNumEls, kNumMus, kVetEls, kVetMus, kGoodJets};
+  enum {kGlobal=0, kEwkSel, kUcsSel, kQcdSel, kTrigger, kSync, kDenEls, kDenMus, kNumEls, kNumMus, kVetEls, kVetMus, kGoodJets};
 
   enum {kNoGenMatch=0, kMisMatchPdgId,
 	kMisChargePdgId, kGenMatched};
@@ -126,6 +137,7 @@ private:
 
   int _idx_data;
   int _idx_datacorrETH;
+  int _idx_datacorrUCSX;
   int _idx_datacorrCERN;
   int _idx_ewk;
   int _idx_ewk_dy;
@@ -181,8 +193,9 @@ private:
 
   string _norm;
   string _ewkSub;
-  bool _doEwkSubETH;
   bool _doEwkSubCERN;
+  bool _doEwkSubETH;
+  bool _doEwkSubUCSX;
 
   float _valCutNBJetsMR;
   std::string _cTypeNBJetsMR;

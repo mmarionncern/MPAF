@@ -15,10 +15,10 @@
 
 #define DUMP(x) std::cout << #x << " = " << x << std::endl
 
-#define DUMPVECTOR(x) for(int i = 0; i < x.size(); ++i) std::cout << #x << "[" << i << "] = " << x[i] << std::endl
+#define DUMPVECTOR(x) for(int iti = 0; iti < x.size(); ++iti) std::cout << #x << "[" << iti << "] = " << x[iti] << std::endl
 
-#define DUMPMAP(x) for(int i = 0; i < x.size(); ++i) for(int j = 0; j < x[0].size(); ++j) std::cout << #x << "[" << i << "][" << j << "] = " << x[i][j] << std::endl
+#define DUMPMAP(x) for(int iti = 0; iti < x.size(); ++iti) for(int itj = 0; itj < x[0].size(); ++itj) std::cout << #x << "[" << iti << "][" << itj << "] = " << x[iti][itj] << std::endl
 
-#define DUMPCUBE(x) for(int i = 0; i < x.size(); ++i) for(int j = 0; j < x[0].size(); ++j) for(int k = 0; k < x[0][0].size(); ++k) std::cout << #x << "[" << i << "][" << j << "][" << k << "] = " << x[i][j][k] << std::endl
+#define DUMPCUBE(x) for(int iti = 0; iti < x.size(); ++iti) for(int itj = 0; itj < x[0].size(); ++itj) for(int itk = 0; itk < x[0][0].size(); ++itk) std::cout << #x << "[" << iti << "][" << itj << "][" << itk << "] = " << x[iti][itj][itk] << std::endl
 
 #endif

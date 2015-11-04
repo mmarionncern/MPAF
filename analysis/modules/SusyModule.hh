@@ -27,7 +27,9 @@ public:
   bool elHLTEmulSelIso(int, int mvaWP = kLooseHT) const;
   bool multiIsoSel(int idx, int wp) const;
   bool multiIsoSelCone(int idx, int wp) const;
+  bool multiIsoSelInSitu(int idx, int wp) const;
   bool invMultiIsoSel(int idx, int wp) const;
+  bool invPtRelSel(int idx, int wp) const;
   bool inSituFO(int idx, int wp) const;
   bool jetSel(int jetIdx) const;
   float HT(const CandList* jets);
@@ -37,6 +39,7 @@ public:
   void cleanJets(CandList* leptons, 
 		 CandList& cleanJets, vector<unsigned int>& jetIdxs,
 		 CandList& cleanBJets, vector<unsigned int>& bJetIdxs);
+  void cleanLeps(CandList& tightLeps, CandList* vetoLeps);
 
   bool mllVetoSelection(const Candidate* l1, const Candidate* l2,
 			const CandList* allLeps) const ;
@@ -55,6 +58,8 @@ public:
   
   float closestJetPt(int idx) const;
   float conePt(int idx, int isoWp = kTight) const; 
+  float coneMt(int, int, Candidate*) const;
+  float coneMt(int, Candidate*, Candidate*) const;
 
   void applyHLTSF(const string& hltLine, const vector<Candidate*>& cands, float& weight);
   void applyLepSF(const CandList& cands, float& weight);

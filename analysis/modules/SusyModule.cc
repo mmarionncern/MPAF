@@ -152,6 +152,17 @@ SusyModule::multiIsoSel(int idx, int wp) const {
 
 
 bool
+SusyModule::multiIsoSelInSitu(int idx, int wp) const {
+
+  // CH: wasn't my idea...
+  if(_vc->get("LepGood_miniRelIso"  , idx) < _multiIsoWP[kMiniIso][wp] &&
+     _vc->get("LepGood_jetPtRatiov2", idx) > _multiIsoWP[kPtRatio][wp]) return true;
+  
+  return false;
+}
+
+
+bool
 SusyModule::multiIsoSelCone(int idx, int wp) const {
 
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
@@ -174,6 +185,8 @@ SusyModule::elMvaSel(int idx, int wp) const {
 
   int etaBin=-1;
 
+  //if(_vc->get("evt") == 930292 && idx == 0) cout << _elMvaIdWP[0][wp] << ":" << _elMvaIdWP[1][wp] << ":" << _elMvaIdWP[2][wp] << endl;
+
   if     (std::abs(_vc->get("LepGood_eta", idx)) < 0.8  ) etaBin=0;
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479) etaBin=1;
   else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5  ) etaBin=2;
@@ -187,7 +200,8 @@ bool
 SusyModule::inSituFO(int idx, int wp) const {
 
   if(_vc->get("LepGood_miniRelIso", idx) > 0.4) return false;
-  if(1 / _vc->get("LepGood_jetPtRatiov2", idx) >= 1 / _multiIsoWP[kPtRatio][wp] + _vc->get("LepGood_miniRelIso", idx) && _vc->get("LepGood_jetPtRelv2", idx) < _multiIsoWP[kPtRel][wp]) return false;
+  if(1 / _vc->get("LepGood_jetPtRatiov2", idx) >= 1 / _multiIsoWP[kPtRatio][wp] + _vc->get("LepGood_miniRelIso", idx)) return false;
+  //if(1 / _vc->get("LepGood_jetPtRatiov2", idx) >= 1 / _multiIsoWP[kPtRatio][wp] + _vc->get("LepGood_miniRelIso", idx) && _vc->get("LepGood_jetPtRelv2", idx) < _multiIsoWP[kPtRel][wp]) return false;
 
   return true;
 }
@@ -273,12 +287,26 @@ SusyModule::elHLTEmulSel(int idx, bool withIso) const {
 bool
 SusyModule::elHLTEmulSelIso(int idx, int mvaWP) const {
 
+  //if(_vc->get("evt") == 930292) cout << "test0" << endl;
+
   if(_vc->get("LepGood_ecalPFClusterIso", idx) > 0.45 * _vc->get("LepGood_pt", idx) ) return false;
+  //if(_vc->get("evt") == 930292) cout << "test1" << endl;
   if(_vc->get("LepGood_hcalPFClusterIso", idx) > 0.25 * _vc->get("LepGood_pt", idx) ) return false;
+  //if(_vc->get("evt") == 930292) cout << "test2" << endl;
   if(_vc->get("LepGood_dr03TkSumPt"     , idx) > 0.2  * _vc->get("LepGood_pt", idx) ) return false;
+  //if(_vc->get("evt") == 930292) cout << "test3" << endl;
   if(!elMvaSel(idx, mvaWP)                                                          ) return false;
+  //if(_vc->get("evt") == 930292) cout << "test4" << endl;
 
   return true;
+}
+
+bool
+SusyModule::invPtRelSel(int idx, int wp) const {
+
+  if(_vc->get("LepGood_jetPtRelv2", idx) < _multiIsoWP[kPtRel][wp]) return true;
+  return false;
+
 }
 
 
@@ -485,6 +513,23 @@ SusyModule::conePt(int idx, int isoWp) const {
 }
 
 
+float 
+SusyModule::coneMt(int idx, int isoWp, Candidate* met) const {
+
+  return sqrt(2 * conePt(idx, isoWp) * met -> pt() * (1. - cos(_vc->get("LepGood_phi", idx) - met -> phi())));
+
+}
+
+float
+SusyModule::coneMt(int idx, Candidate* lep, Candidate* met) const {
+
+  int wp = kTight;
+  if(std::abs(lep->pdgId()) == 13) wp = kMedium;
+  return coneMt(idx, wp, met);
+
+}
+
+
 void 
 SusyModule::awayJets(CandList* leptons, CandList& jets, vector<unsigned int>& jetIdxs, float dR) {
 
@@ -496,6 +541,19 @@ SusyModule::awayJets(CandList* leptons, CandList& jets, vector<unsigned int>& je
         jetIdxs.erase(jetIdxs.begin() + ij);
       }
     }
+  }
+}
+
+void
+SusyModule::cleanLeps(CandList& tightLeps, CandList* vetoLeps) {
+
+  for(CandList::iterator it = tightLeps.begin(); it != tightLeps.end();) {
+    int i = it - tightLeps.begin();
+    if(!passMllMultiVeto( tightLeps[i], vetoLeps, 76, 106, true) ||
+       !passMllMultiVeto( tightLeps[i], vetoLeps,  0,  12, true) ) 
+      it = tightLeps.erase(it);
+    else
+      ++it;
   }
 }
 
@@ -619,3 +677,17 @@ SusyModule::applySingleLepSF(const Candidate* cand, float& weight) {
   }
 
 }
+
+//float
+//SusyModule::puWeight(int idx) {
+//
+//  if nVert >= 60: return 1.;
+//  return _dbm -> getDBValue("PUdb", _vc->get("nVert")); 
+//
+//// put this stuff into the database:
+////array = [1.0, 3.153000427291265, 2.4535501340758543, 2.353696182351581, 2.3718057802881676, 2.3508262193470397, 2.291773427755106, 2.129929297304804, 1.9422796094930384, 1.7126175249202766, 1.4622401225778663, 1.2063711142884181, 0.9608504360968657, 0.7484941355600901, 0.5769889517104192, 0.4315759540480359, 0.3195820162866148, 0.2306052595765186, 0.1691819686464576, 0.12324466445693416, 0.08833641123547825, 0.06306193566475429, 0.047857788612281564, 0.034655984107483044, 0.02358209210941948, 0.019535383939466185, 0.01500976654907348, 0.009407396052837736, 0.006332906010381258, 0.008524617116368491, 0.003145186350322339, 0.0, 0.0, 0.006930381551001214, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0] 
+//
+//
+//}
+
+
