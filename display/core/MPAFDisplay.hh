@@ -113,6 +113,11 @@ public:
   
   void doPlot();
 
+  void setObservables(string v1, string v2="", string v3="",
+		      string v4="", string v5="", string v6="");
+  void loadAutoBinning(string file);
+    
+
   void getStatistics(string categ="nominal");
   void drawStatistics(string categ="nominal", string cname="", 
 		      bool multiScheme=false, bool vetoOpt=false, string optCateg="");
@@ -145,12 +150,13 @@ public:
   void saveDataMCRatio(string fname,string hname);
 
   //data cards
-  void addDataCardSample(string sName, string dsName);
-  void addDataCardSigSample(string sName, string dsName);
+  void addDataCardSample(string sName, string dsName, float w=1);
+  void addDataCardSigSample(string sName, string dsName, float w=1);
   void addNuisanceParameter(string npName, string dss, string scheme,  string vals) ;
   vector<string> getExternalNuisanceParameters(string sigName);
   void makeSingleDataCard(string sigName, string categ, string cname, string cardName);
 
+  void overwriteNuisanceParameter(string npName, string dss, string vals);
 
   ClassDef(MPAFDisplay,0)
 

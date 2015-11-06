@@ -54,6 +54,10 @@ void Dataset::freeMemory() {
   delete _chain;
 }
 
+void
+Dataset::setUsefulVars(vector<string> vars) {
+  _usefulVars = vars;
+}
 
 //____________________________________________________________________________
 void Dataset::addSample(const SampleId sId, string path, string dir, string objName, string hname, string hwgtname, float xSect, float kFact, float lumi, float eqLumi, bool loadH) {
@@ -153,6 +157,7 @@ Dataset::getNProcEvents(string path, string dir, string fileName, string hname) 
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
 
   TFile* file = TFile::Open( NameF.c_str() );
+  if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hname.c_str() );
   int nProc=-1;
   if(htmp) {
@@ -180,6 +185,7 @@ Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtnam
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
   
   TFile* file = TFile::Open( NameF.c_str() );
+  if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hwgtname.c_str() );
   double nProc=-1;
   if(htmp) {
@@ -351,6 +357,8 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
 
   datafile = TFile::Open(NameF.c_str());
 
+  if(datafile==nullptr) {cout<<"warning, unable to load histograms"<<endl; return;}
+
   //scan the file to retrieve the histograms
   TIter nextkey(datafile->GetListOfKeys());
   TKey *key;
@@ -366,7 +374,10 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
     
     //MM FIXME, jsut take a too long time to load everything, should be done in a better way thatn disabling everything 
     //if(varName.find("SR")!=string::npos) continue;
-  
+    if(_usefulVars.size()!=0 && 
+       find(_usefulVars.begin(), _usefulVars.end(), varName)==_usefulVars.end() &&
+       find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() ) continue;
+
 
     if(optCat!="") {
       size_t op=varName.find(optCat);

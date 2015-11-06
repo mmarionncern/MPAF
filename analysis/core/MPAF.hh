@@ -137,8 +137,10 @@ protected:
 		     string db, string hname, bool wUnc=false);
   void addWSystSource(string name, int dir, string type, float val);
   void addWSystSource(string name, int dir, string type, string db, string hname);
+  void addManualSystSource(string name, int dir);
 
   bool isInUncProc() {return _uncId;};
+  string getUncName() { return _unc;};
   int getUncDir() { return _uDir;};
 
   // Private Non-Template Methods

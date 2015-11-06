@@ -57,7 +57,7 @@ MPAFDisplay::drawStatistics(string categ, string cname, bool multiScheme, bool v
   if(multiScheme) scheme=AnaUtils::kMulti;
   if(multiScheme && vetoOpt) scheme=AnaUtils::kMultiVeto;
   
-  vector< pair<string, vector<vector<float> > > > numbers = _au->retrieveNumbers(categ,  cname, scheme, opt);
+  vector< pair<string, vector<vector<map<string,float> > > > > numbers = _au->retrieveNumbers(categ,  cname, scheme, opt);
   
   vector<string> dsNames = _dsNames;
   dsNames.insert(dsNames.begin(), "MC");
@@ -377,11 +377,11 @@ MPAFDisplay::addExternalSystUnc(string dsName, string uncTag, float Up, float Do
   }
   else { //applied everywhere
     vector<string> categs=_au->getCategories();
-    for(int ic=0;ic<categs.size();ic++) {
+    for(unsigned int ic=0;ic<categs.size();ic++) {
       int icat=_au->getCategId(categs[ic]);
       vector<string> sels=_au->getSelections(idx, icat);
       
-      for(int is=0;is<sels.size();is++) {
+      for(unsigned int is=0;is<sels.size();is++) {
 	cname = sels[is];
 	float yield=_au->getYield(idx, cname, icat);
 	_au->setSystematics(idx, cname, icat, uncTag, true, false,yield*(1+Up/100.) );
@@ -703,7 +703,44 @@ MPAFDisplay::refresh() {
   //_hm->refresh();
 }
 
+void
+MPAFDisplay::setObservables(string v1, string v2, string v3,
+			    string v4, string v5, string v6) {
 
+  anConf.addUsefulVar(v1);
+  if(v2!="") anConf.addUsefulVar(v2);
+  if(v3!="") anConf.addUsefulVar(v3);
+  if(v4!="") anConf.addUsefulVar(v4);
+  if(v5!="") anConf.addUsefulVar(v5);
+  if(v6!="") anConf.addUsefulVar(v6);
+  
+  dp.setObservables(v1,v2,v3,v4,v5,v6);
+}
+
+void
+MPAFDisplay::loadAutoBinning(string filename) {
+  dp.loadAutoBinning(filename);
+
+  if(filename=="") return;
+
+  string ndb= (string)getenv("MPAF")+"/display/cards/"+filename;
+  ifstream fDb( ndb.c_str(), ios::in );
+
+  if(fDb)  {
+    string line;
+    while(getline(fDb, line)) {
+      istringstream iss(line);
+      vector<string> tks;
+      copy(istream_iterator<string>(iss),
+	   istream_iterator<string>(),
+	   back_inserter<vector<string> >(tks));
+      
+      string var = tks[0];
+      anConf.addUsefulVar(var);
+    }
+  }
+  
+}
 
 vector<string> 
 MPAFDisplay::split(const string& s, char delim) {
@@ -747,21 +784,61 @@ MPAFDisplay::findDiff(const string& s1, const string& s2,
 //datacard stuff================================================================
 
 void
-MPAFDisplay::addDataCardSample(string sName, string dsName) {
+MPAFDisplay::addDataCardSample(string sName, string dsName, float w) {
   
   _isSigDs[dsName]=false;
   if(dsName.find("data")!=string::npos) _isSigDs[dsName]=true;
 
-  anConf.addSample(sName, dsName, 0, false);
+  anConf.addSample(sName, dsName, 0, w, false);
 }
 
 void
-MPAFDisplay::addDataCardSigSample(string sName, string dsName) {
+MPAFDisplay::addDataCardSigSample(string sName, string dsName, float w) {
   
   _isSigDs[dsName]=true;
-  anConf.addSample(sName, dsName, 0);
+  anConf.addSample(sName, dsName, 0, w, false);
 }
 
+void
+MPAFDisplay::overwriteNuisanceParameter(string npName, string dss, string vals) {
+
+  //name parsing
+  vector<string> dsList;
+  size_t p=0;
+  while(p!=string::npos) {
+    size_t pi=dss.find(":",p);
+    if(p==0) dsList.push_back( dss.substr(p,pi) );
+    if(pi==string::npos) break;
+    
+    p = dss.find(":",pi+1);
+    if(p==string::npos) {
+      dsList.push_back( dss.substr(pi+1,dss.size()-pi-1 ) );
+    } else {
+      dsList.push_back( dss.substr(pi+1,p-pi-1 ) );
+    }
+  }
+  
+  _nuisPars[ npName+"_OW" ] = dsList;
+  _nuisParExt[ npName+"_OW" ]=false;
+
+  //val parsing, external uncertainties ============================
+  vector<string> valList;
+  p=0;
+  while(p!=string::npos) {
+    size_t pi=vals.find(":",p);
+    if(p==0) valList.push_back( vals.substr(p,pi) );
+    if(pi==string::npos) break;    
+
+    p = vals.find(":",pi+1);
+    if(p==string::npos) {
+      valList.push_back( vals.substr(pi+1,vals.size()-pi-1 ) );
+    } else {
+      valList.push_back( vals.substr(pi+1,p-pi-1 ) );
+    }
+  }
+  _nuisParVals[ npName+"_OW" ] = valList;
+
+}
 
 void
 MPAFDisplay::addNuisanceParameter(string npName, string dss, string scheme,  string vals) {
@@ -803,7 +880,7 @@ MPAFDisplay::addNuisanceParameter(string npName, string dss, string scheme,  str
       valList.push_back( vals.substr(pi+1,p-pi-1 ) );
     }
   }
-  //cout<<npName<<"   "<<valList.size()<<"   "<<dsList.size()<<"   "<<dsList[0]<<endl;
+
   _nuisParVals[ npName ] = valList;
   _nuisParExt[ npName ]=true;
 }
@@ -814,10 +891,10 @@ MPAFDisplay::getExternalNuisanceParameters(string sigName) {
   
   //matching values
   vector<string> lines;
-  //cout<<" ============================================== "<<_nuisParVals.size()<<endl;
   for(_itNp=_nuisParVals.begin();_itNp!=_nuisParVals.end();++_itNp) {
     string line="";
     int nd=0;
+    
     for(unsigned int ids=0;ids<_dsNames.size();ids++) {
       if(_dsNames[ids]=="data") continue;
       if( find( _nuisPars[_itNp->first].begin(), _nuisPars[_itNp->first].end(), _dsNames[ids] )==_nuisPars[_itNp->first].end() ) {
@@ -848,7 +925,7 @@ void
 MPAFDisplay::makeSingleDataCard(string sigName, string categ, string cname, string cardName) {
   
   map<string,string> lines;
-  bool isValidCard = _au->getDataCardLines(lines, _dsNames, sigName, categ, cname, 1, _nuisPars, _nuisParExt);
+  bool isValidCard = _au->getDataCardLines(lines, _dsNames, sigName, categ, cname, 1, _nuisPars, _nuisParExt, _nuisParScheme,_nuisParVals);
 
   if(!isValidCard) { 
     cout<<"Current datacard contains a null background+signal yield,"<<endl

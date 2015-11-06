@@ -171,7 +171,7 @@ public:
   void getSystematics(string ds, string lvl, string categ="");
   void getCategSystematics(string ds, string src, string lvl, string categ="", bool latex=false);
   void getYieldSysts(EffST eST, map<string,float>& rU, map<string,float>& rD,
-		     float& totUp, float& totDown, float& central);
+		       float& totUp, float& totDown, float& central);
   float getYield(int ids, string cName, int icat);
   //workflows
   void setWFEfficiencies(int ids, string cName, float w, bool acc, string uncName="");
@@ -186,13 +186,15 @@ public:
   // =======
 // 	vector<string> listFiles(string dir, string files);
   int findElement(vector<string> v, string e);
-  vector< pair<string, vector<vector<float> > > > retrieveNumbers(string categ, string cname,
-								  int mcat, string opt="");
+  vector< pair<string, vector<vector<map<string,float> > > > > 
+  retrieveNumbers(string categ, string cname, int mcat, string opt="");
   
-  bool getDataCardLines(map<string,string>& lines, vector<string> dsNames, string sigName,
-			string categ, string cname, int bin,
+  bool getDataCardLines(map<string,string>& lines, vector<string> dsNames,
+			string sigName,	string categ, string cname, int bin,
 			map<string,vector<string> > intNuisPars,
-			map<string,bool > nuisParExt);
+			map<string,bool > nuisParExt,
+			map<string,string> nuisParScheme,
+			map<string,vector<string> > nuisParsVals);
  
 
   //void drawNumbers();

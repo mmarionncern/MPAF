@@ -266,6 +266,7 @@ private:
   bool _DoValidationPlots;
 
   vector<TVector2> _uncleanJets;
+  vector<TVector2> _uncleanDiscJets;
   vector<TVector2> _uncleanFwdJets;
 
 

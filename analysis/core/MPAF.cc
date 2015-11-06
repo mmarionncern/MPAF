@@ -744,6 +744,11 @@ MPAF::addWorkflowHistos() {
 
 // systematic uncertainties functions =======================
 
+void
+MPAF::addManualSystSource(string name, int dir) {
+  //everything has to be done by hand
+  addWSystSource(name, dir, "+", 0); 
+}
 
 void
 MPAF::addWSystSource(string name, int dir, string type, float val) {

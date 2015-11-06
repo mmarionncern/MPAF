@@ -21,7 +21,6 @@ SSDL2015::initialize(){
   
   _vc->registerVar("run"                          );
   _vc->registerVar("lumi"                         );
-  //_vc->registerVar("evt"                          );
   _vc->registerVar("evt");
   _vc->registerVar("isData"                       );
   _vc->registerVar("HLT_SingleEl"                 );
@@ -51,9 +50,7 @@ SSDL2015::initialize(){
   _vc->registerVar("LepGood_pdgId"                );
   _vc->registerVar("LepGood_relIso03"             );
   _vc->registerVar("LepGood_relIso04"             );
-  //_vc->registerVar("LepGood_jetPtRatio"           );
   _vc->registerVar("LepGood_jetPtRatiov2"         );
-  //_vc->registerVar("LepGood_jetPtRel"             );
   _vc->registerVar("LepGood_jetPtRelv2"           );
   _vc->registerVar("LepGood_jetBTagCSV"           );
   _vc->registerVar("LepGood_jetRawPt"             );
@@ -251,11 +248,14 @@ SSDL2015::initialize(){
   _categorization = getCfgVarI("categorization", 1);
   _DoValidationPlots = getCfgVarI("ValidationPlots", 0);
 
-   // vector<string> jess;
-   // jess.push_back("Jet_pt");
-   //jess.push_back("LepGood_jetCorrFactor_L1L2L3Res");
-   //addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(Jet_eta):Jet_pt", "" );
+  vector<string> jess;
+  jess.push_back("Jet_pt");
+  //jess.push_back("LepGood_jetCorrFactor_L1L2L3Res");
+  addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(Jet_eta):Jet_pt", "" );
    //addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(LepGood_jetLepAwareJEC_eta):LepGood_jetLepAwareJEC_pt", "" );
+
+  addManualSystSource("EWKFR",SystUtils::kNone);
+  addManualSystSource("BTAG",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -268,6 +268,28 @@ SSDL2015::initialize(){
     _dbm->loadDb("MuNIsoMC","FR_Oct21.root","FRMuPtCorr_qcd_non");
     _dbm->loadDb("ElIsoMC","FR_Oct21.root","FRElPtCorr_qcd_iso");
     _dbm->loadDb("MuIsoMC","FR_Oct21.root","FRMuPtCorr_qcd_iso");
+
+    _dbm->loadDb("ElNIsoUp","FR_Oct21.root","FRElPtCorr_ETH_non");
+    _dbm->loadDb("MuNIsoUp","FR_Oct21.root","FRMuPtCorr_ETH_non");
+    _dbm->loadDb("ElIsoUp","FR_Oct21.root","FRElPtCorr_ETH_iso");
+    _dbm->loadDb("MuIsoUp","FR_Oct21.root","FRMuPtCorr_ETH_iso");
+    
+    _dbm->loadDb("ElNIsoMCUp","FR_Oct21.root","FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMCUp","FR_Oct21.root","FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMCUp","FR_Oct21.root","FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMCUp","FR_Oct21.root","FRMuPtCorr_qcd_iso");
+    
+    _dbm->loadDb("ElNIsoDo","FR_Oct21.root","FRElPtCorr_ETH_non");
+    _dbm->loadDb("MuNIsoDo","FR_Oct21.root","FRMuPtCorr_ETH_non");
+    _dbm->loadDb("ElIsoDo","FR_Oct21.root","FRElPtCorr_ETH_iso");
+    _dbm->loadDb("MuIsoDo","FR_Oct21.root","FRMuPtCorr_ETH_iso");
+
+    _dbm->loadDb("ElNIsoMCDo","FR_Oct21.root","FRElPtCorr_qcd_non");
+    _dbm->loadDb("MuNIsoMCDo","FR_Oct21.root","FRMuPtCorr_qcd_non");
+    _dbm->loadDb("ElIsoMCDo","FR_Oct21.root","FRElPtCorr_qcd_iso");
+    _dbm->loadDb("MuIsoMCDo","FR_Oct21.root","FRMuPtCorr_qcd_iso");
+
+
   }
   if(_FR=="FO4C") {
     _dbm->loadDb("El","MaySync/CH_FRFile_090615.root","tt/nosel/FRISisofo4RElPtMIso2");
@@ -300,6 +322,10 @@ SSDL2015::modifyWeight() {
     else {_weight *= lheWeight();}
     //pileup weights
     _weight *= _vc->get("vtxWeight");
+
+    //BTAgging placeholder
+    // if(isUncProc() && getUncName()=="BTAG")
+    //   _susyMod->get
   }
 
 }
@@ -476,7 +502,7 @@ SSDL2015::run() {
       if(_auxFlags[ip]==kIsFake || _auxFlags[ip]==kIsDFake ) {
 	setWorkflow(kGlobalFake);
 	counter("dispatching");
-	getFRProb(_auxFlags[ip], kIsDFake?0:frs[n] );
+	getFRProb(_auxFlags[ip], (_auxFlags[ip]==kIsDFake)?0:frs[n] );
 	advancedSelection( kGlobalFake );
 	if(_auxFlags[ip]==kIsFake) n++;
       }
@@ -530,7 +556,7 @@ SSDL2015::advancedSelection(int WF) {
   _mTmin=min( Candidate::create(_l1Cand, _met)->mass(),
 	      Candidate::create(_l2Cand, _met)->mass() );
   //===============================
-  //cout<<" passing lepton "<<endl;
+  //cout<<" passing lepton "<<_HT<<"  "<<_metPt<<endl;
   counter("lepton baseline");
   
   //default cuts for baseline
@@ -603,21 +629,19 @@ SSDL2015::advancedSelection(int WF) {
 
 vector<float> 
 SSDL2015::getFRs() {
-
+  
   vector<float> frs;
   for(unsigned int ip=0;ip<_auxPairs.size();ip++) {
     if(_auxFlags[ip]!=kIsFake ) continue;
     float fr=getFR(_auxPairs[ip][1], _auxIdxs[ip][1]);
     frs.push_back(fr);
   }
-  
   vector<float> probs;
   if(frs.size()==0) return probs;
   probs.push_back(frs[0]);
   for(unsigned int i=1;i<frs.size();i++) {
     float prob = frs[i]/(1-frs[i]);
     for(unsigned int j=0;j<i;j++) {
-      //cout<<" computing proba :"<<i<<"  "<<j<<" prob "<<prob<<"  "<<(1-frs[i])<<endl;
       prob*=(1-frs[i]);
     }
     probs.push_back(prob);
@@ -628,7 +652,6 @@ SSDL2015::getFRs() {
 
 void
 SSDL2015::getFRProb(int flag, float fr) {
-
   float p=0;
   if(flag==kIsFake) {
     // float fr=getFR(_l2Cand, _idxL2);
@@ -1435,6 +1458,10 @@ SSDL2015::getFR(Candidate* cand, int idx) {
 
   if(_vc->get("isData")!=1) db +="MC";
 
+
+  if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
+  if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
+
   float ptVal=cand->pt();
   float etaVal=std::abs(cand->eta());
 
@@ -2013,13 +2040,19 @@ TVector2
 SSDL2015::varyMET() {
 
   unsigned int nJets=_vc->get("nJet");
+  unsigned int nDiscJets=_vc->get("nDiscJet");
   unsigned int nFwdJets=_vc->get("nJetFwd");
   if(!isInUncProc() ) {//first, store the jets
     _uncleanJets.clear();
+    _uncleanDiscJets.clear();
     _uncleanFwdJets.clear();
     for(unsigned int ij=0;ij<nJets;ij++) { 
       TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij), _vc->get("Jet_phi", ij)   );
       _uncleanJets.push_back(jet);
+    }
+    for(unsigned int ij=0;ij<nDiscJets;ij++) { 
+      TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
+      _uncleanDiscJets.push_back(jet);
     }
     for(unsigned int ij=0;ij<nFwdJets;ij++) { 
       TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij),_vc->get("JetFwd_phi", ij));
@@ -2028,11 +2061,20 @@ SSDL2015::varyMET() {
   }
   
   TVector2 met; met.SetMagPhi(_vc->get("met_pt"), _vc->get("met_phi") );
+  if(!(isInUncProc() &&  getUncName()=="JES") ) return met;
+
   for(unsigned int ij=0;ij<nJets;ij++) { 
     //add back the standard jets
     met += _uncleanJets[ij];
     //JES varied jets
     TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij), _vc->get("Jet_phi", ij)   );
+    met -= jet;
+  }
+  for(unsigned int ij=0;ij<nDiscJets;ij++) { 
+    //add back the standard jets
+    met += _uncleanDiscJets[ij];
+    //JES varied jets
+    TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
     met -= jet;
   }
   for(unsigned int ij=0;ij<nFwdJets;ij++) { 

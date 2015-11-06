@@ -59,6 +59,8 @@ private:
 
   DataBaseManager* _dbm;
 
+  vector<string> _usefulVars;
+
 public:
 
   AnaConfig();
@@ -105,7 +107,7 @@ public:
   vector<string> findDSNames(string channel, string crName);
   int findChan(string ds);
 
-  void addSample(string str, string sname, int col, bool loadH=true );
+  void addSample(string str, string sname, int col, float w=1, bool loadH=true );
 
   bool passRunFilter(int run);
 
@@ -122,7 +124,7 @@ public:
 
   void isHistoAnalysis();
   
-
+  void addUsefulVar(string var);
 
 private:
 

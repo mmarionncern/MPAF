@@ -43,6 +43,8 @@ private:
   int _dsContentType;
   std::vector<std::string> _friends;
 
+  std::vector<string> _usefulVars;
+
   // std::map<std::string, std::string> _crSamples;
   // std::map<std::string, bool> _isNormSamples;
 
@@ -71,6 +73,8 @@ public:
 		 float kFact, float lumi, float eqLumi, bool loadH=true);
 
   void addFriend(std::string friendname);
+
+  void setUsefulVars(std::vector<std::string> vars);
 
   //access functions 
   std::string getName() const { return _name;};
