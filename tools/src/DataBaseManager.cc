@@ -21,6 +21,11 @@ DataBaseManager::loadDb(string key,string dbName, string hname) {
   readDbHisto(key,dbName,hname);
 }
 
+void
+DataBaseManager::loadDbCSV(string key, string dbName, char separator){
+  readDbCSV(key, dbName, separator);
+}
+
 
 void
 DataBaseManager::readDb(string key, string dbName) {
@@ -199,6 +204,41 @@ DataBaseManager::readDb(string key, string dbName) {
 }
 
 
+void
+DataBaseManager::readDbCSV(string key, string dbName, char separator){
+
+  string ndb= (string)getenv("MPAF")+"/workdir/database/"+dbName;
+  ifstream dbFile(ndb.c_str());
+
+  if(!dbFile.is_open()) {
+    cout << "ERROR, database file " << ndb << " could not be opened." << endl;
+    return;
+  }
+
+  vector<vector<float> > eF;
+  vector<vector<string> > eS;
+  _csvDbValS.insert(pair<string, vector<vector<string> > >(key, eS));
+  _csvDbValF.insert(pair<string, vector<vector<float > > >(key, eF));
+  
+  string line;
+  while( getline(dbFile, line) ) {
+//DUMP(line);
+    vector<string> cols = Tools::split(line, separator);
+    for(unsigned int i = 0; i < cols.size(); ++i)
+      cols[i] = Tools::trim(Tools::trim(cols[i]), "\"");
+//DUMPVECTOR(cols);
+    _csvDbValS[key].push_back(cols);
+//DUMPVECTOR(Tools::strToFloat(cols));
+    _csvDbValF[key].push_back(Tools::strToFloat(cols));
+  }
+
+//DUMPVECTOR(_csvDbValF[key][0]);
+//DUMPVECTOR(_csvDbValF[key][1]);
+
+  dbFile.close();
+
+}
+
 
 void
 DataBaseManager::readDbHisto(string key, string dbName, string hname) {
@@ -272,7 +312,7 @@ DataBaseManager::readDbHisto(string key, string dbName, string hname) {
     min[i] = _cDbLim[key][i][0];
     max[i] = _cDbLim[key][i].back();
   }
-     
+  
   _mDBs[ key ] = new THnSparseF(key.c_str(),key.c_str(),nV,nBins,min,max);
   _mDBEHs[ key ] = new THnSparseF((key+"EH").c_str(),(key+"EH").c_str(),nV,nBins,min,max);
   _mDBELs[ key ] = new THnSparseF((key+"EL").c_str(),(key+"EL").c_str(),nV,nBins,min,max);
@@ -481,6 +521,38 @@ DataBaseManager::getDBValue(string key, string v1) {
 
   return getDBValue(key, _mSIt->second);
 }
+
+
+float
+DataBaseManager::getDBValueCSV(string key, vector<pair<int, float> > fCheck, vector<pair<int, string> > sCheck, int col){
+
+  for(unsigned int i = 0; i < _csvDbValS[key].size(); ++i){
+
+    bool found = true;
+    for(unsigned int j = 0; j < fCheck.size(); ++j){
+      if(_csvDbValF[key][i][fCheck[j].first] != fCheck[j].second){
+        found = false;
+        break;
+      }
+    }
+
+    if(!found) continue;
+
+    for(unsigned int j = 0; j < sCheck.size(); ++j){
+      if(_csvDbValS[key][i][sCheck[j].first] != sCheck[j].second){
+        found = false;
+        break;
+      }
+    }
+
+    if(!found) continue;
+    return _csvDbValF[key][i][col];
+
+  }
+
+  return -9999;
+
+} 
 
 float 
 DataBaseManager::getDBErrL(string key, string v1) {

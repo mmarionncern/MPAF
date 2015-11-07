@@ -38,6 +38,13 @@ namespace Tools {
 
 	// Non-template members
 
+    float add(const std::vector<std::string>);
+    float subtract(const std::vector<std::string>);
+    std::vector<std::string> split(const std::string, char);
+	std::vector<float> strToFloat(const std::vector<std::string>);
+    float evalSimpleFormula(std::string);
+    std::string trim(std::string, std::string chr = " ");
+
 	float AngleAddition(float, float);
 	float AngleSubtraction(float, float);
 	bool checkDirWritePermission(std::string);
@@ -64,7 +71,6 @@ namespace Tools {
 	std::string toStdString(TString);
 	TString toTString(std::string);
 	VerbosityLevel toVerbosityLevel(std::string);
-    std::string trim(std::string);
 
  
 

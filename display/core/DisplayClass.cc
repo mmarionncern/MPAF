@@ -185,6 +185,16 @@ DisplayClass::refreshHistos() {
   delete _leg;
   _leg=NULL;
 
+  delete _empty;
+  delete _hMC;
+  delete _hData;
+  delete _gData;
+  _empty=NULL;
+  _hMC=NULL;
+  _hData=NULL;
+  _gData=NULL;
+  _hCoords.clear();
+
 }
 
 void
@@ -260,6 +270,8 @@ DisplayClass::loadAutoBinning(string filename) {
 void 
 DisplayClass::setObservables(string v1, string v2, string v3,
 			string v4, string v5, string v6) {
+
+  _vars.clear();
 
   _vars.push_back(v1);
   if(v2!="") _vars.push_back(v2);

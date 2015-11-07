@@ -20,6 +20,8 @@
 #include "TGraph.h"
 
 #include "tools/src/StatUtils.hh"
+#include "analysis/utils/Debug.cc"
+#include "analysis/utils/Tools.hh"
 
 class DataBaseManager {
 
@@ -30,10 +32,12 @@ public:
 
   void loadDb(std::string key, std::string dbName);
   void loadDb(std::string key, std::string dbName, std::string hname);
+  void loadDbCSV(std::string key, std::string dbName, char separator);
   float getDBValue(std::string key, float v1=-1000000, float v2=-1000000,
 		   float v3=-1000000, float v4=-1000000, float v5=-1000000,
 		   float v6=-1000000,float v7=-1000000, float v8=-1000000, 
 		   float v9=-1000000, float v10=-1000000);
+
 
   float getDBErrL(std::string key, float v1=-1000000, float v2=-1000000,
 		   float v3=-1000000, float v4=-1000000, float v5=-1000000,
@@ -49,6 +53,9 @@ public:
   float getDBValue(std::string key, std::string v1);
   float getDBErrL(std::string key, std::string v1);
   float getDBErrH(std::string key, std::string v1);
+  // csv stuff
+  float getDBValueCSV(std::string key, std::vector<std::pair<int, float> > fCheck, 
+                                       std::vector<std::pair<int, std::string> > sCheck, int col);
 
   std::vector<std::vector<float> > getDB(std::string key);
 
@@ -57,7 +64,11 @@ public:
 private:
   
   void readDb(std::string key, std::string dbName);
+  void readDbCSV(std::string key, std::string dbName, char separator);
   void readDbHisto(std::string key, std::string dbName, std::string hname);
+
+  std::map<std::string, std::vector<std::vector<string> > > _csvDbValS;
+  std::map<std::string, std::vector<std::vector<float> > > _csvDbValF;
 
   std::map<std::string,std::vector<std::vector<float> > > _cDbLim;
   std::map<std::string,std::map<int, int* > > _cDbIdx;

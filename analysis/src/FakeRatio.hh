@@ -78,17 +78,11 @@ private:
   void sumTriggerPlots(string obs, int ds, string ext);
   void writeOutput();
 
-  void testEwkSub();
-
-  bool bJetSelection(int);
   void collectKinematicObjects();
-  bool goodJetSelection(int);
   bool denominatorElectronSelection(int);
   bool denominatorMuonSelection(int);
   bool numeratorElectronSelection(int);
   bool numeratorMuonSelection(int);
-  bool vetoElectronSelection(int);
-  bool vetoMuonSelection(int);
 
   void setCut(std::string, float, std::string, float = 0);
   void setMeasurementRegion();
@@ -98,7 +92,6 @@ private:
   bool mrSelection();
   bool qcdSelection();
   bool skimSelection();
-  bool triggerEmulation(int idx, int label);
   bool triggerSelection();
   bool triggerSelectionLite();
   bool ucsxEwkSelection();
@@ -120,10 +113,13 @@ private:
   void fillUcsxEwkLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
   void fillUcsxEwkLeptonPlots();
   void findTriggerExts();
+  float overflowPt(float);
+
+  void testEwkSub();
+  bool triggerEmulation(int idx, int label);
   void fillTriggerTestPlots();
   vector<int> findTriggerIdxs();
 
-  float overflowPt(float);
 
 private: 
 

@@ -44,6 +44,7 @@ SusyModule::defineLeptonWPS() {
   _cLostHitWP.resize(kNWPs);
   _tChWP.resize(kNWPs);
   _sipWP.resize(kNWPs);
+  _muIdWP.resize(kNWPs);
   _dxyWP.resize(kNWPs);
   _dzWP.resize(kNWPs);
   _elMvaIdWP.resize(3);
@@ -56,6 +57,12 @@ SusyModule::defineLeptonWPS() {
     if(i!=2) _ptWP[i].resize(kNWPs);
   }
   
+  //muId
+  _muIdWP[kDenom] = 0; 
+  _muIdWP[kLoose] = 0;//1000. 
+  _muIdWP[kTight] = 1; 
+  
+
   //conv rej ====================
   _cLostHitWP[kDenom] = 1; 
   _cLostHitWP[kLoose] = 1; 
@@ -64,11 +71,11 @@ SusyModule::defineLeptonWPS() {
   //pt ============================
   _ptWP[kEl][kDenom] = 7 ; _ptWP[kMu][kDenom] = 5 ;
   _ptWP[kEl][kLoose] = 7 ; _ptWP[kMu][kLoose] = 5 ;
-  _ptWP[kEl][kTight] = 10; _ptWP[kMu][kTight] = 10;
+  _ptWP[kEl][kTight] = 15; _ptWP[kMu][kTight] = 10;
 
   //sip & IP ======================
   _sipWP[kDenom] = 4.0; 
-  _sipWP[kLoose] = 1000.0; 
+  _sipWP[kLoose] = 1000.0;//1000. 
   _sipWP[kTight] = 4.0; 
   
   _dxyWP[kDenom] = 0.05; //cm
@@ -94,15 +101,6 @@ SusyModule::defineLeptonWPS() {
   // _elMvaIdWP[kEBF][kTight] = 0.57;
   // _elMvaIdWP[kEE ][kTight] = 0.05;
 
-  // emulator for non-isolated and isolated triggers  
-  //_elMvaIdWP[kEBC][kSpecFakeElNon] = -0.70;
-  //_elMvaIdWP[kEBF][kSpecFakeElNon] = -0.83;
-  //_elMvaIdWP[kEE ][kSpecFakeElNon] = -0.92;
-
-  // emulator for isolated triggers only
-  //_elMvaIdWP[kEBC][kSpecFakeElIso] = -0.155;
-  //_elMvaIdWP[kEBF][kSpecFakeElIso] = -0.56;
-  //_elMvaIdWP[kEE ][kSpecFakeElIso] = -0.76;
 
   _elMvaIdWP[kEBC][kInSitu] = -0.363;
   _elMvaIdWP[kEBF][kInSitu] = -0.579;
@@ -287,16 +285,10 @@ SusyModule::elHLTEmulSel(int idx, bool withIso) const {
 bool
 SusyModule::elHLTEmulSelIso(int idx, int mvaWP) const {
 
-  //if(_vc->get("evt") == 930292) cout << "test0" << endl;
-
   if(_vc->get("LepGood_ecalPFClusterIso", idx) > 0.45 * _vc->get("LepGood_pt", idx) ) return false;
-  //if(_vc->get("evt") == 930292) cout << "test1" << endl;
   if(_vc->get("LepGood_hcalPFClusterIso", idx) > 0.25 * _vc->get("LepGood_pt", idx) ) return false;
-  //if(_vc->get("evt") == 930292) cout << "test2" << endl;
   if(_vc->get("LepGood_dr03TkSumPt"     , idx) > 0.2  * _vc->get("LepGood_pt", idx) ) return false;
-  //if(_vc->get("evt") == 930292) cout << "test3" << endl;
   if(!elMvaSel(idx, mvaWP)                                                          ) return false;
-  //if(_vc->get("evt") == 930292) cout << "test4" << endl;
 
   return true;
 }
@@ -308,7 +300,6 @@ SusyModule::invPtRelSel(int idx, int wp) const {
   return false;
 
 }
-
 
 
 
@@ -381,7 +372,10 @@ SusyModule::passMllSingleVeto(const Candidate* c1, const Candidate* c2,
 
   //cout<<"Id "<<c1->pdgId()<<"  "<<c2->pdgId()<<"  "<< Candidate::create(c1,c2)->mass()<<"  "<<mllm<<"  "<<mllM<<endl;
   if( (c1->pdgId()== -c2->pdgId()) || !ossf) {
+    //cout<<" ==> aqui "<<c2->uid()<<"   "<<c1->uid()<<endl;
+    
     float mll = Candidate::create(c1,c2)->mass();
+    //cout<<" ==> aqui! "<<endl;
     if(mll>mllm && mll<mllM) return false; 
   }
   return true;
@@ -402,7 +396,9 @@ SusyModule::passMllMultiVeto(const Candidate* c1, const CandList* cands,
 
 CandList
 SusyModule::bestSSPair(const CandList* leps, bool byflav,
-		       bool bypassMV, float pTthr, int& idx1, int& idx2) {
+		       bool bypassMV, bool os, 
+		       float pTthrMu, float pTthrEl,
+		       int& idx1, int& idx2) {
 
 //HACK: replaced nullptr with NULL
 
@@ -413,28 +409,32 @@ SusyModule::bestSSPair(const CandList* leps, bool byflav,
   idx1=0;
   idx2=1;
 
-  if(leps->size()<=2) return (*leps);
+  float pTthr1,pTthr2;
   
   for(unsigned int il1=0;il1<leps->size()-1;il1++) {
     for(unsigned int il2=il1+1;il2<leps->size();il2++) {
       
       //conditional pt threshold, could evolve in CERN code 
  
-      if(leps->at(il1)->pt()<pTthr || leps->at(il2)->pt()<pTthr) continue; 
+      pTthr1 = (std::abs(leps->at(il1)->pdgId())==11)?pTthrEl:pTthrMu;
+      pTthr2 = (std::abs(leps->at(il2)->pdgId())==11)?pTthrEl:pTthrMu;
 
+      //conditional pt threshold, could evolve in CERN code 
+      if(leps->at(il1)->pt()<pTthr1 || leps->at(il2)->pt()<pTthr2) continue; 
+      
       if(!passMllSingleVeto(leps->at(il1), leps->at(il2), 0, 8, false) && !bypassMV) continue;
-
-      if(leps->at(il1)->charge()!=leps->at(il2)->charge()) continue;
-
+      
+      if( (leps->at(il1)->charge()!=leps->at(il2)->charge())!=os ) continue;
+      
       int flav= (byflav?(std::abs(leps->at(il1)->pdgId()) + std::abs(leps->at(il2)->pdgId())):0);
       int st=leps->at(il1)->pt()+leps->at(il2)->pt();
 
       if(flav<tmpFlav) continue;
-
+      
       if(flav>tmpFlav) tmpSt=0;
       tmpFlav=flav;
       if(st<tmpSt) continue;
-
+      
       tmpSt=st;
       clist[0]=leps->at(il1);
       clist[1]=leps->at(il2);
@@ -447,10 +447,58 @@ SusyModule::bestSSPair(const CandList* leps, bool byflav,
   return clist;
 }
 
+CandList
+SusyModule::bestSSPair(const CandList* leps1, const CandList* leps2, bool byflav,
+		       bool bypassMV, bool os, float pTthrMu, float pTthrEl,
+		       int& idx1, int& idx2) {
+
+  //LISTS HAVE TO BE COMPLEMENTARY, NO OVERLAPS!
+
+  //HACK: replaced nullptr with NULL
+  CandList clist(2,NULL);
+  int tmpFlav=0;
+  int tmpSt=0;
+
+  idx1=0;
+  idx2=1;
+
+  float pTthr1,pTthr2;
+
+  for(unsigned int il1=0;il1<leps1->size();il1++) {
+    for(unsigned int il2=0;il2<leps2->size();il2++) {
+      
+      pTthr1 = (std::abs(leps1->at(il1)->pdgId())==11)?pTthrEl:pTthrMu;
+      pTthr2 = (std::abs(leps2->at(il2)->pdgId())==11)?pTthrEl:pTthrMu;
+
+      //conditional pt threshold, could evolve in CERN code 
+      if(leps1->at(il1)->pt()<pTthr1 || leps2->at(il2)->pt()<pTthr2) continue; 
+      if(!passMllSingleVeto(leps1->at(il1), leps2->at(il2), 0, 8, false) && !bypassMV) continue;
+
+      if( (leps1->at(il1)->charge()!=leps2->at(il2)->charge())!=os ) continue;
+      int flav= (byflav?(std::abs(leps1->at(il1)->pdgId()) + std::abs(leps2->at(il2)->pdgId())):0);
+      int st=leps1->at(il1)->pt()+leps2->at(il2)->pt();
+
+      if(flav<tmpFlav) continue;
+      if(flav>tmpFlav) tmpSt=0;
+      tmpFlav=flav;
+      if(st<tmpSt) continue;
+
+      tmpSt=st;
+      clist[0]=leps1->at(il1);
+      clist[1]=leps2->at(il2);
+      idx1 = il1;
+      idx2 = il2;
+    
+    }//il2
+  }//il1
+  return clist;
+}
+
 
 CandList
 SusyModule::bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
-		       bool bypassMV, float pTthr, int& idx1, int& idx2) {
+		       bool bypassMV, bool os, float pTthrMu, float pTthrEl, 
+		       int& idx1, int& idx2) {
 
   CandList clist(2,NULL);
   int tmpFlav=0;
@@ -458,37 +506,137 @@ SusyModule::bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 
   idx1=0;
   idx2=1;
-  if(leps->size()<=1) {
-    clist[0] = c1;
-    clist[1] = leps->at(0);
-    return clist;
-  }
-  
+ 
+  float pTthr1,pTthr2;
+
   for(unsigned int il=0;il<leps->size();il++) {
-     //conditional pt threshold, could evolve in CERN code 
+      
+    pTthr1 = (std::abs(c1->pdgId())==11)?pTthrEl:pTthrMu;
+    pTthr2 = (std::abs(leps->at(il)->pdgId())==11)?pTthrEl:pTthrMu;
 
-      if(c1->pt()<pTthr || leps->at(il)->pt()<pTthr) continue; 
+    //conditional pt threshold, could evolve in CERN code 
+    if(c1->pt()<pTthr1 || leps->at(il)->pt()<pTthr2) continue; 
 
-      if(!passMllSingleVeto(c1, leps->at(il), 0, 8, false) && !bypassMV) continue;
+    if(!passMllSingleVeto(c1, leps->at(il), 0, 8, false) && !bypassMV) continue;
 
-      if(c1->charge()!=leps->at(il)->charge()) continue;
+    if((c1->charge()!=leps->at(il)->charge())!=os) continue;
 
-      int flav= (byflav?(std::abs(c1->pdgId()) + std::abs(leps->at(il)->pdgId())):0);
-      int st=c1->pt()+leps->at(il)->pt();
+    int flav= (byflav?(std::abs(c1->pdgId()) + std::abs(leps->at(il)->pdgId())):0);
+    int st=c1->pt()+leps->at(il)->pt();
 
-      if(flav<tmpFlav) continue;
+    if(flav<tmpFlav) continue;
 
-      if(flav>tmpFlav) tmpSt=0;
-      tmpFlav=flav;
-      if(st<tmpSt) continue;
+    if(flav>tmpFlav) tmpSt=0;
+    tmpFlav=flav;
+    if(st<tmpSt) continue;
 
-      tmpSt=st;
-      clist[0]=c1;
-      clist[1]=leps->at(il);
-      idx1 = 0;
-      idx2 = il;
+    tmpSt=st;
+    clist[0]=c1;
+    clist[1]=leps->at(il);
+    idx1 = 0;
+    idx2 = il;
     
   }//il
+
+  return clist;
+}
+
+
+
+vector<CandList>
+SusyModule::buildSSPairs(const CandList* leps, bool byflav,
+			 bool bypassMV, bool os, 
+			 float pTthrMu, float pTthrEl,
+			 vector<int>& idx1, vector<int>& idx2) {
+
+  vector<CandList> clist;
+  float pTthr1,pTthr2;
+
+  for(unsigned int il1=0;il1<leps->size()-1;il1++) {
+    for(unsigned int il2=il1+1;il2<leps->size();il2++) {
+      pTthr1 = (std::abs(leps->at(il1)->pdgId())==11)?pTthrEl:pTthrMu;
+      pTthr2 = (std::abs(leps->at(il2)->pdgId())==11)?pTthrEl:pTthrMu;
+
+      //conditional pt threshold, could evolve in CERN code 
+      if(leps->at(il1)->pt()<pTthr1 || leps->at(il2)->pt()<pTthr2) continue; 
+      //cout<<" cands => "<<leps->at(il2)->uid()<<endl;
+      if(!passMllSingleVeto(leps->at(il1), leps->at(il2), 0, 8, false) && !bypassMV) continue;
+      
+      if( (leps->at(il1)->charge()!=leps->at(il2)->charge())!=os ) continue;
+    
+      CandList tmp(2,NULL);
+     
+      tmp[0]=leps->at(il1);
+      tmp[1]=leps->at(il2);
+
+      clist.push_back(tmp);
+
+      idx1.push_back(il1);
+      idx2.push_back(il2);
+      
+    }//il2
+  }//il1
+
+  return clist;
+}
+
+
+vector<CandList>
+SusyModule::buildSSPairs(const CandList* leps1, const CandList* leps2, bool byflav,
+			 bool bypassMV, bool os, float pTthrMu, float pTthrEl,
+			 vector<int>& idx1, vector<int>& idx2) {
+
+  //LISTS HAVE TO BE COMPLEMENTARY, NO OVERLAPS!
+
+  vector<CandList> clist;
+  float pTthr1,pTthr2;
+
+  vector<InternalCList> iCList;
+
+  for(unsigned int il1=0;il1<leps1->size();il1++) {
+    for(unsigned int il2=0;il2<leps2->size();il2++) {
+      
+      pTthr1 = (std::abs(leps1->at(il1)->pdgId())==11)?pTthrEl:pTthrMu;
+      pTthr2 = (std::abs(leps2->at(il2)->pdgId())==11)?pTthrEl:pTthrMu;
+
+      //conditional pt threshold, could evolve in CERN code 
+      if(leps1->at(il1)->pt()<pTthr1 || leps2->at(il2)->pt()<pTthr2) continue; 
+      if(!passMllSingleVeto(leps1->at(il1), leps2->at(il2), 0, 8, false) && !bypassMV) continue;
+      if( (leps1->at(il1)->charge()!=leps2->at(il2)->charge())!=os ) continue;
+      
+      CandList tmp(2,NULL);
+     
+      tmp[0]=leps1->at(il1);
+      tmp[1]=leps2->at(il2);
+
+      InternalCList iclist;
+      iclist.list = tmp;
+      iclist.il1 = il1;
+      iclist.il2 = il2;
+      
+      iCList.push_back(iclist);
+    
+    
+    }//il2
+  }//il1
+  
+  //ordering ================
+  std::sort( iCList.begin(), iCList.end() );
+  // if(iCList.size()>=2)
+  //   cout<<" ===================== new pair ===================== "<<endl;
+  for(unsigned int il=0;il<iCList.size();++il) {
+    // if(iCList.size()>=2)
+    //   cout<<" sorting pairs!!!!!! "<<il<<" -->  "<<iCList[il].list[0]->pdgId()
+    // 	  <<"  "<<iCList[il].list[1]->pdgId()<<" --> "
+    // 	  <<iCList[il].list[0]->pt()<<"  "<<iCList[il].list[1]->pt()<<endl;
+
+    clist.push_back(iCList[il].list);
+    idx1.push_back(iCList[il].il1);
+    idx2.push_back(iCList[il].il2);
+  }
+
+  //=========================
+  
 
   return clist;
 }
@@ -561,7 +709,7 @@ SusyModule::cleanLeps(CandList& tightLeps, CandList* vetoLeps) {
 void
 SusyModule::cleanJets(CandList* leptons, 
 		      CandList& cleanJets, vector<unsigned int>& jetIdxs,
-		      CandList& cleanBJets, vector<unsigned int>& bJetIdxs) {
+		      CandList& cleanBJets, vector<unsigned int>& bJetIdxs, float thr, float bthr ) {
 
   cleanJets.clear();
   cleanBJets.clear();
@@ -617,9 +765,9 @@ SusyModule::cleanJets(CandList* leptons,
 
     if(!pass) continue;
 
-    if(jets[ij]->pt()<25) continue;
+    if(jets[ij]->pt()<bthr) continue;
     
-    if(jets[ij]->pt()>40) {
+    if(jets[ij]->pt()>thr) {
       cleanJets.push_back(jets[ij] );
       jetIdxs.push_back(ij);
     }
@@ -689,5 +837,85 @@ SusyModule::applySingleLepSF(const Candidate* cand, float& weight) {
 //
 //
 //}
+
+
+float
+SusyModule::bTagSF(string dbKeyEffB, string dbKeyEffL, string dbKeyCsv, 
+                   CandList& jets , vector<unsigned int>& jetIdx ,
+                   CandList& bJets, vector<unsigned int>& bJetIdx, int st){
+  // put st = -1 / 0 / +1 for down / central / up
+
+  float pdata = 1.0;
+  float pmc   = 1.0;
+
+  for(unsigned int i = 0; i < jets.size(); ++i) {
+    if(find(bJetIdx.begin(), bJetIdx.end(), jetIdx[i]) != bJetIdx.end()){
+      pdata *= bTagMediumEfficiency (dbKeyEffB, dbKeyEffL, jets[i], jetIdx[i], true) * 
+               bTagMediumScaleFactor(dbKeyCsv            , jets[i], jetIdx[i], true, st);
+      pmc   *= bTagMediumEfficiency (dbKeyEffB, dbKeyEffL, jets[i], jetIdx[i], true);
+    }
+    else {
+      pdata *= (1 - bTagMediumEfficiency (dbKeyEffB, dbKeyEffL, jets[i], jetIdx[i], false) * 
+                    bTagMediumScaleFactor(dbKeyCsv            , jets[i], jetIdx[i], false, st));
+      pmc   *= (1 - bTagMediumEfficiency (dbKeyEffB, dbKeyEffL, jets[i], jetIdx[i], false));
+    }
+  }
+
+  if(pmc != 0) return pdata/pmc;
+  return 1.0;
+
+}
+
+float
+SusyModule::bTagMediumEfficiency(string dbKeyB, string dbKeyLight, Candidate* jet, int jetIdx, bool isBTagged){
+
+  if(isBTagged) return _dbm -> getDBValue(dbKeyB, jet -> pt(), std::abs(jet -> eta()));
+  return _dbm -> getDBValue(dbKeyLight, jet -> pt(), std::abs(jet -> eta()));
+
+} 
+
+float
+SusyModule::bTagMediumScaleFactor(string dbKey, Candidate* jet, int jetIdx, bool isBTagged, int st){
+
+  //CH: this is not yet complete, for non-medium bTags, there are formula's to evaluate using pt and eta
+  //float pt  = std::min( std::max(jet -> pt() , 30.001), 669.999);
+  //float eta = std::min( std::max(jet -> eta(), -2.399),   2.399);
+
+  if(isBTagged) return bTagScaleFactor(dbKey, 1, 0, st, 0); // mujets
+  return bTagScaleFactor(dbKey, 1, 1, st, 2); // comb
+
+} 
+
+
+float
+SusyModule::bTagScaleFactor(string dbKey, unsigned int op, unsigned int mt, int st, unsigned int fl){ 
+  // op = 0 (loose), 1 (medium), 2 (tight)
+  // mt = 0 (mujets), 1 (comb)
+  // st = -1 (lower), 0 (central), +1 (upper)
+  // fl = 0 (b), 1 (c), 2 (other)
+
+  string mts = "mujets";
+  if(mt == 1) mts = "comb";
+
+  string sts = "central";
+  if(st == -1) sts = "down";
+  if(st ==  1) sts = "up";
+
+  vector<pair<int, string> > sCheck;
+  sCheck.push_back(pair<int, string>(1, mts));
+  sCheck.push_back(pair<int, string>(2, sts));
+
+  vector<pair<int, float> > fCheck;
+  fCheck.push_back(pair<int, float>(0,   op));
+  fCheck.push_back(pair<int, float>(3,   fl));
+  fCheck.push_back(pair<int, float>(4, -2.4));
+  fCheck.push_back(pair<int, float>(5,  2.4));
+  fCheck.push_back(pair<int, float>(6,   30));
+  fCheck.push_back(pair<int, float>(7,  670));
+
+  return _dbm -> getDBValueCSV(dbKey, fCheck, sCheck, 10); 
+
+}
+
 
 

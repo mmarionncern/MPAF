@@ -171,6 +171,75 @@ std::vector<std::string> Tools::explodeString(const std::string string, std::str
 
 
 //__________________________________________________________________________
+std::vector<std::string> Tools::split(const std::string s, char delim) {
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+
+//__________________________________________________________________________
+std::vector<float> Tools::strToFloat(const std::vector<std::string> vec){
+
+	std::vector<float> res;
+    for(unsigned int i = 0; i < vec.size(); ++i){
+        res.push_back(evalSimpleFormula(vec[i]));
+    }
+	return res;
+
+}
+
+
+//__________________________________________________________________________
+float Tools::add(const std::vector<std::string> elems){
+
+  float res = evalSimpleFormula(elems[0]);
+  if(elems[0] == "") res = 0;
+  for(unsigned int i = 1; i < elems.size(); ++i)
+    res += evalSimpleFormula(elems[i]);
+
+  return res;
+}
+
+
+//__________________________________________________________________________
+float Tools::subtract(const std::vector<std::string> elems){
+
+  float res = evalSimpleFormula(elems[0]);
+  if(elems[0] == "") res = 0;
+  for(unsigned int i = 1; i < elems.size(); ++i)
+    res -= evalSimpleFormula(elems[i]);
+
+  return res;
+}
+
+
+//__________________________________________________________________________
+float Tools::evalSimpleFormula(std::string formula){
+
+    if(formula.find("+") == std::string::npos && formula.find("-") == std::string::npos) 
+      return atof(formula.c_str());
+
+    char sign = '+';
+    if(formula.find("+") == std::string::npos) sign = '-';
+
+    formula = trim(formula);
+    formula = trim(formula, "\"");
+    
+    std::vector<std::string> elems;
+    elems = split(formula, sign);
+
+    if(sign == '+') return add(elems);    
+    return subtract(elems);
+
+}
+
+
+//__________________________________________________________________________
 TDirectory* Tools::findOrCreateTDir(TString& dir, TFile* file) {
 	/*
   	looks for a directory and returns it if it exists and creates it and then
@@ -427,10 +496,10 @@ VerbosityLevel Tools::toVerbosityLevel(std::string value){
 
 
 //____________________________________________________________________________
-std::string Tools::trim(std::string s){
+std::string Tools::trim(std::string s, std::string chr){
 
-    size_t first = s.find_first_not_of(' ');
-    size_t last  = s.find_last_not_of(' ');
+    size_t first = s.find_first_not_of(chr);
+    size_t last  = s.find_last_not_of(chr);
     if(first == std::string::npos) return "";
     return s.substr(first, (last-first+1));
 

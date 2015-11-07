@@ -347,7 +347,6 @@ hObs HistoManager::preparehObsFromTemplate(string var, TH1* h, bool prof, bool i
   }
   
   vector<float> tmp;
-	
   otmp.nBX   = otmp.hs[0]->GetNbinsX();
   otmp.nBY   = twoDim?otmp.hs[0]->GetNbinsY():0;
   otmp.binsX = HistoUtils::getXbinning(otmp.hs[0]);
@@ -377,7 +376,7 @@ TH1* HistoManager::getHisto(string obs, int ds) {
 
 //____________________________________________________________________________
 const hObs* HistoManager::getHObs(string obs) {
-
+ 
   _cItVar = _variables.find(obs);
 
   if( _cItVar != _variables.end() ) {	
@@ -461,7 +460,7 @@ void HistoManager::copyHisto(string var, int ds, TH1* htmp ) {
     _itVar = _variables.find(var);
   }
 
-  
+  //cout<<var<<"   "<<htmp<<"  "<<ds<<endl;
   _itVar->second.hs[ds]->Add( htmp );
 	
   gErrorIgnoreLevel = kError;
@@ -674,8 +673,7 @@ void HistoManager::savePlots(string path,const TCanvas* c,
     if(i==1)
       cout<<" Dirname "<<dirname_<<endl;
     test_=fopen( dirname_.Data(), "r" );
-    if( test_==0 )
-      {
+    if( test_==0 ) {
   	TString command_ = TString("mkdir -p ") + dirname_; 
   	system( command_.Data());
       }
@@ -706,6 +704,19 @@ HistoManager::reset() {
   
   _nds=0;
   _hname="";
+
+}
+
+void
+HistoManager::refresh() {
+
+  for(_itVar=_variables.begin();_itVar!=_variables.end();_itVar++) {
+    for(size_t ih=0;ih<_itVar->second.hs.size();ih++)
+      delete _itVar->second.hs[ ih ];
+    
+    _itVar->second.hs.clear();
+  }
+  _variables.clear();
 
 }
 

@@ -62,11 +62,12 @@ void FRinSitu::initialize(){
   string TR_lines_non[3] = {"HLT_BIT_HLT_DoubleMu8_Mass8_PFHT300_v"                    , \
                             "HLT_BIT_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v"  , \
                             "HLT_BIT_HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v"      };
-  string TR_lines_iso[5] = {"HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"            , \
+  string TR_lines_iso[4] = {"HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"            , \
                             "HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v"          , \
-                            "HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"      , \
                             "HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v" , \
                             "HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"  };
+                            //"HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_v"         , 
+                            //"HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"      , 
   _vTR_lines_non = Tools::toVector(TR_lines_non);
   _vTR_lines_iso = Tools::toVector(TR_lines_iso);
 
@@ -934,7 +935,7 @@ void FRinSitu::collectKinematicObjects(){
   _nSigLeps   = _sigLeps  .size();
   _nVetLeps   = _vetLeps  .size();
 
-  _susyMod -> cleanJets( &_clLeps ,  _goodJets, _goodJetsIdx, _bJets, _bJetsIdx);
+  _susyMod -> cleanJets( &_clLeps ,  _goodJets, _goodJetsIdx, _bJets, _bJetsIdx, 40, 25);
   _susyMod -> cleanLeps(  _sigLeps, &_vetLeps );
 
   _nGoodJets = _goodJets.size();
@@ -1496,7 +1497,7 @@ bool FRinSitu::baseSelection(){
     return: true (if event passes selection), false (else)
   */
 
-if(_vc->get("evt") != 16420777) return false;
+if(_vc->get("evt") != 1479832348) return false;
 cout << "here0" << endl;
 
   // triggers
@@ -1511,18 +1512,6 @@ cout << "here3" << endl;
 
   // jet multiplicity
   //if(!makeCut<int>( _nGoodJets           , 2, ">=", "jet multiplicity"     )) return false;
-
-  // same sign pair
-  //CandList lepPair;
-  //lepPair = _susyMod->bestSSPair( _sigLeps[0], (&_denLeps), true, false, 10, _lep1idx, _lep2idx);
-  //if(!makeCut<int>( lepPair.size()       , 2, "=" , "best ss pair found"   )) return false;
-
-  //_lep1 = lepPair[0]; _lep2 = lepPair[1];
-  //if(!makeCut( _lep1 != nullptr && _lep2 != nullptr, "sanity check for best ss pair", "=")) return false;
-
-  // get indices right
-  //_lep1idx = _sigLepsIdx[_lep1idx];
-  //_lep2idx = _denLepsIdx[_lep2idx];
 
   _lep1 = _sigLeps[0];
   _lep2 = _denLeps[0];
@@ -1673,14 +1662,14 @@ bool FRinSitu::triggerSelection(){
     for(unsigned int i = 0; i < trlines.size(); ++i){
 
       if(Tools::trim(trlines[i]) != ""){
-//cout << "testing " << trlines[i] << endl;
+cout << "testing " << trlines[i] << endl;
         bool testiso = false;
         if(trlines[i].find("IsoVL") != std::string::npos || trlines[i].find("IsoVVL") != std::string::npos) 
           testiso = true;
-//DUMP(testiso);
-//DUMP(_vc->get(Tools::trim(trlines[i])));
-//DUMPVECTOR(_denLepsIdx);
-//DUMPVECTOR(_isoLepsIdx);
+DUMP(testiso);
+DUMP(_vc->get(Tools::trim(trlines[i])));
+DUMPVECTOR(_denLepsIdx);
+DUMPVECTOR(_isoLepsIdx);
         if(_vc->get(Tools::trim(trlines[i])) == 1) {
           if(testiso){
            if(_isoLepsIdx.size() == 0 || _isoLepsIdx[0] != _denLepsIdx[0])
@@ -1707,7 +1696,8 @@ bool FRinSitu::triggerSelection(){
     }
   }
 
-
+DUMPVECTOR(trlines);
+DUMPVECTOR(_TR_lines);
   // at least one auxiliary trigger per pt bin to be passed
   if(!makeCut(any, "at least one trigger path", "=", kTrigger)) return false;
 

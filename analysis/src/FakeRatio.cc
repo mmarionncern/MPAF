@@ -380,11 +380,17 @@ void FakeRatio::initialize(){
   _au->addCategory( kGoodJets, "Good Jets"               );
 
   //SusyModule
-  _susyMod = new SusyModule(_vc);
+  _susyMod = new SusyModule(_vc, _dbm);
 
   //Databases
-  _dbm -> loadDb("XS", "XSectionsSpring15.db");  
-  _dbm -> loadDb("KF", "kFactorsSpring15.db");  
+  _dbm -> loadDb   ("XS"         , "XSectionsSpring15.db");  
+  _dbm -> loadDb   ("KF"         , "kFactorsSpring15.db" );  
+
+  // BTAGSF: need these libarries
+  //_dbm -> loadDb   ("BTagEffUSDG", "GC_BTagEffs.root"    , "h2_BTaggingEff_csv_med_Eff_udsg");
+  //_dbm -> loadDb   ("BTagEffCB"  , "GC_BTagEffs.root"    , "h2_BTaggingEff_csv_med_Eff_b"   );
+  //_dbm -> loadDbCSV("BTagSF"     , "CSVv2_50ns.csv"      , ','                              );
+
 
   //input Variables
   //_lumi   = getCfgVarF("LUMINOSITY");
@@ -443,6 +449,9 @@ void FakeRatio::run(){
 
   // prepare event selection
   collectKinematicObjects();
+
+  // BTAGSF: this is how you use it!
+  //cout << _susyMod -> bTagSF("BTagEffCB", "BTagEffUSDG", "BTagSF", _goodJets, _goodJetsIdx, _bJets, _bJetsIdx, 0) << endl; 
 
   // skimming
   //if(!skimSelection()) return;
@@ -688,15 +697,6 @@ void FakeRatio::divideFRMap(string postpend){
     if(i == _idx_datacorrCERN) continue;
     TH2F * denom = (TH2F*) _hm -> getHisto("MR_Den" + postpend, i);
     TH2F * num   = (TH2F*) _hm -> getHisto("MR_Rat" + postpend, i);
-//if(i == _idx_datacorrETH){
-//cout << "dividing MR_Rat" << postpend << endl;
-//cout << denom -> GetName() << endl;
-//cout << denom -> Integral() << endl;
-//cout << num -> GetName() << endl;
-//cout << num -> Integral() << endl;
-//for(int i = 1; i <= num->GetNbinsX(); ++i)
-//cout << "bin " << i << ": " << num->GetBinContent(i) << endl;
-//}
     num -> Divide(denom);
   }
  
@@ -820,38 +820,33 @@ vector<float> FakeRatio::getScalesETH(string obs, float lumi){
   if(lumi                   == 0) return scales;
   if(h_data -> GetEntries() == 0) return scales;
   if(h_data -> GetEntries() < 10) return scales;
-  //if(h_data -> GetEntries() < h_ewk -> GetEntries() + h_qcd -> GetEntries()) return scales;
 
-//DUMP(obs);
-//cout << h_data->Integral() << endl;
-//cout << h_ewk ->Integral() << endl;
-//cout << h_qcd ->Integral() << endl;
+
   // first fit EWK and QCD together to data in range [0, infinity]
   string ext = obs.substr(obs.find_last_of("_"));
   vector<float> sc_first = doubleFit(ext, h_data, h_ewk, h_qcd);
 
   if(sc_first[0] >= 0 && sc_first[1] >= 0){
+
   // save plots after first fit
   string nobs  = obs.substr(0, obs.find_last_of("_")) + "1" + ext;
   TH1 * h_ewk1 = (TH1*) _hm -> getHisto(nobs, _idx_ewk);
   TH1 * h_qcd1 = (TH1*) _hm -> getHisto(nobs, _idx_qcd);
   h_ewk1 -> Scale(sc_first[0]);
   h_qcd1 -> Scale(sc_first[1]);
-//cout << h_ewk1->Integral() << endl;
-//cout << h_qcd1->Integral() << endl;
 
   // fix QCD and subtract from data
   TH1 * h_dataqcdsub = (TH1*) h_data -> Clone(); 
   h_dataqcdsub -> Add(h_qcd1, -1);
-//cout << h_dataqcdsub->Integral() << endl;
 
   // fit EWK to QCD-subtracted-data in range [50,120]
   scales[0] = sc_first[0] * singleFit(ext, h_dataqcdsub, h_ewk1, 50, 120); // ewk scale
   scales[1] = sc_first[1];                                            // qcd scale
   }
-DUMP(obs);
-DUMPVECTOR(sc_first);
-cout << "second " << (scales[0] / sc_first[0]) << endl;
+
+cout << "ETH EWK fit performed for observable " << obs << endl;
+cout << "first : " << scales[0] << "; " << scales[1] << endl;
+cout << "second: " << (scales[0] / sc_first[0]) << endl;
 
   return scales;
 
@@ -874,7 +869,9 @@ vector<float> FakeRatio::getScalesUCSX(string obs, float lumi){
   // fit EWK to QCD-subtracted-data in range [70,120]
   string ext = obs.substr(obs.find_last_of("_"));
   singleFit(scales, ext, h_data, h_ewk, 70, 120); // ewk scale
-DUMPVECTOR(scales);
+
+cout << "UCSX EWK fit performed for observable " << obs << endl;
+cout << "scale : " << scales[0] << endl;
 
   return scales;
 
@@ -901,7 +898,9 @@ vector<float> FakeRatio::getScalesUCSXlite(string obs, float lumi){
   float dev = std::abs(scales[0] - 1.0);
   scales[1] = scales[0] + dev;
   scales[2] = scales[0] - dev;
-DUMPVECTOR(scales);
+
+cout << "UCSX lite EWK fit performed for observable " << obs << endl;
+cout << "scale : " << scales[0] << endl;
 
   return scales;
 
@@ -941,30 +940,19 @@ void FakeRatio::modifyWeight() {
     if(sname.find("qcd") != std::string::npos) sname = sname.erase(sname.find("qcd"), 3); 
 
     _weight *= _vc->get("vtxWeight")*_vc->get("genWeight");
-    //_weight *= _vc->get("puWeight")*_vc->get("genWeight");
-    //_weight *= _vc->get("puWeight");
 
     double nProc=getCurrentDS()->getSumProcWgts(); 
-    //if(sname.find("DYJets") != std::string::npos) nProc = 3.94876696821e+11;
-    //if(sname.find("WJets")  != std::string::npos) nProc = 2.77246219357e+12;
-    //if(sname.find("TTJets") != std::string::npos) nProc = 72744782594.8;
 
     if(nProc==-1) nProc=getCurrentDS()->getNProcEvents();
 
-    if(sname.find("QCD_Pt20to30_Mu5")    != std::string::npos) nProc = 1271383. / 1629978. * nProc;  // basket bug
-    if(sname.find("QCD_Pt_20to30_bcToE") != std::string::npos) nProc = 950000.  / 1496051. * nProc;  // basket bug
-    if(sname.find("TTJets")              != std::string::npos) nProc = 8405382. / 16164196. * 7.96328e+10;  // basket bug
+    // keep this for /pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-10-18-13-19-00/
+    if(sname.find("QCD_Pt20to30_Mu5")    != std::string::npos) nProc = 1271383. / 1629978.  * nProc;
+    if(sname.find("QCD_Pt_20to30_bcToE") != std::string::npos) nProc = 950000.  / 1496051.  * nProc;
+    if(sname.find("TTJets")              != std::string::npos) nProc = 8405382. / 16164196. * 7.96328e+10;
 
     double w=_dbm->getDBValue("XS", sname) * _dbm->getDBValue("KF", sname)/nProc * 1;//last number is lumi
     _weight *=w;
     _isData=false;
-//DUMP(sname);
-//DUMP(_weight);
-//DUMP(_vc->get("vtxWeight"));
-//DUMP(_vc->get("genWeight"));
-//DUMP(_dbm->getDBValue("XS", sname));
-//DUMP(_dbm->getDBValue("KF", sname));
-//DUMP(nProc);
   }
 
 }
@@ -1020,9 +1008,6 @@ void FakeRatio::registerLepPlots(vector<string> leps, string var, int nxbins, ve
 
 //  ____________________________________________________________________________
 void FakeRatio::registerTriggerVars(){
-
-//DUMPVECTOR(_vTR_lines_el_non[0]);
-//DUMPVECTOR(_vTR_lines_el_iso[0]);
 
   for(unsigned int i = 0; i < _vTR_lines_el_non[0].size(); ++i) {
     _vc->registerVar(_vTR_lines_el_non[0][i]); 
@@ -1239,74 +1224,25 @@ void FakeRatio::subtractPlots(string lep, int idx, vector<float> scales, string 
         // CH: careful here: we apply the up variation of the scale factor of the electroweak (eHI)
         // to dHI, but since more of the ewk is subtracted, the fake ratio will be lower, so it is
         // the down variation, hence we fill it into the LO map!
-//DUMP(obs[i]);
-//cout << obs[i].substr(0, obs[i].rfind("_")) << "LO_" << postfix << num << endl;
         TH1 * dHI = _hm -> getHisto(obs[i].substr(0, obs[i].rfind("_")) + "LO_" + postfix + num, idx); // 1
         TH1 * dLO = _hm -> getHisto(obs[i].substr(0, obs[i].rfind("_")) + "HI_" + postfix + num, idx); // 1
 		dHI -> Reset(); // 1
         dLO -> Reset(); // 1
 		dHI -> Add(d); // 1
         dLO -> Add(d); // 1
-
         //TH1* dHI = (TH1*) d -> Clone(); // 2
         //TH1* dLO = (TH1*) d -> Clone(); // 2
 
         TH1* eHI = (TH1*) e -> Clone();
         TH1* eLO = (TH1*) e -> Clone();
-//DUMPVECTOR(scales);
-//cout << "DATA before sub:" << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << d->GetBinContent(ii,ij) << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << dHI->GetBinContent(ii,ij) << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << dLO->GetBinContent(ii,ij) << endl;
-//cout << "EWK before scale:" << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << e->GetBinContent(ii,ij) << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << eHI->GetBinContent(ii,ij) << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << eLO->GetBinContent(ii,ij) << endl;
 
         e   -> Scale(scales[0]);
         eHI -> Scale(scales[1]);
         eLO -> Scale(scales[2]);
-//DUMP(e  ->GetMaximum());
-//DUMP(eHI->GetMaximum());
-//DUMP(eLO->GetMaximum());
-//cout << "EWK after scale:" << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << e->GetBinContent(ii,ij) << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << eHI->GetBinContent(ii,ij) << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << eLO->GetBinContent(ii,ij) << endl;
+
         d   -> Add(e  , -1);
         dHI -> Add(eHI, -1);
         dLO -> Add(eLO, -1);
-//DUMP(d  ->GetMaximum());
-//DUMP(dHI->GetMaximum());
-//DUMP(dLO->GetMaximum());
-//cout << "DATA after sub:" << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << d->GetBinContent(ii,ij) << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << dHI->GetBinContent(ii,ij) << endl;
-//for(unsigned int ii = 1; ii <= e->GetNbinsX(); ++ii) 
-//  for(unsigned int ij = 1; ij <= e->GetNbinsY(); ++ij) 
-//    cout << "bin " << ii << "." << ij << ": " << dLO->GetBinContent(ii,ij) << endl;
 
         //setBinErrors(d, dLO, dHI); // 2
       }
@@ -1314,7 +1250,6 @@ void FakeRatio::subtractPlots(string lep, int idx, vector<float> scales, string 
 
     // central values and errors for ewk and qcd scales
     else if(scales.size() == 6) {
-
       d -> Add(e, -1);
     }
   }
@@ -1387,85 +1322,12 @@ void FakeRatio::subtractPlotsCERN(string lep, int idx, string postfix){
 //  ____________________________________________________________________________
 void FakeRatio::subtractPromptsCERN(){
 
-
   if(!_doEwkSubCERN) return;
 
   subtractPlotsCERN("El", _idx_datacorrCERN, "iso");
   subtractPlotsCERN("Mu", _idx_datacorrCERN, "iso");
   subtractPlotsCERN("El", _idx_datacorrCERN, "non");
   subtractPlotsCERN("Mu", _idx_datacorrCERN, "non");
-  return; 
-
-  // non-isolated triggers
-
-  vector<float> effs = _vTR_efflum_el_non;
-  effs.insert(effs.end(), _vTR_efflum_mu_non.begin(), _vTR_efflum_mu_non.end());
-
-  for(unsigned int i = 0; i < _vTR_lines_el_non[0].size() + _vTR_lines_mu_non[0].size(); ++i){
-    if(_ewkSub == "all" || _ewkSub == "el")
-      subtractPlotsCERN("El", _idx_datacorrCERN, "non" + Tools::intToString(i));
-    if(_ewkSub == "all" || _ewkSub == "mu")
-      subtractPlotsCERN("Mu", _idx_datacorrCERN, "non" + Tools::intToString(i));
-  }
-
-
-  // isolated triggers
-
-  effs = _vTR_efflum_el_iso;
-  effs.insert(effs.end(), _vTR_efflum_mu_iso.begin(), _vTR_efflum_mu_iso.end());
-
-  for(unsigned int i = 0; i < _vTR_lines_el_iso[0].size() + _vTR_lines_mu_iso[0].size(); ++i){
-    if(_ewkSub == "all" || _ewkSub == "el")
-      subtractPlotsCERN("El", _idx_datacorrCERN, "iso" + Tools::intToString(i));
-    if(_ewkSub == "all" || _ewkSub == "mu")
-      subtractPlotsCERN("Mu", _idx_datacorrCERN, "iso" + Tools::intToString(i));
-  }
-
-}
-
-
-void FakeRatio::testEwkSub(){
-
-
-  TH1 * h_data   = (TH1*) _hm -> getHisto("ER_NumElMT_iso3", _idx_datacorrETH) -> Clone();   
-  TH1 * h_ewk    = (TH1*) _hm -> getHisto("ER_NumElMT_iso3", _idx_ewk        ) -> Clone();   
-  TH1 * h_qcd    = (TH1*) _hm -> getHisto("ER_NumElMT_iso3", _idx_qcd        ) -> Clone();   
-
-  TH1 * h_ewk1   = (TH1*) h_ewk -> Clone();
-  TH1 * h_ewk2   = (TH1*) h_ewk -> Clone();
-
-  TH1 * h_qcd1   = (TH1*) h_qcd -> Clone();
-  TH1 * h_qcd2   = (TH1*) h_qcd -> Clone();
-
-  // first fit EWK and QCD together to data in range [0, infinity]
-  vector<float> sc_first = doubleFit("iso3", h_data, h_ewk, h_qcd);
-DUMPVECTOR(sc_first);
-
-  h_ewk1 -> Scale(sc_first[0]); 
-  h_ewk2 -> Scale(sc_first[0]); 
-  h_qcd1 -> Scale(sc_first[1]); 
-  h_qcd2 -> Scale(sc_first[1]); 
-
-  TH1* h_dataqcdsub = (TH1*) h_data->Clone();
-  h_dataqcdsub -> Add(h_qcd2, -1);
-
-  float sc_second = singleFit("iso3", h_dataqcdsub, h_ewk2, 50, 120);
-  DUMP(sc_second);
-
-  h_ewk2 -> Scale(sc_second);
-
-  TFile * f = new TFile("test.root", "recreate");
-
-  h_data -> Write(); 
-  h_ewk  -> Write(); 
-  h_ewk1 -> Write(); 
-  h_ewk2 -> Write(); 
-  h_qcd  -> Write(); 
-  h_qcd1 -> Write(); 
-  h_qcd2 -> Write(); 
-
-  //f -> Write();
-  f -> Close();
 
 }
 
@@ -1478,37 +1340,10 @@ void FakeRatio::subtractPromptsETH(){
 
   if(!_doEwkSubETH) return; 
 
-  // only with PS reweighting
   subtractPlots("El", _idx_datacorrETH, getScalesETH("ER_NumElMT_iso", 1.0), "iso");
   subtractPlots("Mu", _idx_datacorrETH, getScalesETH("ER_NumMuMT_iso", 1.0), "iso");
   subtractPlots("El", _idx_datacorrETH, getScalesETH("ER_NumElMT_non", 1.0), "non");
   subtractPlots("Mu", _idx_datacorrETH, getScalesETH("ER_NumMuMT_non", 1.0), "non");
-  return;
-
-  // non-isolated triggers
-
-  vector<float> effs = _vTR_efflum_el_non;
-  effs.insert(effs.end(), _vTR_efflum_mu_non.begin(), _vTR_efflum_mu_non.end());
-
-  for(unsigned int i = 0; i < _vTR_lines_el_non[0].size() + _vTR_lines_mu_non[0].size(); ++i){
-    if(_ewkSub == "all" || _ewkSub == "el")
-      subtractPlots("El", _idx_datacorrETH, getScalesETH("ER_NumElMT_non" + Tools::intToString(i), effs[i]), "non" + Tools::intToString(i));
-    if(_ewkSub == "all" || _ewkSub == "mu")
-      subtractPlots("Mu", _idx_datacorrETH, getScalesETH("ER_NumMuMT_non" + Tools::intToString(i), effs[i]), "non" + Tools::intToString(i));
-  }
-
-
-  // isolated triggers
-
-  effs = _vTR_efflum_el_iso;
-  effs.insert(effs.end(), _vTR_efflum_mu_iso.begin(), _vTR_efflum_mu_iso.end());
-
-  for(unsigned int i = 0; i < _vTR_lines_el_iso[0].size() + _vTR_lines_mu_iso[0].size(); ++i){
-    if(_ewkSub == "all" || _ewkSub == "el")
-      subtractPlots("El", _idx_datacorrETH, getScalesETH("ER_NumElMT_iso" + Tools::intToString(i), effs[i]), "iso" + Tools::intToString(i));
-    if(_ewkSub == "all" || _ewkSub == "mu")
-      subtractPlots("Mu", _idx_datacorrETH, getScalesETH("ER_NumMuMT_iso" + Tools::intToString(i), effs[i]), "iso" + Tools::intToString(i));
-  }
 
 }   
 
@@ -1747,9 +1582,6 @@ void FakeRatio::collectKinematicObjects(){
   
   for(int i = 0; i < _vc->get("n" + _leps); ++i){
 
-    bool den = false;
-    bool num = false;
-
     // electrons
     if(std::abs(_vc->get(_leps + "_pdgId", i)) == 11){		  
       if(denominatorElectronSelection(i)) {
@@ -1763,7 +1595,6 @@ void FakeRatio::collectKinematicObjects(){
         _denLeps      .push_back( _denEls[ _denEls.size()-1 ] );
         _denLepsIdx   .push_back(i);
         if(_susyMod -> elHLTEmulSelIso(i)) _isoLepsIdx.push_back(i);
-        den = true;      
       }
       if(numeratorElectronSelection(i)) {
         _numEls.push_back( Candidate::create(_vc->get(_leps + "_pt", i),
@@ -1775,19 +1606,7 @@ void FakeRatio::collectKinematicObjects(){
         _numElsIdx    .push_back(i);
         _numLeps      .push_back( _numEls[ _numEls.size()-1 ] );
         _numLepsIdx   .push_back(i);
-        num = true;
       }
-      if(!den && !num) {
-        if(vetoElectronSelection(i))  {
-          _vetEls.push_back( Candidate::create(_vc->get(_leps + "_pt", i),
-					     _vc->get(_leps + "_eta", i),
-					     _vc->get(_leps + "_phi", i),
-					     _vc->get(_leps + "_pdgId", i),
-					     _vc->get(_leps + "_charge", i),
-					     0.0005) );
-          _vetLeps.push_back( _vetEls[ _vetEls.size()-1 ] );
-        }
-      }		
     }
 
     // muons
@@ -1803,7 +1622,6 @@ void FakeRatio::collectKinematicObjects(){
         _denLeps   .push_back( _denMus[ _denMus.size()-1 ] );
         _denLepsIdx.push_back(i);
         _isoLepsIdx.push_back(i);
-        den = true;
       }
       if(numeratorMuonSelection(i)) {
         _numMus.push_back( Candidate::create(_vc->get(_leps + "_pt", i),
@@ -1815,18 +1633,6 @@ void FakeRatio::collectKinematicObjects(){
         _numMusIdx .push_back(i);
         _numLeps   .push_back( _numMus[ _numMus.size()-1 ] );
         _numLepsIdx.push_back(i);
-        num = true;
-      }
-      if(!den && !num) {
-        if(vetoMuonSelection(i))  {
-          _vetMus.push_back( Candidate::create(_vc->get(_leps + "_pt", i),
-					     _vc->get(_leps + "_eta", i),
-					     _vc->get(_leps + "_phi", i),
-					     _vc->get(_leps + "_pdgId", i),
-					     _vc->get(_leps + "_charge", i),
-					     0.105) );
-          _vetLeps.push_back( _vetMus[ _vetMus.size()-1 ] );
-        }
       }
     }
   }
@@ -1838,70 +1644,12 @@ void FakeRatio::collectKinematicObjects(){
   _nNumLeps = _numLeps.size();
   _nNumMus  = _numMus .size();
  
-  //for(int i = 0; i < _vc->get("n" + _jets); ++i){
-  //  if(goodJetSelection(i)) {
-  //    _goodJets.push_back( Candidate::create(_vc->get(_jets + "_pt", i),
-  //  				                         _vc->get(_jets + "_eta", i),
-  //  				                         _vc->get(_jets + "_phi", i) ) );
-  //    _goodJetsIdx.push_back(i);
-  //  }
-  //  if(bJetSelection(i)) {
-  //    _bJets.push_back( Candidate::create(_vc->get(_jets + "_pt", i),
-  //  		  		                      _vc->get(_jets + "_eta", i),
-  //  				                      _vc->get(_jets + "_phi", i) ) );
-  //    _bJetsIdx.push_back(i);
-  //  }
-  //}
-
-  
-  _susyMod->cleanJets( &_denLeps, _goodJets, _goodJetsIdx, _bJets, _bJetsIdx);
-  _susyMod->awayJets( &_denLeps, _goodJets, _goodJetsIdx, 1.0);
+  _susyMod -> cleanJets( &_denLeps, _goodJets, _goodJetsIdx, _bJets, _bJetsIdx, 40, 25);
+  _susyMod -> awayJets ( &_denLeps, _goodJets, _goodJetsIdx, 1.0);
 
   _nJets  = _goodJets.size();
-  _HT  = _susyMod -> HT( &(_goodJets) );
-  _met = Candidate::create(_vc->get(_mets + "_pt"), _vc->get(_mets + "_phi") );
-
-}
-
-
-//____________________________________________________________________________
-bool FakeRatio::goodJetSelection(int jetIdx){
-  /*
-    does the selection of good jets, i.e. minimum selection of jets 
-    parameters: jetIdx
-    return: true (if the jet is good), false (else)
-  */
-  
-  counter("GoodJets", kGoodJets);
-
-  if(!makeCut<float>(         _vc->get(_jets + "_pt" , jetIdx) , 40.0, ">" , "pt selection"   , 0, kGoodJets)) return false;
-  if(!makeCut<float>(std::abs(_vc->get(_jets + "_eta", jetIdx)),  2.4, "<" , "eta selection"  , 0, kGoodJets)) return false;
-  if(!makeCut<float>(         _vc->get(_jets + "_id" , jetIdx) ,  1  , ">=", "pog pf loose id", 0, kGoodJets)) return false;
-  
-  // CH: away-jet requirement
-  for(unsigned int il=0; il<_denLeps.size(); ++il){
-    float dr = KineUtils::dR(_denLeps[il]->eta(), _vc->get("Jet_eta", jetIdx),
-			                 _denLeps[il]->phi(), _vc->get("Jet_phi", jetIdx));
-    if(!makeCut<float>(dr, 1.0, ">", "dR selection", 0, kGoodJets) ) return false;
-  }
-
-  //// CH: this is jet-lepton cleaning: removing the closest jet to the loose lepton if dR < 0.4
-  //float dr_cache = 999999.;
-  //for(unsigned int il=0; il<_denLeps.size(); ++il){
-  //  float dr = KineUtils::dR(_denLeps[il]->eta(), _vc->get("Jet_eta", jetIdx),
-  //  		                 _denLeps[il]->phi(), _vc->get("Jet_phi", jetIdx));
-  //  if(dr < dr_cache)
-  //    dr_cache = dr;
-  //}
-  //for(unsigned int il=0; il<_vetLeps.size(); ++il){
-  //  float dr = KineUtils::dR(_vetLeps[il]->eta(), _vc->get("Jet_eta", jetIdx),
-  //  		                 _vetLeps[il]->phi(), _vc->get("Jet_phi", jetIdx));
-  //  if(dr < dr_cache)
-  //    dr_cache = dr;
-  //}
-  //if(!makeCut<float>(dr_cache, 0.4, ">", "dR selection, jet-lepton cleaning", 0, kGoodJets) ) return false;
-
-  return true;
+  _HT     = _susyMod -> HT( &(_goodJets) );
+  _met    = Candidate::create(_vc->get(_mets + "_pt"), _vc->get(_mets + "_phi") );
 
 }
 
@@ -1911,41 +1659,8 @@ bool FakeRatio::denominatorElectronSelection(int elIdx){
 
   counter("DenominatorElectrons", kDenEls);
 
-  // CH: FO2 selection for electrons
-  // extrapolation in ElMvaId and mini isolation
-
-  if(!_susyMod -> elIdSel(elIdx, SusyModule::kTight, SusyModule::kLoose)) return false;
-  if(!_susyMod -> elHLTEmulSel(elIdx, false)                            ) return false;
-
-  //if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
-  //   !makeCut<int>(           _vc->get("LepGood_mcMatchId"  , elIdx) ,  0    , "="  , "gen match fake"    , 0    , kDenEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 1.4442, "[!]", "eta selection veto", 1.566, kDenEls)) return false;
-  // electron cleaning 
-  //float dr_cache = 999.;
-  //for(unsigned int il=elIdx+1; il<_vc->get("nLepGood"); ++il){
-  //  float dr = KineUtils::dR(_vc->get("LepGood_eta", il), _vc->get("LepGood_eta", elIdx),
-  //  		                 _vc->get("LepGood_phi", il), _vc->get("LepGood_phi", elIdx));
-  //  if(std::abs(_vc->get("LepGood_pdgId")) == 13 && dr < dr_cache) 
-  //    dr_cache = dr;
-  //}
-  //if(!makeCut<float>(dr_cache, 0.05, ">", "electron cleaning selection", 0, kDenEls) ) return false;
-
-
-  // in susy Module now
-  //if(!makeCut<float>(   _susyMod -> conePt(elIdx, SusyModule::kTight), 10.   , ">"  , "pt selection"      , 0    , kDenEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 2.5   , "<"  , "eta selection"     , 0    , kDenEls)) return false;
-  //if(!makeCut<float>(         _vc->get("LepGood_sip3d"      , elIdx) , 4.0   , "<"  , "SIP 3D"            , 0    , kDenEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"         , elIdx)), 0.1   , "<"  , "dz selection"      , 0    , kDenEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"        , elIdx)), 0.05  , "<"  , "dxy selection"     , 0    , kDenEls)) return false;
-  //if(!makeCut<int>(           _vc->get("LepGood_tightCharge", elIdx) , 1     , ">"  , "charge selection"  , 0    , kDenEls)) return false;
-
-  //bool conv = (_vc->get("LepGood_convVeto", elIdx) > 0 && _vc->get("LepGood_lostHits", elIdx)==0);
-
-  //if(!makeCut( conv                                              , "conversion rejection", "=", kDenEls)) return false;
-  //if(!makeCut( _susyMod -> multiIsoSel(elIdx, SusyModule::kDenom), "isolation"           , "=", kDenEls)) return false; 
-  //if(!makeCut( _susyMod -> elMvaSel   (elIdx, SusyModule::kLoose), "electron mva"        , "=", kDenEls)) return false;    
-  //if(!makeCut( triggerEmulation(elIdx, kDenEls)                  , "trigger emulation"   , "=", kDenEls)) return false;    
-
+  if(!makeCut( _susyMod -> elIdSel     (elIdx, SusyModule::kTight, SusyModule::kLoose), "electron id", "=", kDenEls)) return false;
+  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false                                 ), "non-iso emu", "=", kDenEls)) return false;
 
   return true;
 
@@ -1956,49 +1671,8 @@ bool FakeRatio::denominatorElectronSelection(int elIdx){
 bool FakeRatio::denominatorMuonSelection(int muIdx){
 
   counter("DenominatorMuons", kDenMus);
-  
-  //CH: FO1 for muons
-  //extrapolation in isolation only
 
-  if(!_susyMod->muIdSel(muIdx, SusyModule::kTight)) return false;
-  //if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
-  //   !makeCut<int>(           _vc->get("LepGood_mcMatchId"   , muIdx) ,  0   , "=", "gen match fake", 0, kDenMus)) return false;
-
-
-
-  // in susy Module now:
-  //if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kDenom), "isolation", "=", kDenMus)) return false;
-
-  //if(!makeCut<float>(   _susyMod -> conePt(muIdx, SusyModule::kMedium), 10.  , ">", "pt selection"     , 0  , kDenMus)) return false;
-  //if(!makeCut<float>(         _vc->get("LepGood_eta"         , muIdx) ,  2.4 , "<", "eta selection"    , 0  , kDenMus)) return false;
-  //if(!makeCut<int>(           _vc->get("LepGood_mediumMuonId", muIdx) ,  0   , ">", "medium muon ID"   , 0  , kDenMus)) return false;
-  //if(!makeCut<int>(           _vc->get("LepGood_tightCharge" , muIdx) ,  1   , ">", "error/pt < 20"    , 0  , kDenMus)) return false;
-  //if(!makeCut<float>(         _vc->get("LepGood_sip3d"       , muIdx) ,  4.0 , "<", "SIP 3D"           , 0  , kDenMus)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"          , muIdx)),  0.1 , "<", "dz selection"     , 0  , kDenMus)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"         , muIdx)),  0.05, "<", "dxy selection"    , 0  , kDenMus)) return false;
-
-
-  // for SYNC
-  //if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kDenom), "mini-isolation < 0.4", "=", kSync)) return false;
-
-  //if(!makeCut<float>(   _susyMod -> conePt(muIdx, SusyModule::kMedium), 10.  , ">", "pt > 10"     , 0  , kSync)) return false;
-  //if(!makeCut<float>(         _vc->get("LepGood_eta"         , muIdx) ,  2.4 , "<", "abs(eta) < 2.4"    , 0  , kSync)) return false;
-  //if(!makeCut<int>(           _vc->get("LepGood_mediumMuonId", muIdx) ,  0   , ">", "medium muon ID"   , 0  , kSync)) return false;
-  //if(!makeCut<int>(           _vc->get("LepGood_tightCharge" , muIdx) ,  1   , ">", "error/pt < 20"    , 0  , kSync)) return false;
-  //if(!makeCut<float>(         _vc->get("LepGood_sip3d"       , muIdx) ,  4.0 , "<", "SIP 3D"           , 0  , kSync)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"          , muIdx)),  0.1 , "<", "dz selection"     , 0  , kSync)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"         , muIdx)),  0.05, "<", "dxy selection"    , 0  , kSync)) return false;
-  //Candidate* MT = nullptr;
-  //Candidate* lep = nullptr;
-  //lep = Candidate::create(_vc->get(_leps + "_pt", muIdx),
-  //  				  _vc->get(_leps + "_eta", muIdx),
-  //  				  _vc->get(_leps + "_phi", muIdx),
-  //  				  _vc->get(_leps + "_pdgId", muIdx),
-  //  				  _vc->get(_leps + "_charge", muIdx),
-  //  				  0.105);
-  //MT = Candidate::create( lep, _met);
-  //if(!makeCut<float>( MT->mass() , 20.0, "<" , "MT selection"                  , 0, kSync)) return false;
-
+  if(!makeCut( _susyMod -> muIdSel(muIdx, SusyModule::kTight), "muon id", "=", kDenMus)) return false;
 
   return true;
 
@@ -2015,46 +1689,6 @@ bool FakeRatio::numeratorElectronSelection(int elIdx){
   if(!makeCut( _susyMod -> multiIsoSel (elIdx, SusyModule::kTight)                    , "isolation"   , "=", kNumEls)) return false; 
   if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false)                                 , "electron emu", "=", kNumEls)) return false;
 
-  //if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
-  //   !makeCut<int>(           _vc->get("LepGood_mcMatchId"  , elIdx) ,  0    , "="  , "gen match fake"    , 0    , kDenEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 1.4442, "[!]", "eta selection veto", 1.566, kDenEls)) return false;
-  // electron cleaning 
-  //float dr_cache = 999.;
-  //for(unsigned int il=elIdx+1; il<_vc->get("nLepGood"); ++il){
-  //  float dr = KineUtils::dR(_vc->get("LepGood_eta", il), _vc->get("LepGood_eta", elIdx),
-  //  		                 _vc->get("LepGood_phi", il), _vc->get("LepGood_phi", elIdx));
-  //  if(std::abs(_vc->get("LepGood_pdgId")) == 13 && dr < dr_cache) 
-  //    dr_cache = dr;
-  //}
-  //if(!makeCut<float>(dr_cache, 0.05, ">", "electron cleaning selection", 0, kDenEls) ) return false;
-
-  // in susy module now
-  //if(!makeCut<float>(   _susyMod -> conePt(elIdx, SusyModule::kTight), 10.   , ">"  , "pt selection"      , 0    , kNumEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 2.5   , "<"  , "eta selection"     , 0    , kNumEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_eta"        , elIdx)), 1.4442, "[!]", "eta selection veto", 1.566, kNumEls)) return false;
-  ////if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
-  ////   !makeCut<int>(           _vc->get("LepGood_mcMatchId"  , elIdx) ,  0    , "="  , "gen match fake"    , 0    , kNumEls)) return false;
-  //if(!makeCut<float>(         _vc->get("LepGood_sip3d"      , elIdx) , 4.0   , "<"  , "SIP 3D"            , 0    , kNumEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"         , elIdx)), 0.1   , "<"  , "dz selection"      , 0    , kNumEls)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"        , elIdx)), 0.05  , "<"  , "dxy selection"     , 0    , kNumEls)) return false;
-  //if(!makeCut<int>(           _vc->get("LepGood_tightCharge", elIdx) , 1     , ">"  , "charge selection"  , 0    , kNumEls)) return false;
-
-  //bool conv = (_vc->get("LepGood_convVeto", elIdx) > 0 && _vc->get("LepGood_lostHits", elIdx)==0);
-
-  //if(!makeCut( conv                                              , "conversion rejection", "=", kNumEls)) return false;
-  //if(!makeCut( _susyMod -> multiIsoSel(elIdx, SusyModule::kTight), "isolation"           , "=", kNumEls)) return false; 
-  ////if(!makeCut( triggerEmulation(elIdx, kNumEls)                  , "trigger emulation"   , "=", kNumEls)) return false;    
-
-  //// electron cleaning 
-  //float dr_cache = 999.;
-  //for(unsigned int il=elIdx+1; il<_vc->get("nLepGood"); ++il){
-  //  float dr = KineUtils::dR(_vc->get("LepGood_eta", il), _vc->get("LepGood_eta", elIdx),
-  //  		                 _vc->get("LepGood_phi", il), _vc->get("LepGood_phi", elIdx));
-  //  if(std::abs(_vc->get("LepGood_pdgId")) == 13 && dr < dr_cache) 
-  //    dr_cache = dr;
-  //}
-  //if(!makeCut<float>(dr_cache, 0.05, ">", "electron cleaning selection", 0, kNumEls) ) return false;
-
   return true;
 
 }
@@ -2065,57 +1699,12 @@ bool FakeRatio::numeratorMuonSelection(int muIdx){
 
   counter("NumeratorMuons", kNumMus);
 
-  if(!_susyMod->muIdSel(muIdx, SusyModule::kTight)) return false;
+  if(!makeCut( _susyMod -> muIdSel    (muIdx, SusyModule::kTight ), "muon id  ", "=", kNumMus)) return false;
   if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kMedium), "isolation", "=", kNumMus)) return false;
-  //if((_datasets[_inds]->getName().find("qcd") != std::string::npos && _datasets[_inds]->getName().find("data") == std::string::npos) && 
-  //   !makeCut<int>(           _vc->get("LepGood_mcMatchId"   , muIdx) ,  0   , "=", "gen match fake", 0, kNumMus)) return false;
-
-
-  // now in Susy Module
-  //if(!makeCut<float>(   _susyMod -> conePt(muIdx, SusyModule::kMedium), 10.  , ">", "pt selection"     , 0  , kNumMus)) return false;
-  //if(!makeCut<float>(         _vc->get("LepGood_eta"         , muIdx) ,  2.4 , "<", "eta selection"    , 0  , kNumMus)) return false;
-  //if(!makeCut<int>(           _vc->get("LepGood_mediumMuonId", muIdx) ,  0   , ">", "medium muon ID"   , 0  , kNumMus)) return false;
-  //if(!makeCut<int>(           _vc->get("LepGood_tightCharge" , muIdx) ,  1   , ">", "error/pt < 20"    , 0  , kNumMus)) return false;
-  //if(!makeCut<float>(         _vc->get("LepGood_sip3d"       , muIdx) ,  4.0 , "<", "SIP 3D"           , 0  , kNumMus)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dz"          , muIdx)),  0.1 , "<", "dz selection"     , 0  , kNumMus)) return false;
-  //if(!makeCut<float>(std::abs(_vc->get("LepGood_dxy"         , muIdx)),  0.05, "<", "dxy selection"    , 0  , kNumMus)) return false;
  
   return true;
 
 }
-
-
-//____________________________________________________________________________
-bool FakeRatio::vetoElectronSelection(int elIdx){
-  // selection of veto electrons
-
-  counter("VetoElectrons", kVetEls);
-
-  // electron cleaning 
-  float dr_cache = 999.;
-  for(unsigned int il=elIdx+1; il<_vc->get("n" + _leps); ++il){
-    float dr = KineUtils::dR(_vc->get(_leps + "_eta", il), _vc->get(_leps + "_eta", elIdx),
-			                 _vc->get(_leps + "_phi", il), _vc->get(_leps + "_phi", elIdx));
-    if(std::abs(_vc->get(_leps + "_pdgId")) == 13 && dr < dr_cache) 
-      dr_cache = dr;
-  }
-  if(!makeCut<float>(dr_cache, 0.05, ">", "electron cleaning selection", 0, kVetEls) ) return false;
-  
-  return true;
-
-}
-
-
-//____________________________________________________________________________
-bool FakeRatio::vetoMuonSelection(int muIdx){
-  // selection of veto muons
-
-  counter("VetoMuons", kVetMus);
-  
-  return true;
-
-}
-
 
 
 
@@ -2190,9 +1779,6 @@ void FakeRatio::setMeasurementRegion() {
 //____________________________________________________________________________
 bool FakeRatio::baseSelection(){
 
-//if(_vc->get("evt") != 74199163) return false;
-//cout << "here 0" << endl;
-
   // lepton multiplicity
   if(!makeCut<int>( _nDenLeps            , 1 , "=" , "lepton multiplicity and flavor"  )) return false;
   if     (_sampleName.find("datael") != std::string::npos){ 
@@ -2201,8 +1787,6 @@ bool FakeRatio::baseSelection(){
   else if(_sampleName.find("datamu") != std::string::npos){ 
     if(!makeCut<int>( _nDenMus           , 1 , "=" , "muon multiplicity and flavor"    )) return false;
   }
-
-//cout << "here 1" << endl;
 
   //QCD muon samples
   if     (_sampleName.find("Mu15") != std::string::npos && 
@@ -2213,15 +1797,10 @@ bool FakeRatio::baseSelection(){
   // jet multiplicity
   if(!makeCut<int>( _nJets             ,  1, ">=", "jet multiplicity"              )) return false; 
 
-//DUMP(_nJets);
-//DUMP(_goodJets[0]->pt());
-//
-//cout << "here 2" << endl;
   // triggers per FO
   if(!makeCut(triggerSelection()    , "trigger selection"     , "="                )) return false; 
   //if(!makeCut(triggerSelectionLite(), "trigger selection lite", "="                )) return false; 
 
-//cout << "here 3" << endl;
   return true;
 }
 
@@ -2252,32 +1831,20 @@ bool FakeRatio::ucsxEwkSelection(){
 bool FakeRatio::mrSelection(){
   // CH: fake ratio measurement for RA5 sync exercise May 2015
 
-
-
-//cout << "here 4" << endl;
   // MET 
-  if(!makeCut<float>( _met->pt() , 20.0, "<" , "MET selection")) return false;
-//counter("MET < 20", kSync);
+  if(!makeCut<float>( _met -> pt(), 20.0, "<", "MET selection"   )) return false;
 
-//cout << "here 5" << endl;
-//DUMP(_susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium));
-//DUMP(_denLeps[0]->phi());
-//DUMP(_met -> phi());
-//DUMP(_met -> pt());
   // MT
   float MT = _susyMod -> coneMt(_denLepsIdx[0], _denLeps[0], _met);
-//DUMP(MT);
-  if(!makeCut<float>( MT, 20.0, "<" , "coneMT selection" )) return false;
-  //Candidate* MT = nullptr;
-  //MT = Candidate::create( _denLeps[0], _met);
-  //if(!makeCut<float>( MT->mass() , 20.0, "<" , "MT selection" )) return false;
-//counter("nJets >= 1", kSync);
+  if(!makeCut<float>( MT          , 20.0, "<", "coneMT selection")) return false;
 
-//cout << "here 6" << endl;
-//DUMPVECTOR(_TR_lines);
-//DUMPVECTOR(_exts);
+
+
+
 return true;
 
+
+// sync stuff
   int isotr = -1;
   int nontr = -1;
   for(int i = 0; i < _TR_lines.size(); ++i){
@@ -2326,8 +1893,6 @@ return true;
 }
 
 
-
-
 //____________________________________________________________________________
 bool FakeRatio::qcdSelection(){
 
@@ -2341,84 +1906,6 @@ bool FakeRatio::skimSelection(){
 
   if(!makeCut<int>( _nDenLeps, 1, "=" , "lepton multiplicity and flavor") ) return false;
   if(!makeCut<int>( _nJets   , 1, ">=", "jet multiplicity"              ) ) return false; 
-
-  return true;
-
-}
-
-
-//____________________________________________________________________________
-bool FakeRatio::triggerEmulation(int idx, int label){
-
-
-  //trigger emulation cuts
-  if(std::abs(_vc->get(_leps + "_pdgId", idx)) == 11){
-
-//if(_vc->get("evt") == 63546557) cout << "here" << endl;
-    if(!_susyMod -> elHLTEmulSel(idx, _iso)) return false;
-    ////central
-    //if(std::abs(_vc->get(_leps + "_eta", idx)) < 1.479){
-    //  counter("central electron to emu", label);
-    //  if(_iso) counter("central electron to emu Ele12iso", label);
-    //  else     counter("central electron to emu Ele12non", label);
-    //  if(!makeCut<float>(         _vc->get(_leps + "_sigmaIEtaIEta" , idx) , 0.011, "<", "central emu: sigmaIEtaIEta selection", 0, label)) return false;
-    //  if(_iso) counter("central emu: sigmaIEtaIEta selection Ele12iso", label);
-    //  else     counter("central emu: sigmaIEtaIEta selection Ele12non", label);
-    //  if(!makeCut<float>(         _vc->get(_leps + "_hadronicOverEm", idx) , 0.08 , "<", "central emu: H / E selection"        , 0, label)) return false;
-    //  if(_iso) counter("central emu: H / E selection Ele12iso", label);
-    //  else     counter("central emu: H / E selection Ele12non", label);
-    //  if(!makeCut<float>(std::abs(_vc->get(_leps + "_dEtaScTrkIn"   , idx)), 0.01 , "<", "central emu: dEta selection"         , 0, label)) return false;
-    //  if(_iso) counter("central emu: dEta selection Ele12iso", label);
-    //  else     counter("central emu: dEta selection Ele12non", label);
-    //  if(!makeCut<float>(std::abs(_vc->get(_leps + "_dPhiScTrkIn"   , idx)), 0.04 , "<", "central emu: dPhi selection"         , 0, label)) return false;
-    //  if(_iso) counter("central emu: dPhi selection Ele12iso", label);
-    //  else     counter("central emu: dPhi selection Ele12non", label);
-    //  string ext = "non1";
-    //  if(_iso) ext = "iso0";
-    //  fill("MR_DenEleInvMinusPInvEB_" + ext, std::abs(_vc->get(_leps + "_eInvMinusPInv", idx)), _weight);
-    //  if(!makeCut<float>(std::abs(_vc->get(_leps + "_eInvMinusPInv" , idx)), 0.01 , "<", "forward emu: 1/E - 1/P selection"    , 0, label)) return false;
-    //  if(_iso) counter("central emu: 1/E - 1/P selection Ele12iso", label);
-    //  else     counter("central emu: 1/E - 1/P selection Ele12non", label);
-    //}
-    ////forward
-    //else {
-    //  counter("forward electron to emu", label);
-    //  if(_iso) counter("forward electron to emu Ele12iso", label);
-    //  else     counter("forward electron to emu Ele12non", label);
-    //  if(!makeCut<float>(         _vc->get(_leps + "_sigmaIEtaIEta" , idx) , 0.031, "<", "forward emu: sigmaIEtaIEta selection", 0, label)) return false;
-    //  if(_iso) counter("forward emu: sigmaIEtaIEta selection Ele12iso", label);
-    //  else     counter("forward emu: sigmaIEtaIEta selection Ele12non", label);
-    //  if(!makeCut<float>(         _vc->get(_leps + "_hadronicOverEm", idx) , 0.08 , "<", "forward emu: H / E selection"        , 0, label)) return false;
-    //  if(_iso) counter("forward emu: H / E selection Ele12iso", label);
-    //  else     counter("forward emu: H / E selection Ele12non", label);
-    //  if(!makeCut<float>(std::abs(_vc->get(_leps + "_dEtaScTrkIn"   , idx)), 0.01 , "<", "forward emu: dEta selection"         , 0, label)) return false;
-    //  if(_iso) counter("forward emu: dEta selection Ele12iso", label);
-    //  else     counter("forward emu: dEta selection Ele12non", label);
-    //  if(!makeCut<float>(std::abs(_vc->get(_leps + "_dPhiScTrkIn"   , idx)), 0.08 , "<", "forward emu: dPhi selection"         , 0, label)) return false;
-    //  if(_iso) counter("forward emu: dPhi selection Ele12iso", label);
-    //  else     counter("forward emu: dPhi selection Ele12non", label);
-    //  string ext = "non1";
-    //  if(_iso) ext = "iso0";
-    //  fill("MR_DenEleInvMinusPInvEE_" + ext, std::abs(_vc->get(_leps + "_eInvMinusPInv", idx)), _weight);
-    //  if(!makeCut<float>(std::abs(_vc->get(_leps + "_eInvMinusPInv" , idx)), 0.01 , "<", "forward emu: 1/E - 1/P selection"    , 0, label)) return false;
-    //  if(_iso) counter("forward emu: 1/E - 1/P selection Ele12iso", label);
-    //  else     counter("forward emu: 1/E - 1/P selection Ele12non", label);
-    //}
-
-    // non-isolated trigger only
-    if(!_iso){
-      if(!makeCut(_susyMod -> elMvaSel(idx, SusyModule::kLoose  ), "non-isolated mva id", "=", label)) return false;
-    }
-    // isolated trigger only
-    else {
-      if(!makeCut(_susyMod -> elMvaSel(idx, SusyModule::kLooseHT), "isolated mva id"    , "=", label)) return false;
-
-      //if(!makeCut<float>(         _vc->get(_leps + "_sigmaIEtaIEta" , _denElsIdx[0]) , 0.031, "<", "isolated emu: sigmaIEtaIEta selection", 0, kTrigger)) return false;
-      //if(!makeCut<float>(         _vc->get(_leps + "_hadronicOverEm", _denElsIdx[0]) , 0.08 , "<", "isolated emu: H / E selection"        , 0, kTrigger)) return false;
-      //if(!makeCut<float>(         _vc->get(_leps + "_hadronicOverEm", _denElsIdx[0]) , 0.08 , "<", "isolated emu: H / E selection"        , 0, kTrigger)) return false;
-    }
-  //Plus for isolated triggers only: EcalPFClusterIso<0.45, HcalPFClusterIso<0.25, TrackIso<0.2
-  }
 
   return true;
 
@@ -2477,36 +1964,15 @@ bool FakeRatio::triggerSelection(){
           }
           any = true;
           _TR_lines.push_back(Tools::trim(trlines[i]));
-            
-          //any = true;
-          //_TR_lines.push_back(trlines[i]);
-          //if(trlines[i].find("IsoVL") != std::string::npos || trlines[i].find("IsoVVL") != std::string::npos){ 
-          //  if(_isoLepsIdx.size() > 0 && _isoLepsIdx[0] == _denLepsIdx[0])
-          //    _iso = true;
-          //}
         }
       }
     }
-    //if(trlines.size() == 1 && trlines[0] == "")
-    //  any = true;
 
   }
-
-//if(_vc->get("evt") == 63546557) {
-//DUMPVECTOR(_TR_lines);
-//DUMP(any);
-//DUMP(_iso);
-//}
 
 
   // at least one auxiliary trigger per pt bin to be passed
   if(!makeCut(any, "at least one trigger path", "=", kTrigger)) return false;
-
-  // for isolated trigger, FO needs to pass isolated emulation cuts
-  //if(!makeCut(!_iso || find(_isoLepsIdx.begin(), _isoLepsIdx.end(), _denLepsIdx[0]) != _isoLepsIdx.end(), "iso emu", "=", kTrigger)) return false;
-
-  // trigger emulation cuts
-  //if(!makeCut(triggerEmulation(_denLepsIdx[0], kTrigger), "full trigger emulation cuts", "=", kTrigger)) return false;
 
   // trigger extensions
   findTriggerExts();
@@ -2561,9 +2027,6 @@ bool FakeRatio::triggerSelectionLite(){
 
   // at least one auxiliary trigger per pt bin to be passed
   if(!makeCut(any, "at least one trigger path", "=", kTrigger)) return false;
-
-  // trigger emulation cuts
-  //if(!makeCut(triggerEmulation(_denLepsIdx[0], kTrigger), "full trigger emulation cuts", "=", kTrigger)) return false;
 
   return true;
 
@@ -2689,27 +2152,6 @@ void FakeRatio::fillFakeRatioMaps(){
                                                      fillFRMaps("MR_RatEl", _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
   for(unsigned int i = 0; i < _numMus.size(); ++i) { fillFRMaps("MR_NumMu", _numMus[i]  , _numMusIdx[i], SusyModule::kMedium);
                                                      fillFRMaps("MR_RatMu", _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
-
-}
-
-void FakeRatio::fillTriggerTestPlots(){
-
-  if(std::abs(_denLeps[0]->pdgId()) == 11){
-    for(unsigned j = 0; j < _vTR_lines_el_non[0].size(); ++j)
-      if(_vc->get(_vTR_lines_el_non[0][j]) == 1 && triggerEmulation(false, kTrigger)) 
-        fill("MR_DenElMapTrTest_non" + Tools::intToString(j), overflowPt(_denLeps[0]->pt()), std::abs(_denLeps[0]->eta()));
-    for(unsigned j = 0; j < _vTR_lines_el_iso[0].size(); ++j)
-      if(_vc->get(_vTR_lines_el_iso[0][j]) == 1 && triggerEmulation(true, kTrigger)) 
-        fill("MR_DenElMapTrTest_iso" + Tools::intToString(j), overflowPt(_denLeps[0]->pt()), std::abs(_denLeps[0]->eta()));
-  }
-  else {
-    for(unsigned j = _vTR_lines_el_non[0].size(); j < _vTR_lines_el_non[0].size() + _vTR_lines_mu_non[0].size(); ++j)
-      if(_vc->get(_vTR_lines_mu_non[0][j - _vTR_lines_el_non[0].size()]) == 1) 
-        fill("MR_DenMuMapTrTest_non" + Tools::intToString(j), overflowPt(_denLeps[0]->pt()), std::abs(_denLeps[0]->eta()));
-    for(unsigned j = _vTR_lines_el_iso[0].size(); j < _vTR_lines_el_iso[0].size() + _vTR_lines_mu_iso[0].size(); ++j)
-      if(_vc->get(_vTR_lines_mu_iso[0][j - _vTR_lines_el_iso[0].size()]) == 1) 
-        fill("MR_DenMuMapTrTest_iso" + Tools::intToString(j), overflowPt(_denLeps[0]->pt()), std::abs(_denLeps[0]->eta()));
-  }
 
 }
 
@@ -2877,16 +2319,12 @@ void FakeRatio::fillUcsxEwkLeptonPlots(){
 void FakeRatio::findTriggerExts(){
 
 
-  //cout << "searching for trigger extensions" << endl;
-  //DUMPVECTOR(_TR_lines);
   for(unsigned int i = 0; i < _TR_lines.size(); ++i){
 
     vector<string>::iterator pos = find(_vTR_lines_el_non[0].begin(), _vTR_lines_el_non[0].end(), _TR_lines[i]);
     if(pos != _vTR_lines_el_non[0].end()){
       _exts.push_back("non" + Tools::intToString(pos - _vTR_lines_el_non[0].begin()));
-      //_trws.push_back(1.0);
       if(_isData)
-        //_trws.push_back(_vc->get(_vTR_psbh_el_non[pos - _vTR_lines_el_non[0].begin()]));
         _trws.push_back(_vc->get(_vTR_psbh_el_non[pos - _vTR_lines_el_non[0].begin()]) * \
                         _vc->get(_vTR_psbl_el_non[pos - _vTR_lines_el_non[0].begin()]) );
       else
@@ -2897,7 +2335,6 @@ void FakeRatio::findTriggerExts(){
     if(pos != _vTR_lines_mu_non[0].end()){
       _exts.push_back("non" + Tools::intToString(pos - _vTR_lines_mu_non[0].begin() + _vTR_lines_el_non[0].size()));
       if(_isData)
-        //_trws.push_back(_vc->get(_vTR_psbh_mu_non[pos - _vTR_lines_mu_non[0].begin()]));
         _trws.push_back(_vc->get(_vTR_psbh_mu_non[pos - _vTR_lines_mu_non[0].begin()]) * \
                         _vc->get(_vTR_psbl_mu_non[pos - _vTR_lines_mu_non[0].begin()]) );
       else
@@ -2912,7 +2349,6 @@ void FakeRatio::findTriggerExts(){
       if(pos != _vTR_lines_el_iso[0].end()){
         _exts.push_back("iso" + Tools::intToString(pos - _vTR_lines_el_iso[0].begin()));
         if(_isData)
-          //_trws.push_back(_vc->get(_vTR_psbh_el_iso[pos - _vTR_lines_el_iso[0].begin()]));
           _trws.push_back(_vc->get(_vTR_psbh_el_iso[pos - _vTR_lines_el_iso[0].begin()]) * \
                           _vc->get(_vTR_psbl_el_iso[pos - _vTR_lines_el_iso[0].begin()]) );
         else
@@ -2923,9 +2359,6 @@ void FakeRatio::findTriggerExts(){
       if(pos != _vTR_lines_mu_iso[0].end()){
         _exts.push_back("iso" + Tools::intToString(pos - _vTR_lines_mu_iso[0].begin() + _vTR_lines_el_iso[0].size()));
         if(_isData){
-//DUMP(_vc->get(_vTR_psbh_mu_iso[pos - _vTR_lines_mu_iso[0].begin()]));
-//DUMP(_vc->get(_vTR_psbl_mu_iso[pos - _vTR_lines_mu_iso[0].begin()]));
-          //_trws.push_back(_vc->get(_vTR_psbh_mu_iso[pos - _vTR_lines_mu_iso[0].begin()]));
           _trws.push_back(_vc->get(_vTR_psbh_mu_iso[pos - _vTR_lines_mu_iso[0].begin()]) * \
                           _vc->get(_vTR_psbl_mu_iso[pos - _vTR_lines_mu_iso[0].begin()]) );
           }
@@ -2934,41 +2367,6 @@ void FakeRatio::findTriggerExts(){
       }
     }
   }
-
-  //cout << "found trigger extensions:" << endl;
-  //DUMPVECTOR(_exts);
-
-}
-
-
-//____________________________________________________________________________
-vector<int> FakeRatio::findTriggerIdxs(){
- 
-  vector<int> result;
-
-  string fix = "non";
-  vector<string> els = _vTR_lines_el_non[0];
-  vector<string> mus = _vTR_lines_mu_non[0];
-  if(_iso){
-    fix = "iso";
-    els = _vTR_lines_el_iso[0];
-    mus = _vTR_lines_mu_iso[0];
-  }
-
-  for(unsigned int i = 0; i < _TR_lines.size(); ++i){
-    vector<string>::iterator pos = find(els.begin(), els.end(), _TR_lines[i]);
-    if(pos != els.end()){
-      result.push_back(pos - els.begin());
-    }
-    else {
-      pos = find(mus.begin(), mus.end(), _TR_lines[i]);
-      if(pos != mus.end()){
-        result.push_back(els.size() + pos - mus.begin());
-      }
-    }
-  }
-
-  return result;
 
 }
 

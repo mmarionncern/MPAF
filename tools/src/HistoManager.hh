@@ -74,6 +74,7 @@ public:
  
   //reset
   void reset();
+  void refresh();
 
   //Histogram access and booking
   

@@ -10,6 +10,9 @@ MPAFDisplay::MPAFDisplay() {
   _dbm=new DataBaseManager();
   _au=new AnaUtils();
   _recompute=true;
+
+  _histoSet=false;
+  _auto=false;
 }
 
 MPAFDisplay::~MPAFDisplay() {
@@ -304,9 +307,9 @@ MPAFDisplay::prepareDisplay(){
 
 void
 MPAFDisplay::doPlot() {
-
+  
   setHistograms();
-
+ 
   //See if a fit is needed for the normalization
   //ugly....
   string fitVar=dp.getFitVar();
@@ -317,7 +320,7 @@ MPAFDisplay::doPlot() {
     else
       cout<<" Error, no observable of name : "<<fitVar<<" for fitting "<<endl;
   }
-  
+
   //Find the observables and draw them
   //could be done in a better way...
   vector<string> obs_ = dp.getObservables();
@@ -335,7 +338,7 @@ MPAFDisplay::doPlot() {
     Obs_.push_back( _hm->getHObs( obs_[io] ) );
     systs_.push_back( _hm->getSystObs( obs_[io] ) );
   }  
-  
+
   if(Obs_.size()!=0) {
     dp.setSystematicsUnc( systs_ );
     dp.plotDistributions( Obs_ );
@@ -348,6 +351,9 @@ MPAFDisplay::doPlot() {
 
 void
 MPAFDisplay::setHistograms() {
+
+  if(_auto && _histoSet) return;
+  _histoSet=true;
 
   //loop over the datasets, find the histograms, sum them
   // and store them into the HistoManager
@@ -362,8 +368,8 @@ MPAFDisplay::setHistograms() {
 
     Dataset* ds=anConf.getDataset( _ids );
     string tmpDs= _ids;
-    
     vector<string> obss = ds->getObservables();
+    
     for(size_t io=0;io<obss.size();io++) {
       TH1* htmp(0);
       vector<string> samples= ds->getSamples();
@@ -388,7 +394,7 @@ MPAFDisplay::setHistograms() {
       delete htmp;
     
     }
-
+  
   }//datasets
 
   //keep for later ideas for uncertainties
@@ -554,14 +560,14 @@ MPAFDisplay::savePlot(string path, string advname) {
 
 void
 MPAFDisplay::producePlots(string path) {
-  
+  _auto=true;
   gROOT->SetBatch(kTRUE);
 
   //vector<string> obss = _hm->getObservables();
   vector<string> obss = dp.getAutoVars();
 
   for(size_t is=0;is<obss.size();is++) {
-
+    
     refresh();
     dp.setObservables( obss[is] );
     doPlot();
@@ -585,9 +591,9 @@ MPAFDisplay::getIntegral(float x1, float x2, float y1, float y2) {
 
 void
 MPAFDisplay::refresh() {
-  dp.reset();
-  anConf.reset();
-  _hm->reset();
+  dp.refreshHistos();
+  //anConf.reset();
+  //_hm->refresh();
 }
 
 
