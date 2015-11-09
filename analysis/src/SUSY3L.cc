@@ -185,10 +185,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-   // if (_vc->get("isData") != 1){
-   //     _weight *= _vc->get("genWeight");
-   //     _weight *= _vc->get("vtxWeight");
-   // }
+    if (_vc->get("isData") != 1){
+        _weight *= _vc->get("genWeight");
+        _weight *= _vc->get("vtxWeight");
+    }
 
 }
 
@@ -245,12 +245,12 @@ void SUSY3L::run(){
     counter("baseline");
 
     //fillSkimTree();
-    //fillControlPlots();
+    fillControlPlots();
     fillEventPlots();
 
     //initialization of signal region cuts, categorization of events passing the baseline 
     //selection into different signal regions, and filling of plots
-    setSignalRegion();
+/*    setSignalRegion();
     if(!srSelection()){
         setWorkflow(kGlobal);
         return;
@@ -260,7 +260,7 @@ void SUSY3L::run(){
     counter("signal region", kSR);
     setWorkflow(kGlobal);
     counter("signal region");
-
+*/
 }
 
 
@@ -452,31 +452,6 @@ void SUSY3L::collectKinematicObjects(){
     
     //number of taus in the event
     _nTaus = _taus.size();
-   
-    /* 
-    // loop over all jets of the event
-    for(int i = 0; i < _vc->get("nJet"); ++i){
-        //if jet passes good jet selection, create a jet candidate and fetch kinematics  
-        if(goodJetSelection(i)) {
-            _jets.push_back( Candidate::create(_vc->get("Jet_pt", i),
-                                               _vc->get("Jet_eta", i),
-                                               _vc->get("Jet_phi", i)));
-            if(bJetSelection(i) ) {
-                _bJets.push_back( Candidate::create(_vc->get("Jet_pt", i),
-                                                _vc->get("Jet_eta", i),
-                                                _vc->get("Jet_phi", i)));
-            } 
-        }
-    }
-    //number of jets in event
-    _nJets = _jets.size();
-    
-    //number of (b-)jets in the event
-    _nBJets = _bJets.size();
-    
-    //compute sum of jet pT's 
-    //_HT = HT();
-    */
 
     //clean jets
     _susyMod->cleanJets( &(_jetCleanLeps10), _jets, _jetsIdx, _bJets, _bJetsIdx, _jetThreshold, _bjetThreshold);
@@ -651,87 +626,6 @@ bool SUSY3L::tauSelection(int tauIdx){
 }
 
 
-//____________________________________________________________________________
-//bool SUSY3L::goodJetSelection(int jetIdx){
-    /*
-        selection of jets
-        parameters: jetIdx
-        return: true (if the jet is good), false (else)
-    */
-/*    
-    counter("JetDenominator", kJetId);
-
-    //define cut values
-    float pt_cut = 30.;
-    float eta_cut = 2.4;
-    float deltaR = 0.4;
-
-    if(!makeCut<float>(_vc->get("Jet_pt", jetIdx)       , pt_cut, ">", "pt selection" , 0, kJetId) ) return false;
-    if(!makeCut<float>(std::abs(_vc->get("Jet_eta", jetIdx)),  eta_cut, "<", "eta selection", 0, kJetId) ) return false;
-    if(!makeCut<float>(_vc->get("Jet_id", jetIdx),  1, ">=", "jet id", 0, kJetId) ) return false;
-
-    //exclude jets which are within a cone of deltaR around lepton candidates or taus
-    //loop over all electron candidates
-    bool lepMatch = false;
-    for(int ie=0; ie<_nEls; ++ie){
-        //calculate delta R, input eta1, eta2, phi1, phi2
-        float dr = KineUtils::dR( _els[ie]->eta(), _vc->get("Jet_eta", jetIdx), _els[ie]->phi(), _vc->get("Jet_phi", jetIdx));
-        if(dr < deltaR){
-            lepMatch = true; 
-            break;
-        }
-    }
-
-    //loop over all muon candidates
-    for(int im=0; im<_nMus; ++im){
-        //calculate delta R, input eta1, eta2, phi1, phi2
-        float dr = KineUtils::dR( _mus[im]->eta(), _vc->get("Jet_eta", jetIdx), _mus[im]->phi(), _vc->get("Jet_phi", jetIdx));
-        if(dr < deltaR) {
-            lepMatch = true; 
-            break;
-        }
-    }
-  
-    //loop over all tau candidates
-    for(int it=0; it<_nTaus; ++it){
-        //calculate delta R, input eta1, eta2, phi1, phi2
-        float dr = KineUtils::dR( _taus[it]->eta(), _vc->get("Jet_eta", jetIdx), _taus[it]->phi(), _vc->get("Jet_phi", jetIdx));
-        if(dr < deltaR) {
-            lepMatch = true; 
-            break;
-        }
-    }
-    //enable to clean on tight objects
-    if(!makeCut(!lepMatch,  "lepton cleaning", "=", kJetId) ) return false;
-    
-    return true;
-}
-*/
-
-
-//____________________________________________________________________________
-//bool SUSY3L::bJetSelection(int jetIdx){
-    /*
-        does the selection of  b-jets
-        parameters: jetIdx
-        return: true (if the jet is a b-jet), false (else)
-    */
-/*    
-    counter("BJetDenominator", kBJetId);
-
-    float btagCSV_cut = 0.814;
-
-    //b-jet needs to fulfill criteria for jets
-    //if(!makeCut(goodJetSelection(jetIdx), "jet selection", "=", kBJetId) ) return false;
-    //cut on b-tagger parameter
-    if(!makeCut<float>(_vc->get("Jet_btagCSV", jetIdx), btagCSV_cut, ">", "csv btag selection", 0, kBJetId) ) return false;
-
-    return true;
-
-}
-*/
-
-
 /*******************************************************************************
 * ******************************************************************************
 * ** KINEMATIC REGION DEFINITIONS                                             **
@@ -757,31 +651,12 @@ void SUSY3L::setBaselineRegion(){
         setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,   60, ">=" )  ;     //sum of jet pT's
-        setCut("MET"                ,   50, ">=" )  ;     //missing transverse energy
+        setCut("MET"                ,   50, "<=" )  ;     //missing transverse energy
         setCut("Mll"                ,   12, ">=" )  ;     //invariant mass of ossf lepton pair
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
         _bjetThreshold                = 30.         ;     //bjet threshold
     }
-
-}
-
-
-//____________________________________________________________________________
-void SUSY3L::setWZControlRegion(){
-    /*
-        sets the cuts of the WZ control region
-        parameters: none
-        return: none
-    */
-
-    setCut("LepMultiplicityWZ"    ,    3, "="       )   ;     //number of isolated leptons
-    _M_T_3rdLep_MET_cut           =   -1                ;     //minimum transverse mass of 3rd lepton and met in On-Z events
-    setCut("NJetsWZ"              ,    2, "[]", 3   )   ;     //number of jets in event
-    setCut("NBJetsWZ"             ,    0, "="       )   ;     //number of b-tagged jets in event
-    _ZMassWindow                  =   15.               ;     //width around Z mass to define on- or off-Z events
-    setCut("HTWZ"                 ,   60, "<", 400   )  ;     //sum of jet pT's
-    setCut("METWZ"                ,   50, "<", 150   )  ;     //missing transverse energy
 
 }
 
@@ -1918,7 +1793,7 @@ if(_SR == "SR017") {
 }
 */
 
-/*
+
 //____________________________________________________________________________
 void SUSY3L::setSignalRegion() {
 
@@ -2035,7 +1910,7 @@ if(_SR == "SR014") {
    setCut("HTSR", 60, ">=");
 }
 }
-*/
+
 /*
 //____________________________________________________________________________
 void SUSY3L::setSignalRegion() {
@@ -2198,6 +2073,8 @@ if(_SR == "SR020") {
 }
 */
 
+//vary ultra-high HT and MET SR cut
+/*
 void SUSY3L::setSignalRegion() {
 
 if(_SR == "SR999") {
@@ -2296,7 +2173,7 @@ if(_SR == "SR013") {
 }
 
 
-}
+}*/
 //____________________________________________________________________________
 void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upValCut) {
     /*
@@ -2429,7 +2306,7 @@ bool SUSY3L::baseSelection(){
     else if(_pairmass == "on"){
         if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
     }
-/*    
+    
     //fill plots 
     if(is_reconstructed_Z){
         fill("Zmass" , _Z->mass()      , _weight);
@@ -2456,7 +2333,7 @@ bool SUSY3L::baseSelection(){
         //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR, kBase) ) return false;
         fill("MT2" , _MT2        , _weight);
     }
-*/      
+      
     return true;
 }
 
@@ -2475,19 +2352,12 @@ bool SUSY3L::wzCRSelection(){
 
     //lepton multiplicity
     if(!(_nMus + _nEls == 3)) return false;
-    
-    //cut on  number of jets
+    bool has_hard_legs = hardLegSelection();
+    if(!has_hard_legs) return false;
     if(!( _nJets == 1)) return false;
-
-    //require minimum number of b-tagged jets
     if(!( _nBJets == 0)) return false;
-    
-    //cut on hadronic activity (sum of jet pT's)
     if(!(_HT > 60 && _HT < 400)) return false;
-
-    //require minimum missing transvers energy (actually missing momentum)
     if(!(_met->pt() > 50 && _met->pt() < 150)) return false;
-
     //select on-Z events
     bool is_reconstructed_Z = ZEventSelectionLoop();
     if(!is_reconstructed_Z) return false;

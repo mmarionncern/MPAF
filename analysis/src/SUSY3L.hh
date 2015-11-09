@@ -38,15 +38,12 @@ private:
     bool electronSelection(const Candidate* c, int);
     bool muonSelection(const Candidate* c, int);
     bool tauSelection(int);
-    bool bJetSelection(int);
-    bool goodJetSelection(int);
     bool looseLepton(const Candidate* c, int idx, int pdgId);
     bool fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass);
     
     bool baseSelection();
     bool wzCRSelection();
     void setBaselineRegion();
-    void setWZControlRegion();
     void setSignalRegion();
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection();
