@@ -201,12 +201,14 @@ void SUSY3L_sync3::run(){
     _mus.clear();
     _taus.clear();
     _looseLeps.clear();
+    _tightLeps.clear();
     _looseLeps10.clear();
     _jetCleanLeps10.clear();
     _elIdx.clear();
     _muIdx.clear();
     _tauIdx.clear();
     _looseLepsIdx.clear();
+    _tightLepsIdx.clear();
     _looseLeps10Idx.clear();
     _jetCleanLeps10Idx.clear();
     _jets.clear();
@@ -246,12 +248,12 @@ void SUSY3L_sync3::run(){
     
     int lumi = _vc->get("lumi");
     int evt = _vc->get("evt");
-    _lumi1 = 1104; 
-    _evt1 = 365448;
-    _lumi2 = -1;
-    _evt2 = -1;
-    _debug = false;
-    cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+    _lumi1 = 737; 
+    _evt1 = 243785;
+    _lumi2 = 747;
+    _evt2 = 247059;
+    _debug = true;
+    //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
 
     setWorkflow(kGlobal);
     counter("baseline");
@@ -408,6 +410,15 @@ void SUSY3L_sync3::collectKinematicObjects(){
         _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
     } 
 
+    
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){
+        cout << "ALL LOOSE LEPTONS: " << endl;
+        for(int i = 0 ; i < _looseLeps.size(); i++){
+            cout << _looseLeps[i]->pt() << endl;
+        }
+    }   
+    }
+
     //select tight muons and electrons
     for(size_t il=0;il<_looseLeps.size();il++){
         if(_selectMuons == "true"){ 
@@ -433,6 +444,16 @@ void SUSY3L_sync3::collectKinematicObjects(){
     //number of muons and electrons in event   
     _nMus = _mus.size();
     _nEls = _els.size();
+
+    //add muons and electrons to _tightLeps
+    for(size_t il=0;il<_nMus;il++){
+        _tightLeps.push_back(_mus[il]);
+        _tightLepsIdx.push_back(_muIdx[il]);
+    }
+    for(size_t il=0;il<_nEls;il++){
+        _tightLeps.push_back(_els[il]);
+        _tightLepsIdx.push_back(_elIdx[il]);
+    }
 
     //select taus
     if(_selectTaus == "true"){ 
@@ -483,7 +504,8 @@ void SUSY3L_sync3::collectKinematicObjects(){
     */
 
     //clean jets
-    _susyMod->cleanJets( &(_jetCleanLeps10), _jets, _jetsIdx, _bJets, _bJetsIdx, _jetThreshold, _bjetThreshold);
+    //_susyMod->cleanJets( &(_jetCleanLeps10), _jets, _jetsIdx, _bJets, _bJetsIdx, _jetThreshold, _bjetThreshold);
+    _susyMod->cleanJets( &(_tightLeps), _jets, _jetsIdx, _bJets, _bJetsIdx, _jetThreshold, _bjetThreshold);
     _nJets = _jets.size();
     _nBJets = _bJets.size();
     
@@ -513,11 +535,15 @@ bool SUSY3L_sync3::electronSelection(const Candidate* c, int elIdx){
     float deltaR = 0.1;
     float pt_cut = 10.;
 
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering electron selection " << c->pt() << " " << elIdx << endl;}}
     //apply the cuts via SusyModules
     if(!makeCut<float>( c->pt() , pt_cut, ">"  , "pt selection"    , 0    , kElId)) return false;
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "paasing pt " << c->pt() << " " << elIdx << endl;}}
     if(!makeCut( _susyMod->elIdSel(c, elIdx, SusyModule::kTight, SusyModule::kTight, false), "electron selection", "=", kElId) ) return false;
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "passing electron id " << c->pt() << " " << elIdx << endl;}}
     if(!makeCut( _susyMod->multiIsoSel(elIdx, SusyModule::kMedium), "multiIso selection", "=", kElId) ) return false;
     
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "passing el selection " << c->pt() << " " << elIdx << endl;}}
     //reject electrons which are within a cone of delta R around a muon candidate (potentially final state radiation, bremsstrahlung)
     bool muMatch = false;
     for(int im=0; im<_nMus; ++im){
@@ -576,9 +602,13 @@ bool SUSY3L_sync3::looseLepton(const Candidate* c, int idx, int pdgId) {
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
+        if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering loose electron selection " << c->pt() << endl;}}
         if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
+        if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass loose id selection " << c->pt() << endl;}}
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
+        if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass multiIso denom " << c->pt() << endl;}}
         if(!_susyMod->elHLTEmulSel(idx, true ) ) return false; 
+        if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass trigger emulation cut " << c->pt() << endl;}}
     }
 
     return true;

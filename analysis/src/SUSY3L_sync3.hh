@@ -161,6 +161,7 @@ private:
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
     std::vector<unsigned int> _looseLepsIdx;
+    std::vector<unsigned int> _tightLepsIdx;
     std::vector<unsigned int> _looseLeps10Idx;
     std::vector<unsigned int> _jetCleanLeps10Idx;
     std::vector<unsigned int> _jetsIdx;
@@ -186,6 +187,7 @@ private:
     CandList _bJets;
     CandList _leps;
     CandList _looseLeps;
+    CandList _tightLeps;
     CandList _looseLeps10;
     CandList _jetCleanLeps10;
 
