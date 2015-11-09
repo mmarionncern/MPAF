@@ -185,10 +185,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    if (_vc->get("isData") != 1){
-        _weight *= _vc->get("genWeight");
-        _weight *= _vc->get("vtxWeight");
-    }
+   // if (_vc->get("isData") != 1){
+   //     _weight *= _vc->get("genWeight");
+   //     _weight *= _vc->get("vtxWeight");
+   // }
 
 }
 
@@ -201,12 +201,14 @@ void SUSY3L::run(){
     _mus.clear();
     _taus.clear();
     _looseLeps.clear();
+    _tightLeps.clear();
     _looseLeps10.clear();
     _jetCleanLeps10.clear();
     _elIdx.clear();
     _muIdx.clear();
     _tauIdx.clear();
     _looseLepsIdx.clear();
+    _tightLepsIdx.clear();
     _looseLeps10Idx.clear();
     _jetCleanLeps10Idx.clear();
     _jets.clear();
@@ -225,22 +227,17 @@ void SUSY3L::run(){
     // do the minimal selection and collect kinematic variables for events passing it
     collectKinematicObjects();
 
-    // initialization of baseline region cuts
-    setBaselineRegion();
+    // select events for WZ control region
+    if(wzCRSelection()){
+        setWorkflow(kWZCR);
+        counter("wz control region",kWZCR);
+        fillEventPlots();
+        return;
+    }
 
     //check if event goes into baseline selection
-    //if(!makeCut(baseSelection(),"base selection")){	
+    setBaselineRegion();
     if(!(baseSelection())){	
-        //if event fails baseline selection check if it goes to WZ control region
-        //setWZControlRegion();
-        //if(!(wzCRSelection())){
-        //    setWorkflow(kGlobal);
-        //    return;
-        //}
-        //setWorkflow(kWZCR);
-        //counter("wz control region",kWZCR);
-        //fillEventPlots();
-        //setWorkflow(kGlobal);
         return;
     }
     
@@ -251,8 +248,8 @@ void SUSY3L::run(){
     //fillControlPlots();
     fillEventPlots();
 
-    // initialization of signal region cuts, categorization of events passing the baseline 
-    // selection into different signal regions, and filling of plots
+    //initialization of signal region cuts, categorization of events passing the baseline 
+    //selection into different signal regions, and filling of plots
     setSignalRegion();
     if(!srSelection()){
         setWorkflow(kGlobal);
@@ -423,6 +420,16 @@ void SUSY3L::collectKinematicObjects(){
     _nMus = _mus.size();
     _nEls = _els.size();
 
+    //add muons and electrons to _tightLeps
+    for(size_t il=0;il<_nMus;il++){
+        _tightLeps.push_back(_mus[il]);
+        _tightLepsIdx.push_back(_muIdx[il]);
+    }
+    for(size_t il=0;il<_nEls;il++){
+        _tightLeps.push_back(_els[il]);
+        _tightLepsIdx.push_back(_elIdx[il]);
+    }
+
     //select taus
     if(_selectTaus == "true"){ 
     // loop over all taus and apply selection
@@ -506,16 +513,16 @@ bool SUSY3L::electronSelection(const Candidate* c, int elIdx){
     if(!makeCut( _susyMod->multiIsoSel(elIdx, SusyModule::kMedium), "multiIso selection", "=", kElId) ) return false;
     
     //reject electrons which are within a cone of delta R around a muon candidate (potentially final state radiation, bremsstrahlung)
-    bool muMatch = false;
-    for(int im=0; im<_nMus; ++im){
-        float dr = KineUtils::dR( _mus[im]->eta(), _vc->get("LepGood_eta", elIdx), _mus[im]->phi(), _vc->get("LepGood_phi", elIdx));
+    //bool muMatch = false;
+    //for(int im=0; im<_nMus; ++im){
+    //    float dr = KineUtils::dR( _mus[im]->eta(), _vc->get("LepGood_eta", elIdx), _mus[im]->phi(), _vc->get("LepGood_phi", elIdx));
         //_deltaR = dr;
         //fill("deltaR_elmu" , _deltaR        , _weight);
-        if(dr<deltaR){
-            muMatch = true;
-            break;
-        }
-    }
+    //    if(dr<deltaR){
+    //        muMatch = true;
+    //        break;
+    //    }
+    //}
     //enable to clean on tight objects
     //if(!makeCut( !muMatch, "dr selection (mu)", "=", kElId) ) return false;
        
@@ -2363,36 +2370,6 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
         _upValCutNBJetsSR = upValCut;
     }
 
-
-    //WZ control region
-
-
-    if(var == "LepMultiplicityWZ") {
-        _valCutLepMultiplicityWZ   = valCut;
-        _cTypeLepMultiplicityWZ    = cType;
-        _upValCutLepMultiplicityWZ = upValCut;
-    }
-    else if(var == "NJetsWZ") {
-        _valCutNJetsWZ   = valCut;
-        _cTypeNJetsWZ    = cType;
-        _upValCutNJetsWZ = upValCut;
-    }
-    else if(var == "NBJetsWZ") {
-        _valCutNBJetsWZ   = valCut;
-        _cTypeNBJetsWZ    = cType;
-        _upValCutNBJetsWZ = upValCut;
-    }
-    else if(var == "HTWZ") {
-        _valCutHTWZ   = valCut;
-        _cTypeHTWZ    = cType;
-        _upValCutHTWZ = upValCut;
-    }
-    else if(var == "METWZ") {
-        _valCutMETWZ   = valCut;
-        _cTypeMETWZ    = cType;
-        _upValCutMETWZ = upValCut;
-    }
-
 }
 
 
@@ -2497,27 +2474,25 @@ bool SUSY3L::wzCRSelection(){
     counter("denominator", kWZ);
 
     //lepton multiplicity
-    if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityWZ, _cTypeLepMultiplicityWZ, "WZ: lepton multiplicity", _upValCutLepMultiplicityWZ, kWZ ) ) return false;
+    if(!(_nMus + _nEls == 3)) return false;
     
-    //apply additional pt cuts on leptons
-    bool has_hard_legs = hardLegSelection();
-    if(!makeCut( has_hard_legs , "WZ: hard leg selection", "=", kWZ) ) return false;
-
-    //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsWZ, _cTypeNJetsWZ, "WZ: jet multiplicity", _upValCutNJetsWZ, kWZ) ) return false;
+    //cut on  number of jets
+    if(!( _nJets == 1)) return false;
 
     //require minimum number of b-tagged jets
-    if(!makeCut<int>( _nBJets, _valCutNBJetsWZ, _cTypeNBJetsWZ, "WZ: b-jet multiplicity", _upValCutNBJetsWZ, kWZ) ) return false;
+    if(!( _nBJets == 0)) return false;
     
-    //require minimum hadronic activity (sum of jet pT's)
-    if(!makeCut<float>( _HT, _valCutHTWZ, _cTypeHTWZ, "WZ: hadronic activity", _upValCutHTWZ), kWZ ) return false;
+    //cut on hadronic activity (sum of jet pT's)
+    if(!(_HT > 60 && _HT < 400)) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETWZ, _cTypeMETWZ, "WZ: missing transverse energy", _upValCutMETWZ, kWZ) ) return false;
+    if(!(_met->pt() > 50 && _met->pt() < 150)) return false;
 
     //select on-Z events
     bool is_reconstructed_Z = ZEventSelectionLoop();
-    if(!makeCut( is_reconstructed_Z, "WZ: mll selection", "=", kWZ) ) return false;
+    if(!is_reconstructed_Z) return false;
+    
+    counter("passing WZ selection", kWZ);
     
     return true;
 }

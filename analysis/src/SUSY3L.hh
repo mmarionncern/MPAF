@@ -110,12 +110,6 @@ private:
     float _valCutMllBR;
     float _valCutMT2BR;
 
-    float _valCutLepMultiplicityWZ;
-    float _valCutNJetsWZ;
-    float _valCutNBJetsWZ;
-    float _valCutHTWZ;
-    float _valCutMETWZ;
-    
     std::vector<std::string> _hltLines;
     
     std::string _cTypeLepMultiplicityBR;
@@ -130,12 +124,6 @@ private:
     std::string _cTypeMllBR;
     std::string _cTypeMT2BR;
     
-    std::string _cTypeLepMultiplicityWZ;
-    std::string _cTypeNJetsWZ;
-    std::string _cTypeNBJetsWZ;
-    std::string _cTypeHTWZ;
-    std::string _cTypeMETWZ;
-
     float _upValCutLepMultiplicityBR;
     float _upValCutNJetsBR;
     float _upValCutNBJetsBR;
@@ -148,17 +136,12 @@ private:
     float _upValCutMllBR;
     float _upValCutMT2BR;
     
-    float _upValCutLepMultiplicityWZ;
-    float _upValCutNJetsWZ;
-    float _upValCutNBJetsWZ;
-    float _upValCutHTWZ;
-    float _upValCutMETWZ;
- 
     //vectors for electron, muon, and tau candidates
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
     std::vector<unsigned int> _looseLepsIdx;
+    std::vector<unsigned int> _tightLepsIdx;
     std::vector<unsigned int> _looseLeps10Idx;
     std::vector<unsigned int> _jetCleanLeps10Idx;
     std::vector<unsigned int> _jetsIdx;
@@ -184,6 +167,7 @@ private:
     CandList _bJets;
     CandList _leps;
     CandList _looseLeps;
+    CandList _tightLeps;
     CandList _looseLeps10;
     CandList _jetCleanLeps10;
 
