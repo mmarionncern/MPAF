@@ -797,9 +797,6 @@ double VarClass::findAVal(int tType, int key, int idx) {
 
 double VarClass::get(string name, int idx) {
   
-  // for(itVId_=varIds_.begin();itVId_!=varIds_.end();itVId_++)
-  //   cout<<itVId_->first<<"   "<<itVId_->second<<endl;
-
   itVId_ = varIds_.find(name);
   if(itVId_ == varIds_.end() )
     cout << " error, no such variable " << name << endl;
@@ -872,204 +869,6 @@ void VarClass::linkArrayVal(string name, int tType, int key) {
 }
 
 
-//____________________________________________________________________________
-// bool VarClass::tryType(string name, string type) {
-//   /*
-//     checks, whether a variable has the type one expects
-//     parameters: name (the variable), type (the expected type; either "S", "B",
-//     "UI", "UL", "I", "D", "F", "VS", "VB", "VUI", "VUL", "VI", "VD",
-//     "VF")
-//     return: true (if the variable is of the expected type), false (else)
-//   */
-
-
-//   // Scalars
-
-//   // string
-//   if(type == "S") {
-//     itS = varmS.find( name );
-//     if( itS != varmS.end() ) return true;
-//   }
-	
-//   // bool
-//   else if(type == "B") {
-//     itB = varmB.find( name );
-//     if( itB != varmB.end() ) return true;
-//   }
-
-//   // unsigned int
-//   else if(type == "UI") {
-//     itUI = varmUI.find( name );
-//     if( itUI != varmUI.end() ) return true;
-//   }
-
-//   // unsigned long
-//   else if(type == "UL") {
-//     itUL = varmUL.find( name );
-//     if( itUL != varmUL.end() ) return true;
-//   }
-
-//   // int
-//   else if(type == "I") {
-//     itI = varmI.find( name );
-//     if( itI != varmI.end() ) return true;
-//   }
-
-//   // double
-//   else if(type == "D") {
-//     itD = varmD.find( name );
-//     if( itD != varmD.end() ) return true;
-//   }
-
-//   // float
-//   else if(type == "F") {
-//     itF = varmF.find( name );
-//     if( itF != varmF.end() ) return true;
-//   }
-
-
-//   //Vectors
-
-//   // vector<string>
-//   else if(type == "VS") {
-//     itVS = varmVS.find( name );
-//     if( itVS != varmVS.end() ) return true;
-//   }
-
-//   // vector<bool>
-//   else if(type == "VB") {
-//     itVB = varmVB.find( name );
-//     if( itVB != varmVB.end() ) return true;
-//   }
-
-//   // vector<unsigned int>
-//   else if(type == "VUI") {
-//     itVUI = varmVUI.find( name );
-//     if( itVUI != varmVUI.end() ) return true;
-//   }
-
-//   // vector<unsinged long>
-//   else if(type == "VUL") {
-//     itVUL = varmVUL.find( name );
-//     if( itVUL != varmVUL.end() ) return true;
-//   }
-
-//   // vector<int>
-//   else if(type == "VI") {
-//     itVI = varmVI.find( name );
-//     if( itVI != varmVI.end() ) return true;
-//   }
-
-//   // vector<double>
-//   else if(type == "VD") {
-//     itVD = varmVD.find( name );
-//     if( itVD != varmVD.end() ) return true;
-//   }
-
-//   // vector<float>
-//   else if(type == "VF") {
-//     itVF = varmVF.find( name );
-//     if( itVF != varmVF.end() ) return true;
-//   }
-
-//   // type not found	
-//   cout << "Error for var " << name << endl;
-//   return 0;
-
-// }
-
-
-// const vector<int>& VarClass::getVI(string name) {
-
-//   vector<int> tmp;
-//   itVI = varmVI.find( name );
-
-//   if(itVI != varmVI.end() ) 
-//     return (*((*itVI).second));
-      
-//   cout << " error, no such variable " << name << endl;
-//   return tmp;
-
-// }
-
-// const vector<unsigned int>& VarClass::getVUI(string name) {
-
-//   vector<unsigned int> tmp;
-//   itVUI = varmVUI.find( name );
-  
-//   if( itVUI != varmVUI.end() ) 
-//     return (*((*itVUI).second));
-
-//   cout << " error, no such variable " << name << endl;
-//   return tmp;
-
-// }
-
-// const vector<unsigned long>& VarClass::getVUL(string name) {
-
-//   vector<unsigned long> tmp;
-//   itVUL = varmVUL.find( name );
-  
-//   if( itVUL != varmVUL.end() )
-//     return (*((*itVUL).second));
-
-//   cout << " error, no such variable " << name << endl;
-//   return tmp;
-
-// }
-
-// const vector<bool>& VarClass::getVB(string name) {
-
-//   vector<bool> tmp;
-//   itVB = varmVB.find( name );
-	  
-//   if( itVB != varmVB.end() )
-//     return (*((*itVB).second));
-	
-//   cout << " error, no such variable " << name << endl;
-//   return tmp;
-
-// }
-
-// const vector<double>& VarClass::getVD(string name) {
-
-//   vector<double> tmp;
-//   itVD = varmVD.find( name );
-	  
-//   if( itVD != varmVD.end() )
-//     return (*((*itVD).second));
-
-//   cout << " error, no such variable " << name << endl;
-//   return tmp;
-
-// }
-
-
-// const vector<float>& VarClass::getVF(string name) {
-
-//   vector<float> tmp;	
-//   itVF = varmVF.find( name );
-	  
-//   if( itVF != varmVF.end() )
-//     return (*((*itVF).second));
-	
-//   cout << " error, no such variable " << name << endl;
-//   return tmp;
-// }
-
-// const vector<string>& VarClass::getVS(string name) {
-
-//   vector<string> tmp;
-//   itVS = varmVS.find( name );
-	  
-//   if( itVS != varmVS.end() )
-//     return (*((*itVS).second));
-
-//   cout << " error, no such variable " << name << endl;
-//   return tmp;
-
-// }
-
 
 /*****************************************************************************
 ******************************************************************************
@@ -1140,7 +939,6 @@ VarClass::applySystVar(string name, int dir, string mvar, vector<string> vars, v
       }
     }
 
-    //cout<<" ========= "<<vars[iv]<<"   "<<p[0]<<"  "<<p[1]<<"  "<<p.size()<<endl;
     vals.push_back(p);
   }
 
@@ -1231,7 +1029,7 @@ VarClass::backPortVar(int mvar) {
 //____________________________________________________________________________
 void
 VarClass::backPortAllVars() {
-  
+ 
   multiReinit<unsigned int>( varmUI, uncmUI );
   multiReinit<unsigned long>( varmUL, uncmUL );
   multiReinit<int>( varmI, uncmI );
@@ -1244,11 +1042,11 @@ VarClass::backPortAllVars() {
   multiReinitV<double>( varmVD, uncmVD );
   multiReinitV<float>( varmVF, uncmVF );
 
-  multiReinitA<unsigned int>( varmAUI, uncmVUI );
-  multiReinitA<unsigned long>( varmAUL, uncmVUL );
-  multiReinitA<int>( varmAI, uncmVI );
-  multiReinitA<double>( varmAD, uncmVD );
-  multiReinitA<float>( varmAF, uncmVF );
+  multiReinitA<unsigned int>( varmAUI, uncmAUI );
+  multiReinitA<unsigned long>( varmAUL, uncmAUL );
+  multiReinitA<int>( varmAI, uncmAI );
+  multiReinitA<double>( varmAD, uncmAD );
+  multiReinitA<float>( varmAF, uncmAF );
 
 }
 
@@ -1285,30 +1083,4 @@ VarClass::getUnivF(int id) {
   }
   return vf;
 }
-
-
-//____________________________________________________________________________
-// string VarClass::getType(string mvar) {
-//   /*
-//     returns the type as string (abbreviation) of a variable
-//     parameters: mvar (the variable)
-//     return: the type ("UI", "UL", "I", "D", "F", "VUI", "VUL", "VI", "VD", "VF")
-//   */
-
-//   if( tryType(mvar,"UI" ) ) return "UI";
-//   if( tryType(mvar,"UL" ) ) return "UL";
-//   if( tryType(mvar,"I"  ) ) return "I";
-//   if( tryType(mvar,"D"  ) ) return "D";
-//   if( tryType(mvar,"F"  ) ) return "F";
-	
-//   if( tryType(mvar,"VUI") ) return "VUI";
-//   if( tryType(mvar,"VUL") ) return "VUL";
-//   if( tryType(mvar,"VI" ) ) return "VI";
-//   if( tryType(mvar,"VD" ) ) return "VD";
-//   if( tryType(mvar,"VF" ) ) return "VF";
-	
-//   return "raté";
-  
-// }
-
 

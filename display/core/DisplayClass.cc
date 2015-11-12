@@ -2062,7 +2062,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
   vector<TH1*> hMC;
   TH1F* hData;
   
-  size_t nVals=isMultiScheme?(vals.size()/2):vals.size(); 
+  size_t nVals=vals.size();//isMultiScheme?(vals.size()/2):vals.size(); 
 
   for(size_t ic=0;ic<nVals;ic++) {
     cNames.push_back( vals[ic].first );
@@ -2095,12 +2095,14 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
   mcUncert->SetFillColor(kGray+1);
   
   size_t idat=(_mcOnly)?-1:( vals[0].second.size()-1);
-  if(isMultiScheme) { //overwrite the data plot -> means we have two parallel scheme to looka t in MC
-    for(size_t ic=0;ic<nVals;ic++) {
-    vals[ic].second[0][0]["tot"] = vals[ic].second[nVals][0]["tot"]; 
-    vals[ic].second[0][1]["tot"] = vals[ic].second[nVals][1]["tot"]; 
-    vals[ic].second[0][2]["tot"] = vals[ic].second[nVals][2]["tot"]; 
-    vals[ic].second[0][3]["tot"] = vals[ic].second[nVals][3]["tot"]; 
+  if(isMultiScheme) { //overwrite the data plot -> means we have two parallel scheme to look at in MC
+    if(idat!=-1) {
+      for(size_t ic=0;ic<nVals;ic++) {
+	vals[ic].second[0][0]["tot"] = vals[ic].second[idat][0]["tot"]; 
+	vals[ic].second[0][1]["tot"] = vals[ic].second[idat][1]["tot"]; 
+	vals[ic].second[0][2]["tot"] = vals[ic].second[idat][2]["tot"]; 
+	vals[ic].second[0][3]["tot"] = vals[ic].second[idat][3]["tot"]; 
+      }
     }
   }
 
@@ -2117,19 +2119,13 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
 
 	float eyl2=pow(vals[ic].second[id][2]["tot"],2) + ((_mcSyst)?pow(vals[ic].second[id][1]["tot"],2):0);
 	float eyh2=pow(vals[ic].second[id][3]["tot"],2) + ((_mcSyst)?pow(vals[ic].second[id][1]["tot"],2):0);
-	//cout<<" || "<<vals[ic].second[id][2]<<"  "<<<<" --> "<<eyl2<<"   "<<eyh2<<" ==> "<<sqrt(eyl2)<<"  "<<sqrt(eyh2)<<endl;
        	mcUncert->SetPointError( ic, 0.25,0.25, sqrt(eyl2), sqrt(eyh2) );
       }
       else if(id==idat) { //data
-	//cout<<"  ===> "<<vals[ic].second[id][0]<<endl;
         hData->SetBinContent( ic+1, vals[ic].second[id][0]["tot"] );
 	hData->SetBinError( ic+1, vals[ic].second[id][1]["tot"] );	
       }
       else {
-	// _itCol = _colors.find( _names[_nhmc-id-1] );
-	// hMC[nDs-id-1]->SetLineColor( _itCol->second );
-	// hMC[nDs-id-1]->SetFillColor( _itCol->second );
-
         if( !_sSignal && dsnames[id].find("sig") == (size_t)-1){
           float sum = vals[ic].second[id][0]["tot"];
           float sum2 = pow(vals[ic].second[id][1]["tot"],2);
@@ -2141,7 +2137,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
           hMC[nDs-id-1]->SetBinContent( ic+1, sum);
         }
         else{
-          hMC[nDs-id-1] -> SetBinContent( ic+1, vals[ic].second[id][0]["tot"]);// * weight);
+          hMC[nDs-id-1] -> SetBinContent( ic+1, vals[ic].second[id][0]["tot"]);
         }
       }
 
@@ -2172,7 +2168,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
     if( (!_sSignal && nh.find("sig")!=(size_t)-1) ) {
       float yM = HistoUtils::getHistoYhighWithError(hMC[ih],0,xmax);
       if(yM>ymax)
-        ymax = yM;//*(_logYScale?15:1.5);
+        ymax = yM;
     }
   }
 
@@ -2185,7 +2181,6 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
   emptyH->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   emptyH->GetYaxis()->SetNdivisions(_Ydiv[0],_Ydiv[1],_Ydiv[2]);
   emptyH->GetYaxis()->SetTitle(_ytitle.c_str());
-  //emptyH->GetXaxis()->RotateTitle(90);
   for(size_t ib=0;ib<cNames.size();ib++) {
     emptyH->GetXaxis()->SetBinLabel(ib+1, cNames[ib].c_str() );
     for(size_t ih=0;ih<hMC.size();ih++)
@@ -2463,9 +2458,6 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
 	  systD[iv] +=sU<=0?(sU*sU):(sD*sD);
 	}
 	
-	// if(ib == 20)
-	//   cout<<_hMC->GetBinContent(ib)<<"   sU="<<sU<<"   sD="<<sD<<"   "<<_hMC->GetXaxis()->GetBinCenter(ib)<<" ===> sysU="<<sqrt(systU[iv])<<"   sysD="<<sqrt(systD[iv])<<endl;
-
 	if(ib==0 && _uncDet) {
 	  _uncNames[iv] = (*itS).first;
 	}

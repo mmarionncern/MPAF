@@ -227,10 +227,14 @@ private:
   std::vector<unsigned int>  _tightLepsOSPtCutIdx;
 
   CandList _jets;
-  std::vector<unsigned int>  _jetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
   
   CandList _bJets;
-  std::vector<unsigned int>  _bJetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
+
+
+  CandList _lepJets;
+  std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
   
   unsigned int _nLooseLeps;
  
@@ -269,6 +273,7 @@ private:
   vector<TVector2> _uncleanDiscJets;
   vector<TVector2> _uncleanFwdJets;
 
+  float _btagW;
 
   //background pairs===============
   vector<CandList> _auxPairs;
@@ -284,7 +289,6 @@ private:
 
 
   vector<float> _jetLepACorFactor;
-
 
 };
 

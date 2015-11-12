@@ -339,8 +339,6 @@ AnaUtils::getYieldSysts(EffST eST, map<string,float>& rU, map<string,float>& rD,
     dU = it->second - central; //temporary variation variation
     dD = eST.systsD[ n ] - central;
     
-    //cout<<"  "<<n<<" : "<<central<<"  up "<<it->second<<"  do "<<eST.systsD[ n ]<<endl;
-
     if( dU*dD > 0) { //same sign errors
       rU[ n ] = dU>=0?(dU>dD?(dU*dU):(dD*dD)):0;
       rD[ n ] = dU<0?(dU<dD?(dU*dU):(dD*dD)):0;
@@ -836,11 +834,6 @@ AnaUtils::printTables(string categ) {
     if(header) {
       cout<<" Cut  "<<fixed<<setprecision(2);
       for(size_t ids=0;ids<dsNames.size();ids++) { //_itEMap
-
-        //_itEMap = _effMap[ ids ].find( dsNames[ ids ] );
-        // if(_itEMap->first=="data" || _itEMap->first=="Data") 
-        //   cout<<" & MC   "<<"  & "<<_itEMap->first<<"   ";
-        // else
         cout<<" & "<<dsNames[ ids ]<<"   ";
       }
       cout<<" \\\\ "<<endl;
@@ -907,8 +900,7 @@ AnaUtils::printTables(string categ) {
         _itEIMap=_effMap[ ids ][ icat ].find( _categories[icat].effNames[ ic ] );
         if(_itEIMap==_effMap[ ids ][ icat ].end()) 
           cout<<setw(20)<<" - ";
-        //cout<<" - ";
-        else {
+	else {
           if(_itEIMap->second.sumw>0.000001 ) {
             
             ostringstream os,os2;
@@ -950,6 +942,12 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
   vector< pair<string, vector<vector<map<string,float> > > > > onums;
   if(categ=="") return onums;
 
+  istringstream iss(opt);
+  vector<string> opts;
+  copy(istream_iterator<string>(iss),
+       istream_iterator<string>(),
+       back_inserter<vector<string> >(opts));
+
   //first, retrieve the ids to be used =================
 
   vector<pair<int,string> > catIds; //icateg:selection
@@ -962,27 +960,26 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
   }
   if(scheme>=kMulti) {//several categories, one selection -> yield comparison
     for(_itC=_categories.begin();_itC!=_categories.end();++_itC) {
-      //cout<<" -> "<<_itC->second.name<<"  "<<(_itC->second.name.find(opt)!=string::npos)<<endl;
+      if(_itC->second.isUnc) continue;
+
       if(_itC->second.name.find(categ)!=string::npos) {
 	int icat= getCategId(_itC->second.name);
 	pair<int, string> p(icat, cname);
-	if(_itC->second.name.find(opt)==string::npos && opt!="") {
-	  if(scheme!=kMultiVeto) {
-	    catIdsOpt.push_back(p);
-	    //cout<<"selected 3 "<<endl;
-	  }
-	  else {
-	    if(_itC->second.name.find(opt)!=string::npos) continue;
-	    catIds.push_back(p);
-	    //cout<<"selected 1 "<<endl;
-	  }
-	 
+
+	bool findOpt=false;
+	for(int io=0;io<opts.size();io++) {
+	  if(_itC->second.name.find(opts[io])!=string::npos)
+	    findOpt=true;
+	}
+
+	if(!findOpt){
+	  catIds.push_back(p);
 	}
 	else if(opt=="") { // empty option categ
 	  catIds.push_back(p);
-	  //cout<<"selected 2 "<<endl;
 	}
-      }
+
+       }
     }
     
     if(opt!="" && scheme==kMulti)
@@ -1004,8 +1001,6 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
     int icat = catIds[id].first;
     string sel = catIds[id].second;
     pair<string, vector<vector<map<string,float> > > > p;
-    //vector<vector<float> > v(dsNames.size(),vector<float>(5,0));
-    //vector<vector<pair<string,float> > > v(dsNames.size(),vector<pair<string,float> >(5,0));
     vector<vector<map<string,float> > > v(dsNames.size(),vector<map<string,float> >(5, map<string,float>() ));
 
     //naming scheme =========================
@@ -1133,26 +1128,40 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
   lines[ "dataYield" ] = os2.str(); 
   // =================================================================
   // and the nuisance parameters
-  //cout<<" cui "<<endl;
   for(map<string,vector<string> >::const_iterator it=intNuisPars.begin();
       it!=intNuisPars.end(); it++) {
     string line;
-    //cout<<it->first<<" \\ "<<endl;
+    
     if(it->first.find("stat")!=string::npos) continue; //syst from stat ucnertainties
     if(nuisParExt[ it->first ] == true ) continue;
     if(it->first.find("_OW")!=string::npos) continue;
-   
-    for(unsigned int ids2=0;ids2<it->second.size()+1;ids2++) {
-      if(it->second[ids2]=="") continue; //total MC?
-      //if(it->first.find(dsNames[ids-1])==string::npos ) continue;
-      for(unsigned int ids=1;ids<dsNames.size()+1;ids++) {
+
+    bool exists=false;
+    for(unsigned int ids=1;ids<dsNames.size()+1;ids++) {
+      exists=false;
+      if(dsNames[ids-1]=="") continue; //total MC?
+      if(dsNames[ids-1].find("data")!=string::npos) continue;
+
+      for(unsigned int ids2=0;ids2<it->second.size();ids2++) {
 	if(dsNames[ids-1]==it->second[ids2] ) {
+	  exists=true;
 	  float vUp=-1, vDo=1;
 	  if(numbers[0].second[ids][2].find(it->first)!=numbers[0].second[ids][2].end()) {
-	     vUp = numbers[0].second[ids][2][it->first]/numbers[0].second[ids][0]["tot"];
-	     vDo = numbers[0].second[ids][3][it->first]/numbers[0].second[ids][0]["tot"];
+	    if(numbers[0].second[ids][0]["tot"]!=0) {
+	      vUp = numbers[0].second[ids][2][it->first]/numbers[0].second[ids][0]["tot"];
+	      vDo = numbers[0].second[ids][3][it->first]/numbers[0].second[ids][0]["tot"];
+	    }
+	    else { //arbitrary 100% for now
+	      if(numbers[0].second[ids][2][it->first]==0) vUp=0;
+	      else vUp=1;
+
+	      if(numbers[0].second[ids][3][it->first]==0) vDo=0;
+	      else vDo=1;
+	      // vUp = 1;// numbers[0].second[ids][2][it->first]/numbers[0].second[ids][2][it->first];
+	      // vDo = 1;//numbers[0].second[ids][3][it->first]/numbers[0].second[ids][3][it->first];
+	    }
 	  }
-	  // cout<<it->first<<"   "<<dsNames[ids-1]<<"   "<<numbers[0].second[ids][0]["tot"]<<"  "<<numbers[0].second[ids][2][it->first]<<"  "<<numbers[0].second[ids][3][it->first]<<" --> "<< vUp<<"   "<<vDo<<endl;
+
 	  ostringstream osU, osD;
 	  map<string,vector<string> >::const_iterator it2=intNuisPars.find(it->first+"_OW");
 	  if(it2!=intNuisPars.end() && 
@@ -1164,70 +1173,63 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
 	      }
 	    }
 	  }
+	  
+	  if(std::abs(vUp)<0.001 && vUp!=0) vUp=0.001*(vUp/std::abs(vUp));
+	  if(std::abs(vDo)<0.001 && vDo!=0) vDo=0.001*(vDo/std::abs(vDo));
+	  
+	  if(vDo>1) vDo=0.999;
 
-	  osU<<fixed<<setprecision(2)<<(1+vUp);
-	  osD<<fixed<<setprecision(2)<<(1-vDo);
+	  osU<<fixed<<setprecision(3)<<(1+vUp);
+	  osD<<fixed<<setprecision(3)<<(1-vDo);
+	  string tmpU=osU.str();
+	  string tmpD=osD.str();
 
 	  if(dsNames[ids-1]!=sigName) {
-	    if(vUp==vDo)
-	      line+=osU.str()+"\t";
-	    else
-	      line+=osD.str()+"/"+osU.str()+"\t";
+	    line+=osD.str()+"/"+osU.str()+"\t";
 	  }
 	  else {
-	    if(vUp==vDo)
-	      line=osU.str()+"\t"+line;
-	    else
-	      line=osD.str()+"/"+osU.str()+"\t"+line;
+	    line=osD.str()+"/"+osU.str()+"\t"+line;
 	  }
+	
 	}//find ds
-	else if(dsNames[ids-1].find("data")==string::npos) {
-	  line+="-\t";	
-	  //cout<<dsNames[ids-1]<<"  "<<it->first<<"   :"<<it->second[ids2]<<":"<<endl;
-	}
       }//dsname 2
-
-
+      
+      if(!exists) {
+	line+="-\t";	
+      }
     }//dsName
 
     //adding the header ==========================
     lines[ "NP_"+it->first ] = it->first+"\tlnN\t"+line;
   }
-  //cout<<" coin "<<lines.size()<<endl;
+
   //=================================================================
   // and the stat uncertainty
   for(unsigned int ids=1;ids<dsNames.size()+1;ids++) {
     float unc= numbers[0].second[ids][1]["tot"]/numbers[0].second[ids][0]["tot"];
     if(unc<0) unc*=-1;
     if(numbers[0].second[ids][0]["tot"]==0) unc=0;
-    // cout<<ids<<"  "<<dsNames[ids-1]<<"  "<<numbers[0].second[ids][1]
-    // 	<<"   "<<numbers[0].second[ids][0]<<"   "<<unc<<endl;
-  
+
     stringstream osN;
     osN<<setprecision(3)<<numbers[0].second[ids][4]["tot"];
 
     string line="";
-    // cout<<os.str()<<"   "<<numbers[0].second[ids][0]<<"  "<<numbers[0].second[ids][1]<<"   "<<unc<<endl;
-   
+
     //single case
     //if(intNuisPars.find(dsNames[ids-1]+"stat")==intNuisPars.end() ) continue;
 
     //multicase
     bool exists=false;
     bool gmN=false;
-    //cout<<" --> "<<dsNames[ids-1]<<endl;
+
     map<string,vector<string> >::const_iterator it;
     for( it=intNuisPars.begin();it!=intNuisPars.end(); it++) {
       if(nuisParExt[ it->first ] == true ) continue;
       if(it->first.find("_OW")!=string::npos) continue;
-      // cout<<it->first<<"  "<<dsNames[ids-1]<<"  "
-      //  	  <<(it->first.find("stat")!=string::npos)<<"   "
-      //  	  <<(it->first.find(dsNames[ids-1])!=string::npos)<<endl;
       if(it->first.find("stat")!=string::npos &&
 	 it->first.find(dsNames[ids-1])!=string::npos ) {
 	exists=true; 
 	if(nuisParScheme[it->first]=="gmN") {
-	  // cout<<dsNames[ids-1]<<"   "<<numbers[0].second[ids][4]["tot"]<<" <> "<<numbers[0].second[ids][1]["tot"]<<" ==> "<<numbers[0].second[ids][1]["tot"]/sqrt(numbers[0].second[ids][4]["tot"])<<endl;
 	  if(numbers[0].second[ids][4]["tot"]!=0)
 	    unc = numbers[0].second[ids][1]["tot"]/sqrt(numbers[0].second[ids][4]["tot"]); //effective rate
 	  else
@@ -1237,9 +1239,7 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
 	}
 	break;}
     }
-    // cout<<" coin "<<endl;
     if(!exists) continue;
-    //cout<<it->first<<"   "<<dsNames[ids-1]<<endl;
     
     map<string,vector<string> >::const_iterator it2=intNuisPars.find(it->first+"_OW");
     if(it2!=intNuisPars.end() && 
@@ -1275,15 +1275,12 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
     }
     
     //single case
-    //lines[ "NP_"+dsNames[ids-1]+"stat" ] = dsNames[ids-1]+"stat\tlnN\t"+line;
-    //cout<<it->first<<"   "<<endl;
     if(nuisParScheme[it->first]=="lnN")
       lines[ "NP_"+dsNames[ids-1]+"stat" ] = it->first+"\tlnN\t"+line;
     else if(nuisParScheme[it->first]=="gmN")
       lines[ "NP_"+dsNames[ids-1]+"stat" ] = it->first+"\tgmN "+osN.str()+"\t"+line;
     
   }
-  //cout<<" pouet "<<lines.size()<<endl;
   if(sumBkg+sumSig==0) return false;
   return true;
 }

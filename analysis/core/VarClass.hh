@@ -155,14 +155,12 @@ private:
     typename map<int, T>::const_iterator it = cmap.find(mvar);
     if( it == cmap.end() ) { // variable not yet registered in the backup map	
       cmap[ mvar ] = imap[ mvar ];
-      //cout<<" init step : "<<mvar<<"  "<<cmap[ mvar ]<<" / "<<imap[ mvar ]<<"   "<<(&(cmap[ mvar ]))<<endl;
     }
     else {   // variable already registered, reinitialization
       if(_nextEvent)
   	cmap[ mvar ] = imap[ mvar ];
       else
   	imap[ mvar ] = cmap[ mvar ];
-      //cout<<" back step : "<<cmap[ mvar ]<<" / "<<imap[ mvar ]<<"   "<<(&(cmap[ mvar ]))<<endl;
     }
   };
 
@@ -183,7 +181,6 @@ private:
       cmap[ mvar ] = new vector<T>;
       for(size_t ie = 0; ie < imap[mvar]->size(); ++ie) {
   	cmap[ mvar ]->push_back( imap[ mvar ]->at(ie) );
-  	//cout << " init step : " << cmap[ mvar ]->at(ie) << " / " << imap[ mvar ]->at(ie) << endl;
       }
     }
     else { // variable already registered, reinitialization 
@@ -196,7 +193,6 @@ private:
       else {
   	for(size_t ie = 0; ie < imap[mvar]->size(); ++ie) {
   	  imap[ mvar ]->at(ie) = cmap[ mvar ]->at(ie);
-  	  //cout << " back step : " << cmap[ mvar ]->at(ie) << " / " << imap[ mvar ]->at(ie) << endl;
   	}
       }
     }
@@ -213,7 +209,6 @@ private:
       cmap[mvar] = new vector<T>;
       for(size_t ie=0;ie<as;++ie) {
   	cmap[mvar]->push_back( imap[mvar][ie] );
-  	//cout << " init step : " << cmap[ mvar ]->at(ie) << " / " << imap[ mvar ]->at(ie) << endl;
       }
     }
     else { // variable already registered, reinitialization 
@@ -226,10 +221,10 @@ private:
       else {
   	for(size_t ie=0;ie<as;++ie) {
   	  imap[mvar][ie] = cmap[ mvar]->at(ie);
-  	  //cout << " back step : " << cmap[ mvar ]->at(ie) << " / " << imap[ mvar ]->at(ie) << endl;
-  	}
+	}
       }
     }
+
   };
 
 
@@ -273,10 +268,10 @@ private:
     */
 	
     typename map<int, vector<T>* >::const_iterator it;
-	
     for(it = cmap.begin(); it != cmap.end(); ++it) {
-      for(size_t ie = 0; ie <it->second->size(); ++ie)
+      for(size_t ie = 0; ie <it->second->size(); ++ie) {
   	imap[ it->first ][ie]=it->second->at(ie);
+      }
     }
 	
   };
@@ -488,8 +483,6 @@ private:
 
   bool _nextEvent;
 	
-  //ClassDef(VarClass,0)
-
 };
 
 #endif

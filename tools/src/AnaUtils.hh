@@ -302,7 +302,6 @@ private:
       }
       else {
 	string uncName="Unc"+_uncSrc+((_uncDir==SystUtils::kUp)?"Up":"Do");
-	//cout<<uncName<<"  "<<_offsetUnc[uncName]<<endl;
     	//separated workflow for uncertainty
 	if( (_nWF==1 || _curWF!=-100) && !_isMultiWF) { //single workflow
 	  setEfficiency(ids, cName, _curWF+_offsetUnc[uncName], w, accept);

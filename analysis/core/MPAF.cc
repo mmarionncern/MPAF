@@ -164,7 +164,6 @@ void MPAF::analyze(){
 	  modifyWeight();
 	  if(iu==0) _vc->nextEvent();
 	  else _vc->sameEvent();
-	  //cout<<" starting : "<<iu<<"   "<<_uncSrcs[iu]<<"  "<<_uncSrcs.size()<<"   "<<_weight<<endl;
 	  _uncId = true;
 	  _unc = _uncSrcs[iu];
 	  _uDir = _uncDirs[iu];
@@ -172,14 +171,11 @@ void MPAF::analyze(){
 	  //very ugly...
 	  // _curWF = _au->getUncWorkflow("Unc"+_unc+dir);
 	  //_offsetWF=_au->getUncWorkflow("Unc"+_unc+dir);
-	  //cout<<" aqui "<<_offsetWF<<"   "<<_curWF<<endl;
 	  _au->setCurrentWorkflow(_curWF);
 	  _au->setUncSrc(_unc, _uDir );
 	  applySystVar( _vc->_su->getSystInfos(_unc, _uDir) );
 	  run();
 	  _vc->backPortAllVars();
-	  //cout<<" bluou : "<<iu<<"   "<<_uncSrcs[iu]<<"  "<<_uncSrcs.size()<<"   "<<_weight<<endl;
-	  //reinitVars( _vc->_su->getSystInfos(_unc, _uDir).modVar );
 	}
 
       //destroy old Candidate pointers ======
@@ -312,12 +308,10 @@ void MPAF::loadConfigurationFile(std::string cfg){
     sId.norm = -1; 
     
     for (size_t ft=0; ft<_friends.size();ft++) {
-      cout<<_friends[ft]<<endl;
       _datasets.back()->addFriend(_friends[ft]); 
     }
 
     for (size_t ft=0; ft<friends.size();ft++) {
-      cout<<friends[ft]<<endl;
       _datasets.back()->addFriend(friends[ft]);
     }
 

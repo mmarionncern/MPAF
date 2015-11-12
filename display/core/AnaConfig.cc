@@ -141,9 +141,6 @@ AnaConfig::findDSNames(string channel, string crName) {
   vector<string> names;
   map<string, Dataset* >::const_iterator itDs;
   for(itDs=_datasets.begin(); itDs!=_datasets.end();itDs++) {
-    // cout<<itDs->second->getName()<<"   "<<channel<<endl;
-    // if(itDs->second->hasSample(channel)!=-1)
-    //   cout<<" --> "<<itDs->second->getSample(channel)->getCR()<<"  "<<crName<<endl;
     if(itDs->second->hasSample(channel)!=-1 && itDs->second->getSample(channel)->getCR()==crName )
       names.push_back(itDs->first);
   }
@@ -157,7 +154,7 @@ AnaConfig::findDSNames(string channel) {
   vector<string> names;
   map<string, Dataset* >::const_iterator itDs;
   for(itDs=_datasets.begin(); itDs!=_datasets.end();itDs++) {
-    if(itDs->second->hasSample(channel)!=-1)// && itDs->second->getSample(channel)->getCR()=="" )
+    if(itDs->second->hasSample(channel)!=-1)
       names.push_back(itDs->first);
   }
   
@@ -168,8 +165,7 @@ AnaConfig::findDSNames(string channel) {
 Dataset* 
 AnaConfig::findDS(string channel) {
   string dsName = findDSName(channel);
-  //cout<<" =-> "<<dsName<<"  !"<<getDataset(dsName)->getSample(channel)->getCR()<<"!"<<endl;
-  if(dsName!="") // && getDataset(dsName)->getSample(channel)->getCR()==""
+  if(dsName!="")
     return getDataset(dsName);
   else
     return nullptr;
@@ -240,8 +236,8 @@ AnaConfig::configureNames(string dir, string rootFile, string fileList) {
   _rootFile = rootFile;
   vector<string> filenames = listFiles((string)(getenv("MPAF")) + "/workdir/stats/" + dir + "/", fileList + ".dat");
   _statFileList = filenames;
-  _hname = "nEvtProc";//hName;
-  _hwgtname = "sumWgtProc";//hWgtName;
+  _hname = "nEvtProc";
+  _hwgtname = "sumWgtProc";
 }
 
 
@@ -300,8 +296,6 @@ AnaConfig::parseSampleId(string str) {
   //sample name ========
   sId.name=tmpStr;
 
-  cout<<sId.norm<<"  "<<sId.dd<<"  "<<sId.cr<<"  "<<sId.name<<endl;
-
   return sId;
 }
 
@@ -338,8 +332,7 @@ AnaConfig::addSample( string str, string sname, int col, float weight, bool load
     sId.dd=true;
     _datasets[ dsName ]->setUsefulVars(_usefulVars);
     _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
-				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1., 1., 1., loadH);
-    //_samplenames.push_back(str);
+				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1.*weight, 1., 1., loadH);
     _dsnames.push_back(dsName);
  
     return;
@@ -428,18 +421,6 @@ AnaConfig::getDSNames() {
   
   return names;
 }
-
-// vector<int>
-// AnaConfig::getDDDSStatus() {
-//   vector<int> status;
-
-//   for(_itNDS=_numDS.begin();_itNDS!=_numDS.end();_itNDS++) {
-//     _itDs = _datasets.find( _itNDS->second );
-//     status.push_back( _itDs->second->isDataDriven() + _itDs->second->csCode()*2 );
-//   }
-
-//   return status;
-// }
 
 vector<pair<string, float> >
 AnaConfig::getCSData() {

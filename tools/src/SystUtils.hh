@@ -100,11 +100,10 @@ public:
       if(i<vals.size())
 	vs[i] = vals[i];
     }
-    //cout<<_dbm->exists(db)<<"   "<<vs[0]<<"  "<<vs[1]<<endl;
+
     float x = _dbm->getDBValue(db, vs[0], vs[1], vs[2], vs[3], vs[4], 
 			       vs[5], vs[6], vs[7], vs[8], vs[9]);
     
-    //cout<<"var == "<<name<<"  "<<v<<"  "<<x<<endl;
     systOp<T>(name, dir, type, v, x);
     
   };
@@ -115,7 +114,7 @@ public:
 	       vector<vector<float> > vals) {
 
     //splitting objects
-    vector<float> p(vals.size());//,vector<float>(0,0));
+    vector<float> p(vals.size());
     for(size_t i=0;i<v->size();i++) {
       for(size_t iv=0;iv<vals.size();iv++) {
 	p[iv]=vals[iv][i];
@@ -137,9 +136,7 @@ public:
     for(size_t i=0;i<sa;i++) { //for each object to modify
       for(size_t iv=0;iv<vals.size();iv++) {
        	p[iv]=vals[iv][i];//picking the proper dependency values object
-	//cout<<" --> "<<i<<"  "<<iv<<"  "<<vals[iv][i]<<endl;
       }
-      //cout<<" ==> "<<name<<"  "<<dir<<"  "<<type<<"  "<<v[i]<<"  "<<db<<endl;
       systOp<T>(name, dir, type, v[i], i, db, p);
     }
 
@@ -149,7 +146,6 @@ public:
 	       string db, vector<float> vals);
   void systOpW(string name, int dir, string type, float& w, float x);
 
-  //  ClassDef(SystUtils,0)
 };
 
 #endif

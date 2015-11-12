@@ -113,6 +113,7 @@ SSDL2015::initialize(){
 
   _vc->registerVar("nJetFwd"                      );
   _vc->registerVar("JetFwd_pt"                    );
+  _vc->registerVar("JetFwd_eta"                   );
   _vc->registerVar("JetFwd_phi"                   );
   
 
@@ -248,13 +249,14 @@ SSDL2015::initialize(){
   _categorization = getCfgVarI("categorization", 1);
   _DoValidationPlots = getCfgVarI("ValidationPlots", 0);
 
-  vector<string> jess;
-  jess.push_back("Jet_pt");
-  //jess.push_back("LepGood_jetCorrFactor_L1L2L3Res");
-  addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(Jet_eta):Jet_pt", "" );
-   //addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(LepGood_jetLepAwareJEC_eta):LepGood_jetLepAwareJEC_pt", "" );
+  //vector<string> jess;
+  // jess.push_back("Jet_pt");
+  //addSystSource("JES",SystUtils::kNone, "%", jess, "JESUncer25nsV5_MC.db:abs(Jet_eta):Jet_pt", "" );
+  
+  _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
   addManualSystSource("EWKFR",SystUtils::kNone);
+  addManualSystSource("JES",SystUtils::kNone);
   addManualSystSource("BTAG",SystUtils::kNone);
 
   //FR databases
@@ -297,8 +299,6 @@ SSDL2015::initialize(){
   }
 
   //chargeflip DB
-  // _dbm->loadDb("chargeMId","ChargeMisIdProb.root","chargeMisId");
-  // _dbm->loadDb("chargeMIdMC","ChargeMisIdProb_MC.root","chargeMisId");
   _dbm->loadDb("chargeMId","comissioning_data.root","chargeMisId");
   _dbm->loadDb("chargeMIdMC","comissioning_data.root","chargeMisId");
   
@@ -318,14 +318,10 @@ SSDL2015::modifyWeight() {
 
   if (_vc->get("isData") != 1) {
     //generator weights
-    if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}///23443.423;}
+    if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}
     else {_weight *= lheWeight();}
     //pileup weights
     _weight *= _vc->get("vtxWeight");
-
-    //BTAgging placeholder
-    // if(isUncProc() && getUncName()=="BTAG")
-    //   _susyMod->get
   }
 
 }
@@ -333,23 +329,13 @@ SSDL2015::modifyWeight() {
 double        
 SSDL2015::lheWeight() {
 
-
-  int tmp_nlhe = _vc->get("nLHEweight");
-  //std::cout << "tmp_nlhe=" << tmp_nlhe << std::endl;
-  
-  for (int i = 0; i < tmp_nlhe; i++) {
-        int tmp_lhe_id = _vc->get("LHEweight_id", i);
-	
-      
-        if (tmp_lhe_id == (int)atoi(_LHESYS.c_str())) {
-	  double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
-	  
-	  
-          //std::cout << "using weight LHEid[" << i << "]="  << tmp_lhe_id << " LHEvalue=" << tmp_lhe_wgt  <<  std::endl;
-		
-          return tmp_lhe_wgt;
-        }
-      
+  int tmp_nlhe=_vc->get("nLHEweight");
+  for (int i=0; i<tmp_nlhe; i++) {
+    int tmp_lhe_id = _vc->get("LHEweight_id", i);
+    if (tmp_lhe_id == (int)atoi(_LHESYS.c_str())) {
+      double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
+      return tmp_lhe_wgt;
+    } 
   }
   return 1.0;
 
@@ -427,36 +413,11 @@ void
 SSDL2015::run() {
  
   if(_vc->get("isData") && !checkDoubleCount()) return;
-  //cout<<" passing protection "<<endl;
-  //cout<<" ================== new event ================== "<<endl;
-  //if(_vc->get("evt")!=69430384  && _vc->get("evt")!=37738763 && _vc->get("evt")!=58845792 // &&
-  //    // _vc->get("evt")!=72951 && _vc->get("evt")!=142649
-  //  ) return;
   
-  //if(_vc->get("evt")!=215711614) return;
-  //&& _vc->get("evt")!=92537991 ) return;
-  
-  //if(_vc->get("evt")!=103973 )  return;
-  //if(_vc->get("evt")!=142649 && _vc->get("evt")!=72951 ) return;
-  //if(_vc->get("evt")!=72688 && _vc->get("evt")!=49205) return;
-  ////cout<<" =================================="<< _sampleName <<endl;
- 
-  // bool find=false;
-  // for(size_t ii=0;ii<_events.size();ii++)
-  //   if(_events[ii]==_vc->get("evt")) {
-  //     find=true;
-  //     break;
-  //   }
-
-  // if(!find) return;
-
   counter("denominator");
-  //cout<<" ============================== "<<_vc->get("evt")<<" ============================== "<<endl;
-  
+    
   retrieveObjects();
-  //return;
- 
-  //cout<<" leptons! "<<_tightLepsOSPtCut[0]->pdgId()<<"  "<<_tightLepsOSPtCut[1]->pdgId()<<endl;
+  
   if(_DoValidationPlots) {
     if (ttbarSelection())   fillValidationHistos("ttbar");
     if (ZlSelection())      fillValidationHistos("Zl");
@@ -468,15 +429,13 @@ SSDL2015::run() {
    bool ssLepSel=ssLeptonSelection();
    if(_vc->get("isData") && !_isOS && !_isFake) return; //blinding of signal regions
  
-  if(!ssLepSel) { //!makeCut(ssLeptonSelection(),"SS Selection")
+  if(!ssLepSel) {
     // failed same-sign lepton selection, fill WZ control region
     wzCRSelection(); 
     setWorkflow(kGlobal); //MANDATORY (otherwise double counting in other categories)
     return;
   }
    counter("SS like pair");
-   //cout<<" passing SSPair "<<endl;
-   //if(!_isFake) return;
    //===============================================
   if(!_isFake && !_isOS) {
     setWorkflow(kGlobal);
@@ -532,7 +491,7 @@ SSDL2015::advancedSelection(int WF) {
   if(_lepflav=="ee" && 
      (std::abs(_l1Cand->pdgId())!=11 || std::abs(_l2Cand->pdgId())!=11 ) ) return;
   if(_lepflav=="em" && std::abs(_l1Cand->pdgId())==std::abs(_l2Cand->pdgId()) ) return;
-  //cout<<" passing ptflav "<<endl;
+  
   counter("ptflav");
    Candidate* Z=Candidate::create(_l1Cand, _l2Cand);
   fill("mass",Z->mass(),_weight);
@@ -541,12 +500,12 @@ SSDL2015::advancedSelection(int WF) {
     if(!passGenSelection() ) return;
   }
   counter("genselection");
-  //cout<<" passing gen "<<endl;
+  
   _flav=std::abs(_l1Cand->pdgId())+std::abs(_l2Cand->pdgId());
 
   if(!hltSelection() ) return;
   counter("HLT");
-  //cout<<" passing HLT "<<endl;
+  
   //Scale factors =======================
   _susyMod->applySingleLepSF(_l1Cand, _weight);
   _susyMod->applySingleLepSF(_l2Cand, _weight);
@@ -556,14 +515,28 @@ SSDL2015::advancedSelection(int WF) {
   _mTmin=min( Candidate::create(_l1Cand, _met)->mass(),
 	      Candidate::create(_l2Cand, _met)->mass() );
   //===============================
-  //cout<<" passing lepton "<<_HT<<"  "<<_metPt<<endl;
-  counter("lepton baseline");
+    counter("lepton baseline");
+
+
+  if(!_vc->get("isData") ) {
+    if(!isInUncProc())  {
+      _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);
+      _weight *= _btagW;
+    }
+    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+      _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 1); 
+    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+      _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1); 
+    else //other syst. variations
+      _weight *= _btagW;
+        
+  }
+  counter("btag SF");
   
   //default cuts for baseline
   if(_HT<80) return;
   if( (_HT<500 && _metPt < 30) ) return;
   if(_nJets<2) return;
-  //cout<<" passing baseline "<<endl;
   counter("std baseline");
   
   fillhistos();//fill histos for kGlobal, kGlobalFake, kGlobalmId
@@ -654,8 +627,6 @@ void
 SSDL2015::getFRProb(int flag, float fr) {
   float p=0;
   if(flag==kIsFake) {
-    // float fr=getFR(_l2Cand, _idxL2);
-    // p=fr/(1-fr);
     p=fr;
   }
   else {
@@ -791,9 +762,6 @@ SSDL2015::retrieveObjects(){
   _looseLepsPtCut.clear();
   _looseLepsPtCutIdx.clear();
 
-  // _looseLepsVeto.clear();
-  // _looseLepsVetoIdx.clear();
-
   _looseLepsPtCutVeto.clear();
   _looseLepsPtCutVetoIdx.clear();
 
@@ -824,12 +792,11 @@ SSDL2015::retrieveObjects(){
   _auxFlags.clear();
   _auxIdxs.clear();
   //===================
-
   selectLeptons();
 
   _nJets=_jets.size();
   _nBJets=_bJets.size();
-  
+
   if(true) {
     TVector2 met = varyMET();
     _met = Candidate::create( met.Mod(), met.Phi() );
@@ -838,9 +805,6 @@ SSDL2015::retrieveObjects(){
     _met = Candidate::create( _vc->get("met_pt"), _vc->get("met_phi") );
 
   _metPt = _met->pt();
-  //cout<<" coinon"<<endl;
-  //MET and MT
- 
 
 }
 
@@ -852,13 +816,9 @@ SSDL2015::ssLeptonSelection() {
   _isOS=false;
   _dFake=false;
 
-  //cout<<" size "<<_tightLepsVeto10.size()<<endl;
   // 2Tight ===============================
   bool isGoodPair=false;
   if(_tightLepsPtCutVeto.size()>=2) { //main
-    // _isFake=false;
-    // _isOS=false;
-   
     CandList lepPair=_susyMod->bestSSPair( (&_tightLepsPtCutVeto), true, false, false, 10, 15, _idxL1, _idxL2);
     if(lepPair.size()>=2) {
       _l1Cand = lepPair[0];
@@ -880,8 +840,7 @@ SSDL2015::ssLeptonSelection() {
 
   // 2Tight, opposite charge ===================
   if(_tightLepsOSPtCut.size()>=2) {
-    //_isFake=false;
-    
+        
     CandList lepPair=_susyMod->bestSSPair( (&_tightLepsOSPtCut), true, false, true, 10, 15, _idxL1, _idxL2);
     if(lepPair.size()>=2) { 
       _l1Cand = lepPair[0];
@@ -906,7 +865,7 @@ SSDL2015::ssLeptonSelection() {
     lepPairs=_susyMod->buildSSPairs( (&_tightLepsPtCutVeto), (&_fakableLepsPtCutVeto), 
 				     _tightLepsPtCutVetoIdx, _fakableLepsPtCutVetoIdx,
 				     true, false, false, 10, 15, idxs1, idxs2);
-    //cout<<" pair size "<<lepPairs.size()<<endl;
+    
     //filling =======================
     for(unsigned int i=0;i<lepPairs.size();i++) {
       _isFake=true;
@@ -930,7 +889,7 @@ SSDL2015::ssLeptonSelection() {
     vector<CandList> lepPairs=_susyMod->buildSSPairs( (&_fakableLepsPtCutVeto), 
 						      _fakableLepsPtCutVetoIdx,
 						      true, false, false, 10, 15, idxs1, idxs2);
-    //cout<<" pair size "<<lepPairs.size()<<endl;
+    
     for(unsigned int i=0;i<lepPairs.size();i++) {
       _isFake=true;
 
@@ -984,8 +943,6 @@ SSDL2015::wzCRSelection() {
   if(!makeCut(_nBJets==0,"n_{bjets} = 0")) return;
 
   // for the moment is not fully exclusive with 3L but can be easily done by uncommenting these
-  //  if(!makeCut((_HT<200 && _met->pt()>50 && _met->pt()<100) ||
-  //	      (_HT>200 && _met->pt()<50),"MET cut  ")) return;
   if(!makeCut(_met->pt()>50, "MET > 50 GeV")) return;
 
 
@@ -1126,13 +1083,11 @@ SSDL2015::setSignalRegions() {
   
   //inclusive H-MET ==========================================================
   else if( _SR== "HH SR31" ) {
-    //setSelLine("LL:=:hh|MET:>=:500|NJ:>=:2|HT:>=:300"); //10fb-1
     setSelLine("LL:=:hh|MET:>=:300|NJ:>=:2|HT:>=:300"); //3 fb-1
   }
 
   //inclusive H-HT ==========================================================
   else if( _SR== "HH SR32" ) {
-    //setSelLine("LL:=:hh|MET:[]:50:500|NJ:>=:2|HT:>=:1600"); //10fb-1
     setSelLine("LL:=:hh|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:>=:"+HThighBound); //3 fb-1
   }
 
@@ -1230,7 +1185,6 @@ SSDL2015::setSignalRegions() {
   
   //inclusive H-HT ==========================================================
   else if( _SR== "HL SR26" ) {
-    //setSelLine("LL:=:hl|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:>=:1600"); //10 fb-1
     setSelLine("LL:=:hl|MET:[]:50:"+METhighBound+"|NJ:>=:2|HT:>=:1125"); //3 fb-1
   }
 
@@ -1436,11 +1390,8 @@ SSDL2015::passGenSelection() {
     }
     else {
       //if( genMatchedToFake(_idxL1) || genMatchedToFake(_idxL2) ) return false;
-      //cout<<" passing prompt "<<endl;
     }
-
   }
-  
   return true;
 }
 
@@ -1448,7 +1399,6 @@ SSDL2015::passGenSelection() {
 float 
 SSDL2015::getFR(Candidate* cand, int idx) {
   string db;
-  //int wp=SusyModule::kTight;
   float ptM=10;
   if( std::abs(cand->pdgId())==13) db="Mu";
   else { db="El"; ptM=15;}
@@ -1471,16 +1421,9 @@ SSDL2015::getFR(Candidate* cand, int idx) {
   if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
   ptVal=std::max(ptVal, ptM);
-  // cout<<" ====> "<<cand->pt()<<" / "<<cand->eta()<<" => "<<_dbm->getDBValue(db, std::min( ptVal,(float)69.9),
-  // 									    std::min(std::abs(cand->eta()),(float)2.49) )<<endl;
-
-  // if(_dbm->getDBValue(db, std::min( ptVal,(float)69.9),
-  // 		      std::min(std::abs(cand->eta()),(float)2.49) ) == 1)
-  //   cout<<cand->pt()<<"  "<<ptVal<<"   "<<_dbm->getDBValue(db, std::min( ptVal,(float)69.9),
-  // 							   std::min(std::abs(cand->eta()),(float)2.49) )<<endl;
-
+  
   return _dbm->getDBValue(db, std::min( ptVal,(float)69.9),
-			  std::min(etaVal,(float)2.49) );
+			  std::min(etaVal,(float)(std::abs(cand->pdgId())==11)?2.49:2.39) );
 }
 
 
@@ -1572,11 +1515,9 @@ SSDL2015::hltSelection() {
   _hltDLHT=false;
   if(passHLT("DL") ) {
     _hltDLHT=false;
-    //  return true;
   }
   else {
     _hltDLHT=true;
-    // return true;
   }
   //priority to DiLeps lines
 
@@ -1653,11 +1594,9 @@ SSDL2015::tightLepton(const Candidate*c, int idx, int pdgId) {
     if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
   }
   else {
-    //cout<<" 0 "<<endl;
-    if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight) ) return false; //   cout<<" 1 "<<endl;
-    if(!_susyMod->multiIsoSel(idx, SusyModule::kTight) ) return false;  //  cout<<" 2 "<<endl;
-    if(!_susyMod->elHLTEmulSel(idx, (_HT<300) ) ) return false; //_hltDLHT
-    //cout<<" 3 "<<endl;
+    if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight) ) return false;
+    if(!_susyMod->multiIsoSel(idx, SusyModule::kTight) ) return false;
+    if(!_susyMod->elHLTEmulSel(idx, (_HT<300) ) ) return false;
   }
 
   return true;
@@ -1676,20 +1615,12 @@ SSDL2015::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
   else {
     int elMva=(_HT<300)?SusyModule::kLooseHT:SusyModule::kLoose;
     if(bypass) elMva=SusyModule::kLoose;
-    bool hltDLHT=bypass?false:(_HT<300);//_hltDLHT;
+    bool hltDLHT=bypass?false:(_HT<300);
     
-    // cout<<idx<<" ===> "<<_susyMod->multiIsoSel(idx, SusyModule::kDenom)<<"  "
-    // 	<<_susyMod->elHLTEmulSel(idx, hltDLHT )<<"   "
-    // 	<<_susyMod->elIdSel(idx, SusyModule::kTight, SusyModule::kTight )<<"  "
-    // 	<<_susyMod->elIdSel(idx, SusyModule::kTight, elMva )<<endl;
-
-  
     if(_FR.find("FO2")==string::npos && !_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight )) return false;
-    //cout<<" passing 1 "<<_hltDLHT<<" == "<<hltDLHT<<"   "<<(_HT<300)<<endl;
-     if(_FR.find("FO2")!=string::npos && !_susyMod->elIdSel(c, idx, SusyModule::kTight, elMva )) return false;
-     //cout<<" passing 2"<<endl;
-     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;  //cout<<" passing 3"<<endl;
-     if(!_susyMod->elHLTEmulSel(idx, hltDLHT ) ) return false;   //cout<<" passing 4"<<endl;
+    if(_FR.find("FO2")!=string::npos && !_susyMod->elIdSel(c, idx, SusyModule::kTight, elMva )) return false;
+    if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
+     if(!_susyMod->elHLTEmulSel(idx, hltDLHT ) ) return false; 
     
     if(_FR.find("FO4")!=string::npos && !_susyMod->invMultiIsoSel(idx, SusyModule::kSpecFakeEl) ) return false;
   }
@@ -1985,14 +1916,12 @@ SSDL2015::selectLeptons() {
     _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
   }
   
-  _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx, 40, 15);
+  _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
+		       _lepJets, _lepJetsIdx, 40, 15, getUncName()=="JES", getUncDir() );
   _HT=_susyMod->HT( &(_jets) );
   
    //OS case with no Z Veto!======================
   for(size_t il=0;il<_looseLepsPtCut.size();il++) {
-    // cout<<il<<"  "<<_looseLepsPtCut[il]->pt()
-    // 	<<"   "<<tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId())
-    // 	<<"   "<<_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 0, 12, true)<<endl;
 
       if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId())) continue;
       //if(!_susyMod->passMllMultiVeto( _looseLepsPtCut[il], &_looseLeps, 0, 12, true) ) continue;
@@ -2029,8 +1958,6 @@ SSDL2015::selectLeptons() {
       
   }
 
-  //  cout<<_fakableLepsPtCutVeto.size()<<"   "<<_tightLepsPtCutVeto.size()<<endl;
-
 }
 
 
@@ -2058,33 +1985,66 @@ SSDL2015::varyMET() {
       TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij),_vc->get("JetFwd_phi", ij));
       _uncleanFwdJets.push_back(jet);
     }
-  }
   
+    // for(unsigned int ij=0;ij<nJets;ij++) {
+    //   cout<<getUncName()<<" -> "<<_vc->get("Jet_pt", ij)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
+    // }
+    // for(unsigned int ij=0;ij<nDiscJets;ij++) {
+    //   cout<<getUncName()<<" -> "<<_vc->get("DiscJet_pt", ij)<<" / "<<_vc->get("DiscJet_eta", ij)<<endl;
+    // }
+    // for(unsigned int ij=0;ij<nFwdJets;ij++) {
+    //   cout<<getUncName()<<" -> "<<_vc->get("JetFwd_pt", ij)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
+    // }
+  }
+
   TVector2 met; met.SetMagPhi(_vc->get("met_pt"), _vc->get("met_phi") );
   if(!(isInUncProc() &&  getUncName()=="JES") ) return met;
 
   for(unsigned int ij=0;ij<nJets;ij++) { 
+    
+    bool find=false;
+    for(unsigned int iv=0;iv<_lepJetsIdx.size();iv++) {
+      if("Jet"==_lepJetsIdx[iv].first && ij==_lepJetsIdx[iv].second) { find=true; break;}
+    }
+    if(find) continue; //bloody lepton cleaning
+   
     //add back the standard jets
     met += _uncleanJets[ij];
     //JES varied jets
-    TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij), _vc->get("Jet_phi", ij)   );
+    float scale=_dbm->getDBValue("jes", _vc->get("Jet_eta", ij), _vc->get("Jet_pt", ij));
+    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
+    TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij)*(1+scale), _vc->get("Jet_phi", ij)   );
     met -= jet;
+    //cout<<" -> "<<_vc->get("Jet_pt", ij)*(1+scale)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
   }
   for(unsigned int ij=0;ij<nDiscJets;ij++) { 
+    
+    bool find=false;
+    for(unsigned int iv=0;iv<_lepJetsIdx.size();iv++) {
+      if("DiscJet"==_lepJetsIdx[iv].first && ij==_lepJetsIdx[iv].second) { find=true; break;}
+    }
+    if(find) continue; //bloody lepton cleaning
+    
     //add back the standard jets
     met += _uncleanDiscJets[ij];
     //JES varied jets
+    float scale=_dbm->getDBValue("jes", _vc->get("DiscJet_eta", ij), _vc->get("DiscJet_pt", ij));
+    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
     TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
     met -= jet;
+    //cout<<" -> "<<_vc->get("DiscJet_pt", ij)*(1+scale)<<" / "<<_vc->get("DiscJet_eta", ij)<<endl;
   }
   for(unsigned int ij=0;ij<nFwdJets;ij++) { 
     //add back the standard jets
     met += _uncleanFwdJets[ij];
     //JES varied jets
+    float scale=_dbm->getDBValue("jes", _vc->get("JetFwd_eta", ij), _vc->get("JetFwd_pt", ij));
+    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
     TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij), _vc->get("JetFwd_phi", ij) );
     met -= jet;
+    //cout<<" -> "<<_vc->get("JetFwd_pt", ij)*(1+scale)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
   }
-  
+
   return met;
 }
 
@@ -2113,7 +2073,6 @@ SSDL2015::varyJetLepAware(Candidate* lep, int idx) {
       _dbm->getDBValue("JES",std::abs(_vc->get("LepGood_jetLepAwareJEC_eta",idx)),
 		       _vc->get("LepGood_jetLepAwareJEC_pt",idx) );  
   }
-  //cout<<"factor = "<<f<<endl;
   hadCorr *= f;
   
   Candidate* jetVar=Candidate::create((hadCorr+lep->p4()).Pt(),

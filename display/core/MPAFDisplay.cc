@@ -173,7 +173,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	  }
 	  categ +=tks[i];
 	}
-	//cout<<" uncertainty tag "<<uncTag<<endl;
+
 	if(categ!="global" || uncTag!="") {
 	  if(uncTag=="")
 	    _au->addCategory(icat, categ);
@@ -209,7 +209,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
         yield  = atof( tks[n+1].c_str() );
         gen = atoi( tks[n+2].c_str() );
         eyield = atof( tks[n+3].c_str() );
-
+	
 	if(ext!="")
 	  extDss=anConf.findDSS( sname, ext );
 	
@@ -285,10 +285,6 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
       dss=anConf.findDSS( catMap[ic].first.sname );
       int icat=_au->getCategId( catMap[ic].first.categ );
       for(unsigned int i=0;i<dss.size();i++) {
-	// if(catMap[ic].first.redCateg.find("SR9")!=string::npos)
-	//   cout<<n<<"  "<<dss[i]->getName()<<" ====> "<<catMap[ic].first.categ<<"   "
-	//         <<catMap[ic].first.cname<<"   "<<catMap[ic].first.sname
-	//       <<"   "<<catMap[ic].second.yield<<"   "<<catMap[ic].first.uncTag<<"  "<<catMap[ic].first.upVar<<endl;
 	storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
 		      catMap[ic].second.gen, icat,
 		      catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
@@ -325,6 +321,7 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
   yield *=w;
   eyield *=w;
  
+
   string var=(upVar==SystUtils::kUp)?"Up":"Do";
   std::pair<string,string> p(ds->getName(), cname+sname+categ+uncTag+var);
   if(_sfVals.find(p)!=_sfVals.end() ) return;
@@ -340,7 +337,6 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
 			upVar!=SystUtils::kUp, yield);
   }  
 
-  //  if(skipNominal) return;
   //nominal category ===================
   //identified category for nominal
   if( ds->getSample(sname)->getCR()!=ext ) return; 
@@ -528,7 +524,6 @@ void
 MPAFDisplay::drawRatio(string o1, string o2 ) {
 
   vector<const hObs*> Obs_;
-  // vector<vector<systM> > systs_;
   
   Obs_.push_back( _hm->getHObs( o1 ) );
   Obs_.push_back( _hm->getHObs( o2 ) );
@@ -939,13 +934,11 @@ MPAFDisplay::makeSingleDataCard(string sigName, string categ, string cname, stri
     if(!it->second) nBkgs++;
   }
   ostringstream osB; osB<<nBkgs;
-  //int nNuis=_nuisPars.size();
   
   string dirname_ = (string)(getenv("MPAF"))+"/workdir/datacards/";
   ofstream card( (dirname_+cardName+".txt").c_str() , ios::out | ios::trunc );
   
   card<<"imax 1 number of channels"<<endl; 
-  //card<<"jmax "+osB.str()+" number of backgrounds"<<endl; 
   card<<"jmax * number of backgrounds"<<endl; 
   card<<"kmax * number of nuisance parameters"<<endl; 
   card<<"---------------------------"<<endl; 
@@ -963,7 +956,6 @@ MPAFDisplay::makeSingleDataCard(string sigName, string categ, string cname, stri
     if(itU->first.substr(0,2)!="NP") continue;
     if(_nuisParVals.find(itU->first.substr(3, itU->first.size()-3))!=_nuisParVals.end() ) continue;
     string name=itU->first.substr(3,itU->first.size()-3);
-    //cout<<name<<"   "<<itU->second<<endl;
     card<<itU->second<<endl;
   }
   

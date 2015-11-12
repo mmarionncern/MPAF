@@ -115,46 +115,28 @@ Candidate::Candidate( Vertex* vtx )
   
 }
 
-//Candidate::Candidate( const vector< const Candidate* >& listOfDau )
 Candidate::Candidate( const CandList& listOfDau )
 {
-  //cout<<" lflflf "<<endl;
+
   init();
-  //cout<<" uid begin "<<_uid<<endl;
   _uid--;
   _curUid--;
-  //cout<<" lflflfddd "<<listOfDau.size()<<endl;
   for( size_t idau=0; idau<listOfDau.size(); idau++ )
     {
       const Candidate* dau = listOfDau[idau];
-      //cout<<idau<<" --- "<<endl;
       if( dau->isTransverse() ) _type = kTransverse;
-      //cout<<idau<<" ---c "<<_curUid<<"   "<<_baseCand.size()<<"   "<<dau->uid()<<"   "<<dau<<endl;
       addDaughter( dau->clone() );
-      //cout<<idau<<" ---cc "<<_curUid<<"   "<<_baseCand.size()<<endl;
     }
-  //cout<<" lflflfddddddd "<<endl;
+
   _uid+=listOfDau.size()+1;
   _curUid+=1;
-  //cout<<"uid :"<<_uid<<endl;
 
-  // int p;
-  // cin >> p;
-  //cout<<" buvid "<<endl;
-  // now loop on the daughters
-  //cout<< " cui "<<endl;
   TVector2 p2_(0,0);
-  //cout<<" blou "<<endl;
   float pz_(0);
-  //cout<<" blou1 "<<endl;
   float E_(0);
-  //cout<<" blou2 "<<endl;
   _q=0;
-  //cout<<" blou3 "<<endl;
   Vertex* vtx_(0);
-  //cout<<" blou4 "<<endl;
   bool sameVtx(false);
-  //cout<<" lflflf2 "<<endl;
   for( size_t idau=0; idau<nDaughters(); idau++ )
     {
       const Candidate* dau = daughter(idau);
@@ -192,7 +174,6 @@ Candidate::Candidate( const CandList& listOfDau )
   _m = sqrt(m2_);
   if( sameVtx ) setVertex( vtx_ );
 
-  //cout<<" shgwhgwg "<<endl;
   lock();
 }
 
@@ -212,16 +193,13 @@ Candidate::Candidate( const Candidate& o )
 {
   _status = kUnlocked;
  
-  //cout<<" uid "<<_curUid<<" // "<<o.uid()<<" locking "<<_baseCand.size()<<"   "<<_baseCand.count(o.uid())<<endl; 
   // make sure the original is in the bank of base candidates
   if( _baseCand.count(o.uid())==0 ) _baseCand[_uid]=&o;
 
-  // _curUid++;
   lock();
 
   for( size_t idau=0; idau<o.nDaughters(); idau++ )
     {
-      //cout<<" doing daughter "<<endl;
       addDaughter( o.daughter(idau)->clone() );
     } 
   
@@ -421,10 +399,6 @@ Candidate::init()
 void
 Candidate::lock()
 {
-  // map<size_t,const Candidate*>::iterator it;
-  // for(it=_baseCand.begin();it!=_baseCand.end();++it)
-    //cout<<it->first<<"  ---> "<<it->second<<endl;
-  //cout<<_uid<<"   "<<_curUid<<" ==> "<<_baseCand.count(_uid)<<endl;
   _status=kLocked;   
   assert( _baseCand.count(_uid)==0 );
   _baseCand[_uid]=this;

@@ -5,8 +5,8 @@ void ssdl2015JES(){
 
   //general parameters ********************* general parameters
   string dir="SSDL2015";
-  string fileName="ssdlSync_jes";
-  string fileList="ssdlSync_jes";
+  string fileName="ssdlUncProd";
+  string fileList="ssdlUncProd";
   
   bool mcOnly = false;
   
@@ -16,7 +16,7 @@ void ssdl2015JES(){
   //}
   
   //observables **********************
-  md.dp.setObservables("MET");
+  md.setObservables("MET");
     
   //Binning & title ************************* Binning & titre
   string yTitle="number of events";
@@ -58,12 +58,12 @@ void ssdl2015JES(){
   string Norm="";
   
   //Lumis( or XSections ) pb-1 & KFactors ************************************
-  float lumi=1280; //pb-1 19470
+  float lumi=1; //pb-1 19470
   float energy=13; //TeV
 
   bool useXS=false;
 
-  md.anConf.loadXSDB("XSectionsSpring15.db");
+  //md.anConf.loadXSDB("XSectionsSpring15.db");
 
   map<string,float> LumisXS;
 
@@ -82,39 +82,43 @@ void ssdl2015JES(){
   //md.anConf.addSample( "TTJets", "TTJets", kBlack); 
 
   // md.anConf.addSample( "TTHnobb", "rare", kOrange-2); 
-  // md.anConf.addSample( "TTWToLNu", "rare", kOrange-2); 
-  // md.anConf.addSample( "TTZToLLNuNu", "rare", kOrange-2); 
+  //md.anConf.addSample( "TTWToLNu", "rare", kOrange-2); 
+  //md.anConf.addSample( "TTZToLLNuNu", "rare", kOrange-2); 
 
-  md.anConf.addSample( "TTWToLNu", "TTW", kOrange-2); 
-  md.anConf.addSample( "TTZToLLNuNu", "TTZH", kOrange-2); 
-  md.anConf.addSample( "TTHnobb", "TTZH", kOrange-2); 
-  md.anConf.addSample( "GGHZZ4L", "rare", kOrange-2); 
-  //md.anConf.addSample( "TBar_tWch", "rare", kOrange-2); 
-  // md.anConf.addSample( "TToLeptons_sch_amcatnlo", "rare", kOrange-2); 
-  // md.anConf.addSample( "TToLeptons_tch", "rare", kOrange-2); 
-  // md.anConf.addSample( "T_tWch", "rare", kOrange-2); 
-  //md.anConf.addSample( "TbarToLeptons_tch", "rare", kOrange-2); 
-  md.anConf.addSample( "VHToNonbb", "rare", kOrange-2); 
-  md.anConf.addSample( "WWTo2L2Nu", "rare", kOrange-2); 
-  md.anConf.addSample( "WWZ", "rare", kOrange-2); 
-  md.anConf.addSample( "WZZ", "rare", kOrange-2); 
-  md.anConf.addSample( "ZZTo4L", "rare", kOrange-2); 
-  md.anConf.addSample( "ZZZ", "rare", kOrange-2); 
-  md.anConf.addSample( "WWDouble", "rare", kOrange-2); 
+  //md.anConf.addSample( "_standard_prompt_ttW", "ttW", kOrange-2);
 
-  md.anConf.addSample( "WpWpJJ", "WW++", kOrange-2); 
+  md.anConf.addSample( "WZTo3LNu", "_standard_prompt_WZ", kOrange-2); 
+
+  md.anConf.addSample( "TTWToLNu", "_standard_prompt_ttW", kOrange-2); 
+  md.anConf.addSample( "TTZToLLNuNu", "_standard_prompt_ttZH", kOrange-2); 
+  md.anConf.addSample( "TTHnobb", "_standard_prompt_ttZH", kOrange-2); 
+  md.anConf.addSample( "GGHZZ4L", "_standard_prompt_Rares", kOrange-2); 
+  // md.anConf.addSample( "TBar_tWch", "_standard_prompt_Rares", kOrange-2); 
+  // md.anConf.addSample( "TToLeptons_sch_amcatnlo", "_standard_prompt_Rares", kOrange-2); 
+  // md.anConf.addSample( "TToLeptons_tch", "_standard_prompt_Rares", kOrange-2); 
+  // md.anConf.addSample( "T_tWch", "_standard_prompt_Rares", kOrange-2); 
+  // md.anConf.addSample( "TbarToLeptons_tch", "_standard_prompt_Rares", kOrange-2); 
+  md.anConf.addSample( "VHToNonbb", "_standard_prompt_Rares", kOrange-2); 
+  md.anConf.addSample( "WWTo2L2Nu", "_standard_prompt_Rares", kOrange-2); 
+  md.anConf.addSample( "WWZ", "_standard_prompt_Rares", kOrange-2); 
+  md.anConf.addSample( "WZZ", "_standard_prompt_Rares", kOrange-2); 
+  md.anConf.addSample( "ZZTo4L", "_standard_prompt_Rares", kOrange-2); 
+  md.anConf.addSample( "ZZZ", "_standard_prompt_Rares", kOrange-2); 
+  md.anConf.addSample( "WWDouble", "_standard_prompt_Rares", kOrange-2); 
+
+  md.anConf.addSample( "WpWpJJ", "WWss", kOrange-2); 
 
   md.anConf.addSample( "TGJets", "XG",  kOrange-2); 
   md.anConf.addSample( "TTGJets", "XG",  kOrange-2);
   md.anConf.addSample( "WGToLNuG", "XG",  kOrange-2);
 
-  md.anConf.addSample( "T1tttt_mGo1200_mChi800", "T14t12",  kOrange-2); 
-  md.anConf.addSample( "T1tttt_mGo1500_mChi100", "T14t15",  kOrange-2); 
-  md.anConf.addSample( "T5qqqqWWDeg_mGo1000_mCh315_mChi300_dilep", "T54qDeg",  kOrange-2); 
-  md.anConf.addSample( "T5qqqqWW_mGo1200_mCh1000_mChi800_dilep", "T54q12",  kOrange-2); 
-  md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280", "T14tDeg",  kOrange-2); 
-  md.anConf.addSample( "T6ttWW_mSbot600_mCh425_mChi50", "T6ttWW60",  kOrange-2); 
-  md.anConf.addSample( "T6ttWW_mSbot650_mCh150_mChi50", "T6ttWW65",  kOrange-2); 
+  md.anConf.addSample( "T1tttt_mGo1200_mChi800", "_sig_T1t_1200_800",  kOrange-2); 
+  md.anConf.addSample( "T1tttt_mGo1500_mChi100", "_sig_T1t_1500_100",  kOrange-2); 
+  md.anConf.addSample( "T5qqqqWWDeg_mGo1000_mCh315_mChi300_dilep", "sig_T5Deg",  kOrange-2); 
+  md.anConf.addSample( "T5qqqqWW_mGo1200_mCh1000_mChi800_dilep", "_sig_T5q",  kOrange-2); 
+  md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280", "_sig_T5t",  kOrange-2); 
+  md.anConf.addSample( "T6ttWW_mSbot600_mCh425_mChi50", "_sig_T6_600_425",  kOrange-2); 
+  md.anConf.addSample( "T6ttWW_mSbot650_mCh150_mChi50", "_sig_T6_650_150",  kOrange-2); 
 
   // md.anConf.addSample( "T1ttbbWW_mGo1300_mCh300_mChi290", "T1ttbbWW", kBlack); 
   // md.anConf.addSample( "T5qqqqWW_mGo1500_mCh800_mChi100", "T5qqqqWW", kBlack); 
@@ -219,9 +223,9 @@ void ssdl2015JES(){
   // md.addExternalSystUnc("rare","btag",-100.00, -100.00,"global_LLSR8","selected");
 
   
-  md.getCategSystematic("JES","HH","selected");
-  md.getCategSystematic("JES","HL","selected");
-  md.getCategSystematic("JES","LL","selected");
+  md.getCategSystematic("BTAG","HH","selected");
+  md.getCategSystematic("BTAG","HL","selected");
+  md.getCategSystematic("BTAG","LL","selected");
   gROOT->ProcessLine(".q");
     //md.drawStatistics("global_BR00H", "selected");
 

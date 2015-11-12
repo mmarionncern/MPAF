@@ -335,15 +335,7 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
 
   delete tmptree;
   delete datafile;
- 
-  //event database
-
-  // bool empty=_events.size()==0;
-  // int m=empty?0:_events.back().second;
-  // int M=empty?nEvent:_events.back().second+nEvent;
-  // pair<int,int> p(m,M);
-  // _events.push_back(p);
-  
+   
 }
 
 void 
@@ -372,8 +364,6 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
     string varName(obj->GetName());
     map<string, TH1*> tmp;
     
-    //MM FIXME, jsut take a too long time to load everything, should be done in a better way thatn disabling everything 
-    //if(varName.find("SR")!=string::npos) continue;
     if(_usefulVars.size()!=0 && 
        find(_usefulVars.begin(), _usefulVars.end(), varName)==_usefulVars.end() &&
        find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() ) continue;

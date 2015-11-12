@@ -7,6 +7,7 @@
 #include "analysis/utils/mt2_bisect.h"
 
 #include "tools/src/DataBaseManager.hh"
+#include "tools/src/SystUtils.hh"
 
 struct InternalCList{
   CandList list;
@@ -18,8 +19,6 @@ struct InternalCList{
     int flb= std::abs(b.list[0]->pdgId()) + std::abs(b.list[1]->pdgId());
     float stb=b.list[0]->pt()+b.list[1]->pt();
   
-    //  cout<<flb<<"  "<<fla<<"     "<<sta<<"   "<<stb<<endl;
-
     if(flb>fla) return false;
     else if(flb==fla) {
       if(stb>sta) return false;
@@ -49,9 +48,10 @@ public:
   float HT(const CandList* jets);
 
   void cleanJets(CandList* leptons, 
-		 CandList& cleanJets, vector<unsigned int>& jetIdxs,
-		 CandList& cleanBJets, vector<unsigned int>& bJetIdxs,
-		 float thr, float bthr);
+		 CandList& cleanJets, vector<pair<string, unsigned int> >& jetIdxs,
+		 CandList& cleanBJets, vector<pair<string,unsigned int> >& bJetIdxs,
+		 CandList& lepJets, vector<pair<string,unsigned int> >& lepJetsIdxs,
+		 float thr, float bthr, bool isJESUnc, int dir);
 
   const Candidate* jetLepAware(const Candidate* lep);
   float pTRatio(const Candidate* lep, const Candidate* jet);
@@ -92,6 +92,13 @@ public:
   void applyHLTSF(const string& hltLine, const vector<Candidate*>& cands, float& weight);
   void applyLepSF(const CandList& cands, float& weight);
   void applySingleLepSF(const Candidate* cand, float& weight);
+
+
+  float bTagSF(CandList& jets , vector<pair<string, unsigned int> >& jetIdx ,
+               CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx, int st);
+  float bTagMediumEfficiency(Candidate* jet, bool isBTagged);
+  float bTagMediumScaleFactor(Candidate* jet, bool isBTagged, int st);
+  float bTagScaleFactor(unsigned int op, unsigned int mt, int st, unsigned int fl);
 
   enum {kDenom=0,
 	kVLoose,

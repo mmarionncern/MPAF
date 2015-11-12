@@ -38,25 +38,35 @@ void dataCardProd_CATTAG_SIGTAG() {
   md.addDataCardSample("CATTAG:_standard_prompt_WZ", "WZ");
   md.addDataCardSample("CATTAG:_standard_prompt_ttW","ttW");
   md.addDataCardSample("CATTAG:_standard_prompt_ttZH","ttHZ");
-  md.addDataCardSample("CATTAG:_standard_prompt_WW", "WW");
-  md.addDataCardSample("CATTAG:_standard_prompt_TG", "XG");
-  md.addDataCardSample("CATTAG:_standard_prompt_VG", "XG");
+  md.addDataCardSample("CATTAG:_standard_prompt_WWss", "WW");
+  //md.addDataCardSample("CATTAG:_standard_prompt_TG", "XG");
+  md.addDataCardSample("CATTAG:_standard_prompt_XG", "XG");
   md.addDataCardSample("CATTAG:_standard_prompt_Rares","rares");
   md.addDataCardSample("CATTAG:_flipsappl_data", "flip");
   md.addDataCardSample("CATTAG:_fakesappl_data", "fake");
 
-  md.addDataCardSample("CATTAG:_standard_prompt_ttZH","pseudodata");
+  //prompt contamination removal
+  // md.addDataCardSample("CATTAG:_promptratesub_Rares", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_WWss", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_WZ", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_XG", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_ttW", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_ttZH", "fake");
+
+  md.addDataCardSample("CATTAG:data","data");
   
   
   //lumi
-  md.addNuisanceParameter("lumi","WZ:ttW:ttHZ:WW:XG:rares","lnN","1.08:1.08:1.08:1.08:1.08:1.08");
+  md.addNuisanceParameter("lumi","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.08:1.08:1.08:1.08:1.08:1.08:1.08");
 
   //experimental uncertainties
-  md.addNuisanceParameter("jes","ttW:ttZH:WW:XG:rares:SIGTAG","lnN","JESTAG");
-  md.addNuisanceParameter("btag","ttW:ttZH:WW:XG:rares:SIGTAG","lnN","BTAGTAG");
-  md.addNuisanceParameter("lEff","ttW:ttZH:WW:XG:rares","lnN","1.04:1.04:1.04:1.04:1.04");
-  md.addNuisanceParameter("tEff","ttW:ttZH:WW:XG:rares","lnN","1.02:1.02:1.02:1.02:1.02");
-  md.addNuisanceParameter("tHTE","ttW:ttZH:WW:XG:rares","lnN","HLTEFFTAG");
+  //md.addNuisanceParameter("jes","ttW:ttZH:WW:XG:rares:SIGTAG","lnN","JESTAG");
+  //md.addNuisanceParameter("btag","ttW:ttZH:WW:XG:rares:SIGTAG","lnN","BTAGTAG");
+  md.addNuisanceParameter("JES","WZ:ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","");
+  md.addNuisanceParameter("BTAG","WZ:ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","");
+  md.addNuisanceParameter("lEff","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.04:1.04:1.04:1.04:1.04:1.04");
+  md.addNuisanceParameter("tEff","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
+  md.addNuisanceParameter("tHTE","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","HLTEFFTAG");
   
   
   //Data-driven methods
@@ -66,17 +76,17 @@ void dataCardProd_CATTAG_SIGTAG() {
 
   //theoretical uncertainties
   md.addNuisanceParameter("wzTh","WZ","lnN","1.30");
-  md.addNuisanceparameter("WWTh","ttW","lnN","1.50");
-  md.addNuisanceparameter("TGTh","XG","lnN","1.50");
-  md.addNuisanceparameter("rareTh","rare","lnN","1.50");
+  md.addNuisanceParameter("WWTh","ttW","lnN","1.50");
+  md.addNuisanceParameter("TGTh","XG","lnN","1.50");
+  md.addNuisanceParameter("rareTh","rares","lnN","1.50");
   //md.addNuisanceParameter("sigTh","SIGTAG","lnN","SIGTHTAG");
 
-  md.addNuisanceparameter("ttWPdf","ttW","lnN","1.04");
-  md.addNuisanceparameter("ttHZPdf","ttHZ","lnN","1.04");
-  md.addNuisanceparameter("ttWXs","ttW","lnN","1.13");
-  md.addNuisanceparameter("ttHZXs","ttHZ","lnN","1.11");
-  md.addNuisanceparameter("ttWAcc","ttW","lnN","TTWACCTAG");
-  md.addNuisanceparameter("ttHZAcc","ttHZ","lnN","TTHZACCTAG");
+  md.addNuisanceParameter("ttWPdf","ttW","lnN","1.04");
+  md.addNuisanceParameter("ttHZPdf","ttHZ","lnN","1.04");
+  md.addNuisanceParameter("ttWXs","ttW","lnN","1.13");
+  md.addNuisanceParameter("ttHZXs","ttHZ","lnN","1.11");
+  md.addNuisanceParameter("ttWAcc","ttW","lnN","TTWACCTAG");
+  md.addNuisanceParameter("ttHZAcc","ttHZ","lnN","TTHZACCTAG");
 
 
   string srs[66]={ 
@@ -99,12 +109,19 @@ void dataCardProd_CATTAG_SIGTAG() {
       md.addNuisanceParameter("ttW"+srs[isr]+"stat","ttW","lnN","");
       md.addNuisanceParameter("ttHZ"+srs[isr]+"stat","ttHZ","lnN","");
       md.addNuisanceParameter("WW"+srs[isr]+"stat","WW","lnN","");
-      md.addNuisanceParameter("XG"+srs[isr]+"stat","XG","lnN","STATXGTAG");
+      md.addNuisanceParameter("XG"+srs[isr]+"stat","XG","lnN","STATXGTAG"); //STATXGTAG
       md.addNuisanceParameter("rares"+srs[isr]+"stat","rares","lnN","");
-      md.addNuisanceParameter("fake"+srs[isr]+"stat","fake","lnN","STATFAKETAG");
+      md.addNuisanceParameter("fake"+srs[isr]+"stat","fake","lnN","STATFAKETAG"); //STATFAKETAG
       md.addNuisanceParameter("flip"+srs[isr]+"stat","flip","lnN","");
       md.addNuisanceParameter("SIGTAG"+srs[isr]+"stat","SIGTAG","lnN","");
       
+      // if("STATFAKETAG"!="") {
+      // 	md.overwriteNuisanceParameter("fakeCATTAGstat","fake","STATFAKETAG");
+      // }
+      // if("STATXGTAG"!="") {
+      // 	md.overwriteNuisanceParameter("XGCATTAGstat","XG","STATXGTAG");
+      // }
+    
     }
     else {
       md.addNuisanceParameter("ttW"+srs[isr]+"stat","ttW","lnN","-");
@@ -119,8 +136,6 @@ void dataCardProd_CATTAG_SIGTAG() {
   }//signal regions  
 
 
-
-
   //===============================================================
 
   //*********************************************************************²
@@ -131,7 +146,7 @@ void dataCardProd_CATTAG_SIGTAG() {
    
   md.prepareDisplay();
   
-  md.makeSingleDataCard("SIGTAG", "CATTAG", "selected", "ssdl2015_CATTAG_SIGTAG");
+  md.makeSingleDataCard("SIGTAG", "global_CATTAG", "selected", "ssdl2015_CATTAG_SIGTAG");
 
 
   gROOT->ProcessLine(".q");
