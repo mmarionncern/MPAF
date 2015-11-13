@@ -335,11 +335,10 @@ AnaUtils::getYieldSysts(EffST eST, map<string,float>& rU, map<string,float>& rD,
       it != eST.systsU.end(); it++ ) {
     
     string n =  (*it).first;
+
     dU = it->second - central; //temporary variation variation
     dD = eST.systsD[ n ] - central;
-
-    //cout<<ds<<"  "<<n<<" : "<<central<<"  up "<<it->second<<"  do "<<eST.systsD[ n ]<<endl;
-
+    
     if( dU*dD > 0) { //same sign errors
       rU[ n ] = dU>=0?(dU>dD?(dU*dU):(dD*dD)):0;
       rD[ n ] = dU<0?(dU<dD?(dU*dU):(dD*dD)):0;
@@ -835,11 +834,6 @@ AnaUtils::printTables(string categ) {
     if(header) {
       cout<<" Cut  "<<fixed<<setprecision(2);
       for(size_t ids=0;ids<dsNames.size();ids++) { //_itEMap
-
-        //_itEMap = _effMap[ ids ].find( dsNames[ ids ] );
-        // if(_itEMap->first=="data" || _itEMap->first=="Data") 
-        //   cout<<" & MC   "<<"  & "<<_itEMap->first<<"   ";
-        // else
         cout<<" & "<<dsNames[ ids ]<<"   ";
       }
       cout<<" \\\\ "<<endl;
@@ -906,8 +900,7 @@ AnaUtils::printTables(string categ) {
         _itEIMap=_effMap[ ids ][ icat ].find( _categories[icat].effNames[ ic ] );
         if(_itEIMap==_effMap[ ids ][ icat ].end()) 
           cout<<setw(20)<<" - ";
-        //cout<<" - ";
-        else {
+	else {
           if(_itEIMap->second.sumw>0.000001 ) {
             
             ostringstream os,os2;
@@ -944,10 +937,16 @@ AnaUtils::findElement(vector<string> v, string e){
 }
 
 //selection:<nom, ds:nums> 
-vector< pair<string, vector<vector<float> > > >
+vector< pair<string, vector<vector<map<string,float> > > > >
 AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
-  vector< pair<string, vector<vector<float> > > > onums;
+  vector< pair<string, vector<vector<map<string,float> > > > > onums;
   if(categ=="") return onums;
+
+  istringstream iss(opt);
+  vector<string> opts;
+  copy(istream_iterator<string>(iss),
+       istream_iterator<string>(),
+       back_inserter<vector<string> >(opts));
 
   //first, retrieve the ids to be used =================
 
@@ -961,27 +960,26 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
   }
   if(scheme>=kMulti) {//several categories, one selection -> yield comparison
     for(_itC=_categories.begin();_itC!=_categories.end();++_itC) {
-      //cout<<" -> "<<_itC->second.name<<"  "<<(_itC->second.name.find(opt)!=string::npos)<<endl;
+      if(_itC->second.isUnc) continue;
+
       if(_itC->second.name.find(categ)!=string::npos) {
 	int icat= getCategId(_itC->second.name);
 	pair<int, string> p(icat, cname);
-	if(_itC->second.name.find(opt)==string::npos && opt!="") {
-	  if(scheme!=kMultiVeto) {
-	    catIdsOpt.push_back(p);
-	    //cout<<"selected 3 "<<endl;
-	  }
-	  else {
-	    if(_itC->second.name.find(opt)!=string::npos) continue;
-	    catIds.push_back(p);
-	    //cout<<"selected 1 "<<endl;
-	  }
-	 
+
+	bool findOpt=false;
+	for(int io=0;io<opts.size();io++) {
+	  if(_itC->second.name.find(opts[io])!=string::npos)
+	    findOpt=true;
+	}
+
+	if(!findOpt){
+	  catIds.push_back(p);
 	}
 	else if(opt=="") { // empty option categ
 	  catIds.push_back(p);
-	  //cout<<"selected 2 "<<endl;
 	}
-      }
+
+       }
     }
     
     if(opt!="" && scheme==kMulti)
@@ -1002,8 +1000,8 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
   for(size_t id=0;id<catIds.size();id++) {
     int icat = catIds[id].first;
     string sel = catIds[id].second;
-    pair<string, vector<vector<float> > > p;
-    vector<vector<float> > v(dsNames.size(),vector<float>(4,0));
+    pair<string, vector<vector<map<string,float> > > > p;
+    vector<vector<map<string,float> > > v(dsNames.size(),vector<map<string,float> >(5, map<string,float>() ));
 
     //naming scheme =========================
     if(scheme>=kMulti) { //only the extension
@@ -1028,21 +1026,28 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
       //simulation detail
       _itEIMap=_effMap[ ids ][ icat ].find( sel );
       if(_itEIMap==_effMap[ ids ][ icat ].end() ) {
-	p.second[ids][0] = 0.; //no data for this point and this dataset
-	p.second[ids][1] = 0.;
-	p.second[ids][2] = 0.;
-	p.second[ids][3] = 0.;
+	p.second[ids][0]["tot"] = 0.; //no data for this point and this dataset
+	p.second[ids][1]["tot"] = 0.;
+	p.second[ids][2]["tot"] = 0.;
+	p.second[ids][3]["tot"] = 0.;
+	p.second[ids][4]["tot"] = 0.;
       }
       else {
 	float central;
 	float totUp=0,totDown=0;
 	map<string,float> rU, rD;
-	getYieldSysts(_itEIMap->second, rU, rD, totUp, totDown, central);
+	getYieldSysts(_itEIMap->second, rU, rD, 
+		      totUp, totDown, central);
 	
-	p.second[ids][0] = _itEIMap->second.sumw;
-	p.second[ids][1] = sqrt(_itEIMap->second.sumw2);
-	p.second[ids][2] = totUp;
-	p.second[ids][3] = totDown;
+	p.second[ids][0]["tot"] = _itEIMap->second.sumw;
+	p.second[ids][1]["tot"] = sqrt(_itEIMap->second.sumw2);
+	p.second[ids][4]["tot"] = _itEIMap->second.N;
+
+	p.second[ids][2] = rU;
+	p.second[ids][3] = rD;
+	p.second[ids][2]["tot"] = totUp;
+	p.second[ids][3]["tot"] = totDown;
+
       }
     }
     onums.push_back(p);
@@ -1052,133 +1057,15 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
 }
 
 
-// vector< pair<string, vector<vector<float> > > >
-// AnaUtils::retrieveNumbers(string categ, int mcat, string cname, string opt) {
-
-//   vector< pair<string, vector<vector<float> > > > onums;
-  
-//   if(categ=="") return onums;
-
-//   int cat= getCategId(categ);
-//   vector<int> idxs;
-//   vector<string> dsNames = prepareDSNames(true, idxs);
-
-//   vector<string> cNames;
-//   vector<int> catIds;
-
-//   if(mcat!=kGeneral) { //monocateg for datacards, multicateg for drawstatistics
-//   //if(mcat==kMono) { //monocateg for datacards, multicateg for drawstatistics
-//     for(map<int, vector<string> >::const_iterator itc=_.begin();
-//   	itc!=_effNames.end();itc++) { //cuts for uni-categ
-
-//       string catname = _categories[icat].effNames[itc->first].name;
-      
-//       if(mcat==kMulti) {
-//       	if(itc->first==_kGlobal || catname.find(categ)==string::npos ) continue;
-//       	if(catname.find(categ)==string::npos ) continue;     
-//   	if(opt!="" && catname.find(opt)!=string::npos ) continue;     
-//       }
-//       if(mcat==kMono)
-//   	if(catname!=categ) continue;     
-
-//       cat= getCategId(catname);
-//       int ic = -1;
-//       //cout<<"categ "<<catname<<"  "<<cat<<"   "<<_effNames[cat].size()<<endl;
-//       // for(size_t i=0;i<_effNames[cat].size();i++) 
-//       // 	cout<<itc->second[i]<<endl;
-
-//       for(size_t i=0;i<_effNames[cat].size();i++) {
-//         if(itc->second[i].find(cname) != string::npos) {ic=i; break;}
-//       } 
-      
-//       if(ic==-1) {
-//         cout<<"WARNING, no such selection name : ["<<cname<<"] in categ "<<categ<<" ("<<catname<<"), please check name"<<endl;
-	
-//   	continue;
-//       }
-   
-//       //why in that direction? MM
-//       // cNames.insert(cNames.begin(), _effNames[cat][ic] );
-//       // catIds.insert(catIds.begin(), itc->first );
-
-//       cNames.push_back(_effNames[cat][ic] );
-//       catIds.push_back(itc->first );
-//     }
-//   }
-//   else { //general : one categ, several selection
-//     for(size_t ic=0;ic<_effNames[cat].size();ic++) { 
-//       cNames.push_back( _effNames[cat][ic] );
-//       catIds.push_back( cat );
-//     }
-//   }
-
- 
-//   //common retrieving of numbers =====================
-//   for(size_t ic=0;ic<cNames.size();ic++) {
-//     int icat = catIds[ic];
-//     string cN = cNames[ ic ];
-    
-//     _itEIMap = _effMap[ _kMC ][ icat ].find( cN );
-    
-//     pair<string, vector<vector<float> > > p;
-//     vector<vector<float> > v(dsNames.size(),vector<float>(4,0));
-
-//     if(mcat!=kGeneral) {
-//       size_t p0= _categories[icat].name.find(categ);
-//       p.first = _categories[icat].name.substr(p0+categ.size(), categ.size()-p0-1);
-//     }
-//     else
-//       p.first = _itEIMap->first;
-    
-//     p.second = v;
-
-//     //to skip the simulation summary
-//     for(size_t id=0;id<dsNames.size();id++) { //datasets
-//       int ids = idxs[id];
-      
-//       { //simulation detail
-//         _itEIMap=_effMap[ ids ][ icat ].find( cN );
-//         if(_itEIMap==_effMap[ ids ][ icat ].end() ) {
-//           p.second[ids][0] = 0.; //no data for this point
-//         }
-//         else {
-//           p.second[ids][0] = _itEIMap->second.sumw;
-//           p.second[ids][1] = sqrt(_itEIMap->second.sumw2);
-//           p.second[ids][2] = 0.;
-//           p.second[ids][3] = 0.;
-//         }
-//       }
-     
-//     }//datasets
-   
-//     onums.push_back( p );
-//   }//cuts
- 
-//   //protection against empty categories, FIXME
-//   if(mcat!=kMulti && onums.size()==0) {
-//     pair<string, vector<vector<float> > > p;
-//     //vector<vector<float> > v(dsNames.size(),vector<float>(4,0));
-//     for(size_t id=0;id<dsNames.size();id++) { //datasets
-//       int ids = idxs[id];
-    
-//       p.second[ids][0] = 0.;
-//       p.second[ids][1] = 0.;
-//       p.second[ids][2] = 0.;
-//       p.second[ids][3] = 0.;
-//     }
-//     onums.push_back(p);
-//   }
-
-//   return onums;
-// }
-
 bool
 AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, string sigName,
 			   string categ, string cname, int bin,
 			   map<string,vector<string> > intNuisPars,
-			   map<string,bool > nuisParExt) {
+			   map<string,bool > nuisParExt,
+			   map<string,string> nuisParScheme,
+			   map<string,vector<string> > nuisParVals) {
   
-  vector<pair<string, vector<vector<float> > > > numbers=retrieveNumbers(categ, cname, kMono);
+  vector<pair<string, vector<vector<map<string,float> > > > > numbers=retrieveNumbers(categ, cname, kMono);
 
   if(numbers.size()==0) return false; //case where no data are available
 
@@ -1199,11 +1086,13 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
     ostringstream osB; osB<<bin;  
     if(dsNames[ids-1]!=sigName && dsNames[ids-1].find("sig")==string::npos && 
        dsNames[ids-1].find("data")==string::npos) {
-      sumBkg+= (numbers[0].second[ids][0]);
+      sumBkg+= (numbers[0].second[ids][0]["tot"]);
       
       binLine += osB.str()+"\t";
       ostringstream os;
-      os<<setprecision(4)<< ((numbers[0].second[ids][0]==0)?0.0001:numbers[0].second[ids][0]);
+      float y=((numbers[0].second[ids][0]["tot"]==0)?0.0001:numbers[0].second[ids][0]["tot"]);
+      if(y<0) y=0.0001;
+      os<<setprecision(4)<< y;
       yieldLine += os.str()+"\t";
       procNameLine += dsNames[ids-1]+"\t";
     
@@ -1216,10 +1105,10 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
     }
     else if(dsNames[ids-1]==sigName) {
       binLine += osB.str()+"\t";
-      sumSig = numbers[0].second[ids][0];
+      sumSig = numbers[0].second[ids][0]["tot"];
     }
     else if(dsNames[ids-1].find("data")!=string::npos) {
-      sumData = numbers[0].second[ids][0];
+      sumData = numbers[0].second[ids][0]["tot"];
     }
   }
   
@@ -1239,96 +1128,159 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
   lines[ "dataYield" ] = os2.str(); 
   // =================================================================
   // and the nuisance parameters
-  //cout<<" cui "<<endl;
   for(map<string,vector<string> >::const_iterator it=intNuisPars.begin();
       it!=intNuisPars.end(); it++) {
     string line;
-    //cout<<it->first<<" \\ "<<endl;
+    
     if(it->first.find("stat")!=string::npos) continue; //syst from stat ucnertainties
     if(nuisParExt[ it->first ] == true ) continue;
+    if(it->first.find("_OW")!=string::npos) continue;
 
+    bool exists=false;
     for(unsigned int ids=1;ids<dsNames.size()+1;ids++) {
-      float vUp = numbers[0].second[ids][2]/numbers[0].second[ids][0]; //MM FIXME -> always 1
-      float vDo = numbers[0].second[ids][3]/numbers[0].second[ids][0];
+      exists=false;
+      if(dsNames[ids-1]=="") continue; //total MC?
+      if(dsNames[ids-1].find("data")!=string::npos) continue;
 
-      ostringstream osU, osD;
-      osU<<vUp;
-      osD<<vDo;
-      
-      if( find( it->second.begin(), it->second.end(), dsNames[ids-1] )== it->second.end() ) {
+      for(unsigned int ids2=0;ids2<it->second.size();ids2++) {
+	if(dsNames[ids-1]==it->second[ids2] ) {
+	  exists=true;
+	  float vUp=-1, vDo=1;
+	  if(numbers[0].second[ids][2].find(it->first)!=numbers[0].second[ids][2].end()) {
+	    if(numbers[0].second[ids][0]["tot"]!=0) {
+	      vUp = numbers[0].second[ids][2][it->first]/numbers[0].second[ids][0]["tot"];
+	      vDo = numbers[0].second[ids][3][it->first]/numbers[0].second[ids][0]["tot"];
+	    }
+	    else { //arbitrary 100% for now
+	      if(numbers[0].second[ids][2][it->first]==0) vUp=0;
+	      else vUp=1;
 
-      }
-      else {
-	if(dsNames[ids-1]!=sigName) {
-	  if(vUp==vDo)
-	    line+=osU.str()+"\t";
-	  else
+	      if(numbers[0].second[ids][3][it->first]==0) vDo=0;
+	      else vDo=1;
+	      // vUp = 1;// numbers[0].second[ids][2][it->first]/numbers[0].second[ids][2][it->first];
+	      // vDo = 1;//numbers[0].second[ids][3][it->first]/numbers[0].second[ids][3][it->first];
+	    }
+	  }
+
+	  ostringstream osU, osD;
+	  map<string,vector<string> >::const_iterator it2=intNuisPars.find(it->first+"_OW");
+	  if(it2!=intNuisPars.end() && 
+	     find( intNuisPars[it->first].begin(), intNuisPars[it->first].end(), _dsNames[ids-1] )==intNuisPars[it->first].end() ) {
+	    for(unsigned int id=0;id<it->second.size();++id) {
+	      if(dsNames[ids-1]==it->second[id]) {
+		vDo=atof(nuisParVals[ it2->first ][id].c_str() );
+		vUp=atof(nuisParVals[ it2->first ][id].c_str() );
+	      }
+	    }
+	  }
+	  
+	  if(std::abs(vUp)<0.001 && vUp!=0) vUp=0.001*(vUp/std::abs(vUp));
+	  if(std::abs(vDo)<0.001 && vDo!=0) vDo=0.001*(vDo/std::abs(vDo));
+	  
+	  if(vDo>1) vDo=0.999;
+
+	  osU<<fixed<<setprecision(3)<<(1+vUp);
+	  osD<<fixed<<setprecision(3)<<(1-vDo);
+	  string tmpU=osU.str();
+	  string tmpD=osD.str();
+
+	  if(dsNames[ids-1]!=sigName) {
 	    line+=osD.str()+"/"+osU.str()+"\t";
-	}
-	else {
-	  if(vUp==vDo)
-	    line=osU.str()+"\t"+line;
-	  else
+	  }
+	  else {
 	    line=osD.str()+"/"+osU.str()+"\t"+line;
-	}
+	  }
+	
+	}//find ds
+      }//dsname 2
+      
+      if(!exists) {
+	line+="-\t";	
       }
-    }
+    }//dsName
 
     //adding the header ==========================
     lines[ "NP_"+it->first ] = it->first+"\tlnN\t"+line;
   }
-  //cout<<" coin "<<lines.size()<<endl;
+
   //=================================================================
   // and the stat uncertainty
   for(unsigned int ids=1;ids<dsNames.size()+1;ids++) {
-    float unc= numbers[0].second[ids][1]/numbers[0].second[ids][0];
-    if(numbers[0].second[ids][0]==0) unc=0;
-    // cout<<ids<<"  "<<dsNames[ids-1]<<"  "<<numbers[0].second[ids][1]
-    //   	<<"   "<<numbers[0].second[ids][0]<<"   "<<unc<<endl;
-    stringstream os;
-    os<<setprecision(3)<<unc;
+    float unc= numbers[0].second[ids][1]["tot"]/numbers[0].second[ids][0]["tot"];
+    if(unc<0) unc*=-1;
+    if(numbers[0].second[ids][0]["tot"]==0) unc=0;
+
+    stringstream osN;
+    osN<<setprecision(3)<<numbers[0].second[ids][4]["tot"];
+
     string line="";
-    // cout<<os.str()<<"   "<<numbers[0].second[ids][0]<<"  "<<numbers[0].second[ids][1]<<"   "<<unc<<endl;
-   
+
     //single case
     //if(intNuisPars.find(dsNames[ids-1]+"stat")==intNuisPars.end() ) continue;
 
     //multicase
     bool exists=false;
-    //cout<<" --> "<<dsNames[ids-1]<<endl;
+    bool gmN=false;
+
     map<string,vector<string> >::const_iterator it;
     for( it=intNuisPars.begin();it!=intNuisPars.end(); it++) {
       if(nuisParExt[ it->first ] == true ) continue;
-      // cout<<it->first<<"  "<<dsNames[ids-1]<<"  "
-      //  	  <<(it->first.find("stat")!=string::npos)<<"   "
-      //  	  <<(it->first.find(dsNames[ids-1])!=string::npos)<<endl;
+      if(it->first.find("_OW")!=string::npos) continue;
       if(it->first.find("stat")!=string::npos &&
-	 it->first.find(dsNames[ids-1])!=string::npos ) {exists=true; break;}
+	 it->first.find(dsNames[ids-1])!=string::npos ) {
+	exists=true; 
+	if(nuisParScheme[it->first]=="gmN") {
+	  if(numbers[0].second[ids][4]["tot"]!=0)
+	    unc = numbers[0].second[ids][1]["tot"]/sqrt(numbers[0].second[ids][4]["tot"]); //effective rate
+	  else
+	    unc = 11;
+
+	  gmN=true;
+	}
+	break;}
     }
-    // cout<<" coin "<<endl;
     if(!exists) continue;
-    //cout<<it->first<<"   "<<dsNames[ids-1]<<endl;
+    
+    map<string,vector<string> >::const_iterator it2=intNuisPars.find(it->first+"_OW");
+    if(it2!=intNuisPars.end() && 
+       find( intNuisPars[it->first].begin(), intNuisPars[it->first].end(), _dsNames[ids-1] )==intNuisPars[it->first].end() ) {
+      for(unsigned int id=0;id<it->second.size();++id) {
+	if(dsNames[ids-1]==it->second[id])
+	  unc=atof(nuisParVals[ it2->first ][id].c_str() );
+      }
+    }
+
+    stringstream os;
+    os<<setprecision(3)<<unc;
 
     for(unsigned int ids2=1;ids2<dsNames.size()+1;ids2++) {
     
       if(dsNames[ids2-1]==dsNames[ids-1]) {
-	if(os.str()!="1" && os.str()!="0")
-	  line+="1."+os.str().substr(2,2)+"\t";
-	else if(os.str()=="1")
-	   line+=os.str()+"\t";
-	else
-	  line+="1.00\t";
+	if(gmN) {
+	  line += os.str()+"\t";
+	}
+	else {
+	  if(os.str().size()>=3 && os.str().substr(2,1)==".") // very long numbers	
+	    line += os.str().substr(0,3)+"\t";
+	  else if(os.str()!="1" && os.str()!="0")
+	    line+="1."+os.str().substr(2,2)+"\t";
+	  else if(os.str()=="1")
+	    line+=os.str()+"\t";
+	  else
+	    line+="1.00\t";
+	}
       }
       else if(dsNames[ids2-1].find("data")==string::npos)
        	line+="-\t";	
     }
     
     //single case
-    //lines[ "NP_"+dsNames[ids-1]+"stat" ] = dsNames[ids-1]+"stat\tlnN\t"+line;
-    //cout<<it->first<<"   "<<endl;
-    lines[ "NP_"+dsNames[ids-1]+"stat" ] = it->first+"\tlnN\t"+line;
+    if(nuisParScheme[it->first]=="lnN")
+      lines[ "NP_"+dsNames[ids-1]+"stat" ] = it->first+"\tlnN\t"+line;
+    else if(nuisParScheme[it->first]=="gmN")
+      lines[ "NP_"+dsNames[ids-1]+"stat" ] = it->first+"\tgmN "+osN.str()+"\t"+line;
+    
   }
-  //cout<<" pouet "<<lines.size()<<endl;
   if(sumBkg+sumSig==0) return false;
   return true;
 }

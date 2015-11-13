@@ -43,6 +43,8 @@ private:
   int _dsContentType;
   std::vector<std::string> _friends;
 
+  std::vector<string> _usefulVars;
+
   // std::map<std::string, std::string> _crSamples;
   // std::map<std::string, bool> _isNormSamples;
 
@@ -72,12 +74,14 @@ public:
 
   void addFriend(std::string friendname);
 
+  void setUsefulVars(std::vector<std::string> vars);
+
   //access functions 
   std::string getName() const { return _name;};
   int getColor(){ return _color;};
 	
   bool isDataset(std::string name){return _name==name;};
-  bool isPPcolDataset(){ return _isData;};
+  bool isPPcolDataset() const { return _isData;};
 
   int hasSample(string sname) const;
 	

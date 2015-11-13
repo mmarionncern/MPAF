@@ -4,6 +4,8 @@ ClassImp(MPAFDisplay)
 
 using namespace std;
 
+
+
 MPAFDisplay::MPAFDisplay() {
 
   _hm=new HistoManager();
@@ -55,7 +57,7 @@ MPAFDisplay::drawStatistics(string categ, string cname, bool multiScheme, bool v
   if(multiScheme) scheme=AnaUtils::kMulti;
   if(multiScheme && vetoOpt) scheme=AnaUtils::kMultiVeto;
   
-  vector< pair<string, vector<vector<float> > > > numbers = _au->retrieveNumbers(categ,  cname, scheme, opt);
+  vector< pair<string, vector<vector<map<string,float> > > > > numbers = _au->retrieveNumbers(categ,  cname, scheme, opt);
   
   vector<string> dsNames = _dsNames;
   dsNames.insert(dsNames.begin(), "MC");
@@ -119,7 +121,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
   
   if(filename=="") return;
  
-  
+  vector<std::pair<CatId, ValId> > catMap;
   string ndb = filename;
   ifstream fDb( ndb.c_str(), ios::in );
   
@@ -173,7 +175,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	}
 
 	if(categ!="global" || uncTag!="") {
-	  if(uncTag!="")
+	  if(uncTag=="")
 	    _au->addCategory(icat, categ);
 	  else
 	    _au->addCategory(icat, categ, uncTag);
@@ -197,41 +199,101 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	    cname += tks[n-1];
 
         sname = tks[n];
-	if(categ.find("global_")!=string::npos) ext = categ.substr(7, categ.size()-7);
-    	if(ext=="") {
-	  dss=anConf.findDSS( sname );
-	  //extDs=nullptr;
+	size_t pos=categ.rfind("_");
+	string redCateg=categ;
+	if(pos!=string::npos && categ.substr(pos+1, categ.size()-pos-1).find("R")==string::npos) {
+	  ext=categ.substr(pos+1, categ.size()-pos-1);
+	  redCateg=categ.substr(0, categ.size()-ext.size()-1);
 	}
-	else {
-	  dss=anConf.findDSS( sname );
-	  //extDs=anConf.findDS( sname, ext );
-	  extDss=anConf.findDSS( sname, ext );
-
-	  //fixme, for cards need to overwrite the yields in the main category...
-	  //dss=anConf.findDSS( sname );
-	}
-	//if(ds==nullptr) continue;
 	
         yield  = atof( tks[n+1].c_str() );
         gen = atoi( tks[n+2].c_str() );
         eyield = atof( tks[n+3].c_str() );
+	
+	if(ext!="")
+	  extDss=anConf.findDSS( sname, ext );
+	
+	CatId id;
+	id.categ = categ;
+	id.cname = cname;
+	id.sname = sname;
+	id.useExt=(extDss.size()!=0);
+	id.redCateg = redCateg;
+	id.ext = ext;
+	id.uncTag = uncTag;
+	id.upVar = upVar;
+	
+	ValId vals;
+	vals.yield = yield;
+	vals.eyield = eyield;
+	vals.gen = gen;
+	catMap.push_back(std::make_pair(id, vals));
 
-	for(unsigned int i=0;i<dss.size();i++) {
-	  //  cout<<"std ds "<<dss[i]->getName()<<"   "<<cname<<"   "<<sname<<"   "<<categ<<endl;
-	  storeStatNums(dss[i], yield, eyield, gen, icat, cname, sname,
-			categ, uncTag, upVar, ext);
-	}
-
-	//if(extDs==nullptr) continue;
-	for(unsigned int i=0;i<extDss.size();i++) {
-	  //cout<<"ext ds "<<extDss[i]->getName()<<"   "<<cname<<"   "<<sname<<"   "<<categ<<endl;
-	  storeStatNums(extDss[i], yield, eyield, gen, icat, cname, sname, categ,
-		      uncTag, upVar, ext);
-	}
       }
 
-    }
+    } //end while line
     fDb.close();
+
+
+    //Now overwritte when needed and fill the internal DB
+    int n=0;
+    vector<std::pair<CatId, ValId> >::const_iterator it;
+    for(it=catMap.begin();it!=catMap.end();++it) {
+
+      n++;
+     
+      if(!it->first.useExt) continue;
+     
+      CatId tmpId;
+      tmpId.categ = it->first.redCateg;
+      tmpId.cname = it->first.cname;
+      tmpId.sname = it->first.sname;
+      tmpId.useExt= false;
+      tmpId.redCateg = it->first.redCateg;
+      tmpId.ext = "";
+      tmpId.uncTag = it->first.uncTag;
+      tmpId.upVar = it->first.upVar;
+      
+      bool found=false;
+      for(size_t ii=0;ii<catMap.size();ii++) {
+	if(catMap[ii].first.categ==tmpId.categ && 
+	   catMap[ii].first.cname==tmpId.cname && 
+	   catMap[ii].first.sname==tmpId.sname && 
+	   catMap[ii].first.useExt==false && 
+	   catMap[ii].first.redCateg==tmpId.redCateg && 
+	   catMap[ii].first.ext=="" && 
+	   catMap[ii].first.uncTag==tmpId.uncTag && 
+	   catMap[ii].first.upVar==tmpId.upVar ) {
+	  catMap[ii].second = it->second;
+	  found=true;
+	  break;
+	}
+      }//end catMap
+      
+      if(!found) {//category missing, need to add it
+	std::pair<CatId, ValId> p(tmpId, it->second);
+	//adding it at the end should work 
+	catMap.push_back(p);
+      }
+    }
+
+    //now filling
+    n=0;
+
+    for(size_t ic=0;ic<catMap.size();++ic) {
+      
+      dss=anConf.findDSS( catMap[ic].first.sname );
+      int icat=_au->getCategId( catMap[ic].first.categ );
+      for(unsigned int i=0;i<dss.size();i++) {
+	storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+		      catMap[ic].second.gen, icat,
+		      catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
+		      catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
+      }
+    
+      n++;
+    }
+
   }
   else {
     cout<<"Warning, statistics file "<<filename<<" not loaded"<<endl;
@@ -243,7 +305,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 void
 MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen,
 			   int icat, string cname, string sname, string categ,
-			   string uncTag, int upVar, string ext) {
+			   string uncTag, int upVar, string ext, bool skipNominal) {
 
   int idx=-1;
   for(size_t id=0;id<_dsNames.size();id++ ) {
@@ -253,25 +315,24 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
     }
   }
 
-  float w = ds->getWeight(sname)*anConf.getLumi();
-  //cout<<idx<<"   "<<_dsNames.size()<<endl;
-  // if(cname=="selected" && ext=="SR1A")
-  //   cout<<idx<<"  "<<ds->getName()<<"  "<<_dsNames[idx-1]<<"   "<<w<<"   "<<yield<<" -> "<<yield*w<<"  "<<eyield/yield<<"   ->>> "<<ext<<"   "<<categ<<endl;
+  float w =ds->getWeight(sname);
+  if(!ds->isPPcolDataset()) w *= anConf.getLumi();
+  
   yield *=w;
   eyield *=w;
  
+
   string var=(upVar==SystUtils::kUp)?"Up":"Do";
   std::pair<string,string> p(ds->getName(), cname+sname+categ+uncTag+var);
   if(_sfVals.find(p)!=_sfVals.end() ) return;
   _sfVals[p]=true;
   if(idx==-1) return;
   
-  if(uncTag=="")
-    _au->setEffFromStat(idx,cname,icat,yield,eyield,gen);
+  if(uncTag=="") {
+     _au->setEffFromStat(idx,cname,icat,yield,eyield,gen);
+  }
   else {
-    //to store separately the unc yields
-    //_au->setEffFromStat(idx,cname,icat,yield,eyield,gen);
-    icat = _au->getCategId(categ);
+     icat = _au->getCategId(categ);
     _au->setSystematics(idx, cname, icat, uncTag, upVar!=SystUtils::kDown,
 			upVar!=SystUtils::kUp, yield);
   }  
@@ -285,6 +346,48 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
     _au->setSystematics(idx, cname, AUtils::kNominal,uncTag,
 			upVar!=SystUtils::kDown , upVar!=SystUtils::kUp, yield);
 }
+
+
+void
+MPAFDisplay::addExternalSystUnc(string dsName, string uncTag, float Up, float Do, string categ, string cname) {
+ 
+  int idx=-1;
+  for(size_t id=0;id<_dsNames.size();id++ ) {
+    if(_dsNames[id]==dsName ) {
+      idx = id+1; 
+      break;
+    }
+  }
+  
+  if(idx==-1) {
+    cout<<"WARNING, dataset "<<dsName<<" not found, no external systematic uncertainty "<<uncTag<<" added "<<endl;
+    return;
+  }
+
+  if(cname!="" && categ!="") {
+    int icat=_au->getCategId(categ);
+    float yield=_au->getYield(idx, cname, icat);
+  
+    _au->setSystematics(idx, cname, icat, uncTag, true, false,yield*(1+Up/100.) );
+    _au->setSystematics(idx, cname, icat, uncTag, false, true,yield*(1+Do/100.) );
+  }
+  else { //applied everywhere
+    vector<string> categs=_au->getCategories();
+    for(unsigned int ic=0;ic<categs.size();ic++) {
+      int icat=_au->getCategId(categs[ic]);
+      vector<string> sels=_au->getSelections(idx, icat);
+      
+      for(unsigned int is=0;is<sels.size();is++) {
+	cname = sels[is];
+	float yield=_au->getYield(idx, cname, icat);
+	_au->setSystematics(idx, cname, icat, uncTag, true, false,yield*(1+Up/100.) );
+	_au->setSystematics(idx, cname, icat, uncTag, false, true,yield*(1+Do/100.) );
+      }
+    }
+  }
+  
+}
+
 
 void
 MPAFDisplay::associateSystUncs() {
@@ -375,11 +478,11 @@ MPAFDisplay::setHistograms() {
       vector<string> samples= ds->getSamples();
       for(size_t is=0;is<samples.size(); is++) {
 	float w = ds->getWeight(is);
-	
+
 	if(ds->getSample(samples[is])->isNorm()) {
 	  w=ds->getSample(samples[is])->getNorm()/(anConf.getLumi()*ds->getHisto( obss[io], samples[is] )->Integral(0,1000000));
 	} 
-	
+
 	if(is==0) {
 	  htmp = ds->getHisto( obss[io], samples[is] );
 	  htmp->Scale( w );
@@ -421,7 +524,6 @@ void
 MPAFDisplay::drawRatio(string o1, string o2 ) {
 
   vector<const hObs*> Obs_;
-  // vector<vector<systM> > systs_;
   
   Obs_.push_back( _hm->getHObs( o1 ) );
   Obs_.push_back( _hm->getHObs( o2 ) );
@@ -596,7 +698,44 @@ MPAFDisplay::refresh() {
   //_hm->refresh();
 }
 
+void
+MPAFDisplay::setObservables(string v1, string v2, string v3,
+			    string v4, string v5, string v6) {
 
+  anConf.addUsefulVar(v1);
+  if(v2!="") anConf.addUsefulVar(v2);
+  if(v3!="") anConf.addUsefulVar(v3);
+  if(v4!="") anConf.addUsefulVar(v4);
+  if(v5!="") anConf.addUsefulVar(v5);
+  if(v6!="") anConf.addUsefulVar(v6);
+  
+  dp.setObservables(v1,v2,v3,v4,v5,v6);
+}
+
+void
+MPAFDisplay::loadAutoBinning(string filename) {
+  dp.loadAutoBinning(filename);
+
+  if(filename=="") return;
+
+  string ndb= (string)getenv("MPAF")+"/display/cards/"+filename;
+  ifstream fDb( ndb.c_str(), ios::in );
+
+  if(fDb)  {
+    string line;
+    while(getline(fDb, line)) {
+      istringstream iss(line);
+      vector<string> tks;
+      copy(istream_iterator<string>(iss),
+	   istream_iterator<string>(),
+	   back_inserter<vector<string> >(tks));
+      
+      string var = tks[0];
+      anConf.addUsefulVar(var);
+    }
+  }
+  
+}
 
 vector<string> 
 MPAFDisplay::split(const string& s, char delim) {
@@ -640,21 +779,61 @@ MPAFDisplay::findDiff(const string& s1, const string& s2,
 //datacard stuff================================================================
 
 void
-MPAFDisplay::addDataCardSample(string sName, string dsName) {
+MPAFDisplay::addDataCardSample(string sName, string dsName, float w) {
   
   _isSigDs[dsName]=false;
   if(dsName.find("data")!=string::npos) _isSigDs[dsName]=true;
 
-  anConf.addSample(sName, dsName, 0, false);
+  anConf.addSample(sName, dsName, 0, w, false);
 }
 
 void
-MPAFDisplay::addDataCardSigSample(string sName, string dsName) {
+MPAFDisplay::addDataCardSigSample(string sName, string dsName, float w) {
   
   _isSigDs[dsName]=true;
-  anConf.addSample(sName, dsName, 0);
+  anConf.addSample(sName, dsName, 0, w, false);
 }
 
+void
+MPAFDisplay::overwriteNuisanceParameter(string npName, string dss, string vals) {
+
+  //name parsing
+  vector<string> dsList;
+  size_t p=0;
+  while(p!=string::npos) {
+    size_t pi=dss.find(":",p);
+    if(p==0) dsList.push_back( dss.substr(p,pi) );
+    if(pi==string::npos) break;
+    
+    p = dss.find(":",pi+1);
+    if(p==string::npos) {
+      dsList.push_back( dss.substr(pi+1,dss.size()-pi-1 ) );
+    } else {
+      dsList.push_back( dss.substr(pi+1,p-pi-1 ) );
+    }
+  }
+  
+  _nuisPars[ npName+"_OW" ] = dsList;
+  _nuisParExt[ npName+"_OW" ]=false;
+
+  //val parsing, external uncertainties ============================
+  vector<string> valList;
+  p=0;
+  while(p!=string::npos) {
+    size_t pi=vals.find(":",p);
+    if(p==0) valList.push_back( vals.substr(p,pi) );
+    if(pi==string::npos) break;    
+
+    p = vals.find(":",pi+1);
+    if(p==string::npos) {
+      valList.push_back( vals.substr(pi+1,vals.size()-pi-1 ) );
+    } else {
+      valList.push_back( vals.substr(pi+1,p-pi-1 ) );
+    }
+  }
+  _nuisParVals[ npName+"_OW" ] = valList;
+
+}
 
 void
 MPAFDisplay::addNuisanceParameter(string npName, string dss, string scheme,  string vals) {
@@ -696,7 +875,7 @@ MPAFDisplay::addNuisanceParameter(string npName, string dss, string scheme,  str
       valList.push_back( vals.substr(pi+1,p-pi-1 ) );
     }
   }
-  //cout<<npName<<"   "<<valList.size()<<"   "<<dsList.size()<<"   "<<dsList[0]<<endl;
+
   _nuisParVals[ npName ] = valList;
   _nuisParExt[ npName ]=true;
 }
@@ -707,10 +886,10 @@ MPAFDisplay::getExternalNuisanceParameters(string sigName) {
   
   //matching values
   vector<string> lines;
-  //cout<<" ============================================== "<<_nuisParVals.size()<<endl;
   for(_itNp=_nuisParVals.begin();_itNp!=_nuisParVals.end();++_itNp) {
     string line="";
     int nd=0;
+    
     for(unsigned int ids=0;ids<_dsNames.size();ids++) {
       if(_dsNames[ids]=="data") continue;
       if( find( _nuisPars[_itNp->first].begin(), _nuisPars[_itNp->first].end(), _dsNames[ids] )==_nuisPars[_itNp->first].end() ) {
@@ -741,7 +920,7 @@ void
 MPAFDisplay::makeSingleDataCard(string sigName, string categ, string cname, string cardName) {
   
   map<string,string> lines;
-  bool isValidCard = _au->getDataCardLines(lines, _dsNames, sigName, categ, cname, 1, _nuisPars, _nuisParExt);
+  bool isValidCard = _au->getDataCardLines(lines, _dsNames, sigName, categ, cname, 1, _nuisPars, _nuisParExt, _nuisParScheme,_nuisParVals);
 
   if(!isValidCard) { 
     cout<<"Current datacard contains a null background+signal yield,"<<endl
@@ -755,13 +934,11 @@ MPAFDisplay::makeSingleDataCard(string sigName, string categ, string cname, stri
     if(!it->second) nBkgs++;
   }
   ostringstream osB; osB<<nBkgs;
-  //int nNuis=_nuisPars.size();
   
   string dirname_ = (string)(getenv("MPAF"))+"/workdir/datacards/";
   ofstream card( (dirname_+cardName+".txt").c_str() , ios::out | ios::trunc );
   
   card<<"imax 1 number of channels"<<endl; 
-  //card<<"jmax "+osB.str()+" number of backgrounds"<<endl; 
   card<<"jmax * number of backgrounds"<<endl; 
   card<<"kmax * number of nuisance parameters"<<endl; 
   card<<"---------------------------"<<endl; 
@@ -779,7 +956,6 @@ MPAFDisplay::makeSingleDataCard(string sigName, string categ, string cname, stri
     if(itU->first.substr(0,2)!="NP") continue;
     if(_nuisParVals.find(itU->first.substr(3, itU->first.size()-3))!=_nuisParVals.end() ) continue;
     string name=itU->first.substr(3,itU->first.size()-3);
-    //cout<<name<<"   "<<itU->second<<endl;
     card<<itU->second<<endl;
   }
   

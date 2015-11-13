@@ -14,12 +14,15 @@
 #include "THnSparse.h"
 #include "TFile.h"
 #include "TObject.h"
+#include "TFormula.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
 #include "TGraph.h"
 
 #include "tools/src/StatUtils.hh"
+// #include "analysis/utils/Debug.cc"
+// #include "analysis/utils/Tools.hh"
 
 class DataBaseManager {
 
@@ -28,12 +31,14 @@ public:
   DataBaseManager(); 
   ~DataBaseManager();
 
-  void loadDb(std::string key, std::string dbName);
+void loadDb(std::string key, std::string dbName);//, bool isTf1Db=false);
   void loadDb(std::string key, std::string dbName, std::string hname);
+
   float getDBValue(std::string key, float v1=-1000000, float v2=-1000000,
 		   float v3=-1000000, float v4=-1000000, float v5=-1000000,
 		   float v6=-1000000,float v7=-1000000, float v8=-1000000, 
 		   float v9=-1000000, float v10=-1000000);
+
 
   float getDBErrL(std::string key, float v1=-1000000, float v2=-1000000,
 		   float v3=-1000000, float v4=-1000000, float v5=-1000000,
@@ -52,6 +57,24 @@ public:
 
   std::vector<std::vector<float> > getDB(std::string key);
 
+  //tf1 databases
+  float getTF1DBValue(std::string key, float x, float v1=-1000000, float v2=-1000000,
+		      float v3=-1000000, float v4=-1000000, float v5=-1000000,
+		      float v6=-1000000,float v7=-1000000, float v8=-1000000, 
+		      float v9=-1000000, float v10=-1000000);
+  
+  
+  float getTF1DBErrL(std::string key, float x, float v1=-1000000, float v2=-1000000,
+		     float v3=-1000000, float v4=-1000000, float v5=-1000000,
+		     float v6=-1000000,float v7=-1000000, float v8=-1000000, 
+		     float v9=-1000000, float v10=-1000000);
+  
+  float getTF1DBErrH(std::string key, float x, float v1=-1000000, float v2=-1000000,
+		     float v3=-1000000, float v4=-1000000, float v5=-1000000,
+		     float v6=-1000000,float v7=-1000000, float v8=-1000000, 
+		     float v9=-1000000, float v10=-1000000);
+
+  
   bool exists(std::string key);
 
 private:
@@ -68,6 +91,12 @@ private:
   std::map<std::string, int> _mStrIdx;
   std::map<std::string, int>::const_iterator _mSIt;
   int _strIdx;
+
+  //tf1s
+  std::map<std::string, bool> _isTF1Db;
+  std::map<int, std::string>  _formulas; 
+  std::map<int, std::string>  _formulasEHs; 
+  std::map<int, std::string>  _formulasELs; 
 
 };
 

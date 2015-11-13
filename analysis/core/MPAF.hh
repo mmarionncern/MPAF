@@ -95,9 +95,9 @@ protected:
 		  float v7 = -100000, float v8 = -100000, float v9 = -100000,
 		  float v10 = -100000);
  
-  string getCfgVarS(string n);
-  int getCfgVarI(string n);
-  float getCfgVarF(string n);
+  string getCfgVarS(string n, string def);
+  int getCfgVarI(string n, int def);
+  float getCfgVarF(string n, float def);
 
   //counters and selection functions
   template <typename T> inline
@@ -137,8 +137,11 @@ protected:
 		     string db, string hname, bool wUnc=false);
   void addWSystSource(string name, int dir, string type, float val);
   void addWSystSource(string name, int dir, string type, string db, string hname);
+  void addManualSystSource(string name, int dir);
 
   bool isInUncProc() {return _uncId;};
+  string getUncName() { return _unc;};
+  int getUncDir() { return _uDir;};
 
   // Private Non-Template Methods
 	

@@ -27,6 +27,7 @@ _c(0),_leg(0),_empty(0),_hMC(0),_hData(0),_gData(0)
   _isProf=false;
 
   _comSyst=true;
+  _mcSystComputed=false;
 
   _userYScale=false;
 
@@ -113,6 +114,7 @@ DisplayClass::reset() {
   _gBin =  _binningSave;
 
   _cNames.clear();
+  _mcSystComputed=false;
 
 }
 
@@ -160,6 +162,8 @@ DisplayClass::softReset() {
 
   _cNames.clear();
 
+  _mcSystComputed=false;
+
 }
 
 void
@@ -194,7 +198,7 @@ DisplayClass::refreshHistos() {
   _hData=NULL;
   _gData=NULL;
   _hCoords.clear();
-
+  _mcSystComputed=false;
 }
 
 void
@@ -237,34 +241,31 @@ DisplayClass::loadAutoBinning(string filename) {
 
   if(fDb)  {
     string line;
-    while(getline(fDb, line)) 
-      {
-
-	istringstream iss(line);
-	vector<string> tks;
-	copy(istream_iterator<string>(iss),
-	     istream_iterator<string>(),
-	     back_inserter<vector<string> >(tks));
-
-	string var = tks[0];
-	int bin = atoi(tks[1].c_str());
-	float xmin = atof(tks[2].c_str());
-	float xmax = atof(tks[3].c_str());
-
-	vector<float> vals(3,0);
-	vals[0] = bin;
-	vals[1] = xmin;
-	vals[2] = xmax;
-
-	_autoBins[ var ] = vals;
+    while(getline(fDb, line)) {
+      istringstream iss(line);
+      vector<string> tks;
+      copy(istream_iterator<string>(iss),
+	   istream_iterator<string>(),
+	   back_inserter<vector<string> >(tks));
+      
+      string var = tks[0];
+      int bin = atoi(tks[1].c_str());
+      float xmin = atof(tks[2].c_str());
+      float xmax = atof(tks[3].c_str());
+      
+      vector<float> vals(3,0);
+      vals[0] = bin;
+      vals[1] = xmin;
+      vals[2] = xmax;
+      
+      _autoBins[ var ] = vals;
 	_autoVars.push_back(var);
-      }
+    }
   } 
   else {
     cout<<"Warning, auto binning file "<<ndb<<" not loaded, no auto binning specified"<<endl;
   }
-
-
+    
 }
 
 void 
@@ -667,6 +668,7 @@ DisplayClass::drawDistribution() {
     bool f=true;
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
+      cout<<nh<<endl;
       if( !_sSignal && nh.find("sig")!=(size_t)-1) 
         sigs.push_back(i);
       else {
@@ -691,12 +693,14 @@ DisplayClass::drawDistribution() {
   }
   
   // systematic uncertainties now ============
+  cout<<" systematics? "<<_addSyst<<endl;
   if(_addSyst && !_is2D && _hMC) {
     if(_comSyst) {
       computeSystematics(_isProf,true);
     }
     
     if(_addSyst) {
+      cout<<" ========== adding systematic uncertainties =================== "<<endl;
       TGraphAsymmErrors* mcUnc = (TGraphAsymmErrors*) _mcUncert.back()->Clone();
       
       mcUnc->SetMarkerSize(0); 
@@ -1963,8 +1967,11 @@ DisplayClass::residualData(const hObs* theObs) {
   
   //systematic uncertainties =============
   if(_addSyst && _hMC) {
-    computeSystematics(_isProf);
-   
+    if(!_mcSystComputed) {
+      computeSystematics(_isProf);
+      _mcSystComputed=true;
+    }   
+
     TGraphAsymmErrors* mcUnc = (TGraphAsymmErrors*) _mcUncert.back()->Clone();
       
     double x,y;
@@ -2014,7 +2021,7 @@ DisplayClass::drawCumulativeHistos(const hObs* theObs ) {
 }
 
 void
-DisplayClass::drawStatistics(vector<pair<string,vector<vector<float> > > > vals, 
+DisplayClass::drawStatistics(vector<pair<string,vector<vector<map<string,float> > > > > vals, 
 			     vector<string> dsnames, bool isMultiScheme) {
   _comSyst = false;
   softReset();
@@ -2046,7 +2053,7 @@ DisplayClass::drawStatistics(vector<pair<string,vector<vector<float> > > > vals,
 }
 
 void
-DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > vals, 
+DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, 
 				 vector<string> dsnames, bool isMultiScheme ) {
 
   
@@ -2055,7 +2062,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
   vector<TH1*> hMC;
   TH1F* hData;
   
-  size_t nVals=isMultiScheme?(vals.size()/2):vals.size(); 
+  size_t nVals=vals.size();//isMultiScheme?(vals.size()/2):vals.size(); 
 
   for(size_t ic=0;ic<nVals;ic++) {
     cNames.push_back( vals[ic].first );
@@ -2088,12 +2095,14 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
   mcUncert->SetFillColor(kGray+1);
   
   size_t idat=(_mcOnly)?-1:( vals[0].second.size()-1);
-  if(isMultiScheme) { //overwrite the data plot -> means we have two parallel scheme to looka t in MC
-    for(size_t ic=0;ic<nVals;ic++) {
-    vals[ic].second[0][0] = vals[ic].second[nVals][0]; 
-    vals[ic].second[0][1] = vals[ic].second[nVals][1]; 
-    vals[ic].second[0][2] = vals[ic].second[nVals][2]; 
-    vals[ic].second[0][3] = vals[ic].second[nVals][3]; 
+  if(isMultiScheme) { //overwrite the data plot -> means we have two parallel scheme to look at in MC
+    if(idat!=-1) {
+      for(size_t ic=0;ic<nVals;ic++) {
+	vals[ic].second[0][0]["tot"] = vals[ic].second[idat][0]["tot"]; 
+	vals[ic].second[0][1]["tot"] = vals[ic].second[idat][1]["tot"]; 
+	vals[ic].second[0][2]["tot"] = vals[ic].second[idat][2]["tot"]; 
+	vals[ic].second[0][3]["tot"] = vals[ic].second[idat][3]["tot"]; 
+      }
     }
   }
 
@@ -2104,32 +2113,31 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
     for(size_t id=0;id<vals[ic].second.size();id++) {
 
       if(id==0) { //MC total
-       	hMCt->SetBinContent( ic+1, vals[ic].second[id][0] );
-       	hMCt->SetBinError( ic+1, vals[ic].second[id][1] );
-       	mcUncert->SetPoint( ic, ic+0.5 , vals[ic].second[id][0] );
+       	hMCt->SetBinContent( ic+1, vals[ic].second[id][0]["tot"] );
+       	hMCt->SetBinError( ic+1, vals[ic].second[id][1]["tot"] );
+       	mcUncert->SetPoint( ic, ic+0.5 , vals[ic].second[id][0]["tot"] );
 
-	float eyl2=pow(vals[ic].second[id][2],2) + ((_mcSyst)?pow(vals[ic].second[id][1],2):0);
-	float eyh2=pow(vals[ic].second[id][3],2) + ((_mcSyst)?pow(vals[ic].second[id][1],2):0);
-
+	float eyl2=pow(vals[ic].second[id][2]["tot"],2) + ((_mcSyst)?pow(vals[ic].second[id][1]["tot"],2):0);
+	float eyh2=pow(vals[ic].second[id][3]["tot"],2) + ((_mcSyst)?pow(vals[ic].second[id][1]["tot"],2):0);
        	mcUncert->SetPointError( ic, 0.25,0.25, sqrt(eyl2), sqrt(eyh2) );
       }
       else if(id==idat) { //data
-        hData->SetBinContent( ic+1, vals[ic].second[id][0] );
-	hData->SetBinError( ic+1, vals[ic].second[id][1] );	
+        hData->SetBinContent( ic+1, vals[ic].second[id][0]["tot"] );
+	hData->SetBinError( ic+1, vals[ic].second[id][1]["tot"] );	
       }
       else {
         if( !_sSignal && dsnames[id].find("sig") == (size_t)-1){
-          float sum = vals[ic].second[id][0];
-          float sum2 = pow(vals[ic].second[id][1],2);
+          float sum = vals[ic].second[id][0]["tot"];
+          float sum2 = pow(vals[ic].second[id][1]["tot"],2);
           for(size_t ii = 1; ii < id; ++ii) {//0 is MC
             if( !_sSignal && dsnames[ii].find("sig")!=(size_t)-1) continue;
-            sum += vals[ic].second[ii][0];
-            sum2 += pow(vals[ic].second[ii][1],2);
+            sum += vals[ic].second[ii][0]["tot"];
+            sum2 += pow(vals[ic].second[ii][1]["tot"],2);
           }
           hMC[nDs-id-1]->SetBinContent( ic+1, sum);
         }
         else{
-          hMC[nDs-id-1] -> SetBinContent( ic+1, vals[ic].second[id][0]);// * weight);
+          hMC[nDs-id-1] -> SetBinContent( ic+1, vals[ic].second[id][0]["tot"]);
         }
       }
 
@@ -2160,7 +2168,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
     if( (!_sSignal && nh.find("sig")!=(size_t)-1) ) {
       float yM = HistoUtils::getHistoYhighWithError(hMC[ih],0,xmax);
       if(yM>ymax)
-        ymax = yM;//*(_logYScale?15:1.5);
+        ymax = yM;
     }
   }
 
@@ -2175,8 +2183,14 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
   emptyH->GetYaxis()->SetTitle(_ytitle.c_str());
   for(size_t ib=0;ib<cNames.size();ib++) {
     emptyH->GetXaxis()->SetBinLabel(ib+1, cNames[ib].c_str() );
+    for(size_t ih=0;ih<hMC.size();ih++)
+      hMC[ih]->GetXaxis()->SetBinLabel(ib+1, cNames[ib].c_str() );
+
   }
-  
+  emptyH->GetXaxis()->LabelsOption("v");
+  for(size_t ih=0;ih<hMC.size();ih++)  
+    hMC[ih]->GetXaxis()->LabelsOption("v");
+
   hMCt->SetLineWidth(2);
   hMCt->SetLineColor(kBlack);
   hMCt->SetFillStyle(0);
@@ -2187,6 +2201,8 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<float> > > > v
   _hData = hData;
   _gData = gData;
   _mcUncert.push_back( mcUncert );
+  _nhmc=hMC.size();
+  _mcSystComputed=true;
   
   _cNames = cNames;
 
@@ -2442,9 +2458,6 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
 	  systD[iv] +=sU<=0?(sU*sU):(sD*sD);
 	}
 	
-	// if(ib == 20)
-	//   cout<<_hMC->GetBinContent(ib)<<"   sU="<<sU<<"   sD="<<sD<<"   "<<_hMC->GetXaxis()->GetBinCenter(ib)<<" ===> sysU="<<sqrt(systU[iv])<<"   sysD="<<sqrt(systD[iv])<<endl;
-
 	if(ib==0 && _uncDet) {
 	  _uncNames[iv] = (*itS).first;
 	}

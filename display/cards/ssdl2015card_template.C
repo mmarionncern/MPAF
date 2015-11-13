@@ -1,13 +1,13 @@
 MPAFDisplay md;
 
-void dataCardProd_CATTAG_SIGTAG_LUMTAG() {
+void dataCardProd_CATTAG_SIGTAG() {
   md.refresh();
 
 
   //general parameters ********************* general parameters
   string dir="SSDL2015";
-  string fileName="fakeEstim_SR"; // not needed for statistics but provides the normalization
-  string fileList="fakeEstim_SR"; // put command line that gives all files as in a "ls" command
+  string fileName="ssdl2fb_oct"; // not needed for statistics but provides the normalization
+  string fileList="ssdl2fb_oct"; // put command line that gives all files as in a "ls" command
 
   bool mcOnly = false;
   
@@ -16,12 +16,12 @@ void dataCardProd_CATTAG_SIGTAG_LUMTAG() {
   
   
   //Lumis( or XSections ) pb-1 & KFactors ************************************
-  float lumi=LUMTAG; //pb-1 19470
+  float lumi=1; //pb-1 19470
   float energy=13; //TeV
 
   bool useXS=false;
 
-  md.anConf.loadXSDB("XSectionsPhys14.db");
+  //md.anConf.loadXSDB("XSectionsSpring15.db");
 
   map<string,float> LumisXS;
 
@@ -35,138 +35,107 @@ void dataCardProd_CATTAG_SIGTAG_LUMTAG() {
 
   md.addDataCardSigSample("CATTAG:SIGNAME","SIGTAG");
   
-  md.addDataCardSample("CATTAG:WZJetsTo3LNu", "wz");
-  md.addDataCardSample("CATTAG:TTH", "tth");
-  md.addDataCardSample("CATTAG:TTZJets", "ttz");
-  md.addDataCardSample("CATTAG:TTWJets", "ttw");
+  md.addDataCardSample("CATTAG:_standard_prompt_WZ", "WZ");
+  md.addDataCardSample("CATTAG:_standard_prompt_ttW","ttW");
+  md.addDataCardSample("CATTAG:_standard_prompt_ttZH","ttHZ");
+  md.addDataCardSample("CATTAG:_standard_prompt_WWss", "WW");
+  //md.addDataCardSample("CATTAG:_standard_prompt_TG", "XG");
+  md.addDataCardSample("CATTAG:_standard_prompt_XG", "XG");
+  md.addDataCardSample("CATTAG:_standard_prompt_Rares","rares");
+  md.addDataCardSample("CATTAG:_flipsappl_data", "flip");
+  md.addDataCardSample("CATTAG:_fakesappl_data", "fake");
+
+  //prompt contamination removal
+  // md.addDataCardSample("CATTAG:_promptratesub_Rares", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_WWss", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_WZ", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_XG", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_ttW", "fake");
+  // md.addDataCardSample("CATTAG:_promptratesub_ttZH", "fake");
+
+  md.addDataCardSample("CATTAG:data","data");
   
-  md.addDataCardSample("CATTAG:TTJetscharge", "chMId");
-  md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT100to200charge", "chMId");
-  md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT200to400charge", "chMId");
-  md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT400to600charge", "chMId");
-  md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT600toInfcharge", "chMId");
-
-  md.addDataCardSample("CATTAG_Fake:TTJets", "fake");
-  md.addDataCardSample("CATTAG_Fake:WJetsToLNu_HT100to200", "fake");
-  md.addDataCardSample("CATTAG_Fake:WJetsToLNu_HT200to400", "fake");
-  md.addDataCardSample("CATTAG_Fake:WJetsToLNu_HT400to600", "fake");
-  md.addDataCardSample("CATTAG_Fake:WJetsToLNu_HT600toInf", "fake");
-  md.addDataCardSample("CATTAG_Fake:DYJetsToLL_M50_HT100to200", "fake");
-  md.addDataCardSample("CATTAG_Fake:DYJetsToLL_M50_HT200to400", "fake");
-  md.addDataCardSample("CATTAG_Fake:DYJetsToLL_M50_HT400to600", "fake");
-  md.addDataCardSample("CATTAG_Fake:DYJetsToLL_M50_HT600toInf", "fake");
-
-  // md.addDataCardSample("CATTAG:TTJetsfake", "fake");
-  // md.addDataCardSample("CATTAG:WJetsToLNu_HT100to200fake", "fake");
-  // md.addDataCardSample("CATTAG:WJetsToLNu_HT200to400fake", "fake");
-  // md.addDataCardSample("CATTAG:WJetsToLNu_HT400to600fake", "fake");
-  // md.addDataCardSample("CATTAG:WJetsToLNu_HT600toInffake", "fake");
-  // md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT100to200fake", "fake");
-  // md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT200to400fake", "fake");
-  // md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT400to600fake", "fake");
-  // md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT600toInffake", "fake");
   
-  md.addDataCardSample("CATTAG:WZJetsTo3LNu", "pseudodata");
-  md.addDataCardSample("CATTAG:TTH", "pseudodata");
-  md.addDataCardSample("CATTAG:TTZJets", "pseudodata");
-  md.addDataCardSample("CATTAG:TTWJets", "pseudodata");
-  md.addDataCardSample("CATTAG:TTJetscharge", "pseudodata");
-  md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT100to200charge", "pseudodata");
-  md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT200to400charge", "pseudodata");
-  md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT400to600charge", "pseudodata");
-  md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT600toInfcharge", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:TTJets", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:WJetsToLNu_HT100to200", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:WJetsToLNu_HT200to400", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:WJetsToLNu_HT400to600", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:WJetsToLNu_HT600toInf", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:DYJetsToLL_M50_HT100to200", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:DYJetsToLL_M50_HT200to400", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:DYJetsToLL_M50_HT400to600", "pseudodata");
-  md.addDataCardSample("CATTAG_Fake:DYJetsToLL_M50_HT600toInf", "pseudodata");
-  // md.addDataCardSample("CATTAG:TTJetsfake", "pseudodata");
-  // md.addDataCardSample("CATTAG:WJetsToLNu_HT100to200fake", "pseudodata");
-  // md.addDataCardSample("CATTAG:WJetsToLNu_HT200to400fake", "pseudodata");
-  // md.addDataCardSample("CATTAG:WJetsToLNu_HT400to600fake", "pseudodata");
-  // md.addDataCardSample("CATTAG:WJetsToLNu_HT600toInffake", "pseudodata");
-  // md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT100to200fake", "pseudodata");
-  // md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT200to400fake", "pseudodata");
-  // md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT400to600fake", "pseudodata");
-  // md.addDataCardSample("CATTAG:DYJetsToLL_M50_HT600toInffake", "pseudodata");
-
+  //lumi
+  md.addNuisanceParameter("lumi","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.08:1.08:1.08:1.08:1.08:1.08:1.08");
 
   //experimental uncertainties
-  md.addNuisanceParameter("jes","ttw:ttz:SIGTAG","lnN","JESTAG");
-
-  //extrapolation uncertainties
-  md.addNuisanceParameter("ttwTail","ttw","lnN","TTWTAILTAG");
-  md.addNuisanceParameter("ttzTail","ttz","lnN","TTZTAILTAG");
-  md.addNuisanceParameter("wzB","wz","lnN","WZBTAG");
-
-  //flat uncertainties -> cross sections
-  // md.addNuisanceParameter("ttwNorm","ttw","lnN","1.1"); //->merged with the "tail" source
-  // md.addNuisanceParameter("ttwNorm","ttz","lnN","1.1");
-  md.addNuisanceParameter("wzNorm","wz","lnN","WZLUMITAG");
+  //md.addNuisanceParameter("jes","ttW:ttZH:WW:XG:rares:SIGTAG","lnN","JESTAG");
+  //md.addNuisanceParameter("btag","ttW:ttZH:WW:XG:rares:SIGTAG","lnN","BTAGTAG");
+  md.addNuisanceParameter("JES","WZ:ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","");
+  md.addNuisanceParameter("BTAG","WZ:ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","");
+  md.addNuisanceParameter("lEff","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.04:1.04:1.04:1.04:1.04:1.04");
+  md.addNuisanceParameter("tEff","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
+  md.addNuisanceParameter("tHTE","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","HLTEFFTAG");
+  
   
   //Data-driven methods
-  md.addNuisanceParameter("chMID","chMId","lnN","1.50");
-  md.addNuisanceParameter("fratio","fake","lnN","1.40");
+  md.addNuisanceParameter("chMID","flip","lnN","1.30");
+  md.addNuisanceParameter("fratio","fake","lnN","1.30");
+  md.addNuisanceParameter("frEwk","fake","lnN","FREWKTAG");
 
-  //syst from stat uncertainties == automatic
-  //md.addNuisanceParameter("wzstat","wz","lnN",""); //--> already given by the 8/15% on Xsect
-  // md.addNuisanceParameter("tthstat","tth","lnN","");
-  // md.addNuisanceParameter("ttwstat","ttw","lnN","");
-  // md.addNuisanceParameter("ttzstat","ttz","lnN","");
-  // md.addNuisanceParameter("fakestat","fake","lnN","");
-  // md.addNuisanceParameter("chMIdstat","chMId","lnN","");
-  // md.addNuisanceParameter("SIGTAGstat","SIGTAG","lnN","");
+  //theoretical uncertainties
+  md.addNuisanceParameter("wzTh","WZ","lnN","1.30");
+  md.addNuisanceParameter("WWTh","ttW","lnN","1.50");
+  md.addNuisanceParameter("TGTh","XG","lnN","1.50");
+  md.addNuisanceParameter("rareTh","rares","lnN","1.50");
+  //md.addNuisanceParameter("sigTh","SIGTAG","lnN","SIGTHTAG");
 
-  
+  md.addNuisanceParameter("ttWPdf","ttW","lnN","1.04");
+  md.addNuisanceParameter("ttHZPdf","ttHZ","lnN","1.04");
+  md.addNuisanceParameter("ttWXs","ttW","lnN","1.13");
+  md.addNuisanceParameter("ttHZXs","ttHZ","lnN","1.11");
+  md.addNuisanceParameter("ttWAcc","ttW","lnN","TTWACCTAG");
+  md.addNuisanceParameter("ttHZAcc","ttHZ","lnN","TTHZACCTAG");
+
+
   string srs[66]={ 
-    "SR1A", "SR2A", "SR3A", "SR4A", "SR5A", "SR6A", "SR7A", "SR8A",
-    "SR9A", "SR10A", "SR11A", "SR12A", "SR13A", "SR14A", "SR15A", "SR16A",
-    "SR17A", "SR18A", "SR19A", "SR20A", "SR21A", "SR22A", "SR23A", "SR24A",
-    "SR25A", "SR26A", "SR27A", "SR28A", "SR29A", "SR30A", "SR31A", "SR32A",
+    "HHSR1", "HHSR2", "HHSR3", "HHSR4", "HHSR5", "HHSR6", "HHSR7", "HHSR8",
+    "HHSR9", "HHSR10", "HHSR11", "HHSR12", "HHSR13", "HHSR14", "HHSR15", "HHSR16",
+    "HHSR17", "HHSR18", "HHSR19", "HHSR20", "HHSR21", "HHSR22", "HHSR23", "HHSR24",
+    "HHSR25", "HHSR26", "HHSR27", "HHSR28", "HHSR29", "HHSR30", "HHSR31", "HHSR32",
     
-    "SR1B", "SR2B", "SR3B", "SR4B", "SR5B", "SR6B", "SR7B", "SR8B",
-    "SR9B", "SR10B", "SR11B", "SR12B", "SR13B", "SR14B", "SR15B", "SR16B",
-    "SR17B", "SR18B", "SR19B", "SR20B", "SR21B", "SR22B", "SR23B", "SR24B",
-    "SR25B","SR26B",
+    "HLSR1", "HLSR2", "HLSR3", "HLSR4", "HLSR5", "HLSR6", "HLSR7", "HLSR8",
+    "HLSR9", "HLSR10", "HLSR11", "HLSR12", "HLSR13", "HLSR14", "HLSR15", "HLSR16",
+    "HLSR17", "HLSR18", "HLSR19", "HLSR20", "HLSR21", "HLSR22", "HLSR23", "HLSR24",
+    "HLSR25","HLSR26",
     
-    "SR1C", "SR2C", "SR3C", "SR4C", "SR5C", "SR6C", "SR7C", "SR8C"
+    "LLSR1", "LLSR2", "LLSR3", "LLSR4", "LLSR5", "LLSR6", "LLSR7", "LLSR8"
   };
 
-
-
+  //statistical uncertainties
   for(int isr=0;isr<66;isr++) {
     if(srs[isr]=="CATTAG") {
-      md.addNuisanceParameter("tth"+srs[isr]+"stat","tth","lnN","");
-      md.addNuisanceParameter("ttw"+srs[isr]+"stat","ttw","lnN","");
-      md.addNuisanceParameter("ttz"+srs[isr]+"stat","ttz","lnN","");
-      md.addNuisanceParameter("fake"+srs[isr]+"stat","fake","lnN","");
-      md.addNuisanceParameter("chMId"+srs[isr]+"stat","chMId","lnN","");
+      md.addNuisanceParameter("ttW"+srs[isr]+"stat","ttW","lnN","");
+      md.addNuisanceParameter("ttHZ"+srs[isr]+"stat","ttHZ","lnN","");
+      md.addNuisanceParameter("WW"+srs[isr]+"stat","WW","lnN","");
+      md.addNuisanceParameter("XG"+srs[isr]+"stat","XG","lnN","STATXGTAG"); //STATXGTAG
+      md.addNuisanceParameter("rares"+srs[isr]+"stat","rares","lnN","");
+      md.addNuisanceParameter("fake"+srs[isr]+"stat","fake","lnN","STATFAKETAG"); //STATFAKETAG
+      md.addNuisanceParameter("flip"+srs[isr]+"stat","flip","lnN","");
       md.addNuisanceParameter("SIGTAG"+srs[isr]+"stat","SIGTAG","lnN","");
+      
+      // if("STATFAKETAG"!="") {
+      // 	md.overwriteNuisanceParameter("fakeCATTAGstat","fake","STATFAKETAG");
+      // }
+      // if("STATXGTAG"!="") {
+      // 	md.overwriteNuisanceParameter("XGCATTAGstat","XG","STATXGTAG");
+      // }
+    
     }
     else {
-      md.addNuisanceParameter("tth"+srs[isr]+"stat","tth","lnN","-");
-      md.addNuisanceParameter("ttw"+srs[isr]+"stat","ttw","lnN","-");
-      md.addNuisanceParameter("ttz"+srs[isr]+"stat","ttz","lnN","-");
+      md.addNuisanceParameter("ttW"+srs[isr]+"stat","ttW","lnN","-");
+      md.addNuisanceParameter("ttHZ"+srs[isr]+"stat","ttHZ","lnN","-");
+      md.addNuisanceParameter("WW"+srs[isr]+"stat","WW","lnN","-");
+      md.addNuisanceParameter("XG"+srs[isr]+"stat","XG","lnN","-");
+      md.addNuisanceParameter("rares"+srs[isr]+"stat","rares","lnN","-");
       md.addNuisanceParameter("fake"+srs[isr]+"stat","fake","lnN","-");
-      md.addNuisanceParameter("chMId"+srs[isr]+"stat","chMId","lnN","-");
+      md.addNuisanceParameter("flip"+srs[isr]+"stat","flip","lnN","-");
       md.addNuisanceParameter("SIGTAG"+srs[isr]+"stat","SIGTAG","lnN","-");
     }
   }//signal regions  
 
 
-  // md.addNuisanceParameter("SIGTAGStat","SIGTAG","lnN","");
-  // md.addNuisanceParameter("ttwStat","ttw","lnN","");
-  // md.addNuisanceParameter("ttzStat","ttz","lnN","");
-  // md.addNuisanceParameter("wzStat","wz","lnN","");
-
-  //md.addNuisanceParameter("sigNorm","T1t415","lnN","1.10");
-
-
-  // }
   //===============================================================
 
   //*********************************************************************²
@@ -177,29 +146,8 @@ void dataCardProd_CATTAG_SIGTAG_LUMTAG() {
    
   md.prepareDisplay();
   
- //  int nCateg=66; //47
- //  vector<string> _categs(nCateg,"");
- 
- // string srs[66]={ 
+  md.makeSingleDataCard("SIGTAG", "global_CATTAG", "selected", "ssdl2015_CATTAG_SIGTAG");
 
- //    "SR1A", "SR2A", "SR3A", "SR4A", "SR5A", "SR6A", "SR7A", "SR8A",
- //    "SR9A", "SR10A", "SR11A", "SR12A", "SR13A", "SR14A", "SR15A", "SR16A",
- //    "SR17A", "SR18A", "SR19A", "SR20A", "SR21A", "SR22A", "SR23A", "SR24A",
- //    "SR25A", "SR26A", "SR27A", "SR28A", "SR29A", "SR30A", "SR31A", "SR32A",
-    
- //    "SR1B", "SR2B", "SR3B", "SR4B", "SR5B", "SR6B", "SR7B", "SR8B",
- //    "SR9B", "SR10B", "SR11B", "SR12B", "SR13B", "SR14B", "SR15B", "SR16B",
- //    "SR17B", "SR18B", "SR19B", "SR20B", "SR21B", "SR22B", "SR23B", "SR24B",
- //    "SR25B","SR26B",
-    
- //    "SR1C", "SR2C", "SR3C", "SR4C", "SR5C", "SR6C", "SR7C", "SR8C"
- // }
-
-  // _categs.assign(srs, srs+nCateg);
-  // for(size_t ic=0;ic< _categs.size();ic++) {
-  //   string cat=_categs[ic];
-    md.makeSingleDataCard("SIGTAG", "nominal", "selected", "ssdl2015_CATTAG_SIGTAG_LUMTAG");
-  // }
 
   gROOT->ProcessLine(".q");
 

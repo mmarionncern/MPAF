@@ -115,17 +115,22 @@ Candidate::Candidate( Vertex* vtx )
   
 }
 
-//Candidate::Candidate( const vector< const Candidate* >& listOfDau )
 Candidate::Candidate( const CandList& listOfDau )
 {
+
   init();
+  _uid--;
+  _curUid--;
   for( size_t idau=0; idau<listOfDau.size(); idau++ )
     {
       const Candidate* dau = listOfDau[idau];
       if( dau->isTransverse() ) _type = kTransverse;
       addDaughter( dau->clone() );
     }
-  // now loop on the daughters
+
+  _uid+=listOfDau.size()+1;
+  _curUid+=1;
+
   TVector2 p2_(0,0);
   float pz_(0);
   float E_(0);
@@ -168,6 +173,7 @@ Candidate::Candidate( const CandList& listOfDau )
   if( m2_<0 ) m2_=0;
   _m = sqrt(m2_);
   if( sameVtx ) setVertex( vtx_ );
+
   lock();
 }
 
@@ -186,7 +192,7 @@ Candidate::Candidate( const Candidate& o )
   //_info(   o._info )
 {
   _status = kUnlocked;
-  
+ 
   // make sure the original is in the bank of base candidates
   if( _baseCand.count(o.uid())==0 ) _baseCand[_uid]=&o;
 

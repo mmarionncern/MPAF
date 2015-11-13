@@ -156,16 +156,16 @@ void FakeRatioStudy::initialize(){
   _au->addCategory( kJetId, "jet Id"     );
 
   //extra input variables
-  _lepptcut = getCfgVarS("LEPPTCUT"); // lepton pt cut, if none given, we take default > 10GeV
-  _lepflav = getCfgVarS("LEPFLAV"); // lepton flavor (all, e, m)
-  _lepiso  = getCfgVarS("LEPISO" ); // lepton isolation (relIso, pTrel)
-  _mva     = getCfgVarS("LEPID"  ); // lepton id (cut, cutnotmva, cutandmva, mva, mvanotcut, mvaandcut)
-  _btag    = getCfgVarS("BTAG"   ); // btag (std, 40, 25, soft25, 15, IVF)
-  _MR      = getCfgVarS("MR"     ); // measurement region (MR00, MR01, MR02, MR03)
-  _fakes   = getCfgVarS("FAKES"  ); // source of fake leptons (none, all, b, c, light)
-  _xpol    = getCfgVarS("DENXPOL"); // denominator extrapolation (isosip, sip, iso)
-  _htbin   = getCfgVarS("HTBIN"  ); // additional HT bin (all, 0, 200, 400)
-  _etabin  = getCfgVarS("ETABIN" ); // lepton eta bin (none, default, 09, 12, 15)
+  _lepptcut = getCfgVarS("LEPPTCUT", ""); // lepton pt cut, if none given, we take default > 10GeV
+  _lepflav = getCfgVarS("LEPFLAV", ""); // lepton flavor (all, e, m)
+  _lepiso  = getCfgVarS("LEPISO" , ""); // lepton isolation (relIso, pTrel)
+  _mva     = getCfgVarS("LEPID"  , ""); // lepton id (cut, cutnotmva, cutandmva, mva, mvanotcut, mvaandcut)
+  _btag    = getCfgVarS("BTAG"   , ""); // btag (std, 40, 25, soft25, 15, IVF)
+  _MR      = getCfgVarS("MR"     , ""); // measurement region (MR00, MR01, MR02, MR03)
+  _fakes   = getCfgVarS("FAKES"  , ""); // source of fake leptons (none, all, b, c, light)
+  _xpol    = getCfgVarS("DENXPOL", ""); // denominator extrapolation (isosip, sip, iso)
+  _htbin   = getCfgVarS("HTBIN"  , ""); // additional HT bin (all, 0, 200, 400)
+  _etabin  = getCfgVarS("ETABIN" , ""); // lepton eta bin (none, default, 09, 12, 15)
   
 }
 

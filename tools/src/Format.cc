@@ -46,6 +46,7 @@ struct SystST{
    std::string db; //database name
    int dir; //direction
    std::vector<std::string> vars; //input dependencies
+   std::vector<bool> specVars; //absolute value modifier
    std::vector<std::string> modVar; //variables to be modified
 
 };
