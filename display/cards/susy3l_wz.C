@@ -262,7 +262,7 @@ void susy3l_wz() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=1200; //pb-1 19470
+    float lumi=1280; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
