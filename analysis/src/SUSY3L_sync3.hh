@@ -38,15 +38,12 @@ private:
     bool electronSelection(const Candidate* c, int);
     bool muonSelection(const Candidate* c, int);
     bool tauSelection(int);
-    bool bJetSelection(int);
-    bool goodJetSelection(int);
     bool looseLepton(const Candidate* c, int idx, int pdgId);
     bool fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass);
     
     bool baseSelection();
     bool wzCRSelection();
     void setBaselineRegion();
-    void setWZControlRegion();
     void setSignalRegion();
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection();
@@ -112,12 +109,6 @@ private:
     float _valCutMllBR;
     float _valCutMT2BR;
 
-    float _valCutLepMultiplicityWZ;
-    float _valCutNJetsWZ;
-    float _valCutNBJetsWZ;
-    float _valCutHTWZ;
-    float _valCutMETWZ;
-    
     std::vector<std::string> _hltLines;
     
     std::string _cTypeLepMultiplicityBR;
@@ -132,12 +123,6 @@ private:
     std::string _cTypeMllBR;
     std::string _cTypeMT2BR;
     
-    std::string _cTypeLepMultiplicityWZ;
-    std::string _cTypeNJetsWZ;
-    std::string _cTypeNBJetsWZ;
-    std::string _cTypeHTWZ;
-    std::string _cTypeMETWZ;
-
     float _upValCutLepMultiplicityBR;
     float _upValCutNJetsBR;
     float _upValCutNBJetsBR;
@@ -150,12 +135,6 @@ private:
     float _upValCutMllBR;
     float _upValCutMT2BR;
     
-    float _upValCutLepMultiplicityWZ;
-    float _upValCutNJetsWZ;
-    float _upValCutNBJetsWZ;
-    float _upValCutHTWZ;
-    float _upValCutMETWZ;
- 
     //vectors for electron, muon, and tau candidates
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;

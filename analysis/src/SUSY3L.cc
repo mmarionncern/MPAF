@@ -478,7 +478,7 @@ bool SUSY3L::electronSelection(const Candidate* c, int elIdx){
     //count electron candidates
     counter("ElectronDenominator", kElId);
 
-    //cut for cleaning
+    //cuts
     float deltaR = 0.1;
     float pt_cut = 10.;
 
@@ -542,7 +542,7 @@ bool SUSY3L::looseLepton(const Candidate* c, int idx, int pdgId) {
     else {
         if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
-        if(!_susyMod->elHLTEmulSel(idx, true ) ) return false; 
+        if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
     }
 
     return true;
@@ -565,9 +565,9 @@ bool SUSY3L::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass){
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
-        bool hltDLHT=bypass?false:_hltDLHT;
+        if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
-        if(!_susyMod->elHLTEmulSel(idx, hltDLHT ) ) return false;
+        if(!_susyMod->elHLTEmulSel(idx, false ) ) return false;
     }
 
     return true;
