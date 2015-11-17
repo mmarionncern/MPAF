@@ -49,6 +49,8 @@ TBar_tWch						1.00
 TBar_tWch_50ns						1.00
 T_tWch							1.00
 T_tWch_50ns						1.00
+TbarToLeptons_tch               1.00
+TToLeptons_sch_amcatnlo         1.00
 WJetsToLNu						1.00
 WJetsToLNu_50ns						1.00
 DYJetsToLL_M50						1.00
@@ -111,3 +113,17 @@ QCD_Pt2400to3200_50ns					1.00
 QCD_Pt3200toInf_50ns					1.00
 TTWToLNu                                1.00
 TTZToLLNuNu                             1.00
+WWZ	            1 
+WZZ	            1
+ZZTo4L          1
+WZTo3LNu        1
+ZZZ	            1 
+WWDouble	    1
+WpWpJJ	        1 
+TGJets	        1
+TTGJets	        1
+WGToLNuG	    1
+GGHZZ4L         1
+VHToNonbb       1
+TTLLJets_m1to10 1
+TTTT            1
