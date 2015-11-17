@@ -1,13 +1,7 @@
-{
+MPAFDisplay md;
 
-    if(Recompute) {
-        MPAFDisplay md;
-
-        bool * rtmp= const_cast<bool*> pr;
-        *rtmp = false;
-
-    }
-    else 
+void susy3l_SIGNALREGION_PAIRSTATE() {    
+    
     md.refresh();
 
 
@@ -100,11 +94,11 @@
 
     bool useXS=false;
 
-    md.anConf.loadXSDB("XSectionsPhys14.db");
+    md.anConf.loadXSDB("XSectionsSpring15.db");
 
     map<string,float> LumisXS;
 
-    md.anConf.loadKFDB("kFactorsPhys14.db");
+    md.anConf.loadKFDB("kFactorsSpring15.db");
  
     //via XSect
     map<string,float> KFactors;
@@ -113,43 +107,42 @@
 
     //===============================================================
     
-    md.anConf.addSample( "WZJetsTo3LNu"                     ,  "diboson"            , kGreen    );
-    md.anConf.addSample( "ZZTo4L"                           ,  "diboson"            , kGreen    );
+    //diboson
+    md.anConf.addSample( "WZTo3LNu"                              ,  "diboson"            , kGreen    );
+    md.anConf.addSample( "ZZTo4L"                                ,  "diboson"            , kGreen+3  );
 
-    md.anConf.addSample( "TTZJets"                          ,  "ttZ"                , kBlue     );
-
-    md.anConf.addSample( "TTWJets"                          ,  "ttW"                , kYellow   );
-    
-    md.anConf.addSample( "TTH"                              ,  "rare"               , kCyan     );
+    //TTV
+    md.anConf.addSample( "TTZToLLNuNu"                      ,  "ttZ"                , kBlue     );
+    md.anConf.addSample( "TTWToLNu"                         ,  "ttW"                , kYellow   );
+   
+    //rare SM 
+    md.anConf.addSample( "TTHnobb"                          ,  "rare"               , kCyan     );
     md.anConf.addSample( "GGHZZ4L"                          ,  "rare"               , kCyan     );
     
     //Drell-Yan
-    md.anConf.addSample( "DYJetsToLL_M50_HT100to200"        ,  "fake"   , kRed      );
-    md.anConf.addSample( "DYJetsToLL_M50_HT200to400"        ,  "fake"    , kRed      );
-    md.anConf.addSample( "DYJetsToLL_M50_HT400to600"        ,  "fake"    , kRed      );
-    md.anConf.addSample( "DYJetsToLL_M50_HT600toInf"        ,  "fake"    , kRed      );
+    md.anConf.addSample( "DYJetsToLL_M50"                   ,  "fake"   , kRed      );
+    md.anConf.addSample( "DYJetsToLL_M10to50"               ,  "fake"    , kRed      );
     
     //t production
-    md.anConf.addSample( "TBarToLeptons_sch"                ,  "fake"    , kRed      );
-    md.anConf.addSample( "TBarToLeptons_tch"                ,  "fake"    , kRed      );
-    md.anConf.addSample( "TBar_tWch"                        ,  "fake"    , kRed      );
-    md.anConf.addSample( "TTJets"                           ,  "fake"    , kRed      );
-    md.anConf.addSample( "TToLeptons_sch"                   ,  "fake"    , kRed      );
-    md.anConf.addSample( "TToLeptons_tch"                   ,  "fake"    , kRed      );
-    md.anConf.addSample( "T_tWch"                           ,  "fake"    , kRed      );
+    md.anConf.addSample( "T_tWch"                           ,  "fake"    , kRed+3      );
+    md.anConf.addSample( "TBar_tWch"                        ,  "fake"    , kRed+3      );
+    md.anConf.addSample( "TbarToLeptons_tch"                ,  "fake"    , kRed+3      );
+    md.anConf.addSample( "TTJets"                           ,  "fake"    , kRed+2      );
+    md.anConf.addSample( "TToLeptons_tch"                   ,  "fake"    , kRed+2      );
+    md.anConf.addSample( "TToLeptons_sch_amcatnlo"          ,  "fake"    , kRed+2      );
+    //md.anConf.addSample( "TTLLJets_m1to10"                  ,  "fake"    , kRed+2      );
+    md.anConf.addSample( "TTGJets"                          ,  "fake"    , kRed+2      );
+   
     
     //W+Jets
-    md.anConf.addSample( "WJetsToLNu_HT100to200"            ,  "fake"    , kRed      );
-    md.anConf.addSample( "WJetsToLNu_HT200to400"            ,  "fake"    , kRed      );
-    md.anConf.addSample( "WJetsToLNu_HT400to600"            ,  "fake"    , kRed      );
-    md.anConf.addSample( "WJetsToLNu_HT600toInf"            ,  "fake"    , kRed      );
+    md.anConf.addSample( "WJetsToLNu"                       ,  "fake"    , kRed-6      );
     
     //signal
     if(signal=="T1t412"){
-        md.anConf.addSample( "SMS_T1tttt_2J_mGl1200_mLSP800"    ,  "T1t412" , kViolet-3 );
+        md.anConf.addSample( "T1tttt_mGo1200_mChi800"       ,  "T1t412" , kBlue-3 );
     }
     if(signal=="T1t415"){
-        md.anConf.addSample( "SMS_T1tttt_2J_mGl1500_mLSP100"    ,  "T1t415" , kOrange+3  );
+        md.anConf.addSample( "T1tttt_mGo1500_mChi100"       ,  "T1t415" , kBlue-7  );
     }
     if(signal=="T5t410"){
         md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"    ,  "T5t410" , kGreen+3  );
@@ -208,8 +201,8 @@
     md.prepareDisplay();
     md.doPlot();
 
-    md.makeSingleDataCard(signal, "global", "SR MET selection", fileList+"_"+signal);
-
+    md.makeSingleDataCard(signal, "global", "signal region", fileList+"_"+signal);
+    md.getStatistics("global");
 
     //md.doStatisticsPlot();
     //md.savePlot("SUSY3L");

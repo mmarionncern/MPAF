@@ -14,6 +14,7 @@
 #define SUSY3L_HH
 
 #include "analysis/core/MPAF.hh"
+#include "analysis/modules/SusyModule.hh"
 
 class SUSY3L: public MPAF {
 
@@ -33,16 +34,15 @@ private:
 
     void modifySkimming();
 
-    void setMultiIsoWP();
     void collectKinematicObjects();
-    bool electronSelection(int);
-    bool muonSelection(int);
+    bool electronSelection(const Candidate* c, int);
+    bool muonSelection(const Candidate* c, int);
     bool tauSelection(int);
-    bool bJetSelection(int);
-    bool goodJetSelection(int);
-
+    bool looseLepton(const Candidate* c, int idx, int pdgId);
+    bool fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass);
+    
     bool baseSelection();
-    void wzCRSelection();
+    bool wzCRSelection();
     void setBaselineRegion();
     void setSignalRegion();
     void setCut(std::string, float, std::string, float = 0);
@@ -51,13 +51,12 @@ private:
     bool ZEventSelection();
     bool ZEventSelectionLoop();
     bool srSelection();
-    bool electronMvaCut(int, int);
-    bool multiIsolation(int, float, float, float);
     void fillEventPlots();
+    void fillControlPlots();
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll(bool ossf = true);
-    bool passMultiLine(bool doubleOnly);
+    bool passMultiLine(bool doubleOnly, bool isolatedOnly);
     bool passHLTLine(string line);
 
     float HT();
@@ -79,10 +78,13 @@ private:
     //counter categories, 0 is ALWAYS global (even if not specified later)
     enum {
         kGlobal=0,                                      //global counter
-        kElId, kMuId, kTauId, kJetId, kBJetId,          //objects counter
-        conZEvents,                                     //Z cand. counter
-        kWZCR                                           //WZ control region counter
+        kElId, kMuId, kTauId,                           //objects counter
+        kBase,kWZ,kSignalRegion,
+        kWZCR, 
+        kSR                                
         };
+    
+    SusyModule* _susyMod;
 
     //cut variables
     float _valCutLepMultiplicityBR;
@@ -104,6 +106,7 @@ private:
     float _valCutNBJetsSR;
     float _valCutMllBR;
     float _valCutMT2BR;
+
     std::vector<std::string> _hltLines;
     
     std::string _cTypeLepMultiplicityBR;
@@ -117,7 +120,7 @@ private:
     std::string _cTypeMETSR;
     std::string _cTypeMllBR;
     std::string _cTypeMT2BR;
-
+    
     float _upValCutLepMultiplicityBR;
     float _upValCutNJetsBR;
     float _upValCutNBJetsBR;
@@ -129,11 +132,17 @@ private:
     float _upValCutMETSR;
     float _upValCutMllBR;
     float _upValCutMT2BR;
-
+    
     //vectors for electron, muon, and tau candidates
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
+    std::vector<unsigned int> _looseLepsIdx;
+    std::vector<unsigned int> _tightLepsIdx;
+    std::vector<unsigned int> _looseLeps10Idx;
+    std::vector<unsigned int> _jetCleanLeps10Idx;
+    std::vector<unsigned int> _jetsIdx;
+    std::vector<unsigned int> _bJetsIdx;
 
     //length of candiate vectors
     int _nEls;
@@ -146,26 +155,34 @@ private:
     int _nBJets;
     int _nleps;
 
+
     //list of object candidates
     CandList _els;
-    CandList _vEls;
     CandList _mus;
-    CandList _vMus;
     CandList _taus;
-    CandList _vTaus;
     CandList _jets;
     CandList _bJets;
     CandList _leps;
+    CandList _looseLeps;
+    CandList _tightLeps;
+    CandList _looseLeps10;
+    CandList _jetCleanLeps10;
+
     Candidate* _met;
     Candidate* _Z;
     Candidate* _lep1;
     Candidate* _lep2;
-
+    
     float _HT;
     float _MT2;
     float _deltaR;
     float _mll;
-  
+   
+    float _jetThreshold;
+    float _bjetThreshold;
+    
+    //HLT
+    bool _hltDLHT; 
     
 };
 
