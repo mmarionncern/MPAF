@@ -46,6 +46,7 @@ private:
   void chargeFlipProb();
 
   TVector2 varyMET();
+  Candidate* varyJetLepAware(Candidate* lep, int idx);
 
   //============================
   void retrieveObjects();
@@ -84,6 +85,8 @@ private:
   
   void fillhistos();
   void fillValidationHistos(std::string reg);
+
+  bool checkDoubleCount();
 
 private: 
 
@@ -224,10 +227,14 @@ private:
   std::vector<unsigned int>  _tightLepsOSPtCutIdx;
 
   CandList _jets;
-  std::vector<unsigned int>  _jetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
   
   CandList _bJets;
-  std::vector<unsigned int>  _bJetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
+
+
+  CandList _lepJets;
+  std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
   
   unsigned int _nLooseLeps;
  
@@ -263,16 +270,25 @@ private:
   bool _DoValidationPlots;
 
   vector<TVector2> _uncleanJets;
+  vector<TVector2> _uncleanDiscJets;
   vector<TVector2> _uncleanFwdJets;
 
+  float _btagW;
 
   //background pairs===============
   vector<CandList> _auxPairs;
   vector<int> _auxFlags;
   vector<vector<int> > _auxIdxs;
 
-  vector<unsigned int> _events;
-  void fillEvents();
+  // vector<unsigned int> _events;
+  // void fillEvents();
+
+  //double counting====
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> > _events;
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> >::iterator _itEvt;
+
+
+  vector<float> _jetLepACorFactor;
 
 };
 

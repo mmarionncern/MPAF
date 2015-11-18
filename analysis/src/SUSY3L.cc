@@ -161,12 +161,12 @@ void SUSY3L::initialize(){
     _au->addCategory( kSignalRegion, "signal region"); 
                 
     //config file input variables
-    _pairmass = getCfgVarS("pairMass");
-    _selectMuons = getCfgVarS("selectMuons");
-    _selectElectrons = getCfgVarS("selectElectrons");
-    _selectTaus = getCfgVarS("selectTaus");
-    _BR = getCfgVarS("baselineRegion");
-    _SR = getCfgVarS("signalRegion");
+    _pairmass = getCfgVarS("pairMass", "off");
+    _selectMuons = getCfgVarS("selectMuons", "true");
+    _selectElectrons = getCfgVarS("selectElectrons", "true");
+    _selectTaus = getCfgVarS("selectTaus", "false");
+    _BR = getCfgVarS("baselineRegion", "BR0");
+    _SR = getCfgVarS("signalRegion", "SR999");
 
     //workflows
     addWorkflow( kWZCR, "WZCR");
@@ -421,11 +421,11 @@ void SUSY3L::collectKinematicObjects(){
     _nEls = _els.size();
 
     //add muons and electrons to _tightLeps
-    for(size_t il=0;il<_nMus;il++){
+    for(int il=0;il<_nMus;il++){
         _tightLeps.push_back(_mus[il]);
         _tightLepsIdx.push_back(_muIdx[il]);
     }
-    for(size_t il=0;il<_nEls;il++){
+    for(int il=0;il<_nEls;il++){
         _tightLeps.push_back(_els[il]);
         _tightLepsIdx.push_back(_elIdx[il]);
     }
@@ -454,7 +454,8 @@ void SUSY3L::collectKinematicObjects(){
     _nTaus = _taus.size();
 
     //clean jets
-    _susyMod->cleanJets( &(_jetCleanLeps10), _jets, _jetsIdx, _bJets, _bJetsIdx, _jetThreshold, _bjetThreshold);
+    _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
+		       _lepJets, _lepJetsIdx, 40, 15, getUncName()=="JES", getUncDir() );
     _nJets = _jets.size();
     _nBJets = _bJets.size();
     

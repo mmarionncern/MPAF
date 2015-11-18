@@ -145,15 +145,15 @@ void FRinSitu::initialize(){
 
   //extra input variables
 
-  _lepptcut = getCfgVarS("LEPPTCUT"); // lepton pt cut, if none given, we take default > 10GeV
-  _lepflav  = getCfgVarS("LEPFLAV");
-  _lepid    = getCfgVarS("LEPID"  );
-  _lepiso   = getCfgVarS("LEPISO" );
-  _leppt    = getCfgVarS("LEPPT"  );
-  _xpol     = getCfgVarS("XPOL"   );
-  _MR       = getCfgVarS("MR"     );
-  _fakes    = getCfgVarS("FAKES"  );
-  _etabin   = getCfgVarS("ETABIN" );
+  _lepptcut = getCfgVarS("LEPPTCUT", ""); // lepton pt cut, if none given, we take default > 10GeV
+  _lepflav  = getCfgVarS("LEPFLAV", "");
+  _lepid    = getCfgVarS("LEPID"  , "");
+  _lepiso   = getCfgVarS("LEPISO" , "");
+  _leppt    = getCfgVarS("LEPPT"  , "");
+  _xpol     = getCfgVarS("XPOL"   , "");
+  _MR       = getCfgVarS("MR"     , "");
+  _fakes    = getCfgVarS("FAKES"  , "");
+  _etabin   = getCfgVarS("ETABIN" , "");
   
 }
 

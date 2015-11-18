@@ -19,6 +19,7 @@ using namespace std;
 #include "analysis/src/FRinSitu.hh"
 #include "analysis/src/SSDL2015.hh"
 #include "analysis/src/UncertaintyTest.hh"
+//#include "analysis/src/Comissioning.hh"
 
 MPAF*
 AnalysisFactory::get(const string& analysis, const string& cfg) {
@@ -70,5 +71,8 @@ AnalysisFactory::get(const string& analysis, const string& cfg) {
   if(analysis=="UncertaintyTest") {
     return new UncertaintyTest(cfg);
   }
+  //if(analysis=="Comissioning") {
+  //  return new Comissioning(cfg);
+  //}
   return 0;
 }

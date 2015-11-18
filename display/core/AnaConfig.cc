@@ -154,7 +154,7 @@ AnaConfig::findDSNames(string channel) {
   vector<string> names;
   map<string, Dataset* >::const_iterator itDs;
   for(itDs=_datasets.begin(); itDs!=_datasets.end();itDs++) {
-    if(itDs->second->hasSample(channel)!=-1 && itDs->second->getSample(channel)->getCR()=="" )
+    if(itDs->second->hasSample(channel)!=-1)
       names.push_back(itDs->first);
   }
   
@@ -165,8 +165,7 @@ AnaConfig::findDSNames(string channel) {
 Dataset* 
 AnaConfig::findDS(string channel) {
   string dsName = findDSName(channel);
-  //cout<<" =-> "<<dsName<<"  !"<<getDataset(dsName)->getSample(channel)->getCR()<<"!"<<endl;
-  if(dsName!="") // && getDataset(dsName)->getSample(channel)->getCR()==""
+  if(dsName!="")
     return getDataset(dsName);
   else
     return nullptr;
@@ -237,8 +236,8 @@ AnaConfig::configureNames(string dir, string rootFile, string fileList) {
   _rootFile = rootFile;
   vector<string> filenames = listFiles((string)(getenv("MPAF")) + "/workdir/stats/" + dir + "/", fileList + ".dat");
   _statFileList = filenames;
-  _hname = "nEvtProc";//hName;
-  _hwgtname = "sumWgtProc";//hWgtName;
+  _hname = "nEvtProc";
+  _hwgtname = "sumWgtProc";
 }
 
 
@@ -297,13 +296,16 @@ AnaConfig::parseSampleId(string str) {
   //sample name ========
   sId.name=tmpStr;
 
-  //cout<<sId.norm<<"  "<<sId.dd<<"  "<<sId.cr<<"  "<<sId.name<<endl;
-
   return sId;
 }
 
 void
-AnaConfig::addSample( string str, string sname, int col, bool loadH) {
+AnaConfig::addUsefulVar(string var) {
+  _usefulVars.push_back(var);
+}
+
+void
+AnaConfig::addSample( string str, string sname, int col, float weight, bool loadH) {
  
   
   string dsName=sname;
@@ -315,8 +317,9 @@ AnaConfig::addSample( string str, string sname, int col, bool loadH) {
   if( sId.cr!="" ) {
     _csData.push_back( pair<string, float>(sId.name,sId.norm) );
   }
-  
-  
+
+  //for setting data...
+    
   _itDs=_datasets.find(dsName);
   
   if(_itDs==_datasets.end() ) {
@@ -326,72 +329,73 @@ AnaConfig::addSample( string str, string sname, int col, bool loadH) {
   }
   
   if(sname=="data" || sname=="Data" || sId.dd ) {
+    sId.dd=true;
+    _datasets[ dsName ]->setUsefulVars(_usefulVars);
     _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
-				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1., 1., 1., loadH);
-    //_samplenames.push_back(str);
+				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1.*weight, 1., 1., loadH);
     _dsnames.push_back(dsName);
  
     return;
   }
  
   
-    //histogram analysis
-    if(!_skiptree) {
+  //histogram analysis
+  if(!_skiptree) {
 
-        //find xSect/kFact/eqLumi
-        float xSect=1.,kFact=1.,eqLumi=1.;
+    //find xSect/kFact/eqLumi
+    float xSect=1.,kFact=1.,eqLumi=1.;
    
-        _itXS=_xSecLumis.find(sId.name);
-        if(_itXS==_xSecLumis.end()) {
-            xSect =-1000; eqLumi=-1;
+    _itXS=_xSecLumis.find(sId.name);
+    if(_itXS==_xSecLumis.end()) {
+      xSect =-1000; eqLumi=-1;
       
-            //first, check if a Xsection DB is loaded
-            if(_dbm->exists("Xsections"))
-	            xSect = _dbm->getDBValue("Xsections", sId.name);
+      //first, check if a Xsection DB is loaded
+      if(_dbm->exists("Xsections"))
+	xSect = _dbm->getDBValue("Xsections", sId.name);
       
-            if(xSect==-1000) { //nothing found in DB
-	            cout<<" Be careful, no specified "
-	            <<(string)((_useXSect)?" cross section":" equivalent luminosity")
-	            <<" for "<<sId.name<<" , 1 by default *****======== "<<endl;
+      if(xSect==-1000) { //nothing found in DB
+	cout<<" Be careful, no specified "
+	    <<(string)((_useXSect)?" cross section":" equivalent luminosity")
+	    <<" for "<<sId.name<<" , 1 by default *****======== "<<endl;
     
-	            //FIXME, set weight to 1 by compensating with the lumi
-	            xSect =1.; eqLumi=1.;
-            }
-        }
-        else {
-            if(_useXSect)
-	            {eqLumi=-1; xSect =_itXS->second;}
-            else  
-	            {eqLumi=_itXS->second; xSect =-1;}
-        }
+	//FIXME, set weight to 1 by compensating with the lumi
+	xSect =1.; eqLumi=1.;
+      }
+    }
+    else {
+      if(_useXSect)
+	{eqLumi=-1; xSect =_itXS->second;}
+      else  
+	{eqLumi=_itXS->second; xSect =-1;}
+    }
 
 
-        //k factors
-        _itKF=_kFactors.find(sId.name);
+    //k factors
+    _itKF=_kFactors.find(sId.name);
 
-        if(_itKF==_kFactors.end()) {
+    if(_itKF==_kFactors.end()) {
       
-            //first, check if a kFactor DB is loaded
-            if(_dbm->exists("Kfactors"))
-	            kFact = _dbm->getDBValue("Kfactors", sId.name);
-            if(kFact!=1) { 
-	            cout<<"applying k factor " << kFact << " for dataset " <<  sId.name << endl;
-            }
-        }
-        else {
-	        cout<< "no k factor found in database - using default 1" << endl;
-	        kFact =1;
-        }
- 
-        _datasets[ sname ]->addSample(sId, _path, _dir, _rootFile,
-				  _hname+"/"+sId.name, _hwgtname+"/"+sId.name, xSect, kFact, _lumi,
-				  eqLumi, loadH);
-        //_samplenames.push_back(sId.name);
-        _dsnames.push_back(sname);
+      //first, check if a kFactor DB is loaded
+      if(_dbm->exists("Kfactors"))
+	kFact = _dbm->getDBValue("Kfactors", sId.name);
+      if(kFact!=1) { 
+	cout<<"applying k factor " << kFact << " for dataset " <<  sId.name << endl;
+      }
+    }
+    else {
+      cout<< "no k factor found in database - using default 1" << endl;
+      kFact =1;
+    }
+    
+    _datasets[ dsName ]->setUsefulVars(_usefulVars);
+    _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
+				   _hname+"/"+sId.name, _hwgtname+"/"+sId.name, 
+				   xSect, kFact*weight, _lumi, eqLumi, loadH);
+    _dsnames.push_back(sname);
   }
   else {
+    _datasets[ dsName ]->setUsefulVars(_usefulVars);
     _datasets[ dsName ]->addSample(sId, "", "", "", "", 0, 0, 0, 0, loadH);
-    //_samplenames.push_back(str);
     _dsnames.push_back(dsName);
   }
   
@@ -417,18 +421,6 @@ AnaConfig::getDSNames() {
   
   return names;
 }
-
-// vector<int>
-// AnaConfig::getDDDSStatus() {
-//   vector<int> status;
-
-//   for(_itNDS=_numDS.begin();_itNDS!=_numDS.end();_itNDS++) {
-//     _itDs = _datasets.find( _itNDS->second );
-//     status.push_back( _itDs->second->isDataDriven() + _itDs->second->csCode()*2 );
-//   }
-
-//   return status;
-// }
 
 vector<pair<string, float> >
 AnaConfig::getCSData() {

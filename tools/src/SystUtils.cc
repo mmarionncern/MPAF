@@ -18,15 +18,23 @@ string SystUtils::uDir[SystUtils::kNDirs]={
 
 
 vector<string>
-SystUtils::parseDb(string db) {
+SystUtils::parseDb(string db, vector<bool>& specVars) {
 
   vector<string> vars;
 
   size_t ib=0;
   size_t ie=0;
-  while(ie!=(size_t)-1) {
+  while(ie!=db.size()) {
     ie = db.find(":",ib);
-    vars.push_back( db.substr(ib,ie) );
+    if(ie==string::npos) ie=db.size();
+    vars.push_back( db.substr(ib,ie-ib) );
+    specVars.push_back(false);
+
+    if(vars.back().find("abs(")!=string::npos) {
+      vars.back() = vars.back().substr(4, vars.back().size()-5 );
+      specVars.back() = true;
+    }
+
     ib = ie+1;
   }
 
@@ -38,7 +46,7 @@ SystUtils::addSystSource(string name, int dir, string type, vector<string> modVa
 			 float val) {
 
   vector<string> pvars;// = parseDb(vars);
- 
+  vector<bool> specVars;
   
   SystST tmp;
   tmp.type = type;
@@ -58,8 +66,9 @@ SystUtils::addSystSource(string name, int dir, string type, vector<string> modVa
 void
 SystUtils::addSystSource(string name, int dir, string type, vector<string> modVar,
 			 string db, string hname) {
-
-  vector<string> dbVars = parseDb(db);
+  
+  vector<bool> specVars;
+  vector<string> dbVars = parseDb(db,specVars);
   
   string file = dbVars[0];
  
@@ -70,6 +79,7 @@ SystUtils::addSystSource(string name, int dir, string type, vector<string> modVa
   tmp.dir = dir;
   dbVars.erase( dbVars.begin() );
   tmp.vars = dbVars;
+  tmp.specVars=specVars; 
   tmp.modVar = modVar;
 
  

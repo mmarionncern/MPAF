@@ -145,11 +145,11 @@ void phys14limits::initialize(){
   _au->addCategory( kZVetoLepSel  , "vetoZLepSel"     );
 
   //extra input variables
-  _lepflav = getCfgVarS("LEPFLAV");
-  _PT      = getCfgVarS("PT"     );
-  _SR      = getCfgVarS("SR"     );
-  _usesb   = getCfgVarS("USESB"  );
-  _fakes   = getCfgVarS("FAKES"  );
+  _lepflav = getCfgVarS("LEPFLAV", "");
+  _PT      = getCfgVarS("PT"     , "");
+  _SR      = getCfgVarS("SR"     , "");
+  _usesb   = getCfgVarS("USESB"  , "");
+  _fakes   = getCfgVarS("FAKES"  , "");
   
 }
 

@@ -35,7 +35,11 @@ SusyModule::loadDBs() {
   _dbm->loadDb("eleSFDb","electronSF.db");
   _dbm->loadDb("muSFDb","muonSF.db");
   _dbm->loadDb("tauSFDb","tauSF.db");
-  
+
+ 
+  _dbm->loadDb("BTagEffUSDG", "GC_BTagEffs.root", (string)("h2_BTaggingEff_csv_med_Eff_udsg") );
+  _dbm->loadDb("BTagEffCB", "GC_BTagEffs.root", (string)("h2_BTaggingEff_csv_med_Eff_b")   );
+  _dbm->loadDb("BTagSF", "BTagSFMedium.db");
 }
 
 void
@@ -130,7 +134,6 @@ SusyModule::defineLeptonWPS() {
 
 bool
 SusyModule::multiIsoSel(int idx, int wp) const {
-  // cout<<_vc->get("LepGood_miniRelIso", idx)<<"/"<<_vc->get("LepGood_jetPtRatiov2", idx)<<"/"<<_vc->get("LepGood_jetPtRelv2", idx)<<"  -->  "<<_multiIsoWP[kMiniIso][wp] <<"/"<<_multiIsoWP[kPtRatio][wp]<<"/"<<_multiIsoWP[kPtRel][wp]<<endl;
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
       (_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
        _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ){
@@ -145,8 +148,8 @@ bool
 SusyModule::multiIsoSelCone(int idx, int wp) const {
 
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (conePt(idx)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+	(conePt(idx, wp)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+	 _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
@@ -156,6 +159,7 @@ SusyModule::invMultiIsoSel(int idx, int wp) const {
   
   if( _vc->get("LepGood_miniRelIso", idx)>_multiIsoWP[kMiniIso][wp]) return false;
   if( 1./_vc->get("LepGood_jetPtRelv2", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
+  
   return true;
 }
 
@@ -179,26 +183,14 @@ bool
 SusyModule::muIdSel(const Candidate*c, int idx, int wp, bool chCut) const {
 
   int wpIso = kDenom;
-  int lumi = 1104;
-  int evt = 365448;
-  // if(         _vc->get("LepGood_pt"          , idx)  < _ptWP[kMu][wp]) return false; //cout<<" pt"<<endl;
-  //if(   c->pt()  < _ptWP[kMu][wp]) return false; //cout<<" pt"<<endl;
-  //if(std::abs(_vc->get("LepGood_eta"         , idx)) >  2.4          ) return false;//cout<<" eta"<<endl;
-  if(std::abs(c->eta() ) >  2.4          ) return false;//cout<<" eta"<<endl;
-  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass eta" << endl;}
-  if(         _vc->get("LepGood_mediumMuonId", idx)  < _muIdWP[wp]   ) return false;//cout<<" id"<<endl;
-  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass muon id" << endl;}
-  if( chCut && _vc->get("LepGood_tightCharge" , idx)  <= 1 ) return false;//cout<<" tc"<<endl;
-  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass tight charge" << endl;}
-  if(         _vc->get("LepGood_sip3d"       , idx)  > _sipWP[wp]    ) return false;//cout<<" sip"<<endl;
-  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass sip" << endl;}
-  if(std::abs(_vc->get("LepGood_dz"          , idx)) > _dzWP[wp]     ) return false;//cout<<" dz"<<endl;
-  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass dz" << endl;}
-  if(std::abs(_vc->get("LepGood_dxy"         , idx)) > _dxyWP[wp]    ) return false;//cout<<" dxy"<<endl;
-  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass dxy" << endl;}
-  if(!multiIsoSel(idx, wpIso)                                        ) return false;//cout<<" iso"<<endl;
-  //if(_vc->get("lumi") == lumi && _vc->get("evt") == evt){cout << "pass iso denom" << endl;}
-  //cout<<" youpi ID "<<idx<<endl;
+  if(std::abs(c->eta() ) >  2.4          ) return false;
+  if(         _vc->get("LepGood_mediumMuonId", idx)  < _muIdWP[wp]   ) return false;
+  if( chCut && _vc->get("LepGood_tightCharge" , idx)  <= 1 ) return false;
+  if(         _vc->get("LepGood_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+   if(std::abs(_vc->get("LepGood_dz"          , idx)) > _dzWP[wp]     ) return false;
+  if(std::abs(_vc->get("LepGood_dxy"         , idx)) > _dxyWP[wp]    ) return false;
+  if(!multiIsoSel(idx, wpIso )               ) return false;
+
   return true;
 
 }
@@ -208,34 +200,19 @@ bool
 SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut) const {
 
   int wpIso=kDenom;
-  //  cout<<" starting "<< _vc->get("LepGood_pt",idx)<<"   "<<conePt(idx)<<endl;
-  //if(_vc->get("LepGood_pt"         , idx)  < _ptWP[kEl][wp] ) return false; //cout<<" pt "<<endl;
-  //if( c->pt()  < _ptWP[kEl][wp] ) return false; //cout<<" pt "<<endl;
-  if(std::abs(_vc->get("LepGood_eta"        , idx)) > 2.5            ) return false; 
-  // if(std::abs(_vc->get("LepGood_eta"        , idx)) > 1.4442 &&
-  //    std::abs(_vc->get("LepGood_eta"        , idx)) < 1.566          ) return false;
-  // cout<<" eta "<<endl;
+  if(std::abs(c->eta()) > 2.5            ) return false; 
 
-  if(_vc->get("LepGood_convVeto", idx)  != 1             ) return false;//cout<<" conv "<<endl;
-  if(_vc->get("LepGood_lostHits", idx)  > _cLostHitWP[wp]) return false;//cout<<" losthit "<<endl;
+  if(_vc->get("LepGood_convVeto", idx)  != 1             ) return false;
+  if(_vc->get("LepGood_lostHits", idx)  > _cLostHitWP[wp]) return false;
 
-  if(chCut && _vc->get("LepGood_tightCharge", idx)  <= _tChWP[wp]    ) return false;//cout<<" charge "<<_tChWP[wp]<<endl;
+  if(chCut && _vc->get("LepGood_tightCharge", idx)  <= _tChWP[wp]    ) return false;
 
-  if(_vc->get("LepGood_sip3d"      , idx)  > _sipWP[wp]     ) return false;//cout<<" sip "<<endl;
-  if(std::abs(_vc->get("LepGood_dz", idx)) > _dzWP[wp]      ) return false;//cout<<" dz "<<endl;
-  if(std::abs(_vc->get("LepGood_dxy", idx)) > _dxyWP[wp]     ) return false;//cout<<" dx "<<endl;
-  if(!elMvaSel(idx, mvaWp)                                           ) return false;//cout<<" mvaId "<<endl;
-  if(!multiIsoSel(idx, wpIso)                                        ) return false;//cout<<" iso "<<endl;
+  if(_vc->get("LepGood_sip3d"      , idx)  > _sipWP[wp]     ) return false;
+  if(std::abs(_vc->get("LepGood_dz", idx)) > _dzWP[wp]      ) return false;
+  if(std::abs(_vc->get("LepGood_dxy", idx)) > _dxyWP[wp]     ) return false;
+  if(!elMvaSel(idx, mvaWp)                                           ) return false;
+  if(!multiIsoSel(idx, wpIso)        ) return false;
 
-  //cout<<idx<<"   iso+sip"<<endl;
-
-  // electron cleaning ==================
-  // for(unsigned int il=0; il<_vc->get("nLepGood"); ++il){
-  //   float dr = KineUtils::dR(_vc->get("LepGood_eta", il), _vc->get("LepGood_eta", idx),
-  //                            _vc->get("LepGood_phi", il), _vc->get("LepGood_phi", idx));
-  //   if(std::abs(_vc->get("LepGood_pdgId"))==13 && dr<0.05 ) return false;
-  // }
-  //cout<<idx<<"   clean"<<endl;
   return true;
 }
 
@@ -333,12 +310,8 @@ bool
 SusyModule::passMllSingleVeto(const Candidate* c1, const Candidate* c2, 
 			      float mllm, float mllM, bool ossf) {
 
-  //cout<<"Id "<<c1->pdgId()<<"  "<<c2->pdgId()<<"  "<< Candidate::create(c1,c2)->mass()<<"  "<<mllm<<"  "<<mllM<<endl;
   if( (c1->pdgId()== -c2->pdgId()) || !ossf) {
-    //cout<<" ==> aqui "<<c2->uid()<<"   "<<c1->uid()<<endl;
-    
     float mll = Candidate::create(c1,c2)->mass();
-    //cout<<" ==> aqui! "<<endl;
     if(mll>mllm && mll<mllM) return false; 
   }
   return true;
@@ -351,7 +324,6 @@ SusyModule::passMllMultiVeto(const Candidate* c1, const CandList* cands,
 
   for(size_t il=0;il<cands->size();il++) {
     if( c1==cands->at(il) ) continue;
-    //cout<<" passng veto? "<<passMllSingleVeto(c1, cands->at(il), mllm, mllM, ossf)<<endl;
     if(!passMllSingleVeto(c1, cands->at(il), mllm, mllM, ossf)) return false;
   }
   return true;
@@ -363,8 +335,7 @@ SusyModule::bestSSPair(const CandList* leps, bool byflav,
 		       float pTthrMu, float pTthrEl,
 		       int& idx1, int& idx2) {
 
-//HACK: replaced nullptr with NULL
-  CandList clist(2,NULL);
+  CandList clist(2,nullptr);
   int tmpFlav=0;
   int tmpSt=0;
 
@@ -414,8 +385,7 @@ SusyModule::bestSSPair(const CandList* leps1, const CandList* leps2, bool byflav
 
   //LISTS HAVE TO BE COMPLEMENTARY, NO OVERLAPS!
 
-  //HACK: replaced nullptr with NULL
-  CandList clist(2,NULL);
+  CandList clist(2,nullptr);
   int tmpFlav=0;
   int tmpSt=0;
 
@@ -460,7 +430,7 @@ SusyModule::bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 		       bool bypassMV, bool os, float pTthrMu, float pTthrEl, 
 		       int& idx1, int& idx2) {
 
-  CandList clist(2,NULL);
+  CandList clist(2,nullptr);
   int tmpFlav=0;
   int tmpSt=0;
 
@@ -504,8 +474,8 @@ SusyModule::bestSSPair(Candidate* c1, const CandList* leps, bool byflav,
 
 
 vector<CandList>
-SusyModule::buildSSPairs(const CandList* leps, bool byflav,
-			 bool bypassMV, bool os, 
+SusyModule::buildSSPairs(const CandList* leps, vector<unsigned int> idxs,
+			 bool byflav, bool bypassMV, bool os, 
 			 float pTthrMu, float pTthrEl,
 			 vector<int>& idx1, vector<int>& idx2) {
 
@@ -517,11 +487,26 @@ SusyModule::buildSSPairs(const CandList* leps, bool byflav,
       pTthr1 = (std::abs(leps->at(il1)->pdgId())==11)?pTthrEl:pTthrMu;
       pTthr2 = (std::abs(leps->at(il2)->pdgId())==11)?pTthrEl:pTthrMu;
 
+      bool isMu=std::abs(_vc->get("LepGood_pdgId",idxs[il1]))==13;
+      Candidate* c1=Candidate::create(_vc->get("LepGood_pt",idxs[il1]),
+				      _vc->get("LepGood_eta",idxs[il1]),
+				      _vc->get("LepGood_phi",idxs[il1]),
+				      _vc->get("LepGood_pdgId",idxs[il1]),
+				      _vc->get("LepGood_charge",idxs[il1]),
+				      isMu?0.105:0.005 );
+
+      isMu=std::abs(_vc->get("LepGood_pdgId",idxs[il2]))==13;
+      Candidate* c2=Candidate::create(_vc->get("LepGood_pt",idxs[il2]),
+				      _vc->get("LepGood_eta",idxs[il2]),
+				      _vc->get("LepGood_phi",idxs[il2]),
+				      _vc->get("LepGood_pdgId",idxs[il2]),
+				      _vc->get("LepGood_charge",idxs[il2]),
+				      isMu?0.105:0.005 );
+
+
       //conditional pt threshold, could evolve in CERN code 
       if(leps->at(il1)->pt()<pTthr1 || leps->at(il2)->pt()<pTthr2) continue; 
-      //cout<<" cands => "<<leps->at(il2)->uid()<<endl;
-      if(!passMllSingleVeto(leps->at(il1), leps->at(il2), 0, 8, false) && !bypassMV) continue;
-      
+      if(!passMllSingleVeto(c1, c2, 0, 8, false) && !bypassMV) continue;
       if( (leps->at(il1)->charge()!=leps->at(il2)->charge())!=os ) continue;
     
       CandList tmp(2,NULL);
@@ -542,7 +527,10 @@ SusyModule::buildSSPairs(const CandList* leps, bool byflav,
 
 
 vector<CandList>
-SusyModule::buildSSPairs(const CandList* leps1, const CandList* leps2, bool byflav,
+SusyModule::buildSSPairs(const CandList* leps1, const CandList* leps2, 
+			 vector<unsigned int> idxs1,
+			 vector<unsigned int> idxs2,
+			 bool byflav,
 			 bool bypassMV, bool os, float pTthrMu, float pTthrEl,
 			 vector<int>& idx1, vector<int>& idx2) {
 
@@ -559,11 +547,26 @@ SusyModule::buildSSPairs(const CandList* leps1, const CandList* leps2, bool byfl
       pTthr1 = (std::abs(leps1->at(il1)->pdgId())==11)?pTthrEl:pTthrMu;
       pTthr2 = (std::abs(leps2->at(il2)->pdgId())==11)?pTthrEl:pTthrMu;
 
+      bool isMu=std::abs(_vc->get("LepGood_pdgId",idxs1[il1]))==13;
+      Candidate* c1=Candidate::create(_vc->get("LepGood_pt",idxs1[il1]),
+				      _vc->get("LepGood_eta",idxs1[il1]),
+				      _vc->get("LepGood_phi",idxs1[il1]),
+				      _vc->get("LepGood_pdgId",idxs1[il1]),
+				      _vc->get("LepGood_charge",idxs1[il1]),
+				      isMu?0.105:0.005 );
+
+      isMu=std::abs(_vc->get("LepGood_pdgId",idxs2[il2]))==13;
+      Candidate* c2=Candidate::create(_vc->get("LepGood_pt",idxs2[il2]),
+				      _vc->get("LepGood_eta",idxs2[il2]),
+				      _vc->get("LepGood_phi",idxs2[il2]),
+				      _vc->get("LepGood_pdgId",idxs2[il2]),
+				      _vc->get("LepGood_charge",idxs2[il2]),
+				      isMu?0.105:0.005 );
+
       //conditional pt threshold, could evolve in CERN code 
       if(leps1->at(il1)->pt()<pTthr1 || leps2->at(il2)->pt()<pTthr2) continue; 
-      if(!passMllSingleVeto(leps1->at(il1), leps2->at(il2), 0, 8, false) && !bypassMV) continue;
-      if( (leps1->at(il1)->charge()!=leps2->at(il2)->charge())!=os ) continue;
-      
+      if(!passMllSingleVeto(c1, c2, 0, 8, false) && !bypassMV) continue;
+      if( (c1->charge()!=c2->charge())!=os ) continue;
       CandList tmp(2,NULL);
      
       tmp[0]=leps1->at(il1);
@@ -582,19 +585,11 @@ SusyModule::buildSSPairs(const CandList* leps1, const CandList* leps2, bool byfl
   
   //ordering ================
   std::sort( iCList.begin(), iCList.end() );
-  // if(iCList.size()>=2)
-  //   cout<<" ===================== new pair ===================== "<<endl;
   for(unsigned int il=0;il<iCList.size();++il) {
-    // if(iCList.size()>=2)
-    //   cout<<" sorting pairs!!!!!! "<<il<<" -->  "<<iCList[il].list[0]->pdgId()
-    // 	  <<"  "<<iCList[il].list[1]->pdgId()<<" --> "
-    // 	  <<iCList[il].list[0]->pt()<<"  "<<iCList[il].list[1]->pt()<<endl;
-
     clist.push_back(iCList[il].list);
     idx1.push_back(iCList[il].il1);
     idx2.push_back(iCList[il].il2);
   }
-
   //=========================
   
 
@@ -602,109 +597,113 @@ SusyModule::buildSSPairs(const CandList* leps1, const CandList* leps2, bool byfl
 }
 
 
+const Candidate*
+SusyModule::jetLepAware(const Candidate* lep) {
+  
+  float drTmp=1000;
+  int idx=-1;
+  string type="";
+  Candidate* lepJet;
+  vector<string> jetTypes({"Jet"});//,"DiscJet"});
+  for(size_t it=0;it<jetTypes.size();it++) {
+    string jType=jetTypes[it];
+    
+    for(int ij=0;ij<_vc->get("n"+jType);ij++) {
+      Candidate* jet=Candidate::create(_vc->get(jType+"_rawPt", ij),
+				       _vc->get(jType+"_eta", ij),
+				       _vc->get(jType+"_phi", ij) );
+     
+      float dR=lep->dR( jet );
+      if(dR<drTmp && jet->pt()>0.8*lep->pt()){
+	drTmp=dR;
+	lepJet=jet;
+	idx=ij;
+	type=jType;
+      }
+    }//loop jet
+  }//jet types
+
+  //=======================================
+  TLorentzVector l=lep->p4();
+  if(idx==-1) return lep;//no jet matched
+  
+  TLorentzVector j=lepJet->p4();
+  if( (j-l).Rho()<0.0001) return lep; //only the lepton
+  j = (j-l*(1/_vc->get(type+"_CorrFactor_L1")) )*_vc->get(type+"_CorrFactor_L1L2L3Res")+l;
+  lepJet=Candidate::create(j.Pt(), j.Eta(), j.Phi() );
+  return lepJet;
+
+}
+
+float
+SusyModule::pTRatio(const Candidate* lep, const Candidate* jet) {
+  return lep->pt()/jet->pt();
+}
+
+
+float
+SusyModule::pTRel(const Candidate* lep, const Candidate* jet) {
+  if( (jet->p4()-lep->p4()).Rho()<0.0001) return 0;
+  return (jet->p4()-lep->p4()).Perp(lep->p4().Vect() );
+}
+
+
 float
 SusyModule::closestJetPt(int idx) const {
-
   return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatiov2", idx);
 }
 
 
 float 
 SusyModule::conePt(int idx, int isoWp) const {
-
-  if(_vc->get("LepGood_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
-    return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
-  }
-  return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
-
-}
-
-
-// void
-// SusyModule::cleanJets(CandList* leptons, 
-// 		      CandList& cleanJets, vector<unsigned int>& jetIdxs,
-// 		      CandList& cleanBJets, vector<unsigned int>& bJetIdxs ) {
-
-//   cleanJets.clear();
-//   cleanBJets.clear();
-//   jetIdxs.clear();
-//   bJetIdxs.clear();
-
-//   vector<string> jetTypes({"Jet","DiscJet"});
-//   bool findLep=false;
-//   vector<int> lepmatch;
   
-//   for(size_t it=0;it<jetTypes.size();it++) {
-//     string jType=jetTypes[it];
-    
-//     for(int ij=0;ij<_vc->get("n"+jType);ij++) {
-//       //cout<<" new jet "<<endl;
-//       if(_vc->get(jType+"_id",ij)<1) continue;
-
-//       Candidate* jet=Candidate::create(_vc->get(jType+"_pt", ij),
-// 				       _vc->get(jType+"_eta", ij),
-// 				       _vc->get(jType+"_phi", ij) );
-    
-//       // cout<<" pt: "<<jet->pt()<<"  eta: "<<jet->eta()<<"  phi: "<<jet->phi()<<"  "<<_vc->get("Jet_btagCSV",ij)<<endl;
-//       //jet->print( cout );
-//       findLep=false;
-//       float tmp=1000;
-//       for(unsigned int il=0;il<leptons->size();il++) {
-	
-// 	//for(size_t i=0;i<lepmatchs.size();i++)
-// 	//  if(il==lepmatch[i]) continue;
-	
-// 	// cout<<"\t ====> "<<leptons->at(il)->pt()<<"   "
-// 	//     <<leptons->at(il)->eta()<<"  "<<leptons->at(il)->phi()<<" --> "<<leptons->at(il)->dR( jet )<<endl;
-// 	if( leptons->at(il)->dR( jet )<0.4 ) {findLep=true; continue;} 
-//       }
-//       if(findLep) continue;
-//       //cout<<" ==== > passing sel"<<endl;
-
-//       if(jet->pt()<25) continue;
-
-//       if(jet->pt()>40) {
-// 	//cout<<" -------------> selected "<<endl;
-// 	cleanJets.push_back(jet);
-// 	jetIdxs.push_back(ij);
-     
-//       }
-
-//       if(_vc->get(jType+"_btagCSV",ij)<0.814) continue;
-    
-//       cleanBJets.push_back(jet);
-//       bJetIdxs.push_back(ij);
-//     } //loop jets
-//   }//jet types
-
-// }
+    if(_vc->get("LepGood_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
+      return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
+    }
+    return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
+}
 
 
 void
 SusyModule::cleanJets(CandList* leptons, 
-		      CandList& cleanJets, vector<unsigned int>& jetIdxs,
-		      CandList& cleanBJets, vector<unsigned int>& bJetIdxs, float thr, float bthr ) {
+		      CandList& cleanJets, vector<pair<string, unsigned int> >& jetIdxs,
+		      CandList& cleanBJets, vector<pair<string, unsigned int> >& bJetIdxs,
+		      CandList& lepJets, vector<pair<string, unsigned int> >& lepJetsIdxs,
+		      float thr, float bthr,
+		      bool isJESVar, int dir ) {
 
   cleanJets.clear();
   cleanBJets.clear();
   jetIdxs.clear();
   bJetIdxs.clear();
 
+  lepJets.clear();
+  lepJetsIdxs.clear();
+  
   vector<string> jetTypes({"Jet","DiscJet"});
   CandList jets;
   vector<bool> bvals;
+  vector<pair<string, unsigned int> > tmpIdxs;
+
   for(size_t it=0;it<jetTypes.size();it++) {
     string jType=jetTypes[it];
     
     for(int ij=0;ij<_vc->get("n"+jType);ij++) {
       if(_vc->get(jType+"_id",ij)<1) continue;
       
-      Candidate* jet=Candidate::create(_vc->get(jType+"_pt", ij),
+      float scale=0.;
+      if(isJESVar) {
+	scale = _dbm->getDBValue("jes", _vc->get(jType+"_eta", ij), _vc->get(jType+"_pt", ij) );
+	scale = ((SystUtils::kUp==dir)?1:(-1))*scale;
+      }
+
+    Candidate* jet=Candidate::create(_vc->get(jType+"_pt", ij)*(1+scale),
 				       _vc->get(jType+"_eta", ij),
 				       _vc->get(jType+"_phi", ij) );
 
       jets.push_back(jet);
-      bvals.push_back( _vc->get(jType+"_btagCSV",ij)<0.814 );
+      bvals.push_back( _vc->get(jType+"_btagCSV",ij)<0.890 );//0.814
+      tmpIdxs.push_back(make_pair(jType, ij));
     }
   }
 
@@ -735,19 +734,22 @@ SusyModule::cleanJets(CandList* leptons,
       if(it->second.first > 0.4 ) continue;
       if(it->second.second == jets[ij] ) {pass=false; break;}
     }
-    if(!pass) continue;
+    if(!pass) { 
+      lepJetsIdxs.push_back(tmpIdxs[ij]);
+      continue;
+    }
 
     if(jets[ij]->pt()<bthr) continue;
     
     if(jets[ij]->pt()>thr) {
       cleanJets.push_back(jets[ij] );
-      jetIdxs.push_back(ij);
+      jetIdxs.push_back(tmpIdxs[ij]);
     }
     
     if(bvals[ij]) continue;
     
     cleanBJets.push_back(jets[ij]);
-    bJetIdxs.push_back(ij);
+    bJetIdxs.push_back(tmpIdxs[ij]);
   } //loop jets
 
 }
@@ -797,3 +799,52 @@ SusyModule::applySingleLepSF(const Candidate* cand, float& weight) {
   }
 
 }
+
+float
+SusyModule::bTagSF(CandList& jets , vector<pair<string, unsigned int> >& jetIdx,
+                   CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx, int st){
+  // put st = -1 / 0 / +1 for down / central / up
+
+  float pdata = 1.0;
+  float pmc   = 1.0;
+
+  for(unsigned int i=0;i<jets.size(); ++i) {
+
+    bool find=false;
+    for(unsigned int iv=0;iv<bJets.size();iv++) {
+      if(jetIdx[i].first==bJetIdx[iv].first && jetIdx[i].second==bJetIdx[iv].second) { find=true; break;}
+    }
+    if(find){
+      pdata*=bTagMediumEfficiency(jets[i], true) * 
+               bTagMediumScaleFactor(jets[i], true, st);
+      pmc*=bTagMediumEfficiency(jets[i], true);
+    }
+    else {
+      pdata*=(1-bTagMediumEfficiency(jets[i], false) * 
+		bTagMediumScaleFactor(jets[i], false, st));
+      pmc*=(1-bTagMediumEfficiency(jets[i], false));
+    }
+  }
+
+  if(pmc != 0) return pdata/pmc;
+  return 1.0;
+
+}
+
+float
+SusyModule::bTagMediumEfficiency(Candidate* jet, bool isBTagged){
+
+  if(isBTagged) return _dbm->getDBValue("BTagEffCB", jet->pt(), std::abs(jet->eta()));
+  return _dbm->getDBValue("BTagEffUSDG", jet->pt(), std::abs(jet->eta()));
+} 
+
+float
+SusyModule::bTagMediumScaleFactor(Candidate* jet, bool isBTagged, int st){
+  if(st==0)  
+    return _dbm->getDBValue("BTagSF", (isBTagged?1:2), jet->eta(), jet->pt());
+  else if(st==1)
+    return _dbm->getDBErrH("BTagSF",  (isBTagged?1:2), jet->eta(), jet->pt());
+  else
+    return _dbm->getDBErrL("BTagSF",  (isBTagged?1:2), jet->eta(), jet->pt());
+
+} 
