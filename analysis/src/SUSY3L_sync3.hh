@@ -49,7 +49,7 @@ private:
     bool hardLegSelection();
     bool checkMultiIso();
     bool ZEventSelection();
-    bool ZEventSelectionLoop();
+    bool ZEventSelectionLoop(bool onz);
     bool srSelection();
     void fillEventPlots();
     void fillControlPlots();

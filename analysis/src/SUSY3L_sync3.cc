@@ -164,7 +164,7 @@ void SUSY3L_sync3::initialize(){
     _pairmass = getCfgVarS("pairMass", "off");
     _selectMuons = getCfgVarS("selectMuons", "true");
     _selectElectrons = getCfgVarS("selectElectrons", "true");
-    _selectTaus = getCfgVarS("selectTaus", "false");
+    _selectTaus = getCfgVarS("selectTaus", "true");
     _BR = getCfgVarS("baselineRegion", "BR0");
     _SR = getCfgVarS("signalRegion", "SR999");
 
@@ -228,27 +228,27 @@ void SUSY3L_sync3::run(){
     collectKinematicObjects();
 
     // select events for WZ control region
-    if(wzCRSelection()){
-        setWorkflow(kWZCR);
-        counter("wz control region",kWZCR);
-        fillEventPlots();
-        return;
-    }
+    //if(wzCRSelection()){
+    //    setWorkflow(kWZCR);
+    //    counter("wz control region",kWZCR);
+    //    fillEventPlots();
+    //    return;
+    //}
 
+    setBaselineRegion();
     //check if event goes into baseline selection
-    //if(!makeCut(baseSelection(),"base selection")){	
     if(!(baseSelection())){	
         return;
     }
     
     int lumi = _vc->get("lumi");
     int evt = _vc->get("evt");
-    _lumi1 = 1020; 
-    _evt1 = 337444;
-    _lumi2 = 747;
-    _evt2 = 247059;
-    _debug = true;
-    //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+    _lumi1 = 1028; 
+    _evt1 = 340222;
+    _lumi2 = 999;
+    _evt2 = 9999;
+    _debug = false;
+    cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
 
     setWorkflow(kGlobal);
     counter("baseline");
@@ -475,7 +475,7 @@ void SUSY3L_sync3::collectKinematicObjects(){
 
     //clean jets
     _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, 40, 15, getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, 30, 30, getUncName()=="JES", getUncDir() );
     _nJets = _jets.size();
     _nBJets = _bJets.size();
     
@@ -2317,16 +2317,16 @@ bool SUSY3L_sync3::baseSelection(){
     //if(!makeCut( has_two_tighter_leptons , "multiIso tightening", "=") ) return false;
 
     //require minimum number of jets
-//    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
+    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
 
     //require minimum number of b-tagged jets
-//    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR, kBase) ) return false;
+    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR, kBase) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
 //    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR, kBase) ) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
-//    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR, kBase) ) return false;
+    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR, kBase) ) return false;
 
     //find smallest invariant mass of ossf pair and reject event if this is below a cut value
 //    _mll = lowestOssfMll();
@@ -2334,13 +2334,14 @@ bool SUSY3L_sync3::baseSelection(){
 //        fill("lowMll" , _mll        , _weight);
  
     //select on or off-Z events according to specification in config file
-//    bool is_reconstructed_Z = ZEventSelectionLoop();
-//    if(_pairmass == "off"){
-//        if(!makeCut( !is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
-//    }
-//    else if(_pairmass == "on"){
-//        if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
-//    }
+    if(_pairmass == "off"){
+        bool is_reconstructed_Z = ZEventSelectionLoop(false);
+        if(!makeCut( !is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
+    }
+    else if(_pairmass == "on"){
+        bool is_reconstructed_Z = ZEventSelectionLoop(true);
+        if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
+    }
 /*    
     //fill plots 
     if(is_reconstructed_Z){
@@ -2394,7 +2395,7 @@ bool SUSY3L_sync3::wzCRSelection(){
     if(!(_HT > 60 && _HT < 400)) return false;
     if(!(_met->pt() > 50 && _met->pt() < 150)) return false;
     //select on-Z events
-    bool is_reconstructed_Z = ZEventSelectionLoop();
+    bool is_reconstructed_Z = ZEventSelectionLoop(true);
     if(!is_reconstructed_Z) return false;
     
     counter("passing WZ selection", kWZ);
@@ -2563,7 +2564,7 @@ float SUSY3L_sync3::lowestOssfMll(bool ossf){
 
 
 //____________________________________________________________________________
-bool SUSY3L_sync3::ZEventSelectionLoop(){
+bool SUSY3L_sync3::ZEventSelectionLoop(bool onz){
     /*
         Checks if there is a same-flavor opposite-charge lepton pair with an invariant 
         mass around the Z mass. The ossf pair with an invariant mass closest to the 
@@ -2663,7 +2664,7 @@ bool SUSY3L_sync3::ZEventSelectionLoop(){
     }
 
     //for 2 lepton selection do not check MT requirement with 3rd lepton
-    if(_nMus + _nEls + _nTaus == 2){
+    if(_nMus + _nEls + _nTaus == 2 || onz == false){
         if(el_Zcand == true || mu_Zcand == true || tau_Zcand == true){return true;}
         else{return false;}
     }
@@ -3125,10 +3126,10 @@ void SUSY3L_sync3::printBefore(){
         for(int i = 0; i<_vc->get("nLepGood");i++){
             cout << "lep " << i << ": pt " << _vc->get("LepGood_pt",i) << ", eta " << _vc->get("LepGood_eta",i) <<  ", phi " << _vc->get("LepGood_phi",i) << ", pdgId " << _vc->get("LepGood_pdgId",i) << ", miniIso " << _vc->get("LepGood_miniRelIso", i)  << ", pt rel " << _vc->get("LepGood_jetPtRelv2",i) << ", pt ratio: " << _vc->get("LepGood_jetPtRatiov2",i)<<endl;
         }
-        //cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose jets: " <<  _vc->get("nJet") << endl;
-        //for(int i = 0; i<_vc->get("nJet");i++){
-        //    cout << "jet " << i << ": " << _vc->get("Jet_pt",i) << " " << _vc->get("Jet_eta",i)<< " " << _vc->get("Jet_phi",i)  <<endl;
-        //}
+        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose jets: " <<  _vc->get("nJet") << endl;
+        for(int i = 0; i<_vc->get("nJet");i++){
+            cout << "jet " << i << ": " << _vc->get("Jet_pt",i) << " " << _vc->get("Jet_eta",i)<< " " << _vc->get("Jet_phi",i) << " " << _vc->get("Jet_btagCSV",i)<<endl;
+        }
         //cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose taus: " <<  _vc->get("nTauGood") << endl;
         //for(int i = 0; i<_vc->get("nTauGood");i++){
         //    cout << "tau " << i << ": " << _vc->get("TauGood_pt",i) << " " << _vc->get("TauGood_eta",i)<< " " << _vc->get("TauGood_phi",i)  <<endl;
@@ -3164,6 +3165,15 @@ void SUSY3L_sync3::printAfter(){
             cout << "pt " << _jets[i]->pt()<<endl;
             cout << "eta " << _jets[i]->eta()<<endl;
             cout << "phi " << _jets[i]->phi()<<endl;
+            cout << "--------" << endl;
+            //float dr = KineUtils::dR( _mus[i]->eta(), _els[0]->eta(), _mus[i]->phi(), _els[0]->phi());
+            //cout << "deltaR with electron " << dr << endl;
+            }
+        cout << " b-jets " << endl;    
+        for(int i =0;i<_nBJets;i++){
+            cout << "pt " << _bJets[i]->pt()<<endl;
+            cout << "eta " << _bJets[i]->eta()<<endl;
+            cout << "phi " << _bJets[i]->phi()<<endl;
             cout << "--------" << endl;
             //float dr = KineUtils::dR( _mus[i]->eta(), _els[0]->eta(), _mus[i]->phi(), _els[0]->phi());
             //cout << "deltaR with electron " << dr << endl;
