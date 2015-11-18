@@ -235,8 +235,8 @@ void SUSY3L_sync3::run(){
     //    return;
     //}
 
+	//baseline selection
     setBaselineRegion();
-    //baseline selection
     if(!(baseSelection())){	
         return;
     }
@@ -260,7 +260,7 @@ void SUSY3L_sync3::run(){
     // initialization of signal region cuts, categorization of events passing the baseline 
     // selection into different signal regions, and filling of plots
     //setSignalRegion();
-    ///if(!srSelection()){
+    //if(!srSelection()){
     //    setWorkflow(kGlobal);
     //    return;
     //}
@@ -441,11 +441,11 @@ void SUSY3L_sync3::collectKinematicObjects(){
     _nEls = _els.size();
 
     //add muons and electrons to _tightLeps
-    for(size_t il=0;il<_nMus;il++){
+    for(int il=0;il<_nMus;il++){
         _tightLeps.push_back(_mus[il]);
         _tightLepsIdx.push_back(_muIdx[il]);
     }
-    for(size_t il=0;il<_nEls;il++){
+    for(int il=0;il<_nEls;il++){
         _tightLeps.push_back(_els[il]);
         _tightLepsIdx.push_back(_elIdx[il]);
     }
@@ -544,7 +544,7 @@ bool SUSY3L_sync3::muonSelection(const Candidate* c, int muIdx){
    
     //count muon candidates
     counter("MuonDenominator", kMuId);
- 
+
     //cut values
     float pt_cut = 10.;
 
@@ -2336,12 +2336,13 @@ bool SUSY3L_sync3::baseSelection(){
 //        fill("lowMll" , _mll        , _weight);
  
     //select on or off-Z events according to specification in config file
+    bool is_reconstructed_Z = false;
     if(_pairmass == "off"){
-        bool is_reconstructed_Z = ZEventSelectionLoop(false, false);
+        is_reconstructed_Z = ZEventSelectionLoop(false, false);
         if(!makeCut( !is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
     }
     else if(_pairmass == "on"){
-        bool is_reconstructed_Z = ZEventSelectionLoop(true, false);
+        is_reconstructed_Z = ZEventSelectionLoop(true, false);
         if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
     }
 /*    
