@@ -143,8 +143,9 @@ private:
     std::vector<unsigned int> _tightLepsIdx;
     std::vector<unsigned int> _looseLeps10Idx;
     std::vector<unsigned int> _jetCleanLeps10Idx;
-    std::vector<unsigned int> _jetsIdx;
-    std::vector<unsigned int> _bJetsIdx;
+    std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
+    std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
+    std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
 
     //length of candiate vectors
     int _nEls;
@@ -169,6 +170,7 @@ private:
     CandList _tightLeps;
     CandList _looseLeps10;
     CandList _jetCleanLeps10;
+    CandList _lepJets;
 
     Candidate* _met;
     Candidate* _Z;
