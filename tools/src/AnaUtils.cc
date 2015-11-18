@@ -86,8 +86,8 @@ AnaUtils::setWFEfficiencies(int ids, string cName, float w, bool acc, string unc
   
   if(_isMultiWF) {
     for(unsigned int ic=0;ic<_multiWFs.size();ic++) {
-      bool nsyst=_categories[ic].isWF && uncName=="" && !_categories[ic].isUnc;
-      bool syst=_categories[ic].isUnc && uncName==_categories[ic].uncTag ;
+      //bool nsyst=_categories[ic].isWF && uncName=="" && !_categories[ic].isUnc;
+      //bool syst=_categories[ic].isUnc && uncName==_categories[ic].uncTag ;
       setEfficiency(ids, cName, ic, w, acc);
     }
   }
@@ -788,6 +788,30 @@ AnaUtils::getCategId(string categ) {
 }
 
 vector<string> 
+AnaUtils::getCategories() {
+  
+  vector<string> vs;
+  map<int, categ>::const_iterator it;
+  for(it=_categories.begin(); it!=_categories.end();it++) 
+    vs.push_back( it->second.name );
+  
+  return vs;
+}
+
+vector<string>
+AnaUtils::getSelections(int ids, int icat) {
+
+  vector<string> vs;
+  for(size_t ic=0;ic<_categories[ icat ].effNames.size();ic++) {
+    _itEIMap = _effMap[ ids ][ icat ].find( _categories[ icat ].effNames[ ic ] );
+    if(_itEIMap == _effMap[ _kMC ][ icat ].end()) continue;
+    vs.push_back(_categories[ icat ].effNames[ic]);
+  }
+  
+  return vs;
+}
+
+vector<string> 
 AnaUtils::prepareDSNames(bool wMC, vector<int>& idxs) {
   //move MC at the end
   vector<string> dsNames;
@@ -967,7 +991,7 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
 	pair<int, string> p(icat, cname);
 
 	bool findOpt=false;
-	for(int io=0;io<opts.size();io++) {
+	for(unsigned int io=0;io<opts.size();io++) {
 	  if(_itC->second.name.find(opts[io])!=string::npos)
 	    findOpt=true;
 	}

@@ -255,9 +255,11 @@ SSDL2015::initialize(){
   
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
-  addManualSystSource("EWKFR",SystUtils::kNone);
+  //addManualSystSource("EWKFR",SystUtils::kNone);
   addManualSystSource("JES",SystUtils::kNone);
   addManualSystSource("BTAG",SystUtils::kNone);
+  addManualSystSource("Th",SystUtils::kNone);
+  addManualSystSource("other",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -361,6 +363,10 @@ SSDL2015::defineOutput() {
 
   _hm->addVariable("mass" ,   200,0, 200, "m_{ll} [GeV]"  );
   
+  _hm->addVariable("HHSR", 32,1,33, "HH SR");
+  _hm->addVariable("HLSR", 26,1,27, "HL SR");
+  _hm->addVariable("LLSR", 8,1,9, "LL SR");
+
   if(!_DoValidationPlots) return; 
   ///////////////////////////////////////////////////////////////////////////
   // VALIDATION PLOTS:  plotting these varibles for a general SS selection //
@@ -530,6 +536,17 @@ SSDL2015::advancedSelection(int WF) {
     else //other syst. variations
       _weight *= _btagW;
         
+
+    if(isInUncProc() && getUncName()=="other" && getUncDir()==SystUtils::kUp )
+      _weight *= 1.045;
+    if(isInUncProc() && getUncName()=="other" && getUncDir()==SystUtils::kDown )
+      _weight *= 0.955;
+
+    if(isInUncProc() && getUncName()=="Th" && getUncDir()==SystUtils::kUp )
+      _weight *= ((_HT>300 || (_l1Cand->pt()<25 && _l2Cand->pt()<25))?1.158:1.139);
+    if(isInUncProc() && getUncName()=="Th" && getUncDir()==SystUtils::kDown )
+      _weight *= ((_HT>300 || (_l1Cand->pt()<25 && _l2Cand->pt()<25))?0.842:0.861);
+
   }
   counter("btag SF");
   
@@ -543,7 +560,20 @@ SSDL2015::advancedSelection(int WF) {
  
   if(_categorization) {
     categorize();
-    setWorkflow(getCurrentWorkflow()+offset);
+
+    int wf=getCurrentWorkflow();
+    { //ugly.. store the yields per SR
+      //cout<<wf<<"  "<<offset<<" --> "<<getUncName()<<"  "<<getUncDir()<<"  "<<_weight<<endl;
+      setWorkflow(offset);
+      if(wf<kSR1B+offset) //HH
+	fill( "HHSR", wf+offset , _weight );
+      else if(wf<kSR1C) //HL
+	fill( "HLSR", wf-kSR32A+offset, _weight );
+      else if(wf<kBR00H) //LL
+	fill( "LLSR", wf-kSR26B+offset , _weight );
+    }
+    
+    setWorkflow(wf+offset);
     counter("region splitting");
   }
   else {
@@ -644,7 +674,6 @@ SSDL2015::getFRProb() {
   CandList fObj1,fObj2;
   vector<unsigned int> fIdx1, fIdx2;
 
-  float w=0;
   for(unsigned int i=0;i<_auxPairs.size();i++) {
 
     if(_auxFlags[i]==kIsFake && _auxFlags[i]!=kIsDFake) {
@@ -1424,6 +1453,7 @@ SSDL2015::getFR(Candidate* cand, int idx) {
   
   return _dbm->getDBValue(db, std::min( ptVal,(float)69.9),
 			  std::min(etaVal,(float)((std::abs(cand->pdgId())==11)?2.49:2.39) ) );
+
 }
 
 
@@ -1917,7 +1947,7 @@ SSDL2015::selectLeptons() {
   }
   
   _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, 40, 15, getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, 40, 25, getUncName()=="JES", getUncDir() );
   _HT=_susyMod->HT( &(_jets) );
   
    //OS case with no Z Veto!======================

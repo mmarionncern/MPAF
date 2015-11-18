@@ -364,10 +364,20 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
     string varName(obj->GetName());
     map<string, TH1*> tmp;
     
-    if(_usefulVars.size()!=0 && 
-       find(_usefulVars.begin(), _usefulVars.end(), varName)==_usefulVars.end() &&
-       find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() ) continue;
+    bool find=false;
+    for(size_t i=0;i<_usefulVars.size();i++) {
+      if(_usefulVars[i]==varName ||
+	 _usefulVars[i]==varName+optCat ||
+	 varName.find(_usefulVars[i]+"Unc")!=string::npos) {
+	find=true; break;
+      }
+    }
 
+    if(_usefulVars.size()!=0 && !find) continue; 
+       // find(_usefulVars.begin(), _usefulVars.end(), varName)==_usefulVars.end() &&
+       // find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() &&
+       // !findUnc ) continue;
+    
 
     if(optCat!="") {
       size_t op=varName.find(optCat);

@@ -2096,7 +2096,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
   
   size_t idat=(_mcOnly)?-1:( vals[0].second.size()-1);
   if(isMultiScheme) { //overwrite the data plot -> means we have two parallel scheme to look at in MC
-    if(idat!=-1) {
+    if(idat!=(size_t)-1) {
       for(size_t ic=0;ic<nVals;ic++) {
 	vals[ic].second[0][0]["tot"] = vals[ic].second[idat][0]["tot"]; 
 	vals[ic].second[0][1]["tot"] = vals[ic].second[idat][1]["tot"]; 
@@ -2461,8 +2461,11 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
 	if(ib==0 && _uncDet) {
 	  _uncNames[iv] = (*itS).first;
 	}
-      }
 
+	// if(ib==1)
+	//   cout<<"  "<<(*itS).first<<"  "<<_hMC->GetBinContent(ib)<<"  "<<sU<<"  "<<sD<<" // "<<systU[iv]<<"  "<<systD[iv]<<endl;
+      }
+      
       if(_uncDet) nu++;
     } //asym
     
