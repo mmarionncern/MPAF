@@ -57,7 +57,7 @@ void dataCardProd_CATTAG_SIGTAG() {
   
   
   //lumi
-  md.addNuisanceParameter("lumi","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.08:1.08:1.08:1.08:1.08:1.08:1.08");
+  md.addNuisanceParameter("lumi","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.12:1.12:1.12:1.12:1.12:1.12:1.12");
 
   //experimental uncertainties
   //md.addNuisanceParameter("jes","ttW:ttZH:WW:XG:rares:SIGTAG","lnN","JESTAG");
@@ -68,7 +68,11 @@ void dataCardProd_CATTAG_SIGTAG() {
   md.addNuisanceParameter("tEff","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
   md.addNuisanceParameter("tHTE","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","HLTEFFTAG");
   
-  
+  if("CATTAG"=="HHSR31" || "CATTAG"=="HHSR32" ||
+     "CATTAG"=="HLSR25" || "CATTAG"=="HLSR26" )
+    md.overwriteNuisanceParameter("BTAG","WZ:ttW:ttHZ:WW:XG:rares:SIGTAG","-:-:-:-:-:-:-");
+
+
   //Data-driven methods
   md.addNuisanceParameter("chMID","flip","lnN","1.30");
   md.addNuisanceParameter("fratio","fake","lnN","1.30");
@@ -135,6 +139,7 @@ void dataCardProd_CATTAG_SIGTAG() {
     }
   }//signal regions  
 
+ 
 
   //===============================================================
 
