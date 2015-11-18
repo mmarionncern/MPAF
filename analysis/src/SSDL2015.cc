@@ -256,10 +256,11 @@ SSDL2015::initialize(){
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
   //addManualSystSource("EWKFR",SystUtils::kNone);
-  addManualSystSource("JES",SystUtils::kNone);
-  addManualSystSource("BTAG",SystUtils::kNone);
-  addManualSystSource("Th",SystUtils::kNone);
-  addManualSystSource("other",SystUtils::kNone);
+ 
+  addManualSystSource("Eff",SystUtils::kNone);
+  addManualSystSource("Theory",SystUtils::kNone);
+  addManualSystSource("jes",SystUtils::kNone);
+  addManualSystSource("bTag",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -529,22 +530,22 @@ SSDL2015::advancedSelection(int WF) {
       _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);
       _weight *= _btagW;
     }
-    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+    else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kUp )
       _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 1); 
-    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+    else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kDown )
       _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1); 
     else //other syst. variations
       _weight *= _btagW;
         
 
-    if(isInUncProc() && getUncName()=="other" && getUncDir()==SystUtils::kUp )
+    if(isInUncProc() && getUncName()=="Eff" && getUncDir()==SystUtils::kUp )
       _weight *= 1.045;
-    if(isInUncProc() && getUncName()=="other" && getUncDir()==SystUtils::kDown )
+    if(isInUncProc() && getUncName()=="Eff" && getUncDir()==SystUtils::kDown )
       _weight *= 0.955;
 
-    if(isInUncProc() && getUncName()=="Th" && getUncDir()==SystUtils::kUp )
+    if(isInUncProc() && getUncName()=="Theory" && getUncDir()==SystUtils::kUp )
       _weight *= ((_HT>300 || (_l1Cand->pt()<25 && _l2Cand->pt()<25))?1.158:1.139);
-    if(isInUncProc() && getUncName()=="Th" && getUncDir()==SystUtils::kDown )
+    if(isInUncProc() && getUncName()=="Theory" && getUncDir()==SystUtils::kDown )
       _weight *= ((_HT>300 || (_l1Cand->pt()<25 && _l2Cand->pt()<25))?0.842:0.861);
 
   }
@@ -1947,7 +1948,7 @@ SSDL2015::selectLeptons() {
   }
   
   _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, 40, 25, getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, 40, 25, getUncName()=="jes", getUncDir() );
   _HT=_susyMod->HT( &(_jets) );
   
    //OS case with no Z Veto!======================
@@ -2028,7 +2029,7 @@ SSDL2015::varyMET() {
   }
 
   TVector2 met; met.SetMagPhi(_vc->get("met_pt"), _vc->get("met_phi") );
-  if(!(isInUncProc() &&  getUncName()=="JES") ) return met;
+  if(!(isInUncProc() &&  getUncName()=="jes") ) return met;
 
   for(unsigned int ij=0;ij<nJets;ij++) { 
     

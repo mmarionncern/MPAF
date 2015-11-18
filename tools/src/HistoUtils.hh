@@ -56,7 +56,7 @@ public:
   
   static TGraphAsymmErrors* convertHistoToGraph(TH1* h, float datnorm=1, bool diff=false, bool byPassPE=true);
 
-  static TGraphAsymmErrors* ratioHistoToGraph(TH1* hd, TH1* hmc, string opt="nP");
+  static TGraphAsymmErrors* ratioHistoToGraph(TH1* hd, TH1* hmc, bool allMc=false, string opt="nP");
 
   static TGraphAsymmErrors* residualGraph(TH1* hd, TH1* hmc, string opt="nP");
 
