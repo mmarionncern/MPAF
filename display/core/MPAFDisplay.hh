@@ -122,8 +122,8 @@ public:
   void drawStatistics(string categ="nominal", string cname="", 
 		      bool multiScheme=false, bool vetoOpt=false, string optCateg="");
 
-  void addExternalSystUnc(string dsName, string unctag, float Up, float Do,
-			  string categ="", string cname="");
+  //void addExternalSystUnc(string dsName, string unctag, float Up, float Do,
+//			  string categ="", string cname="");
   void getDetailSystematics(string categ, string lvl);
   void getCategSystematic(string src, string categ, string lvl, bool latex=false);
 
