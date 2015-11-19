@@ -48,8 +48,7 @@ private:
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection();
     bool checkMultiIso();
-    bool ZEventSelection();
-    bool ZEventSelectionLoop();
+    bool ZEventSelectionLoop(bool onz, bool loose_3rd_lep = false);
     bool srSelection();
     void fillEventPlots();
     void fillControlPlots();
