@@ -243,12 +243,12 @@ void SUSY3L_sync3::run(){
     
     int lumi = _vc->get("lumi");
     int evt = _vc->get("evt");
-    _lumi1 = 1028; 
-    _evt1 = 340222;
+    _lumi1 = 220; 
+    _evt1 = 72583;
     _lumi2 = 999;
     _evt2 = 9999;
-    _debug = false;
-    cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+    _debug = true;
+    //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
 
     setWorkflow(kGlobal);
     counter("baseline");
@@ -642,6 +642,7 @@ bool SUSY3L_sync3::tauSelection(int tauIdx){
     //remove taus which are within a cone of deltaR around selected electrons or muons
     //loop over all electron candidates
     bool lepMatch = false;
+    /*
     for(int ie=0; ie<_nEls; ++ie){
         //calculate delta R, input eta1, eta2, phi1, phi2
         float dr = KineUtils::dR( _els[ie]->eta(), _vc->get("TauGood_eta", tauIdx), _els[ie]->phi(), _vc->get("TauGood_phi", tauIdx));
@@ -659,6 +660,17 @@ bool SUSY3L_sync3::tauSelection(int tauIdx){
             break;
         }
     }
+    */
+    //loop over all loose leptons
+    for(int im=0; im<_vc->get("nLepGood"); ++im){
+        //calculate delta R, input eta1, eta2, phi1, phi2
+        float dr = KineUtils::dR( _vc->get("LepGood_eta",im), _vc->get("TauGood_eta", tauIdx), _vc->get("LepGood_phi",im), _vc->get("TauGood_phi", tauIdx));
+        if(dr < deltaR) {
+            lepMatch = true; 
+            break;
+        }
+    }
+     
     //enable to clean on tight objects
     //if(!makeCut(!lepMatch,  "lepton cleaning", "=", kTauId) ) return false;
     return true;
@@ -2608,6 +2620,11 @@ bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep){
             if((std::abs(Ztmp->mass()-Zmass) < _ZMassWindow) && (std::abs(Ztmp->mass()-Zmass)<diff) ) {
                 _Z = Ztmp;
                 diff = std::abs(_Z->mass()-Zmass);
+                if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){
+                    cout << "mass of Z candidate: " << _Z->mass() << endl;
+                    cout << "el1: " << _els[ie1]->pt() << endl;
+                    cout << "el2: " << _els[ie2]->pt() << endl;
+                }}
                 el_Zcand = true;
                 //save position of selected leptons in LepGood vector
                 lep1_save = _elIdx[ie1];
@@ -2695,6 +2712,11 @@ bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep){
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and there is a 3rd lepton fulfilling the
                 //mt critirion is fulfilled
+                if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){
+                    cout << "MT 3rd lepton with MET: " << mt << endl;
+                    cout << "lep: " << _tightLeps[il]->pt() << endl;
+                }}
+        
                 if(mt > _M_T_3rdLep_MET_cut){
                     fill("MT" , mt        , _weight);
                     fill("3rd_lepton_flavor", _tightLeps[il]->pdgId(), _weight);
@@ -3073,9 +3095,12 @@ void SUSY3L_sync3::printBefore(){
         for(int i = 0; i<_vc->get("nLepGood");i++){
             cout << "lep " << i << ": pt " << _vc->get("LepGood_pt",i) << ", eta " << _vc->get("LepGood_eta",i) <<  ", phi " << _vc->get("LepGood_phi",i) << ", pdgId " << _vc->get("LepGood_pdgId",i) << ", miniIso " << _vc->get("LepGood_miniRelIso", i)  << ", pt rel " << _vc->get("LepGood_jetPtRelv2",i) << ", pt ratio: " << _vc->get("LepGood_jetPtRatiov2",i)<<endl;
         }
-        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose jets: " <<  _vc->get("nJet") << endl;
+        cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose jets: " <<  _vc->get("nJet")+ _vc->get("nDiscJet") << endl;
         for(int i = 0; i<_vc->get("nJet");i++){
             cout << "jet " << i << ": " << _vc->get("Jet_pt",i) << " " << _vc->get("Jet_eta",i)<< " " << _vc->get("Jet_phi",i) << " " << _vc->get("Jet_btagCSV",i)<<endl;
+        }
+        for(int i = 0; i<_vc->get("nDiscJet");i++){
+            cout << "jet " << i << ": " << _vc->get("DiscJet_pt",i) << " " << _vc->get("DiscJet_eta",i)<< " " << _vc->get("DiscJet_phi",i) << " " << _vc->get("DiscJet_btagCSV",i)<<endl;
         }
         //cout << "event  " << _vc->get("lumi") << " " << _vc->get("evt") << " number loose taus: " <<  _vc->get("nTauGood") << endl;
         //for(int i = 0; i<_vc->get("nTauGood");i++){

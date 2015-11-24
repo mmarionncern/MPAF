@@ -7,8 +7,8 @@ void susy3l_wz() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="wzcr"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="wzcr"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="wzcr1_noMET_noMT_cut"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="wzcr1_noMET_noMT_cut"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -18,7 +18,7 @@ void susy3l_wz() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "ht_wz" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    string obs = "mt_wzcr" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
     string sigs = "none"; 
     bool data = true;
 
@@ -94,11 +94,11 @@ void susy3l_wz() {
     }
     if(obs == "met_wzcr"){
         md.dp.setObservables("METWZCR");
-        int binning=50;
-        double rangeX[2]={0,500};
-        //bool logYScale=true;
+        int binning=10;
+        double rangeX[2]={0,250};
+        //bool logYScale=false;
     }
-    if(obs == "wzcr_ht"){
+    if(obs == "ht_wzcr"){
         md.dp.setObservables("HTWZCR");
         int binning=0;
         double rangeX[2]={0,1000};
@@ -139,6 +139,12 @@ void susy3l_wz() {
     if(obs == "mt"){
         md.dp.setObservables("MT");
         int binning=25;
+        double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "mt_wzcr"){
+        md.dp.setObservables("MTWZCR");
+        int binning=10;
         double rangeX[2]={0,200};
         //bool logYScale=true;
     }

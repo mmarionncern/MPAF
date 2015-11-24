@@ -711,10 +711,55 @@ SusyModule::cleanJets(CandList* leptons,
   map<Candidate*, std::pair<float,Candidate*> > cmap;
   map<Candidate*, std::pair<float,Candidate*> >::const_iterator it;
 
+//BEGIN hack to clean all overlapping jets
+  for(unsigned int ij=0;ij<jets.size();ij++) {
+    bool clean = false;
+    for(unsigned int il=0;il<leptons->size();il++) {
+      float dR=leptons->at(il)->dR( jets[ij] );
+      if(dR<0.4){clean=true;}
+        if(_vc->get("evt")==762 && _vc->get("lumi")==252237){
+        cout << "bla" << endl;
+        }
+      }
+    if(clean){continue;}
+    //if(!pass) { 
+    //  lepJetsIdxs.push_back(tmpIdxs[ij]);
+    //  continue;
+    //}
+
+    if(jets[ij]->pt()<bthr) continue;
+    
+    if(jets[ij]->pt()>thr) {
+      cleanJets.push_back(jets[ij] );
+      jetIdxs.push_back(tmpIdxs[ij]);
+    }
+    
+    if(bvals[ij]) continue;
+    
+    cleanBJets.push_back(jets[ij]);
+    bJetIdxs.push_back(tmpIdxs[ij]);
+
+    }
+  
+  
+}
+//END hack
+
+
+
+
+
+/*
+
+
   for(unsigned int il=0;il<leptons->size();il++) {
     for(unsigned int ij=0;ij<jets.size();ij++) {
 
       float dR=leptons->at(il)->dR( jets[ij] );
+        cout << "-------------------" << endl;
+        cout << "jet = " << jets[ij]->pt() << endl;
+        cout << "lep = " << leptons->at(il)->pt() << endl;
+        cout << "dR = " << dR << endl;
       it = cmap.find(leptons->at(il));
       if(it==cmap.end() ) {
 	cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
@@ -731,6 +776,11 @@ SusyModule::cleanJets(CandList* leptons,
     pass=true;
     for(unsigned int il=0;il<leptons->size();il++) {
       it = cmap.find(leptons->at(il));
+
+      if((_vc->get("lumi") == 1124 && _vc->get("evt") == 372082)){
+          cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
+          cout << "jet: " << jets[ij]->pt() << endl;
+          cout << it->second.first << endl;}
       if(it->second.first > 0.4 ) continue;
       if(it->second.second == jets[ij] ) {pass=false; break;}
     }
@@ -753,7 +803,7 @@ SusyModule::cleanJets(CandList* leptons,
   } //loop jets
 
 }
-
+*/
 
 // Scale factors ====================================
 void 
