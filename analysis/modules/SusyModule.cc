@@ -689,7 +689,9 @@ SusyModule::cleanJets(CandList* leptons,
     string jType=jetTypes[it];
     
     for(int ij=0;ij<_vc->get("n"+jType);ij++) {
+
       if(_vc->get(jType+"_id",ij)<1) continue;
+      if(std::abs(_vc->get(jType+"_eta",ij))>2.4) continue;
       
       float scale=0.;
       if(isJESVar) {
@@ -716,10 +718,14 @@ SusyModule::cleanJets(CandList* leptons,
     bool clean = false;
     for(unsigned int il=0;il<leptons->size();il++) {
       float dR=leptons->at(il)->dR( jets[ij] );
+      //if(_vc->get("lumi")== 674&& _vc->get("evt")==223095){
+      //      cout << "-----" << endl;
+      //      cout << "dR " <<  dR << endl;
+      //      cout << "lep pt: " <<  leptons->at(il)->pt() << endl;
+      //      cout << "jet pt: " <<  jets[ij]->pt() << endl;
+      //}
       if(dR<0.4){clean=true;}
-        if(_vc->get("evt")==762 && _vc->get("lumi")==252237){
-        cout << "bla" << endl;
-        }
+
       }
     if(clean){continue;}
     //if(!pass) { 
@@ -748,18 +754,14 @@ SusyModule::cleanJets(CandList* leptons,
 
 
 
-
 /*
+
 
 
   for(unsigned int il=0;il<leptons->size();il++) {
     for(unsigned int ij=0;ij<jets.size();ij++) {
 
       float dR=leptons->at(il)->dR( jets[ij] );
-        cout << "-------------------" << endl;
-        cout << "jet = " << jets[ij]->pt() << endl;
-        cout << "lep = " << leptons->at(il)->pt() << endl;
-        cout << "dR = " << dR << endl;
       it = cmap.find(leptons->at(il));
       if(it==cmap.end() ) {
 	cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
@@ -777,10 +779,6 @@ SusyModule::cleanJets(CandList* leptons,
     for(unsigned int il=0;il<leptons->size();il++) {
       it = cmap.find(leptons->at(il));
 
-      if((_vc->get("lumi") == 1124 && _vc->get("evt") == 372082)){
-          cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
-          cout << "jet: " << jets[ij]->pt() << endl;
-          cout << it->second.first << endl;}
       if(it->second.first > 0.4 ) continue;
       if(it->second.second == jets[ij] ) {pass=false; break;}
     }
