@@ -32,13 +32,21 @@ SUSY3L::SUSY3L(std::string cfg){
     startExecution(cfg);
     initialize();
 
+    //double lepton triggers (isolated)
     _hltLines.push_back("HLT_DoubleMu");
     _hltLines.push_back("HLT_DoubleEl");
     _hltLines.push_back("HLT_MuEG");
+    //double lepton triggers plus HT (non-isolated)
     _hltLines.push_back("HLT_DoubleMuHT");
     _hltLines.push_back("HLT_DoubleElHT");
-    _hltLines.push_back("HLT_SingleMu");
-    _hltLines.push_back("HLT_SingleEl");
+    //tri-lepton triggers
+    _hltLines.push_back("HLT_TripleEl");
+    _hltLines.push_back("HLT_TripleMu");
+    _hltLines.push_back("HLT_DoubleMuEl");
+    _hltLines.push_back("HLT_DoubleElMu");
+    //single lepton triggers (not used in RA7 at the moment)
+    //_hltLines.push_back("HLT_SingleMu");
+    //_hltLines.push_back("HLT_SingleEl");
 
 }
 
@@ -146,7 +154,11 @@ void SUSY3L::initialize(){
     _vc->registerVar("HLT_MuEG"                        );
     _vc->registerVar("HLT_DoubleMuHT"                  );
     _vc->registerVar("HLT_DoubleElHT"                  );
-    
+    _vc->registerVar("HLT_TripleEl"                    );
+    _vc->registerVar("HLT_TripleMu"                    );
+    _vc->registerVar("HLT_DoubleMuEl"                  );
+    _vc->registerVar("HLT_DoubleElMu"                  );
+   
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
     _vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
 
@@ -221,7 +233,7 @@ void SUSY3L::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    if(!passMultiLine(false, true)) return;
+    if(!passMultiLine(false, false)) return;
     counter("HLT");
 
     // do the minimal selection and collect kinematic variables for events passing it
@@ -387,11 +399,18 @@ void SUSY3L::collectKinematicObjects(){
         _looseLeps10Idx.push_back(il);
     }  
     
-    //select leptons for jet cleaning using a tigher fakable object selection
-    for(size_t il=0;il<_looseLeps10.size();il++){
-        if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(), true)) continue;
-        _jetCleanLeps10.push_back( _looseLeps10[il] );
-        _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
+    //select leptons for jet cleaning using a tigher fakable object selection, requiring pt>10
+    //for(size_t il=0;il<_looseLeps10.size();il++){
+    //    if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(), true)) continue;
+    //    _jetCleanLeps10.push_back( _looseLeps10[il] );
+    //    _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
+    //} 
+ 
+    //select leptons for jet cleaning using a tigher fakable object selection, no pt requirement
+    for(size_t il=0;il<_looseLeps.size();il++){
+        if(!fakableLepton(_looseLeps[il], _looseLepsIdx[il], _looseLeps[il]->pdgId(), true)) continue;
+        _jetCleanLeps10.push_back( _looseLeps[il] );
+        _jetCleanLeps10Idx.push_back( _looseLepsIdx[il] );
     } 
 
     //select tight muons and electrons
@@ -537,10 +556,12 @@ bool SUSY3L::looseLepton(const Candidate* c, int idx, int pdgId) {
         return: true (if leptons is selected as loose lepton), false (else)
     */
     if(abs(pdgId)==13) {//mu case
+        if(c->pt() < 5) return false;
         if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
+        if(c->pt() < 7) return false;
         if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
         if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
@@ -604,6 +625,7 @@ bool SUSY3L::tauSelection(int tauIdx){
     //remove taus which are within a cone of deltaR around selected electrons or muons
     //loop over all electron candidates
     bool lepMatch = false;
+    /*
     for(int ie=0; ie<_nEls; ++ie){
         //calculate delta R, input eta1, eta2, phi1, phi2
         float dr = KineUtils::dR( _els[ie]->eta(), _vc->get("TauGood_eta", tauIdx), _els[ie]->phi(), _vc->get("TauGood_phi", tauIdx));
@@ -621,6 +643,17 @@ bool SUSY3L::tauSelection(int tauIdx){
             break;
         }
     }
+    */
+    //loop over all loose leptons
+    for(int im=0; im<_vc->get("nLepGood"); ++im){
+        //calculate delta R, input eta1, eta2, phi1, phi2
+        float dr = KineUtils::dR( _vc->get("LepGood_eta",im), _vc->get("TauGood_eta", tauIdx), _vc->get("LepGood_phi",im), _vc->get("TauGood_phi", tauIdx));
+        if(dr < deltaR) {
+            lepMatch = true; 
+            break;
+        }
+    }
+     
     //enable to clean on tight objects
     //if(!makeCut(!lepMatch,  "lepton cleaning", "=", kTauId) ) return false;
     return true;
@@ -644,8 +677,8 @@ void SUSY3L::setBaselineRegion(){
     if(_BR == "BR0"){
         setCut("LepMultiplicity"   ,    9, ">="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
-        _pt_cut_hard_legs             = 0           ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        _nHardestLeptons              = 0           ;     //number of leptons which need to fulfill harder pt cut
+        _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
@@ -2354,15 +2387,15 @@ bool SUSY3L::wzCRSelection(){
     counter("denominator", kWZ);
 
     //lepton multiplicity
-    if(!(_nMus + _nEls >= 2)) return false;
+    if(!(_nMus + _nEls == 3)) return false;
     bool has_hard_legs = hardLegSelection(1,20.,0,-1.);
     if(!has_hard_legs) return false;
-    if(!( _nJets == 0)) return false;
+    if(!( _nJets == 1)) return false;
     if(!( _nBJets == 0)) return false;
     //if(!(_HT > 60 && _HT < 400)) return false;
-    if(!(_met->pt() > 50 && _met->pt() < 200)) return false;
+    if(!(_met->pt() > 30 && _met->pt() < 150)) return false;
     //select on-Z events
-    bool is_reconstructed_Z = ZEventSelectionLoop(true, true, -1);
+    bool is_reconstructed_Z = ZEventSelectionLoop(true, false, 50);
     if(!is_reconstructed_Z) return false;
     
     counter("passing WZ selection", kWZ);
@@ -3014,13 +3047,14 @@ bool SUSY3L::passHLTLine(string line){
 bool SUSY3L::passMultiLine(bool doubleOnly, bool isolatedOnly){
     /*
         checks if the event has been triggerd by any of the HLT trigger lines
-        parameters: doubleOnly if only dilepton paths should be checked
+        parameters: doubleOnly if only dilepton paths should be selected,
+        isolatedOnly if only isolated di-lepton paths should be selected
         return: true (if event has been triggered), false (else)
     */
 
-    for(size_t ih=0;ih<7;ih++) {
+    for(size_t ih=0;ih<9;ih++) {
+        if(isolatedOnly && ih>2) continue;
         if(doubleOnly && ih>5) continue;
-        if(isolatedOnly && (ih == 3 || ih == 4)) continue;
         if(passHLTLine(_hltLines[ih])) return true;
     }
 

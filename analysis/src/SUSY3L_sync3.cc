@@ -32,13 +32,21 @@ SUSY3L_sync3::SUSY3L_sync3(std::string cfg){
     startExecution(cfg);
     initialize();
 
+    //double lepton triggers (isolated)
     _hltLines.push_back("HLT_DoubleMu");
     _hltLines.push_back("HLT_DoubleEl");
     _hltLines.push_back("HLT_MuEG");
+    //double lepton triggers plus HT (non-isolated)
     _hltLines.push_back("HLT_DoubleMuHT");
     _hltLines.push_back("HLT_DoubleElHT");
-    _hltLines.push_back("HLT_SingleMu");
-    _hltLines.push_back("HLT_SingleEl");
+    //tri-lepton triggers
+    _hltLines.push_back("HLT_TripleEl");
+    _hltLines.push_back("HLT_TripleMu");
+    _hltLines.push_back("HLT_DoubleMuEl");
+    _hltLines.push_back("HLT_DoubleElMu");
+    //single lepton triggers (not used in RA7 at the moment)
+    //_hltLines.push_back("HLT_SingleMu");
+    //_hltLines.push_back("HLT_SingleEl");
 
 }
 
@@ -146,7 +154,11 @@ void SUSY3L_sync3::initialize(){
     _vc->registerVar("HLT_MuEG"                        );
     _vc->registerVar("HLT_DoubleMuHT"                  );
     _vc->registerVar("HLT_DoubleElHT"                  );
-    
+    _vc->registerVar("HLT_TripleEl"                    );
+    _vc->registerVar("HLT_TripleMu"                    );
+    _vc->registerVar("HLT_DoubleMuEl"                  );
+    _vc->registerVar("HLT_DoubleElMu"                  );
+   
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
     //_vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
 
@@ -221,7 +233,7 @@ void SUSY3L_sync3::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    //if(!passMultiLine(false, true)) return;
+    //if(!passMultiLine(false, false)) return;
     //counter("HLT");
 
     // do the minimal selection and collect kinematic variables for events passing it
@@ -235,20 +247,25 @@ void SUSY3L_sync3::run(){
     //    return;
     //}
 
+    //limit run number from json
+    if(_vc->get("run")>258750){return;}
+
 	//baseline selection
     setBaselineRegion();
     if(!(baseSelection())){	
         return;
     }
-    
-    int lumi = _vc->get("lumi");
-    int evt = _vc->get("evt");
-    _lumi1 = 220; 
-    _evt1 = 72583;
-    _lumi2 = 999;
-    _evt2 = 9999;
-    _debug = true;
-    //cout << "1" << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+   
+     
+    long int run = _vc->get("run");
+    long int lumi = _vc->get("lumi");
+    long int evt = _vc->get("evt");
+    _lumi1 = 674; 
+    _evt1 = 223095;
+    _lumi2 = -1;
+    _evt2 = -1;
+    _debug = false;
+    if(!_debug){cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;}
 
     setWorkflow(kGlobal);
     counter("baseline");
@@ -398,21 +415,37 @@ void SUSY3L_sync3::collectKinematicObjects(){
         _looseLeps10Idx.push_back(il);
     }  
     
-    //select leptons for jet cleaning using a tigher fakable object selection
-    for(size_t il=0;il<_looseLeps10.size();il++){
-        if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(), true)) continue;
-        _jetCleanLeps10.push_back( _looseLeps10[il] );
-        _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
+    //select leptons for jet cleaning using a tigher fakable object selection, requiring pt>10
+    //for(size_t il=0;il<_looseLeps10.size();il++){
+    //    if(!fakableLepton(_looseLeps10[il], _looseLeps10Idx[il], _looseLeps10[il]->pdgId(), true)) continue;
+    //    _jetCleanLeps10.push_back( _looseLeps10[il] );
+    //    _jetCleanLeps10Idx.push_back( _looseLeps10Idx[il] );
+    //} 
+ 
+    //select leptons for jet cleaning using a tigher fakable object selection, no pt requirement
+    for(size_t il=0;il<_looseLeps.size();il++){
+        if(!fakableLepton(_looseLeps[il], _looseLepsIdx[il], _looseLeps[il]->pdgId(), true)) continue;
+        _jetCleanLeps10.push_back( _looseLeps[il] );
+        _jetCleanLeps10Idx.push_back( _looseLepsIdx[il] );
     } 
 
     
     if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){
         cout << "ALL LOOSE LEPTONS: " << endl;
         for(int i = 0 ; i < _looseLeps.size(); i++){
-            cout << _looseLeps[i]->pt() << endl;
+            cout << _looseLeps[i]->pt() << " " << _looseLeps[i]->pdgId() <<endl;
         }
     }   
     }
+
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){
+        cout << "ALL FAKABLE LEPTONS: " << endl;
+        for(int i = 0 ; i < _jetCleanLeps10.size(); i++){
+            cout << _jetCleanLeps10[i]->pt() << " " << _jetCleanLeps10[i]->pdgId()<< endl;
+        }
+    }   
+    }
+
 
     //select tight muons and electrons
     for(size_t il=0;il<_looseLeps.size();il++){
@@ -474,6 +507,7 @@ void SUSY3L_sync3::collectKinematicObjects(){
     _nTaus = _taus.size();
 
     //clean jets
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "Calling CleanJet function " <<  endl;}}
     _susyMod->cleanJets( &_jetCleanLeps10, _jets, _jetsIdx, _bJets, _bJetsIdx,
 		       _lepJets, _lepJetsIdx, 30, 30, getUncName()=="JES", getUncDir() );
     _nJets = _jets.size();
@@ -513,6 +547,8 @@ bool SUSY3L_sync3::electronSelection(const Candidate* c, int elIdx){
     if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "paasing pt " << c->pt() << " " << elIdx << endl;}}
     if(!makeCut( _susyMod->elIdSel(c, elIdx, SusyModule::kTight, SusyModule::kTight, false), "electron selection", "=", kElId) ) return false;
     if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "passing electron id " << c->pt() << " " << elIdx << endl;}}
+   
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "miniIso / ptratio / ptrel: " << _vc->get("LepGood_miniRelIso", elIdx) << " / " << _vc->get("LepGood_jetPtRatiov2", elIdx) << " / " << _vc->get("LepGood_jetPtRelv2", elIdx)  << endl;}}
     if(!makeCut( _susyMod->multiIsoSel(elIdx, SusyModule::kMedium), "multiIso selection", "=", kElId) ) return false;
     
     if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "passing el selection " << c->pt() << " " << elIdx << endl;}}
@@ -550,6 +586,19 @@ bool SUSY3L_sync3::muonSelection(const Candidate* c, int muIdx){
 
     if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering muon selection " << c->pt() << " " << muIdx << endl;}}
     //apply the cuts via SusyModules
+    
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){
+        cout << "pt " << _vc->get("LepGood_pt",muIdx) << endl;
+        cout << "eta " << _vc->get("LepGood_eta",muIdx) << endl;
+        cout << "muonId " << _vc->get("LepGood_mediumMuonId",muIdx) << endl;
+        cout << "tight charge " << _vc->get("LepGood_tightCharge",muIdx) << endl;
+        cout << "sip " << _vc->get("LepGood_sip3d",muIdx) << endl;
+        cout << "dz " << _vc->get("LepGood_dz",muIdx) << endl;
+        cout << "dxy " << _vc->get("LepGood_dxy",muIdx) << endl;
+        }}
+   
+    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "miniIso / ptratio / ptrel: " << _vc->get("LepGood_miniRelIso", muIdx) << " / " << _vc->get("LepGood_jetPtRatiov2", muIdx) << " / " << _vc->get("LepGood_jetPtRelv2", muIdx)  << endl;}}
+    
     if(!makeCut<float>( c->pt() , pt_cut, ">"  , "pt selection"    , 0    , kMuId)) return false;
     if(_debug){if(_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1){cout << "pass pt" << endl;}}
     if(!makeCut( _susyMod->muIdSel(c, muIdx, SusyModule::kTight, false), "muon selection", "=", kMuId) ) return false;
@@ -568,19 +617,21 @@ bool SUSY3L_sync3::looseLepton(const Candidate* c, int idx, int pdgId) {
         parameters: position in LepGood, pdgId
         return: true (if leptons is selected as loose lepton), false (else)
     */
-    if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering loose lepton selection " << c->pt() << endl;}}
+    //if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering loose lepton selection " << c->pt() << endl;}}
     if(abs(pdgId)==13) {//mu case
+        if(c->pt() < 5) return false;
         if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
-        if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering loose electron selection " << c->pt() << endl;}}
+        if(c->pt() < 7) return false;
+        //if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "entering loose electron selection " << c->pt() << endl;}}
         if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
-        if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass loose id selection " << c->pt() << endl;}}
+        //if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass loose id selection " << c->pt() << endl;}}
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
-        if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass multiIso denom " << c->pt() << endl;}}
+        //if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass multiIso denom " << c->pt() << endl;}}
         if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
-        if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass trigger emulation cut " << c->pt() << endl;}}
+        //if(_debug){if((_vc->get("lumi") == _lumi1 && _vc->get("evt") == _evt1)||(_vc->get("lumi") == _lumi2 && _vc->get("evt") == _evt2)){cout << "pass trigger emulation cut " << c->pt() << endl;}}
     }
 
     return true;
@@ -694,8 +745,8 @@ void SUSY3L_sync3::setBaselineRegion(){
     if(_BR == "BR0"){
         setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
-        _pt_cut_hard_legs             = 0           ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        _nHardestLeptons              = 0           ;     //number of leptons which need to fulfill harder pt cut
+        _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  40         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
@@ -2323,18 +2374,18 @@ bool SUSY3L_sync3::baseSelection(){
     //if(!makeCut<int>( _nTaus, 1, ">=" , "tau multiplicity", 0 ) ) return false;
     
     //apply additional pt cuts on leptons
-//    bool has_hard_legs = hardLegSelection();
-//    if(!makeCut( has_hard_legs , "hard leg selection", "=", kBase) ) return false;
-
+    //bool has_hard_legs = hardLegSelection(_nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs);
+    //if(!makeCut( has_hard_legs , "hard leg selection", "=", kBase) ) return false;
+      
     //require at least two of the leptons to be tighter in multiiso
     //bool has_two_tighter_leptons = checkMultiIso();
     //if(!makeCut( has_two_tighter_leptons , "multiIso tightening", "=") ) return false;
 
     //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
+//    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
 
     //require minimum number of b-tagged jets
-    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR, kBase) ) return false;
+//    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR, kBase) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
 //    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR, kBase) ) return false;
@@ -2350,11 +2401,11 @@ bool SUSY3L_sync3::baseSelection(){
     //select on or off-Z events according to specification in config file
     bool is_reconstructed_Z = false;
     if(_pairmass == "off"){
-        is_reconstructed_Z = ZEventSelectionLoop(false, false);
+        is_reconstructed_Z = ZEventSelectionLoop(false, false, 0);
         if(!makeCut( !is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
     }
     else if(_pairmass == "on"){
-        is_reconstructed_Z = ZEventSelectionLoop(true, false);
+        is_reconstructed_Z = ZEventSelectionLoop(true, false, _M_T_3rdLep_MET_cut);
         if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
     }
 /*    
@@ -2403,14 +2454,14 @@ bool SUSY3L_sync3::wzCRSelection(){
 
     //lepton multiplicity
     if(!(_nMus + _nEls == 3)) return false;
-    bool has_hard_legs = hardLegSelection();
+    bool has_hard_legs = hardLegSelection(1,20.,0,-1.);
     if(!has_hard_legs) return false;
     if(!( _nJets == 1)) return false;
     if(!( _nBJets == 0)) return false;
-    if(!(_HT > 60 && _HT < 400)) return false;
-    if(!(_met->pt() > 50 && _met->pt() < 150)) return false;
+    //if(!(_HT > 60 && _HT < 400)) return false;
+    if(!(_met->pt() > 30 && _met->pt() < 150)) return false;
     //select on-Z events
-    bool is_reconstructed_Z = ZEventSelectionLoop(true, false);
+    bool is_reconstructed_Z = ZEventSelectionLoop(true, false, 50);
     if(!is_reconstructed_Z) return false;
     
     counter("passing WZ selection", kWZ);
@@ -2457,7 +2508,7 @@ bool SUSY3L_sync3::checkMultiIso(){
 
 
 //____________________________________________________________________________
-bool SUSY3L_sync3::hardLegSelection(){
+bool SUSY3L_sync3::hardLegSelection(int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg){
     /*
         Checks if the selected event has at least _nHardestLeptons leptons
         (muon or electron) fullfilling a harsher pT cut and _nHardLeptons leptons fulfilling another lower cut
@@ -2469,9 +2520,9 @@ bool SUSY3L_sync3::hardLegSelection(){
 
     //check how many electrons fullfils hard pt cut
     for(int ie=0; ie<_nEls; ++ie){
-        if(_els[ie]->pt()>_pt_cut_hard_legs){
+        if(_els[ie]->pt()>cut_hardLeg){
             nHardLepCount += 1;
-            if(_els[ie]->pt()>_pt_cut_hardest_legs){
+            if(_els[ie]->pt()>cut_hardestLeg){
                 nHardestLepCount += 1;
             } 
         }
@@ -2479,9 +2530,9 @@ bool SUSY3L_sync3::hardLegSelection(){
 
     //check how many muons fullfils hard pt cut
     for(int im=0; im<_nMus; ++im){
-        if(_mus[im]->pt()>_pt_cut_hard_legs){
+        if(_mus[im]->pt()>cut_hardLeg){
             nHardLepCount += 1;
-            if(_mus[im]->pt()>_pt_cut_hardest_legs){
+            if(_mus[im]->pt()>cut_hardestLeg){
                 nHardestLepCount += 1;
             }
         }
@@ -2489,9 +2540,9 @@ bool SUSY3L_sync3::hardLegSelection(){
 
     //check how many taus fullfils hard pt cut
     for(int it=0; it<_nTaus; ++it){
-        if(_taus[it]->pt()>_pt_cut_hard_legs){
+        if(_taus[it]->pt()>cut_hardLeg){
             nHardLepCount += 1;
-            if(_taus[it]->pt()>_pt_cut_hardest_legs){
+            if(_taus[it]->pt()>cut_hardestLeg){
                 nHardestLepCount += 1;
             }
         }
@@ -2500,7 +2551,7 @@ bool SUSY3L_sync3::hardLegSelection(){
     //correct number of leptons of hardLeg requirement with required number of leptons with hardestLeg
     nHardLepCount -= _nHardLeptons;
 
-    if(nHardestLepCount >= _nHardestLeptons && nHardLepCount >= _nHardLeptons) return true;
+    if(nHardestLepCount >= n_hardestLeg && nHardLepCount >= n_hardLeg) return true;
 
     return false;
 }
@@ -2579,7 +2630,7 @@ float SUSY3L_sync3::lowestOssfMll(bool ossf){
 
 
 //____________________________________________________________________________
-bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep){
+bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep, float mt_cut){
     /*
         Checks if there is a same-flavor opposite-charge lepton pair with an invariant 
         mass around the Z mass. The ossf pair with an invariant mass closest to the 
@@ -2587,7 +2638,7 @@ bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep){
         there is a 3rd lepton and if this 3rd lepton fulfills a requirement 
         on the transverse mass of the 3rd lepton and the met is checked
         The 3rd lepton can be relaxed to be a loose lepton with the parameter loose_3rd_lep = true
-        parameter: boolean onz, boolean loose_3rd_lep
+        parameter: boolean onz, boolean loose_3rd_lep, float mt cut for 3rd lepton with MET
         return: true (if a Z can be reconstructed from 2 leptons and tranverse mass 
         requirement is fulfilled), false (else)
     */
@@ -2717,7 +2768,7 @@ bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep){
                     cout << "lep: " << _tightLeps[il]->pt() << endl;
                 }}
         
-                if(mt > _M_T_3rdLep_MET_cut){
+                if(mt > mt_cut){
                     fill("MT" , mt        , _weight);
                     fill("3rd_lepton_flavor", _tightLeps[il]->pdgId(), _weight);
                     fill("3rd_lepton_pt", _tightLeps[il]->pt(), _weight);
@@ -2739,7 +2790,7 @@ bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep){
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and there is a 3rd lepton fulfilling the
                 //mt critirion is fulfilled
-                if(mt > _M_T_3rdLep_MET_cut){
+                if(mt > mt_cut){
                     fill("MT" , mt        , _weight);
                     fill("3rd_lepton_flavor", _taus[it]->pdgId(), _weight);
                     fill("3rd_lepton_pt", _taus[it]->pt(), _weight);
@@ -2765,7 +2816,7 @@ bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep){
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and there is a 3rd lepton fulfilling the
                 //mt critirion is fulfilled
-                if(mt > _M_T_3rdLep_MET_cut){
+                if(mt > mt_cut){
                     //fill("MT" , mt        , _weight);
                     //fill("3rd_lepton_flavor", _vc->get("LepGood_pdgId", il), _weight);
                     //fill("3rd_lepton_pt", _vc->get("LepGood_pt", il), _weight);
@@ -2788,7 +2839,7 @@ bool SUSY3L_sync3::ZEventSelectionLoop(bool onz, bool loose_3rd_lep){
                 mt = M_T(pt_other, _vc->get("met_pt"), phi_other, _vc->get("met_phi"));
                 //accept event if Z candidate exists and there is a 3rd lepton fulfilling the
                 //mt critirion is fulfilled
-                if(mt > _M_T_3rdLep_MET_cut){
+                if(mt > mt_cut){
                     //fill("MT" , mt        , _weight);
                     //fill("3rd_lepton_flavor", _vc->get("TauGood_pdgId", it), _weight);
                     //fill("3rd_lepton_pt", _vc->get("TauGood_pt", it), _weight);
@@ -3072,13 +3123,14 @@ bool SUSY3L_sync3::passHLTLine(string line){
 bool SUSY3L_sync3::passMultiLine(bool doubleOnly, bool isolatedOnly){
     /*
         checks if the event has been triggerd by any of the HLT trigger lines
-        parameters: doubleOnly if only dilepton paths should be checked
+        parameters: doubleOnly if only dilepton paths should be selected,
+        isolatedOnly if only isolated di-lepton paths should be selected
         return: true (if event has been triggered), false (else)
     */
 
-    for(size_t ih=0;ih<7;ih++) {
+    for(size_t ih=0;ih<9;ih++) {
+        if(isolatedOnly && ih>2) continue;
         if(doubleOnly && ih>5) continue;
-        if(isolatedOnly && (ih == 3 || ih == 4)) continue;
         if(passHLTLine(_hltLines[ih])) return true;
     }
 
