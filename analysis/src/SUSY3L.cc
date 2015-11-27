@@ -261,8 +261,7 @@ void SUSY3L::run(){
     fillEventPlots();
 
     //initialization of signal region cuts, categorization of events passing the baseline 
-    //selection into different signal regions, and filling of plots
-/*    setSignalRegion();
+    setSignalRegion();
     if(!srSelection()){
         setWorkflow(kGlobal);
         return;
@@ -272,7 +271,7 @@ void SUSY3L::run(){
     counter("signal region", kSR);
     setWorkflow(kGlobal);
     counter("signal region");
-*/
+
 }
 
 
@@ -1831,6 +1830,7 @@ if(_SR == "SR017") {
 //____________________________________________________________________________
 void SUSY3L::setSignalRegion() {
 
+//inclusive region (=baseline region)
 if(_SR == "SR999") {
    setCut("NBJetsSR", 0, ">=" );
    setCut("METSR", 50, ">=" );
