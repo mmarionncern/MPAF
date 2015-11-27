@@ -174,9 +174,9 @@ void SUSY3L::initialize(){
                 
     //config file input variables
     _pairmass = getCfgVarS("pairMass", "off");
-    _selectMuons = getCfgVarS("selectMuons", "true");
-    _selectElectrons = getCfgVarS("selectElectrons", "true");
-    _selectTaus = getCfgVarS("selectTaus", "false");
+    _selectMuons = getCfgVarI("selectMuons", true);
+    _selectElectrons = getCfgVarI("selectElectrons", true);
+    _selectTaus = getCfgVarI("selectTaus", false);
     _BR = getCfgVarS("baselineRegion", "BR0");
     _SR = getCfgVarS("signalRegion", "SR999");
 
@@ -415,7 +415,7 @@ void SUSY3L::collectKinematicObjects(){
 
     //select tight muons and electrons
     for(size_t il=0;il<_looseLeps.size();il++){
-        if(_selectMuons == "true"){ 
+        if(_selectMuons == true){ 
             // loop over all loose leptons in this event and select muons
             if(std::abs(_looseLeps[il]->pdgId()) == 13){
                 if(muonSelection(_looseLeps[il], _looseLepsIdx[il])) {
@@ -424,7 +424,7 @@ void SUSY3L::collectKinematicObjects(){
                 }
             }
         }
-        if(_selectElectrons == "true"){ 
+        if(_selectElectrons == true){ 
             // loop over all loose leptons in this event and select electrons
             if(std::abs(_looseLeps[il]->pdgId()) == 11){
                 if(electronSelection(_looseLeps[il], _looseLepsIdx[il])) {
@@ -450,7 +450,7 @@ void SUSY3L::collectKinematicObjects(){
     }
 
     //select taus
-    if(_selectTaus == "true"){ 
+    if(_selectTaus == true){ 
     // loop over all taus and apply selection
     for(int i = 0; i < _vc->get("nTauGood"); ++i){
         // check which of the taus have tau identifier 15 (actually not needed)
@@ -2751,7 +2751,7 @@ bool SUSY3L::ZEventSelectionLoop(bool onz, bool loose_3rd_lep, float mt_cut){
                 phi_other = 0.;
             }
             //loop over all electrons to check MT requirement
-            if(_selectTaus == "true"){
+            if(_selectTaus == true){
             for(int it=0;it<_vc->get("nTauGood"); it++) {
                 //continue if tau is part of the Z candidte
                 if(lep1_save == it || lep2_save == it){
