@@ -233,7 +233,7 @@ void SUSY3L::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    if(!passMultiLine(false, false)) return;
+    if(!passMultiLine(true, false)) return;
     counter("HLT");
 
     // do the minimal selection and collect kinematic variables for events passing it
