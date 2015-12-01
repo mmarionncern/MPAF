@@ -112,6 +112,7 @@ float Tools::dR(float eta1, float eta2, float phi1, float phi2){
 }
 
 
+//____________________________________________________________________________
 float Tools::dR2(float eta1, float eta2, float phi1, float phi2){
 	/* 
 	computes delta R between two particles, whose pseudorapidity and azimuthal
@@ -165,6 +166,75 @@ std::vector<std::string> Tools::explodeString(const std::string string, std::str
 	vector.push_back(element);
 	
 	return vector;
+
+}
+
+
+//__________________________________________________________________________
+std::vector<std::string> Tools::split(const std::string s, char delim) {
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+
+//__________________________________________________________________________
+std::vector<float> Tools::strToFloat(const std::vector<std::string> vec){
+
+	std::vector<float> res;
+    for(unsigned int i = 0; i < vec.size(); ++i){
+        res.push_back(evalSimpleFormula(vec[i]));
+    }
+	return res;
+
+}
+
+
+//__________________________________________________________________________
+float Tools::add(const std::vector<std::string> elems){
+
+  float res = evalSimpleFormula(elems[0]);
+  if(elems[0] == "") res = 0;
+  for(unsigned int i = 1; i < elems.size(); ++i)
+    res += evalSimpleFormula(elems[i]);
+
+  return res;
+}
+
+
+//__________________________________________________________________________
+float Tools::subtract(const std::vector<std::string> elems){
+
+  float res = evalSimpleFormula(elems[0]);
+  if(elems[0] == "") res = 0;
+  for(unsigned int i = 1; i < elems.size(); ++i)
+    res -= evalSimpleFormula(elems[i]);
+
+  return res;
+}
+
+
+//__________________________________________________________________________
+float Tools::evalSimpleFormula(std::string formula){
+
+    if(formula.find("+") == std::string::npos && formula.find("-") == std::string::npos) 
+      return atof(formula.c_str());
+
+    char sign = '+';
+    if(formula.find("+") == std::string::npos) sign = '-';
+
+    formula = trim(formula);
+    formula = trim(formula, "\"");
+    
+    std::vector<std::string> elems;
+    elems = split(formula, sign);
+
+    if(sign == '+') return add(elems);    
+    return subtract(elems);
 
 }
 
@@ -242,17 +312,24 @@ std::string Tools::getTimestampDir(){
 
 
 //____________________________________________________________________________
-float Tools::interpretCut(TString cut){
-	/*
-  	interprets a cut value defined in the config file such that it can be used
-  	as a float
-  	parameters: cut
-  	return: the float interpretation of the cut
-  	*/
+std::vector<std::string> Tools::insertIntoVectorS(std::vector<std::string> vector, std::vector<std::string> append){
 
-	if     (cut == "true" ) return 1;
-	else if(cut == "false") return 0;
-	else                    return cut.Atof();
+  for(unsigned int i = 0; i < append.size(); ++i){
+    if(std::find(vector.begin(), vector.end(), append[i]) == vector.end())
+      vector.push_back(append[i]);
+  }
+  
+  return vector;
+
+}
+
+
+//____________________________________________________________________________
+std::string Tools::intToString(int number) {
+
+  std::ostringstream oss;
+  oss << number;
+  return oss.str();
 
 }
 
@@ -417,6 +494,16 @@ VerbosityLevel Tools::toVerbosityLevel(std::string value){
 }
 
 
+
+//____________________________________________________________________________
+std::string Tools::trim(std::string s, std::string chr){
+
+    size_t first = s.find_first_not_of(chr);
+    size_t last  = s.find_last_not_of(chr);
+    if(first == std::string::npos) return "";
+    return s.substr(first, (last-first+1));
+
+}
 
 
 

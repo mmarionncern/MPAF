@@ -39,6 +39,10 @@ typedef std::map<std::string,std::pair<std::string,std::vector<std::vector<float
 typedef std::map<std::string,std::pair<std::string,std::vector<std::vector<float> > > >::iterator itFitM;
 typedef std::map<std::string,std::pair<std::string,std::vector<std::vector<float> > > >::const_iterator citFitM;
 
+//uncNames / dataset / yields
+typedef std::map<std::string, std::map<std::string,std::vector<float> > > shapeM; 
+typedef std::map<std::string, std::map<std::string,std::vector<float> > >::const_iterator itShapeM;
+
 struct SystST{
 
    std::string type; //+ * %

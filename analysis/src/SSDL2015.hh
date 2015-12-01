@@ -2,8 +2,8 @@
 #define SSDL2015_HH
 
 #include "analysis/core/MPAF.hh"
-
 #include "analysis/modules/SusyModule.hh"
+#include "analysis/utils/Tools.hh"
 
 class SSDL2015: public MPAF {
 
@@ -63,6 +63,9 @@ private:
   //advanced fast selection
   bool testRegion();
   void categorize();
+  
+  int getMergedSR(int wf);
+
 
   bool passCERNSelection();
   bool looseLepton(const Candidate*c, int idx, int pdgId);
@@ -71,6 +74,11 @@ private:
   
   bool hltSelection();
   bool passHLT(std::string id);
+  bool passHLTbit();
+  
+  bool passNoiseFilters();
+  bool passCSCfilter();
+  bool passEESCfilter();
 
   void advancedSelection(int WF);
 
@@ -88,6 +96,11 @@ private:
 
   bool checkDoubleCount();
 
+  void registerTriggerVars();
+  void readCSCevents();
+  void readEESCevents();
+  void readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >&, vector<string>);
+  
 private: 
 
   enum {kIsOS=0,kIsFake, kIsDFake};
@@ -180,6 +193,14 @@ private:
 
   //HLT
   bool _hltDLHT;
+  string _hltBit;
+
+  vector<string> _vTR_lines_non_ee;
+  vector<string> _vTR_lines_non_em;
+  vector<string> _vTR_lines_non_mm;
+  vector<string> _vTR_lines_iso_ee;
+  vector<string> _vTR_lines_iso_em;
+  vector<string> _vTR_lines_iso_mm;
 
   //charge misId
   bool _isOS;
@@ -226,6 +247,9 @@ private:
   CandList _tightLepsOSPtCut;
   std::vector<unsigned int>  _tightLepsOSPtCutIdx;
 
+  CandList _allJets;
+  std::vector<std::pair<std::string, unsigned int> >  _allJetsIdx;
+
   CandList _jets;
   std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
   
@@ -267,6 +291,7 @@ private:
 
   vector<string> _categs;
   bool _categorization;
+  bool _mergeSRs;
   bool _DoValidationPlots;
 
   vector<TVector2> _uncleanJets;
@@ -287,6 +312,9 @@ private:
   map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> > _events;
   map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> >::iterator _itEvt;
 
+  //CSC events
+  map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredCSCEvents;
+  map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredEESCEvents;
 
   vector<float> _jetLepACorFactor;
 
