@@ -150,7 +150,7 @@ void AnaUtils::setEffFromStat(int ids, string cName, int iCateg, float sw, float
   //  Acceptance
   // if(_useAccForEff)
   //   if(!_inAcc) w=0;
-  
+ 
   _itEIMap=_effMap[ ids ][iCateg].find( cName );
   if(_itEIMap==_effMap[ ids ][ iCateg ].end() ) {
    
@@ -312,7 +312,7 @@ AnaUtils::setSystematics(int ids, string cName, int iCateg, string sName, bool u
   accept[1] = down;
   
   float val=w;
-  
+ 
   _effMap[ ids ][ iCateg ][ cName ].systsU[ sName ] +=(accept[0]?val:0);
   _effMap[ ids ][ iCateg ][ cName ].systsD[ sName ] +=(accept[1]?val:0);
   
@@ -365,6 +365,11 @@ AnaUtils::getYieldSysts(EffST eST, map<string,float>& rU, map<string,float>& rD,
 
 }
 
+float
+AnaUtils::getYield(int ids, string cName, int icat) {
+
+  return _effMap[ ids ][ icat ][ cName ].sumw;
+}
 
 void
 AnaUtils::getSystematics(string ds, string lvl, string categ) {
@@ -792,10 +797,20 @@ AnaUtils::getCategories() {
   
   vector<string> vs;
   map<int, categ>::const_iterator it;
-  for(it=_categories.begin(); it!=_categories.end();it++) 
+  for(it=_categories.begin(); it!=_categories.end();it++) {
+    
+    if(it->second.isUnc) continue;
+   
     vs.push_back( it->second.name );
-  
+  }  
+
   return vs;
+}
+
+bool
+AnaUtils::isUncCateg(int id) {
+  //int id=getCategId(categ);
+  return _categories[id].isUnc;
 }
 
 vector<string>
@@ -1071,7 +1086,6 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
 	p.second[ids][3] = rD;
 	p.second[ids][2]["tot"] = totUp;
 	p.second[ids][3]["tot"] = totDown;
-
       }
     }
     onums.push_back(p);
@@ -1082,12 +1096,14 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
 
 
 bool
-AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, string sigName,
+AnaUtils::getDataCardLines(map<string,string>& lines,
+			   shapeM& shapes, 
+			   vector<string> dsNames, string sigName,
 			   string categ, string cname, int bin,
 			   map<string,vector<string> > intNuisPars,
 			   map<string,bool > nuisParExt,
 			   map<string,string> nuisParScheme,
-			   map<string,vector<string> > nuisParVals) {
+			   map<string,vector<string> > nuisParVals ) {
   
   vector<pair<string, vector<vector<map<string,float> > > > > numbers=retrieveNumbers(categ, cname, kMono);
 
@@ -1154,7 +1170,9 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
   // and the nuisance parameters
   for(map<string,vector<string> >::const_iterator it=intNuisPars.begin();
       it!=intNuisPars.end(); it++) {
-    string line;
+    string line="";
+    map<string, vector<float> > tmpMap;
+    float central;
     
     if(it->first.find("stat")!=string::npos) continue; //syst from stat ucnertainties
     if(nuisParExt[ it->first ] == true ) continue;
@@ -1165,15 +1183,19 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
       exists=false;
       if(dsNames[ids-1]=="") continue; //total MC?
       if(dsNames[ids-1].find("data")!=string::npos) continue;
-
+      
+      vector<float> vals;
       for(unsigned int ids2=0;ids2<it->second.size();ids2++) {
+	
 	if(dsNames[ids-1]==it->second[ids2] ) {
 	  exists=true;
 	  float vUp=-1, vDo=1;
 	  if(numbers[0].second[ids][2].find(it->first)!=numbers[0].second[ids][2].end()) {
-	    if(numbers[0].second[ids][0]["tot"]!=0) {
+	    central=numbers[0].second[ids][0]["tot"];
+	    if(numbers[0].second[ids][0]["tot"]>0) {
 	      vUp = numbers[0].second[ids][2][it->first]/numbers[0].second[ids][0]["tot"];
 	      vDo = numbers[0].second[ids][3][it->first]/numbers[0].second[ids][0]["tot"];
+	      // cout<<it->first<<"  "<<dsNames[ids-1]<<" -->  "<<numbers[0].second[ids][2][it->first]<<"  "<<numbers[0].second[ids][3][it->first]<<"  "<<numbers[0].second[ids][0]["tot"]<<" --> "<<numbers[0].second[ids][0]["tot"]*(1+vUp)<<"  "<<numbers[0].second[ids][0]["tot"]*(1-vDo)<<" --> "<<(1-vDo)<<" "<<(1+vUp)<<" // "<<vUp<<"  "<<vDo<<endl;
 	    }
 	    else { //arbitrary 100% for now
 	      if(numbers[0].second[ids][2][it->first]==0) vUp=0;
@@ -1201,36 +1223,72 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
 	  if(std::abs(vUp)<0.001 && vUp!=0) vUp=0.001*(vUp/std::abs(vUp));
 	  if(std::abs(vDo)<0.001 && vDo!=0) vDo=0.001*(vDo/std::abs(vDo));
 	  
-	  if(vDo>1) vDo=0.999;
+	  central=(central<=0)?0.0001:central;
+	  vals.push_back( central );
+	  if(central!=0.0001) {
+	    vals.push_back( (1+vUp)*central );
+	    vals.push_back( (1-vDo)*central );
+	  }
+	  else { //poisson, cannot work w/o N gen events
+	    float w=std::abs(numbers[0].second[ids][0]["tot"])/numbers[0].second[ids][4]["tot"];
+	    vals.push_back( 1.84*w ); 
+	    vals.push_back( 0.0001 );
+	  }
+	  tmpMap[ dsNames[ids-1] ]=vals;
 
+
+	  if(vDo>=1) vDo=0.999;
+	  //cout<<" --> "<<(1+vUp)<<"  "<<(1-vDo)<<endl;
 	  osU<<fixed<<setprecision(3)<<(1+vUp);
 	  osD<<fixed<<setprecision(3)<<(1-vDo);
 	  string tmpU=osU.str();
 	  string tmpD=osD.str();
 
-	  if(dsNames[ids-1]!=sigName) {
-	    line+=osD.str()+"/"+osU.str()+"\t";
-	  }
-	  else {
-	    line=osD.str()+"/"+osU.str()+"\t"+line;
+	  if(nuisParScheme[it->first]!="shape") {
+	    if(dsNames[ids-1]!=sigName) {
+	      line+=osD.str()+"/"+osU.str()+"\t";
+	    }
+	    else {
+	      line=osD.str()+"/"+osU.str()+"\t"+line;
+	    }
+	  } else {				
+	    if(dsNames[ids-1]!=sigName) {
+	      line+="1\t";
+	    }
+	    else {
+	      line="1\t"+line;
+	    }
 	  }
 	
 	}//find ds
       }//dsname 2
       
       if(!exists) {
-	line+="-\t";	
+	line+="-\t";
+	central = numbers[0].second[ids][0]["tot"];
+	central=(central<=0)?0.0001:central;
+	vals.push_back( central );
+	vals.push_back( central );
+	vals.push_back( central );
+	tmpMap[ dsNames[ids-1] ]=vals;
       }
     }//dsName
 
     //adding the header ==========================
-    lines[ "NP_"+it->first ] = it->first+"\tlnN\t"+line;
+    if(nuisParScheme[it->first]!="shape") {
+      lines[ "NP_"+it->first ] = it->first+"\tlnN\t"+line;
+    } else {
+      lines[ "NP_"+it->first ] = it->first+"\tshape\t"+line;
+      shapes[ it->first ] = tmpMap;
+    }
   }
 
   //=================================================================
   // and the stat uncertainty
   for(unsigned int ids=1;ids<dsNames.size()+1;ids++) {
     float unc= numbers[0].second[ids][1]["tot"]/numbers[0].second[ids][0]["tot"];
+    float central=numbers[0].second[ids][0]["tot"];
+    central=(central<=0)?0.0001:central;
     if(unc<0) unc*=-1;
     if(numbers[0].second[ids][0]["tot"]==0) unc=0;
 
@@ -1238,7 +1296,8 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
     osN<<setprecision(3)<<numbers[0].second[ids][4]["tot"];
 
     string line="";
-
+    map<string, vector<float> > tmpMap;
+    
     //single case
     //if(intNuisPars.find(dsNames[ids-1]+"stat")==intNuisPars.end() ) continue;
 
@@ -1255,18 +1314,21 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
 	exists=true; 
 	if(nuisParScheme[it->first]=="gmN") {
 	  if(numbers[0].second[ids][4]["tot"]!=0)
-	    unc = numbers[0].second[ids][1]["tot"]/sqrt(numbers[0].second[ids][4]["tot"]); //effective rate
+	    unc = numbers[0].second[ids][0]["tot"]/numbers[0].second[ids][4]["tot"]; //effective rate
 	  else
-	    unc = 11;
+	    unc = 1;
+
+	  cout<<numbers[0].second[ids][1]["tot"]<<"  "<<numbers[0].second[ids][0]["tot"]<<"  "<<sqrt(numbers[0].second[ids][4]["tot"])<<"  "<<numbers[0].second[ids][4]["tot"]<<endl;
 
 	  gmN=true;
 	}
-	break;}
+	break;
+      }
     }
     if(!exists) continue;
-    
+      
     map<string,vector<string> >::const_iterator it2=intNuisPars.find(it->first+"_OW");
-    if(it2!=intNuisPars.end() && 
+    if(it2!=intNuisPars.end() && !gmN && 
        find( intNuisPars[it->first].begin(), intNuisPars[it->first].end(), _dsNames[ids-1] )==intNuisPars[it->first].end() ) {
       for(unsigned int id=0;id<it->second.size();++id) {
 	if(dsNames[ids-1]==it->second[id])
@@ -1275,27 +1337,68 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
     }
 
     stringstream os;
-    os<<setprecision(3)<<unc;
+    os<<setprecision(4)<<unc;
 
-    for(unsigned int ids2=1;ids2<dsNames.size()+1;ids2++) {
     
+    for(unsigned int ids2=1;ids2<dsNames.size()+1;ids2++) {
+      vector<float> vals;
       if(dsNames[ids2-1]==dsNames[ids-1]) {
+	
+	// cout<<it->first<<"  "<<dsNames[ids-1]<<" -->  "<<unc<<"  "<<numbers[0].second[ids][0]["tot"]<<"  "<<central<<" --> "<<numbers[0].second[ids][0]["tot"]*(1+unc)<<"  "<<numbers[0].second[ids][0]["tot"]*(1-unc)<<" --> "<<(1-unc)<<" "<<(1+unc)<<endl;
+	central=numbers[0].second[ids2][0]["tot"];
+	vals.push_back( central );
+	vals.push_back( central*(1+unc) );
+	vals.push_back( central*(1-unc) );
+	tmpMap[ dsNames[ids2-1] ]=vals;
+
 	if(gmN) {
-	  line += os.str()+"\t";
+	  if(dsNames[ids-1]!=sigName) {
+	    line += os.str()+"\t";
+	  } else {
+	    line = os.str()+"\t"+line;
+	  }
 	}
-	else {
-	  if(os.str().size()>=3 && os.str().substr(2,1)==".") // very long numbers	
-	    line += os.str().substr(0,3)+"\t";
-	  else if(os.str()!="1" && os.str()!="0")
-	    line+="1."+os.str().substr(2,2)+"\t";
-	  else if(os.str()=="1")
-	    line+=os.str()+"\t";
-	  else
-	    line+="1.00\t";
+	else if(nuisParScheme[it->first]=="lnN") {
+	  if(dsNames[ids-1]!=sigName) {
+	    if(os.str().size()>=3 && os.str().substr(2,1)==".") // very long numbers	
+	      line += os.str().substr(0,4)+"\t";
+	    else if(os.str()!="1" && os.str()!="0")
+	      line+="1."+os.str().substr(2,3)+"\t";
+	    else if(os.str()=="1")
+	      line+=os.str()+"\t";
+	    else
+	      line+="1.00\t";
+	  } else {
+	    if(os.str().size()>=3 && os.str().substr(2,1)==".") // very long numbers	
+	      line=os.str().substr(0,4)+"\t"+line;
+	    else if(os.str()!="1" && os.str()!="0")
+	      line="1."+os.str().substr(2,3)+"\t"+line;
+	    else if(os.str()=="1")
+	      line=os.str()+"\t"+line;
+	    else
+	      line="1.00\t"+line;
+	  }
+	} else { //shape
+	  if(dsNames[ids-1]!=sigName) {
+	    line+="1\t";
+	  } else {
+	    line="1\t"+line;
+	  }
 	}
       }
-      else if(dsNames[ids2-1].find("data")==string::npos)
-       	line+="-\t";	
+      else if(dsNames[ids2-1].find("data")==string::npos) {
+	if(dsNames[ids2-1]!=sigName) {
+	  line+="-\t";	
+	} else {
+	  line="-\t"+line;	
+	}
+	central=numbers[0].second[ids2][0]["tot"];
+	central=(central<=0)?0.0001:central;
+	vals.push_back( central );
+	vals.push_back( central );
+	vals.push_back( central );
+	tmpMap[ dsNames[ids2-1] ]=vals;
+      }
     }
     
     //single case
@@ -1303,8 +1406,16 @@ AnaUtils::getDataCardLines(map<string,string>& lines, vector<string> dsNames, st
       lines[ "NP_"+dsNames[ids-1]+"stat" ] = it->first+"\tlnN\t"+line;
     else if(nuisParScheme[it->first]=="gmN")
       lines[ "NP_"+dsNames[ids-1]+"stat" ] = it->first+"\tgmN "+osN.str()+"\t"+line;
-    
-  }
+    else if(nuisParScheme[it->first]=="shape") {
+      string nUnc=categ;
+      if(categ.find("global_")!=string::npos) nUnc=categ.substr(7,categ.size()-7);
+      lines[ "NP_"+dsNames[ids-1]+nUnc+"stat" ] = dsNames[ids-1]+nUnc+"stat"+"\tshape\t"+line;
+      //cout<<" ==> "<<tmpMap[ dsNames[ids-1] ][1]<<"  "<<tmpMap[ dsNames[ids-1] ][2]<<endl;
+      shapes[ dsNames[ids-1]+nUnc+"stat" ] = tmpMap;
+    }
+   
+    //}
+  }//dsnames
   if(sumBkg+sumSig==0) return false;
   return true;
 }

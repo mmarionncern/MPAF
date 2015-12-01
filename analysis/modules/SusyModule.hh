@@ -2,6 +2,7 @@
 #define SusyModule_hh
 
 #include "analysis/core/VarClass.hh"
+#include "analysis/modules/BTagCalibrationStandalone.hh"
 #include "analysis/tools/Candidate.hh"
 #include "analysis/utils/KineUtils.hh"
 #include "analysis/utils/mt2_bisect.h"
@@ -52,6 +53,8 @@ public:
 		 CandList& cleanBJets, vector<pair<string,unsigned int> >& bJetIdxs,
 		 CandList& lepJets, vector<pair<string,unsigned int> >& lepJetsIdxs,
 		 float thr, float bthr, bool isJESUnc, int dir);
+  void ptJets(CandList allJets, vector<pair<string, unsigned int> > allJetIdxs,
+              CandList& jets, vector<pair<string, unsigned int> >& jetIdxs, float thr);
 
   const Candidate* jetLepAware(const Candidate* lep);
   float pTRatio(const Candidate* lep, const Candidate* jet);
@@ -89,16 +92,29 @@ public:
   float closestJetPt(int idx) const;
   float conePt(int idx, int isoWp = kTight) const; 
 
+  void correctFlipRate(float& rate, float eta);
+
+  void applyHLTSF(const string& hltLine, float& weight);
   void applyHLTSF(const string& hltLine, const vector<Candidate*>& cands, float& weight);
   void applyLepSF(const CandList& cands, float& weight);
   void applySingleLepSF(const Candidate* cand, float& weight);
+  float getFastSimLepSF(Candidate* lep1, Candidate* lep2, int nVert);
 
 
   float bTagSF(CandList& jets , vector<pair<string, unsigned int> >& jetIdx ,
                CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx, int st);
-  float bTagMediumEfficiency(Candidate* jet, bool isBTagged);
-  float bTagMediumScaleFactor(Candidate* jet, bool isBTagged, int st);
+  float bTagMediumEfficiency(Candidate* jet, unsigned int flavor);
+  float bTagMediumScaleFactor(Candidate* jet, unsigned int flavor, int st);
   float bTagScaleFactor(unsigned int op, unsigned int mt, int st, unsigned int fl);
+  float bTagPt(float);
+
+  float GCtriggerScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
+  float GCelectronScaleFactorHighHT(float pt, float eta);
+  float GCelectronScaleFactorLowHT(float pt, float eta);
+  float GCmuonScaleFactor(float pt, float eta);
+  float GCleptonScaleFactor(int pdgId, float pt, float eta, float ht);
+  float GCeventScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
+  double LTFastSimTriggerEfficiency(double HT, double l1_Pt, int l1_pdgId, double l2_Pt, int l2_pdgId);
 
   enum {kDenom=0,
 	kVLoose,
@@ -120,10 +136,22 @@ public:
 private:
 
   void defineLeptonWPS();
+  void loadBTagReader();
   void loadDBs();
   //const
   VarClass* _vc;
   DataBaseManager* _dbm;
+
+  BTagCalibration* _calib;
+  BTagCalibrationReader* _reader_b_cv;
+  BTagCalibrationReader* _reader_b_up;
+  BTagCalibrationReader* _reader_b_do;
+  BTagCalibrationReader* _reader_c_cv;
+  BTagCalibrationReader* _reader_c_up;
+  BTagCalibrationReader* _reader_c_do;
+  BTagCalibrationReader* _reader_l_cv;
+  BTagCalibrationReader* _reader_l_up;
+  BTagCalibrationReader* _reader_l_do;
 
   vector<float> _cLostHitWP;
   vector<float> _tChWP;

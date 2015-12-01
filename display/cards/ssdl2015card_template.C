@@ -68,9 +68,9 @@ void dataCardProd_CATTAG_SIGTAG() {
   md.addNuisanceParameter("tEff","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
   md.addNuisanceParameter("tHTE","ttW:ttHZ:WW:XG:rares:SIGTAG","lnN","HLTEFFTAG");
   
-  if("CATTAG"=="HHSR31" || "CATTAG"=="HHSR32" ||
-     "CATTAG"=="HLSR25" || "CATTAG"=="HLSR26" )
-    md.overwriteNuisanceParameter("BTAG","WZ:ttW:ttHZ:WW:XG:rares:SIGTAG","-:-:-:-:-:-:-");
+  // if("CATTAG"=="HHSR31" || "CATTAG"=="HHSR32" ||
+  //    "CATTAG"=="HLSR25" || "CATTAG"=="HLSR26" )
+  //   md.overwriteNuisanceParameter("BTAG","WZ:ttW:ttHZ:WW:XG:rares:SIGTAG","-:-:-:-:-:-:-");
 
 
   //Data-driven methods

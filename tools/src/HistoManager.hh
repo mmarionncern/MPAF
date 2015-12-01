@@ -94,7 +94,7 @@ public:
 
   void fill(string var, int ds, float val, float weight=1.);
   void fill(string var, int ds, float valx, float valy, float weight);
-  void fill(string var, string type, float value, float weight=1.,string dir="");
+  void fill(string var, int ds, string type, float value, float weight=1.,string dir="");
   
   void copyHisto( string var, int ds, TH1* h);
 
