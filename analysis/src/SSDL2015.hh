@@ -5,6 +5,8 @@
 #include "analysis/modules/SusyModule.hh"
 #include "analysis/utils/Tools.hh"
 
+#include "TH3D.h"
+
 class SSDL2015: public MPAF {
 
 public:
@@ -39,7 +41,10 @@ private:
   bool genMatchedToFake(int id);
 
   bool passGenSelection();
-  
+
+  bool checkMassBenchmark();
+  void loadScanHistogram();
+
   float getFR(Candidate* cand, int idx);
   
   void chargeFlipProb();
@@ -279,6 +284,7 @@ private:
   string _SR;
   string _FR;
   int _LHESYS;
+  int _fastSim;
 
   int _fakeEl;
   int _fakeMu;
@@ -316,6 +322,11 @@ private:
   map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredEESCEvents;
 
   vector<float> _jetLepACorFactor;
+
+
+  //scan =======
+  TH3D* _hScanWeight;
+  int _nProcEvtScan;
 
 };
 
