@@ -290,13 +290,13 @@ SSDL2015::initialize(){
   
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
-  //addManualSystSource("EWKFR",SystUtils::kNone);
-  addManualSystSource("Eff",SystUtils::kNone);
-  addManualSystSource("Theory",SystUtils::kNone);
-  addManualSystSource("JES",SystUtils::kNone);
-  addManualSystSource("BTAG",SystUtils::kNone);
-  addManualSystSource("BTAGFS",SystUtils::kNone);
-  addManualSystSource("LepEffFS",SystUtils::kNone);
+  // //addManualSystSource("EWKFR",SystUtils::kNone);
+  // addManualSystSource("Eff",SystUtils::kNone);
+  // //addManualSystSource("Theory",SystUtils::kNone);
+  // addManualSystSource("JES",SystUtils::kNone);
+  // addManualSystSource("BTAG",SystUtils::kNone);
+  // addManualSystSource("BTAGFS",SystUtils::kNone);
+  // addManualSystSource("LepEffFS",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -488,6 +488,7 @@ SSDL2015::run() {
   if(!_vc->get("isData") ) {
     if(!isInUncProc())  {
       _btagW = _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
+      //cout<<" --> "<<_btagW<<endl;
       _weight *= _btagW;
     }
     else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
@@ -2517,19 +2518,22 @@ SSDL2015::checkMassBenchmark() {
     float xb = _hScanWeight->GetXaxis()->FindBin(m1);
     float yb = _hScanWeight->GetYaxis()->FindBin(m2);
     float zb = _hScanWeight->GetZaxis()->FindBin(1);
-    // cout<<M1<<"/"<<M2<<" -> "<<xb<<"/"<<yb<<"/"<<zb<<" --> "
-    // 	<<_hScanWeight->GetBinContent(xb,yb,zb)<<endl;
+  
     _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
+    // cout<<M1<<"/"<<M2<<" -> "<<xb<<"/"<<yb<<"/"<<zb<<" --> "
+    // 	<<_hScanWeight->GetBinContent(xb,yb,zb)<<"   "
+    // 	<<_dbm->getDBValue("T1tttXsect",M1)<<"  "<<_dbm->getDBValue("T1tttXsect",M1)*2110/_nProcEvtScan<<"  "<<_weight<<endl;
   }
 
   if(_sampleName.find(s)==string::npos) return false;
-
   _weight *= _dbm->getDBValue("T1ttttXsect",M1)*2110/_nProcEvtScan;
   return true;
 }
 
 void
 SSDL2015::loadScanHistogram() {
-  TFile* file=new TFile("/home/mmarionn/Documents/CMS/MPAF/workdir/data/test/test.root");
+  //TFile* file=new TFile("/home/mmarionn/Documents/CMS/MPAF/workdir/data/test/test.root");
+  string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScanT1tttt.root";
+  TFile* file=new TFile(mpafenv.c_str(),"read");
   _hScanWeight=(TH3D*)file->Get("CountSMS");
 }

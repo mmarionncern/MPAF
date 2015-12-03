@@ -948,19 +948,22 @@ SusyModule::bTagSF(CandList& jets ,
 
     float fsSF=1.;
     if(fastSim) fsSF=bTagMediumScaleFactorFastSim(jets[i], flavor, fsst);
+    // cout<<fsSF<<endl;
+      //fsSF=1;
 
     if(find){
       pdata*=bTagMediumEfficiency(jets[i], flavor) * 
 	bTagMediumScaleFactor(jets[i], flavor, st)*fsSF;
-      pmc*=bTagMediumEfficiency(jets[i], flavor);
+      pmc*=bTagMediumEfficiency(jets[i], flavor)*fsSF;
     }
     else {
       pdata*=(1-bTagMediumEfficiency(jets[i], flavor) * 
-	      bTagMediumScaleFactor(jets[i], flavor, st))*fsSF;
-      pmc*=(1-bTagMediumEfficiency(jets[i], flavor));
+	      bTagMediumScaleFactor(jets[i], flavor, st)*fsSF);
+      pmc*=(1-bTagMediumEfficiency(jets[i], flavor)*fsSF);
     }
   }
 
+  //cout<<"pd " <<pdata<<"  "<<pmc<<endl;
   if(pmc != 0) return pdata/pmc;
   return 1.0;
 
@@ -1014,6 +1017,7 @@ SusyModule::bTagMediumScaleFactor(Candidate* jet, unsigned int flavor, int st){
     else             reader = _reader_l_do;
   }
  
+  
   float sf = reader->eval(fl, jet -> eta(), std::max((float)30.,std::min((float)669.,jet->pt())));
   return sf;
 
