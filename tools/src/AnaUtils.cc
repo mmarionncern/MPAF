@@ -792,6 +792,23 @@ AnaUtils::getCategId(string categ) {
   return icat;
 }
 
+int
+AnaUtils::getCategUniqueId(string categ, string uncTag) {
+  int icat=-1;
+  int n=_categories.size();
+
+  for(int ic=-1;ic<n;ic++) {
+    if(_categories[ic].name==categ &&
+       _categories[ic].uncTag==uncTag) {
+      icat = _categories[ic].id;
+      break;
+    }
+  }
+  return icat;
+}
+
+
+
 vector<string> 
 AnaUtils::getCategories() {
   
@@ -1144,6 +1161,7 @@ AnaUtils::getDataCardLines(map<string,string>& lines,
 
     }
     else if(dsNames[ids-1]==sigName) {
+      //cout<<sigName<<" --> "<<numbers[0].second[ids][0]["tot"]<<endl;
       binLine += osB.str()+"\t";
       sumSig = numbers[0].second[ids][0]["tot"];
     }

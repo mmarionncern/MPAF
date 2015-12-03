@@ -221,6 +221,7 @@ public:
   //int getUncWorkflow(string wf);
 
   int getCategId(string categ);
+  int getCategUniqueId(string categ, string uncTag);
   int getNCateg() {return _categories.size(); };
   vector<string> getCategories();
   vector<string> getSelections(int ids, int icat);

@@ -70,7 +70,7 @@ CXXFLAGS   += -I. -I.. $(patsubst %, -I%, $(MODULES))
 ### External libraries
 # ROOT
 ROOTCFLAGS := $(shell root-config --cflags)
-ROOTGLIBS  := $(shell root-config --glibs) -lMinuit -lMinuit2 -lHtml -lEG -lThread -lRooFit -lRooFitCore -lFoam
+ROOTGLIBS  := $(shell root-config --glibs) -lMinuit -lMinuit2 -lHtml -lEG -lThread -lRooFit -lRooFitCore -lFoam -lHistPainter
 
 # add possible new dependencies
 # -lMinuit2
