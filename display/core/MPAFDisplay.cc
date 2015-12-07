@@ -1082,16 +1082,18 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       
       if(_dsNames[id]=="data") continue;
       
+     
       valCentral[ _dsNames[id] ] += uncShapes[ic].begin()->second[ _dsNames[id] ][0];
       hCentral[ _dsNames[id] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
-      
+      // if(_dsNames[id]=="T1tttt_1200_450")
+      // 	cout<<" ==== > "<<categs[ic]<<"  "<<uncShapes[ic].begin()->second[ _dsNames[id] ][0]<<"   "<<valCentral[ _dsNames[id] ]<<endl;
       for(size_t iu=0;iu<uncNames.size();iu++) {
 	if(uncShapes[ic].find(uncNames[iu])!=uncShapes[ic].end() && 
 	   uncShapes[ic][ uncNames[iu] ].find(_dsNames[id])!=uncShapes[ic][ uncNames[iu] ].end() ) {
-	  if("T1tttt_975_675"==_dsNames[id] && uncNames[iu].find("BTAG")!=string::npos)
-	    cout<<_dsNames[id]+"_"+uncNames[iu]<<" --> "
-		<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
-		<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
+	  // if("T1tttt_1200_450"==_dsNames[id] && uncNames[iu].find("BTAG")!=string::npos)
+	  //   cout<<_dsNames[id]+"_"+uncNames[iu]<<" --> "
+	  // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
+	  // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
 
 	  hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
 	  hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
@@ -1142,6 +1144,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       yieldStr += os.str()+"\t";
       
     } else if(_dsNames[ids]==sigName) {
+      cout<<" --> "<<_dsNames[ids]<<"   "<<valCentral[_dsNames[ids]]<<endl;
       sumSig = valCentral[_dsNames[ids]];
     }
   }

@@ -123,6 +123,8 @@ public:
 
   float getPuWeight(unsigned int nvtx);
 
+  void applyISRWeight(unsigned int process, int var, float& weight);
+
   enum {kDenom=0,
 	kVLoose,
 	kLoose,
@@ -147,6 +149,10 @@ private:
   void loadBTagReader();
   void loadDBs();
   void initPUWeights(); 
+
+ 
+  void isrWeight(int var, float pt, float& weight);
+  CandList collectGenParticles(int pdgId, int status);
 
  //const
   VarClass* _vc;

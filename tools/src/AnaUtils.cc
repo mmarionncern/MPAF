@@ -1364,6 +1364,8 @@ AnaUtils::getDataCardLines(map<string,string>& lines,
 	
 	// cout<<it->first<<"  "<<dsNames[ids-1]<<" -->  "<<unc<<"  "<<numbers[0].second[ids][0]["tot"]<<"  "<<central<<" --> "<<numbers[0].second[ids][0]["tot"]*(1+unc)<<"  "<<numbers[0].second[ids][0]["tot"]*(1-unc)<<" --> "<<(1-unc)<<" "<<(1+unc)<<endl;
 	central=numbers[0].second[ids2][0]["tot"];
+	// if(dsNames[ids-1]=="T1tttt_1200_450")
+	//   cout<<central<<"  "<<numbers[0].second[ids2][0]["tot"]<<endl;
 	vals.push_back( central );
 	vals.push_back( central*(1+unc) );
 	vals.push_back( central*(1-unc) );
