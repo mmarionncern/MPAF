@@ -2079,3 +2079,72 @@ SusyModule::initPUWeights() {
   _puWeights.push_back(1.0);
 
 }
+
+
+
+void
+SusyModule::applyISRWeight(unsigned int process, int var, float& weight) {
+  // process = 0 (gluino-gluino production)
+  // var = 0 (central), -1 (down), +1 (up)
+
+  CandList collection;
+  if(process==0) collection = collectGenParticles(1000021, 3);
+  //cout<<" number of gluinos "<<collection.size()<<endl;
+  if(collection.size()!=2) return;
+
+  Candidate* cand=Candidate::create(collection[0],collection[1]);
+
+  // Candidate* cand=collection[0];
+  // for(unsigned int i=1;i<collection.size(); ++i)
+  //   //pt += collection[i] -> pt();
+  //   cand = Candidate::create(collection[i],cand);
+
+  float pt=cand->pt();
+  isrWeight(var, pt, weight);
+
+}
+
+
+void
+SusyModule::isrWeight(int var, float pt, float& weight){
+  // var = 0 (central), -1 (down), +1 (up)
+
+  // down variation
+  if(var == -1){
+    if     (pt > 600) weight *= 0.7;
+    else if(pt > 400) weight *= 0.85;
+  }
+
+  // up variation
+  else if(var == 1){
+    if     (pt > 600) weight *= 1.3;
+    else if(pt > 400) weight *= 1.15;
+  }
+
+  // central value
+  // else {
+  // }
+
+}
+
+
+CandList
+SusyModule::collectGenParticles(int pdgId, int status){
+
+  CandList list;
+  //cout<<_vc->get("nGenPart")<<endl;
+  for(unsigned int i = 0; i < _vc->get("nGenPart"); ++i){
+    //    cout<<(int)_vc->get("GenPart_pdgId")<<"   "<<pdgId<<"   "<<(std::abs(_vc->get("GenPart_pdgId")) == pdgId)<<"   "<<_vc->get("GenPart_pt"    , i)<<"   "<<_vc->get("GenPart_eta"    , i)<<"  "<<_vc->get("GenPart_status")<<endl;
+    if(std::abs(_vc->get("GenPart_pdgId",i)) == pdgId)// &&
+       //_vc->get("GenPart_status",i) == status)
+      list.push_back(Candidate::create(_vc->get("GenPart_pt"    , i), 
+                                       _vc->get("GenPart_eta"   , i),
+                                       _vc->get("GenPart_phi"   , i),
+				       _vc->get("GenPart_pdgId"   , i),
+				       _vc->get("GenPart_charge", i),
+				       _vc->get("GenPart_mass"  , i)
+				       ));
+  }
+  return list;
+}
+

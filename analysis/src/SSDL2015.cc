@@ -158,6 +158,9 @@ SSDL2015::initialize(){
   _vc->registerVar("GenPart_phi"                  );
   _vc->registerVar("GenPart_pdgId"                );
   _vc->registerVar("GenPart_motherId"             );
+  _vc->registerVar("GenPart_mass");
+  _vc->registerVar("GenPart_charge");
+  _vc->registerVar("GenPart_status");
   
   //LHE gen level weights
   _vc->registerVar("nLHEweight"                   );
@@ -290,13 +293,14 @@ SSDL2015::initialize(){
   
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
-  // //addManualSystSource("EWKFR",SystUtils::kNone);
-  // addManualSystSource("Eff",SystUtils::kNone);
-  // //addManualSystSource("Theory",SystUtils::kNone);
-  // addManualSystSource("JES",SystUtils::kNone);
-  // addManualSystSource("BTAG",SystUtils::kNone);
-  // addManualSystSource("BTAGFS",SystUtils::kNone);
-  // addManualSystSource("LepEffFS",SystUtils::kNone);
+   //addManualSystSource("EWKFR",SystUtils::kNone);
+   addManualSystSource("Eff",SystUtils::kNone);
+   //addManualSystSource("Theory",SystUtils::kNone);
+   addManualSystSource("JES",SystUtils::kNone);
+   addManualSystSource("BTAG",SystUtils::kNone);
+   addManualSystSource("BTAGFS",SystUtils::kNone);
+   addManualSystSource("LepEffFS",SystUtils::kNone);
+   addManualSystSource("ISR",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -523,6 +527,16 @@ SSDL2015::run() {
         
   }
   counter("btag SF");
+
+  if(_fastSim){
+    if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
+      _susyMod->applyISRWeight(0, 1 , _weight); // up variation
+    }
+    else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
+      _susyMod->applyISRWeight(0, -1, _weight); // down variation
+    }
+  }
+
 
 
    //===============================================
