@@ -803,6 +803,22 @@ SusyModule::correctFlipRate(float& rate, float eta){
 
 }
 
+//LHE weights
+double
+SusyModule::getLHEweight(int LHEsysID){
+
+  int tmp_nlhe=_vc->get("nLHEweight");
+  for (int i=0; i<tmp_nlhe; i++) {
+    int tmp_lhe_id = _vc->get("LHEweight_id", i);
+    if (tmp_lhe_id == LHEsysID) {
+      double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
+      return tmp_lhe_wgt;
+    } 
+  }
+  return 1.0;
+
+}
+
 
 // Scale factors ====================================
 void

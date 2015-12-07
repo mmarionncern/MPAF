@@ -263,7 +263,7 @@ SSDL2015::initialize(){
   _leppt   = getCfgVarS("LEPPT"  , "all");
   _SR      = getCfgVarS("SR"     , "BR02H");
   _FR      = getCfgVarS("FR"     , "FO2C");
-  _LHESYS = getCfgVarS("LHESYS", "");
+  _LHESYS = getCfgVarI("LHESYS", 0);
   _categorization = getCfgVarI("categorization", 1);
   _mergeSRs = getCfgVarI("mergeSRs",0);
   _DoValidationPlots = getCfgVarI("ValidationPlots", 0);
@@ -334,14 +334,6 @@ SSDL2015::initialize(){
   _dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
   _dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
 
- 
-  int ilhe = (int)atoi(_LHESYS.c_str());
-  bool tmp_ismux = ilhe >= 1001 && ilhe <= 1009;
-  bool tmp_ispdf = ilhe >= 2001 && ilhe <= 2100;
-  
-  if (!tmp_ismux && !tmp_ispdf) {
-    _LHESYS = "0";
-  }
 
 }
 
@@ -350,28 +342,14 @@ SSDL2015::modifyWeight() {
 
   if (_vc->get("isData") != 1) {
     //generator weights
-    if (_LHESYS == "0") {_weight *= _vc->get("genWeight");}
-    else {_weight *= lheWeight();}
+    if (_LHESYS == 0) {_weight *= _vc->get("genWeight");}
+    else {_weight *= _susyMod->getLHEweight(_LHESYS);}
     //pileup weights
     _weight *= _vc->get("vtxWeight");
   }
 
 }
 
-double        
-SSDL2015::lheWeight() {
-
-  int tmp_nlhe=_vc->get("nLHEweight");
-  for (int i=0; i<tmp_nlhe; i++) {
-    int tmp_lhe_id = _vc->get("LHEweight_id", i);
-    if (tmp_lhe_id == (int)atoi(_LHESYS.c_str())) {
-      double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
-      return tmp_lhe_wgt;
-    } 
-  }
-  return 1.0;
-
-}
 
 void
 SSDL2015::modifySkimming() {

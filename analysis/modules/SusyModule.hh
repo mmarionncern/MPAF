@@ -94,6 +94,7 @@ public:
 
   void correctFlipRate(float& rate, float eta);
 
+  double getLHEweight(int LHEsysID);
   void applyHLTSF(const string& hltLine, float& weight);
   void applyHLTSF(const string& hltLine, const vector<Candidate*>& cands, float& weight);
   void applyLepSF(const CandList& cands, float& weight);
