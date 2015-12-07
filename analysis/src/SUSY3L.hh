@@ -69,6 +69,7 @@ private:
     string _pairmass;
     string _BR;
     string _SR;
+    int _LHESYS;
     
 
 

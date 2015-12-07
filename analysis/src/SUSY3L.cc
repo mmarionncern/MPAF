@@ -147,6 +147,11 @@ void SUSY3L::initialize(){
     _vc->registerVar("HLT_DoubleMuHT"                  );
     _vc->registerVar("HLT_DoubleElHT"                  );
     
+    //LHE gen level weights                                                                                                                                                       
+    _vc->registerVar("nLHEweight"                   );
+    _vc->registerVar("LHEweight_id"                 );
+    _vc->registerVar("LHEweight_wgt"                );
+
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
     _vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
 
@@ -167,6 +172,7 @@ void SUSY3L::initialize(){
     _selectTaus = getCfgVarS("selectTaus", "false");
     _BR = getCfgVarS("baselineRegion", "BR0");
     _SR = getCfgVarS("signalRegion", "SR999");
+    _LHESYS = getCfgVarI("LHESYS", 0);
 
     //workflows
     addWorkflow( kWZCR, "WZCR");
@@ -186,7 +192,10 @@ void SUSY3L::modifyWeight() {
     */ 
     
     if (_vc->get("isData") != 1){
-        _weight *= _vc->get("genWeight");
+        //generator weights                                                                                                                                                        
+        if (_LHESYS == 0) {_weight *= _vc->get("genWeight");}
+        else {_weight *= _susyMod->getLHEweight(_LHESYS);}
+        //pileup weights                                                                                                                                                           
         _weight *= _vc->get("vtxWeight");
     }
 
