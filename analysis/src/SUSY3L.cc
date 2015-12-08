@@ -287,8 +287,8 @@ void SUSY3L::run(){
         return;
     }
 
-
-    if(_isFake){
+/*
+    if(_isFake && (_tightLepsPtCutMllCut.size() + _fakableLepsPtCutVeto.size() > 3)){
         cout << "__________________________" << endl;
         cout << "number of tight leptons: " << _tightLepsPtCutMllCut.size() << endl;
         cout << "number of FO leptons: " << _fakableLepsPtCutVeto.size() << endl;
@@ -306,7 +306,7 @@ void SUSY3L::run(){
         }
     
     }
-
+*/
 
  
     counter("baseline selection");
@@ -1324,9 +1324,9 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     //prepare all the combinations
     CandList tmpList(3,nullptr);
     for(size_t i1=0;i1<clist.size();i1++) {
-        for(size_t i2=i1+1;i2<clist.size();i2++) {
-            for(size_t i3=i1+2;i3<clist.size();i3++) {
-                if(clist[i1]==clist[i2] || clist[i1]==clist[i3] || clist[i2]==clist[i3]) continue;
+        for(size_t i2=0;i2<clist.size();i2++) {
+            for(size_t i3=0;i3<clist.size();i3++) {
+                if(i1>=i2 || i1>=i3 || i2>=i3) continue;
                 tmpList[0] = clist[i1];
                 tmpList[1] = clist[i2];
                 tmpList[2] = clist[i3];
@@ -1338,7 +1338,6 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
                 idx3.push_back(idxs[i3]);
 
                 int cType=typeLeps[i1]+typeLeps[i2]+typeLeps[i3];
-                cout << "cType " << cType << endl;
                 if(cType==0) combType.push_back(kIsTripleFake);
                 if(cType==1) combType.push_back(kIsDoubleFake);
                 if(cType==2) combType.push_back(kIsSingleFake);
