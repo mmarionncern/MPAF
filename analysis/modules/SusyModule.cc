@@ -337,6 +337,40 @@ SusyModule::passMllMultiVeto(const Candidate* c1, const CandList* cands,
 }
 
 CandList
+SusyModule::findZCand(const CandList* leps, float window, float MTcut) {
+    
+    float diff = 99999;
+    int il1_save = -1;
+    int il2_save = -1;
+    CandList clist(2,nullptr);
+    bool zFound = false;
+    for(int il1=0;il1<leps->size()-1;il1++) {
+        for(int il2=il1+1;il2<leps->size();il2++) {
+            if(!(leps->at(il1)->pdgId() == -leps->at(il2)->pdgId())) continue;
+            if(std::abs(91.-Candidate::create(leps->at(il1),leps->at(il2))->mass()) < window && std::abs(91.-Candidate::create(leps->at(il1),leps->at(il2))->mass()) < diff){
+                Candidate* zCand = Candidate::create(leps->at(il1),leps->at(il2));
+                diff = std::abs(91.-(zCand->mass()) );
+                il1_save = il1;
+                il2_save = il2;
+                zFound = true;
+            }
+        }
+    }
+    if(zFound){ 
+        for(int il=0;il<leps->size();il++) {
+            if(il == il1_save || il == il2_save) continue;
+            float mt = M_T(leps->at(il)->pt(), _vc->get("met_pt"), leps->at(il)->phi(), _vc->get("met_phi"));
+            if(mt > MTcut){
+                clist[0] = leps->at(il1_save);
+                clist[1] = leps->at(il2_save);
+            }
+        }
+    }
+    return clist;
+}
+
+
+CandList
 SusyModule::bestSSPair(const CandList* leps, bool byflav,
 		       bool bypassMV, bool os, 
 		       float pTthrMu, float pTthrEl,
@@ -902,4 +936,25 @@ SusyModule::bTagMediumScaleFactor(Candidate* jet, bool isBTagged, int st){
   else
     return _dbm->getDBErrL("BTagSF",  (isBTagged?1:2), jet->eta(), jet->pt());
 
-} 
+}
+
+ 
+float 
+SusyModule::M_T(float pt_lepton, float pt_met, float phi_lepton, float phi_met){
+
+        float deltaPhi = DeltaPhi(phi_lepton, phi_met);
+        float m_t = 0;
+        m_t = sqrt(2 * pt_lepton * pt_met * (1 - cos(deltaPhi) ));
+        return m_t;
+}
+
+float 
+SusyModule::DeltaPhi(float phi1, float phi2){
+
+        float result = phi1 - phi2;
+        while( result >   TMath::Pi() ) result -= TMath::TwoPi();
+        while( result <= -TMath::Pi() ) result += TMath::TwoPi();
+        
+        return TMath::Abs(result);
+}
+

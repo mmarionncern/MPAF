@@ -635,6 +635,7 @@ bool SUSY3L::electronSelection(const Candidate* c, int elIdx){
         return: true (if the electron is accepted as an electron), false (else)
     */
     
+    //TODO: remove function
     //cuts
     float deltaR = 0.1;
     float pt_cut = 10.;
@@ -670,6 +671,7 @@ bool SUSY3L::muonSelection(const Candidate* c, int muIdx){
         return: true (if the muon is accepted as a muon), false (else)
     */
    
+    //TODO: remove function
     //cut values
     float pt_cut = 10.;
 
@@ -1002,7 +1004,7 @@ bool SUSY3L::baseSelection(){
         parameters: none
         return: true (if event passes selection), false (else)
     */
-
+    //TODO: remove function
     //select events with certain lepton multiplicity of all flavor combinations
     if(!makeCut<int>( _nMus + _nEls + _nTaus, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR) ) return false;
     //if(!makeCut<int>( _nMus , 1, "=" , "muon multiplicity", 0 ) ) return false;
@@ -1169,8 +1171,6 @@ void SUSY3L::advancedSelection(int WF){
 
 }
 
-
-
 //____________________________________________________________________________
 void SUSY3L::wzCRSelection(){
     /*
@@ -1181,23 +1181,33 @@ void SUSY3L::wzCRSelection(){
     
     setWorkflow(kWZCR);
     
-    //lepton multiplicity
-    if(!(_nMus + _nEls == 3)) return;
-    bool has_hard_legs = hardLegSelection(1,20.,0,-1.);
-    if(!has_hard_legs) return;
+    if(!(_tightLepsPtCutMllCut.size()==3)) return;
+    counter("lepton multiplicity");
+    //require hard legs
+    if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return;
+    counter("hard leg selection");
+    //Z selection
+    bool pass = false;
+    for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
+        if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){pass = true;}
+    }
+    if(!pass) return;
+    counter("Z selection");
+    CandList zPair = _susyMod->findZCand( &_tightLepsPtCutMllCut, 15, 50);
+    if(zPair[0] == 0 && zPair[1] == 0) return;
+    counter("MT cut");
     if(!( _nJets == 1)) return;
+    counter("jet multiplicity");
     if(!( _nBJets == 0)) return;
-    //if(!(_HT > 60 && _HT < 400)) return false;
+    counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 150)) return;
-    //select on-Z events
-    bool is_reconstructed_Z = ZEventSelectionLoop(true, false, 50);
-    if(!is_reconstructed_Z) return;
-    
+    counter("MET selection");
     counter("passing WZ selection");
     fillEventPlots();
     setWorkflow(kGlobal); 
     
 }
+
 
 //____________________________________________________________________________
 void SUSY3L::categorize(){
@@ -1251,6 +1261,7 @@ bool SUSY3L::checkMultiIso(){
         return: true (if the event has 2 leptons which are tighter in multiIso)
         , false (else)
     */
+    //TODO: remove function
 
     //number of leptons fulfilling the tightened multiIso wp
     int tighter_leptons = 0;
@@ -1314,6 +1325,7 @@ bool SUSY3L::hardLegSelection(int n_hardestLeg, float cut_hardestLeg, int n_hard
         (muon or electron) fullfilling a harsher pT cut and _nHardLeptons leptons fulfilling another lower cut
         return: true (if the event has _nHardestLeptons and _nHardLeptons with higher pT), false (else)
     */
+    //TODO: remove function
     
     int nHardestLepCount = 0;
     int nHardLepCount = 0;
@@ -1363,6 +1375,7 @@ float SUSY3L::lowestOssfMll(bool ossf){
         parameters: ossf, true on default, if false all combinations of leptons are checked for the lowest invariant mass
         return: smallest mll of ossf lepton pair if a pair is found
     */
+    //TODO: remove function
 
     bool pair_found = false;
     float mll = 99999;
@@ -1445,6 +1458,7 @@ bool SUSY3L::ZEventSelectionLoop(bool onz, bool loose_3rd_lep, float mt_cut){
     //count reconstructed Z bosons
     //counter("denominator", conZEvents);
 
+    //TODO: remove function
     //Z mass
     float Zmass = 91.;//1876;
     float diff = 1000000;
