@@ -47,6 +47,12 @@ private:
     void wzCRSelection();
     void categorize();
     bool testRegion();
+    vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
+                const CandList fakableLeps, vector<unsigned int> idxsL,
+                int nHardestLepton, float pt_cut_hardest_legs, 
+                int nHardLeptons, float pt_cut_hard_legs, bool onZ,
+                vector<int>& idx1, vector<int>& idx2, vector<int>& idx3, 
+                vector<int>& combType ); 
     void setBaselineRegion();
     void setSignalRegion();
     void setSelLine(string str);
@@ -92,8 +98,9 @@ private:
     kGlobalFake,
     
     kWZCR
-  };
- 
+    };
+
+    enum {kIsSingleFake=0,kIsDoubleFake,kIsTripleFake };
     
     SusyModule* _susyMod;
 
@@ -201,10 +208,11 @@ private:
     bool _onZ;    
 
     //for fake background
-    vector<CandList> _auxLeps;
-    vector<int> _auxFlags;
-    vector<vector<int> > _auxIdxs; 
-
+    vector<CandList> _combList;
+    vector<int> _combType;
+    vector<int> _idx1;
+    vector<int> _idx2;
+    vector<int> _idx3;
 };
 
 #endif

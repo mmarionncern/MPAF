@@ -275,6 +275,7 @@ void SUSY3L::run(){
     //baseline selection
     setBaselineRegion();
     bool baseSel = multiLepSelection(_onZ);
+    
     //blinding of signal regions
     if(_vc->get("isData") && baseSel && !_isFake) return; 
   
@@ -285,6 +286,28 @@ void SUSY3L::run(){
     if(!baseSel){
         return;
     }
+
+
+    if(_isFake){
+        cout << "__________________________" << endl;
+        cout << "number of tight leptons: " << _tightLepsPtCutMllCut.size() << endl;
+        cout << "number of FO leptons: " << _fakableLepsPtCutVeto.size() << endl;
+        cout << "_isFake: " << _isFake << endl;
+        for(int i=0;i<_tightLepsPtCutMllCut.size();i++){cout << _tightLepsPtCutMllCut[i]->pt() << " " << _tightLepsPtCutMllCut[i]->pdgId() << endl;}
+        for(int i=0;i<_fakableLepsPtCutVeto.size();i++){cout << _fakableLepsPtCutVeto[i]->pt() << " " << _fakableLepsPtCutVeto[i]->pdgId() << endl;}
+        cout << "---" << endl;
+        cout << "number of fake combinations: " << _combList.size() << endl;
+        for(int i=0;i<_combList.size();i++){
+            cout << "combination type " << _combType[i] << endl;
+            for(int j=0;j<_combList[i].size();j++){
+                cout << _combList[i][j]->pt()<<endl;
+            }
+            cout << "........" << endl;
+        }
+    
+    }
+
+
  
     counter("baseline selection");
  
@@ -458,6 +481,14 @@ void SUSY3L::collectKinematicObjects(){
     _jetsIdx.clear();
     _bJets.clear();
     _bJetsIdx.clear();
+  
+  
+    _combList.clear();
+    _combType.clear();
+    _idx1.clear();
+    _idx2.clear();
+    _idx3.clear();
+
    
     //select loose leptons (note: not equivalent to LepGood)
     for(size_t il=0;il<_vc->get("nLepGood"); il++) {
@@ -1119,19 +1150,11 @@ bool SUSY3L::multiLepSelection(bool onZ){
     
     if(_isMultiLep) return true;
 
-    //Fake background 
-    //2 Tight
-    if(_tightLepsPtCutMllCut.size()>=2 && _fakableLepsPtCutVeto.size()>=1) {
-        _isFake = true;
-    }
-    //1 Tight
-    if(_tightLepsPtCutMllCut.size()>=1 && _fakableLepsPtCutVeto.size()>=2) {
-        _isFake = true;
-    }
-    //0 Tight
-    if(_tightLepsPtCutMllCut.size()>=0 && _fakableLepsPtCutVeto.size()>=3) {
-        _isFake = true;
-    }
+
+    _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableLepsPtCutVeto, _fakableLepsPtCutVetoIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, _onZ, _idx1, _idx2, _idx3, _combType );
+    
+    if(_combList.size()>0) _isFake = true;
+
 
     if(_isFake) return true;
     return false;
@@ -1249,6 +1272,84 @@ bool SUSY3L::testRegion(){
 
     return false;
 }                               
+
+
+//____________________________________________________________________________
+vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
+                const CandList fakableLeps, vector<unsigned int> idxsL,
+                int nHardestLeptons, float pt_cut_hardest_legs, 
+                int nHardLeptons, float pt_cut_hard_legs, bool onZ,
+                vector<int>& idx1, vector<int>& idx2, vector<int>& idx3, 
+                vector<int>& combType ) {
+    /*
+    */
+
+    vector<CandList> vclist;
+    //merge the leptons lists
+    CandList clist;
+    clist.insert(clist.end(), tightLeps.begin(), tightLeps.end() );
+    clist.insert(clist.end(), fakableLeps.begin(), fakableLeps.end() );
+
+    vector<unsigned int> idxs;
+    idxs.insert(idxs.end(), idxsT.begin(), idxsT.end());
+    idxs.insert(idxs.end(), idxsL.begin(), idxsL.end());
+
+    vector<int> typeLeps(tightLeps.size(), 1);
+    vector<int> tLepsFake(fakableLeps.size(), 0);
+    typeLeps.insert(typeLeps.end(), tLepsFake.begin(), tLepsFake.end() );
+
+    bool passZsel=false;
+    
+    //Z selection
+    if(onZ){
+        bool pass = false;
+        for(size_t il=0;il<clist.size();il++) {
+            if(!_susyMod->passMllMultiVeto( clist[il], &clist, 76, 106, true) ){pass = true; break;}
+        }
+        if(pass){
+            passZsel = true;
+        }
+    }
+
+    //Z veto
+    else{
+        for(size_t il=0;il<clist.size();il++) {
+            if(!_susyMod->passMllMultiVeto( clist[il], &clist, 76, 106, true) ){return vclist;}
+        }
+        passZsel = true;
+    }
+
+    if(!passZsel) return vclist;
+
+    //prepare all the combinations
+    CandList tmpList(3,nullptr);
+    for(size_t i1=0;i1<clist.size();i1++) {
+        for(size_t i2=i1+1;i2<clist.size();i2++) {
+            for(size_t i3=i1+2;i3<clist.size();i3++) {
+                if(clist[i1]==clist[i2] || clist[i1]==clist[i3] || clist[i2]==clist[i3]) continue;
+                tmpList[0] = clist[i1];
+                tmpList[1] = clist[i2];
+                tmpList[2] = clist[i3];
+                
+                if(!hardLeg(tmpList, nHardestLeptons, pt_cut_hardest_legs, nHardLeptons, pt_cut_hard_legs )) continue;
+                vclist.push_back(tmpList);
+                idx1.push_back(idxs[i1]);
+                idx2.push_back(idxs[i2]);
+                idx3.push_back(idxs[i3]);
+
+                int cType=typeLeps[i1]+typeLeps[i2]+typeLeps[i3];
+                cout << "cType " << cType << endl;
+                if(cType==0) combType.push_back(kIsTripleFake);
+                if(cType==1) combType.push_back(kIsDoubleFake);
+                if(cType==2) combType.push_back(kIsSingleFake);
+                if(cType==3) {
+                    cout<<"WARNING:  a signal event is in the fake background application region! "<<endl;
+                }
+            } 
+        }
+    }
+    return vclist;
+}
 
 
 
