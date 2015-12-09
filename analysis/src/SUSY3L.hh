@@ -44,6 +44,7 @@ private:
     bool baseSelection();
     bool multiLepSelection(bool onZ);
     void advancedSelection(int WF);
+    vector<float> getFRs();
     void wzCRSelection();
     void categorize();
     bool testRegion();
@@ -55,6 +56,7 @@ private:
     void setBaselineRegion();
     void setSignalRegion();
     void setSelLine(string str);
+    float getFR(Candidate* cand, int idx);
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection(int n_hardestLeg = 0, float cut_hardestLeg = -1., int n_hardLeg = 0, float cut_hardLeg = -1.);
     bool hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg);

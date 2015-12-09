@@ -198,46 +198,43 @@ void SUSY3L::initialize(){
     _selectElectrons = getCfgVarI("selectElectrons", true);
     _selectTaus = getCfgVarI("selectTaus", false);
     _BR = getCfgVarS("baselineRegion", "BR0");
-    //_SR = getCfgVarS("signalRegion", "SR999");
     _FR = getCfgVarS("FR" , "FO2C"); 
     _categorization = getCfgVarI("categorization", 1);
 
-
     //FR databases
-   /* 
     if(_FR=="FO2C") {
-        _dbm->loadDb("ElNIso"    , "FR_Nov2.root", "FRElPtCorr_UCSX_non");
-        _dbm->loadDb("MuNIso"    , "FR_Nov2.root", "FRMuPtCorr_UCSX_non");
-        _dbm->loadDb("ElIso"     , "FR_Nov2.root", "FRElPtCorr_UCSX_iso");
-        _dbm->loadDb("MuIso"     , "FR_Nov2.root", "FRMuPtCorr_UCSX_iso");
+        _dbm->loadDb("ElNIso"    , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_non");
+        _dbm->loadDb("MuNIso"    , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_non");
+        _dbm->loadDb("ElIso"     , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_iso");
+        _dbm->loadDb("MuIso"     , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_iso");
 
-        _dbm->loadDb("ElNIsoMC"  , "FR_Nov2.root", "FRElPtCorr_qcd_non");
-        _dbm->loadDb("MuNIsoMC"  , "FR_Nov2.root", "FRMuPtCorr_qcd_non");
-        _dbm->loadDb("ElIsoMC"   , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
-        _dbm->loadDb("MuIsoMC"   , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
+        _dbm->loadDb("ElNIsoMC"  , "FR_RA7_Dec08.root", "FRElPtCorr_qcd_non");
+        _dbm->loadDb("MuNIsoMC"  , "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_non");
+        _dbm->loadDb("ElIsoMC"   , "FR_RA7_Dec08.root", "FRElPtCorr_qcd_iso");
+        _dbm->loadDb("MuIsoMC"   , "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_iso");
 
-        _dbm->loadDb("ElNIsoUp"  , "FR_Nov2.root", "FRElPtCorr_UCSX_HI_non");
-        _dbm->loadDb("MuNIsoUp"  , "FR_Nov2.root", "FRMuPtCorr_UCSX_HI_non");
-        _dbm->loadDb("ElIsoUp"   , "FR_Nov2.root", "FRElPtCorr_UCSX_HI_iso");
-        _dbm->loadDb("MuIsoUp"   , "FR_Nov2.root", "FRMuPtCorr_UCSX_HI_iso");
+        _dbm->loadDb("ElNIsoUp"  , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_HI_non");
+        _dbm->loadDb("MuNIsoUp"  , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_HI_non");
+        _dbm->loadDb("ElIsoUp"   , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_HI_iso");
+        _dbm->loadDb("MuIsoUp"   , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_HI_iso");
     
-        _dbm->loadDb("ElNIsoMCUp", "FR_Nov2.root", "FRElPtCorr_qcd_non");
-        _dbm->loadDb("MuNIsoMCUp", "FR_Nov2.root", "FRMuPtCorr_qcd_non");
-        _dbm->loadDb("ElIsoMCUp" , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
-        _dbm->loadDb("MuIsoMCUp" , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
+        _dbm->loadDb("ElNIsoMCUp", "FR_RA7_Dec08.root", "FRElPtCorr_qcd_non");
+        _dbm->loadDb("MuNIsoMCUp", "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_non");
+        _dbm->loadDb("ElIsoMCUp" , "FR_RA7_Dec08.root", "FRElPtCorr_qcd_iso");
+        _dbm->loadDb("MuIsoMCUp" , "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_iso");
     
-        _dbm->loadDb("ElNIsoDo"  , "FR_Nov2.root", "FRElPtCorr_UCSX_LO_non");
-        _dbm->loadDb("MuNIsoDo"  , "FR_Nov2.root", "FRMuPtCorr_UCSX_LO_non");
-        _dbm->loadDb("ElIsoDo"   , "FR_Nov2.root", "FRElPtCorr_UCSX_LO_iso");
-        _dbm->loadDb("MuIsoDo"   , "FR_Nov2.root", "FRMuPtCorr_UCSX_LO_iso");
+        _dbm->loadDb("ElNIsoDo"  , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_LO_non");
+        _dbm->loadDb("MuNIsoDo"  , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_LO_non");
+        _dbm->loadDb("ElIsoDo"   , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_LO_iso");
+        _dbm->loadDb("MuIsoDo"   , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_LO_iso");
 
-        _dbm->loadDb("ElNIsoMCDo", "FR_Nov2.root", "FRElPtCorr_qcd_non");
-        _dbm->loadDb("MuNIsoMCDo", "FR_Nov2.root", "FRMuPtCorr_qcd_non");
-        _dbm->loadDb("ElIsoMCDo" , "FR_Nov2.root", "FRElPtCorr_qcd_iso");
-        _dbm->loadDb("MuIsoMCDo" , "FR_Nov2.root", "FRMuPtCorr_qcd_iso");
+        _dbm->loadDb("ElNIsoMCDo", "FR_RA7_Dec08.root", "FRElPtCorr_qcd_non");
+        _dbm->loadDb("MuNIsoMCDo", "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_non");
+        _dbm->loadDb("ElIsoMCDo" , "FR_RA7_Dec08.root", "FRElPtCorr_qcd_iso");
+        _dbm->loadDb("MuIsoMCDo" , "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_iso");
     }
-    */
-   
+
+
 }
 
 
@@ -287,7 +284,7 @@ void SUSY3L::run(){
         return;
     }
 
-
+/*
     if(_isFake && (_tightLepsPtCutMllCut.size() + _fakableLepsPtCutVeto.size() > 3)){
         cout << "__________________________" << endl;
         cout << "number of tight leptons: " << _tightLepsPtCutMllCut.size() << endl;
@@ -305,8 +302,7 @@ void SUSY3L::run(){
             cout << "........" << endl;
         }
     }
-
-
+*/
  
     counter("baseline selection");
  
@@ -318,20 +314,22 @@ void SUSY3L::run(){
     } 
     //fake background 
     else{
-        //vector<float> frs=getFRs();
-        //int n = 0;
-        //for(unsigned int ic=0;ic<_combList.size();ic++) {
-        //    _l1Cand = _combList[ic][0];
-        //    _l2Cand = _combList[ic][1];
-        //    _l3Cand = _combList[ic][2];
-        //    _idxL1 = 
+        vector<float> frs=getFRs();
+        int n = 0;
+        for(unsigned int ic=0;ic<_combList.size();ic++) {
+            _l1Cand = _combList[ic][0];
+            _l2Cand = _combList[ic][1];
+            _l3Cand = _combList[ic][2];
+            _idxL1 = _combIdxs[ic][0]; 
+            _idxL2 = _combIdxs[ic][1]; 
+            _idxL3 = _combIdxs[ic][2]; 
 
-
-
-        setWorkflow(kGlobalFake);
-        counter("dispatching");
-        advancedSelection( kGlobalFake );
-                               
+            setWorkflow(kGlobalFake);
+            counter("dispatching");
+            //getFRProb(_combType[ic], (_combType[ic]!=kIsSingleFake)?0:frs[n] );
+            advancedSelection( kGlobalFake );
+            if(_combType[ic]==kIsSingleFake) n++;
+        }
     }
 
    
@@ -984,6 +982,49 @@ void SUSY3L::setSelLine(string str) {
 
 
 //____________________________________________________________________________
+float SUSY3L::getFR(Candidate* cand, int idx) {
+    /*
+        extracts the fake rate of a lepton candiate from the fake rate map taking into account
+        leptons pt and eta
+        parameters: lepton candidate, idx of the candidate
+        return: the fake rate of the candidate
+    */
+
+    string db;
+    float ptM=10;
+    //check candidate flavor
+    if( std::abs(cand->pdgId())==13) db="Mu";
+    else { db="El"; ptM=15;}
+  
+    //check hadronic activty (differernt maps for high and low HT)
+    if(_HT<300) db+= "Iso";
+    else db += "NIso";
+
+    //distinguish data and mc
+    if(_vc->get("isData")!=1) db +="MC";
+
+    //if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
+    //if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
+
+    //get pt and eta of candidate
+    float ptVal=cand->pt();
+    float etaVal=std::abs(cand->eta());
+
+    //flavor dependent multiIso working point
+    int wp=std::abs(cand->pdgId())==11?SusyModule::kMedium:SusyModule::kLoose;
+
+    if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (float)ptM);
+    if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
+
+    ptVal=std::max(ptVal, ptM);
+  
+    //get fake rate from database
+    return _dbm->getDBValue(db, std::min( ptVal,(float)69.9), std::min(etaVal,(float)((std::abs(cand->pdgId())==11)?2.49:2.39) ) );
+
+}
+
+
+//____________________________________________________________________________
 void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upValCut) {
     /*
         sets the parameters (valCut, cType, upValCut) for a specific cut on a variable (var)
@@ -1205,6 +1246,50 @@ void SUSY3L::advancedSelection(int WF){
     counter("selected");
 
 }
+
+
+//____________________________________________________________________________
+vector<float> SUSY3L::getFRs(){
+    /*
+        Function to extract fake proability for each combination 
+        of 3 (tight and) fake leptons
+        parameters: none
+        return: vector with fake probabilities
+    */
+    
+    vector<float> frs;
+    //loop over all fake-(tight)-combinations
+    for(unsigned int ic=0;ic<_combList.size();ic++) {
+        //only extract fake probability for single fakes here
+        if(_combType[ic]!=kIsSingleFake) continue;
+        //for single fake combinations with 3 leptons, always last entry is the fake
+        float fr=getFR(_combList[ic][2], _combIdxs[ic][2]);
+        //build vector with one fake rate per combination
+        frs.push_back(fr);
+    }
+
+    vector<float> probs;
+    //no single fake combination found
+    if(frs.size()==0) return probs;
+    
+    //turn FR into probability
+    //case 1 singel fake combination
+    probs.push_back(frs[0]/(1-frs[0]));
+
+    //case more than 1 single fake combination
+    for(unsigned int i=1;i<frs.size();i++) {
+        float prob = frs[i]/(1-frs[i]);
+            for(unsigned int j=0;j<i;j++) {
+                prob*=(1-frs[j]);
+            }
+        probs.push_back(prob);
+    }
+    
+    return probs;
+
+} 
+
+
 
 //____________________________________________________________________________
 void SUSY3L::wzCRSelection(){
