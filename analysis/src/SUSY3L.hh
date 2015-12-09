@@ -51,8 +51,7 @@ private:
                 const CandList fakableLeps, vector<unsigned int> idxsL,
                 int nHardestLepton, float pt_cut_hardest_legs, 
                 int nHardLeptons, float pt_cut_hard_legs, bool onZ,
-                vector<int>& idx1, vector<int>& idx2, vector<int>& idx3, 
-                vector<int>& combType ); 
+                vector< vector<int> >& combIdxs, vector<int>& combType ); 
     void setBaselineRegion();
     void setSignalRegion();
     void setSelLine(string str);
@@ -190,6 +189,13 @@ private:
     Candidate* _lep1;
     Candidate* _lep2;
     
+    Candidate* _l1Cand;
+    Candidate* _l2Cand;
+    Candidate* _l3Cand;
+    int _idxL1;
+    int _idxL2;
+    int _idxL3;
+    
     float _HT;
     float _MT2;
     float _deltaR;
@@ -209,10 +215,8 @@ private:
 
     //for fake background
     vector<CandList> _combList;
+    vector< vector<int> > _combIdxs;
     vector<int> _combType;
-    vector<int> _idx1;
-    vector<int> _idx2;
-    vector<int> _idx3;
 };
 
 #endif

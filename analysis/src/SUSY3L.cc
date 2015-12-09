@@ -287,26 +287,25 @@ void SUSY3L::run(){
         return;
     }
 
-/*
+
     if(_isFake && (_tightLepsPtCutMllCut.size() + _fakableLepsPtCutVeto.size() > 3)){
         cout << "__________________________" << endl;
         cout << "number of tight leptons: " << _tightLepsPtCutMllCut.size() << endl;
         cout << "number of FO leptons: " << _fakableLepsPtCutVeto.size() << endl;
         cout << "_isFake: " << _isFake << endl;
-        for(int i=0;i<_tightLepsPtCutMllCut.size();i++){cout << _tightLepsPtCutMllCut[i]->pt() << " " << _tightLepsPtCutMllCut[i]->pdgId() << endl;}
-        for(int i=0;i<_fakableLepsPtCutVeto.size();i++){cout << _fakableLepsPtCutVeto[i]->pt() << " " << _fakableLepsPtCutVeto[i]->pdgId() << endl;}
+        for(int i=0;i<_tightLepsPtCutMllCut.size();i++){cout << _tightLepsPtCutMllCut[i]->pt() << " " << _tightLepsPtCutMllCut[i]->pdgId() << " " << _tightLepsPtCutMllCutIdx[i] << endl;}
+        for(int i=0;i<_fakableLepsPtCutVeto.size();i++){cout << _fakableLepsPtCutVeto[i]->pt() << " " << _fakableLepsPtCutVeto[i]->pdgId() << " " << _fakableLepsPtCutVetoIdx[i] << endl;}
         cout << "---" << endl;
         cout << "number of fake combinations: " << _combList.size() << endl;
         for(int i=0;i<_combList.size();i++){
             cout << "combination type " << _combType[i] << endl;
             for(int j=0;j<_combList[i].size();j++){
-                cout << _combList[i][j]->pt()<<endl;
+                cout << _combList[i][j]->pt() << " " << _combIdxs[i][j] <<endl;
             }
             cout << "........" << endl;
         }
-    
     }
-*/
+
 
  
     counter("baseline selection");
@@ -319,6 +318,16 @@ void SUSY3L::run(){
     } 
     //fake background 
     else{
+        //vector<float> frs=getFRs();
+        //int n = 0;
+        //for(unsigned int ic=0;ic<_combList.size();ic++) {
+        //    _l1Cand = _combList[ic][0];
+        //    _l2Cand = _combList[ic][1];
+        //    _l3Cand = _combList[ic][2];
+        //    _idxL1 = 
+
+
+
         setWorkflow(kGlobalFake);
         counter("dispatching");
         advancedSelection( kGlobalFake );
@@ -437,6 +446,11 @@ void SUSY3L::collectKinematicObjects(){
     */
   
     // clear object category vectors from previous event
+    
+    _l1Cand=nullptr;
+    _l2Cand=nullptr;
+    _l3Cand=nullptr;
+    
     _mus.clear();
     _muIdx.clear();
  
@@ -485,9 +499,7 @@ void SUSY3L::collectKinematicObjects(){
   
     _combList.clear();
     _combType.clear();
-    _idx1.clear();
-    _idx2.clear();
-    _idx3.clear();
+    _combIdxs.clear();
 
    
     //select loose leptons (note: not equivalent to LepGood)
@@ -1151,7 +1163,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     if(_isMultiLep) return true;
 
 
-    _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableLepsPtCutVeto, _fakableLepsPtCutVetoIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, _onZ, _idx1, _idx2, _idx3, _combType );
+    _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableLepsPtCutVeto, _fakableLepsPtCutVetoIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, _onZ, _combIdxs, _combType );
     
     if(_combList.size()>0) _isFake = true;
 
@@ -1279,8 +1291,7 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
                 const CandList fakableLeps, vector<unsigned int> idxsL,
                 int nHardestLeptons, float pt_cut_hardest_legs, 
                 int nHardLeptons, float pt_cut_hard_legs, bool onZ,
-                vector<int>& idx1, vector<int>& idx2, vector<int>& idx3, 
-                vector<int>& combType ) {
+                vector< vector<int> >& combIdxs, vector<int>& combType ) {
     /*
     */
 
@@ -1299,6 +1310,11 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     typeLeps.insert(typeLeps.end(), tLepsFake.begin(), tLepsFake.end() );
 
     bool passZsel=false;
+    
+    //low invariant mass veto
+    for(size_t il=0;il<clist.size();il++) {
+        if(!_susyMod->passMllMultiVeto( clist[il], &clist, 0, 12, true) ) {return vclist;}
+    }
     
     //Z selection
     if(onZ){
@@ -1330,12 +1346,14 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
                 tmpList[0] = clist[i1];
                 tmpList[1] = clist[i2];
                 tmpList[2] = clist[i3];
+                vector<int> tmp_idxs;
+                tmp_idxs.push_back(idxs[i1]);
+                tmp_idxs.push_back(idxs[i2]);
+                tmp_idxs.push_back(idxs[i3]);
                 
                 if(!hardLeg(tmpList, nHardestLeptons, pt_cut_hardest_legs, nHardLeptons, pt_cut_hard_legs )) continue;
                 vclist.push_back(tmpList);
-                idx1.push_back(idxs[i1]);
-                idx2.push_back(idxs[i2]);
-                idx3.push_back(idxs[i3]);
+                combIdxs.push_back(tmp_idxs);
 
                 int cType=typeLeps[i1]+typeLeps[i2]+typeLeps[i3];
                 if(cType==0) combType.push_back(kIsTripleFake);
