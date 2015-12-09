@@ -1406,6 +1406,9 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     typeLeps.insert(typeLeps.end(), tLepsFake.begin(), tLepsFake.end() );
 
     bool passZsel=false;
+   
+    //require at least 3 leptons
+    if(clist.size()<3){return vclist;}
     
     //low invariant mass veto
     for(size_t il=0;il<clist.size();il++) {
