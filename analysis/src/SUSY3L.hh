@@ -44,7 +44,9 @@ private:
     bool baseSelection();
     bool multiLepSelection(bool onZ);
     void advancedSelection(int WF);
-    vector<float> getFRs();
+    float getTF_SingleFake(int ic);
+    float getTF_DoubleFake(int ic);
+    float getTF_TripleFake(int ic);
     void wzCRSelection();
     void categorize();
     bool testRegion();

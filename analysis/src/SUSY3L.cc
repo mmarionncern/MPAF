@@ -285,8 +285,8 @@ void SUSY3L::run(){
     }
 
 /*
-    if(_isFake && (_tightLepsPtCutMllCut.size() + _fakableLepsPtCutVeto.size() > 3)){
-        cout << "__________________________" << endl;
+    if(_isFake){ // && (_tightLepsPtCutMllCut.size() + _fakableLepsPtCutVeto.size() > 3)){
+        cout << "______________________________________________________" << endl;
         cout << "number of tight leptons: " << _tightLepsPtCutMllCut.size() << endl;
         cout << "number of FO leptons: " << _fakableLepsPtCutVeto.size() << endl;
         cout << "_isFake: " << _isFake << endl;
@@ -306,32 +306,25 @@ void SUSY3L::run(){
  
     counter("baseline selection");
  
-    //fill signal regions 
+    //signal event
     if(!_isFake){
         setWorkflow(kGlobal);
         counter("dispatching");
         advancedSelection( kGlobal );
     } 
-    //fake background 
+    //fake background event 
     else{
-        vector<float> frs=getFRs();
-        int n = 0;
+        //loop over all combinations of tight and fake leptons
         for(unsigned int ic=0;ic<_combList.size();ic++) {
-            _l1Cand = _combList[ic][0];
-            _l2Cand = _combList[ic][1];
-            _l3Cand = _combList[ic][2];
-            _idxL1 = _combIdxs[ic][0]; 
-            _idxL2 = _combIdxs[ic][1]; 
-            _idxL3 = _combIdxs[ic][2]; 
-
-            setWorkflow(kGlobalFake);
-            counter("dispatching");
-            //getFRProb(_combType[ic], (_combType[ic]!=kIsSingleFake)?0:frs[n] );
-            advancedSelection( kGlobalFake );
-            if(_combType[ic]==kIsSingleFake) n++;
-        }
+            int type = _combType[ic];
+            if(type==kIsSingleFake){ _weight *= getTF_SingleFake(ic); }
+            if(type==kIsDoubleFake){ _weight *= getTF_DoubleFake(ic); }
+            if(type==kIsTripleFake){ _weight *= getTF_TripleFake(ic); }
+        } 
+        setWorkflow(kGlobalFake);
+        counter("dispatching");
+        advancedSelection( kGlobalFake );
     }
-
    
     //fillSkimTree();
     //fillControlPlots();
@@ -1247,49 +1240,67 @@ void SUSY3L::advancedSelection(int WF){
 
 }
 
-
 //____________________________________________________________________________
-vector<float> SUSY3L::getFRs(){
+float SUSY3L::getTF_SingleFake(int ic){
     /*
-        Function to extract fake proability for each combination 
-        of 3 (tight and) fake leptons
-        parameters: none
-        return: vector with fake probabilities
+        Function to extract transfer factor for TTF combination, 
+        i.e. for single fake combinations
+        parameters: number of fake-tight combination
+        return: transfer factors for given combination
     */
     
-    vector<float> frs;
-    //loop over all fake-(tight)-combinations
-    for(unsigned int ic=0;ic<_combList.size();ic++) {
-        //only extract fake probability for single fakes here
-        if(_combType[ic]!=kIsSingleFake) continue;
-        //for single fake combinations with 3 leptons, always last entry is the fake
-        float fr=getFR(_combList[ic][2], _combIdxs[ic][2]);
-        //build vector with one fake rate per combination
-        frs.push_back(fr);
-    }
-
-    vector<float> probs;
-    //no single fake combination found
-    if(frs.size()==0) return probs;
+    if(_combType[ic]!=kIsSingleFake){"WARNING: called 'getTFSingleFake' for wrong combination"; return 0;}
+    //for single fake combinations with 3 leptons, always last entry is the fake
+    float f3=getFR(_combList[ic][2], _combIdxs[ic][2]);
+    //calculate transfer factor
+    float tF = f3/(1-f3);
     
-    //turn FR into probability
-    //case 1 singel fake combination
-    probs.push_back(frs[0]/(1-frs[0]));
+    return tF;
 
-    //case more than 1 single fake combination
-    for(unsigned int i=1;i<frs.size();i++) {
-        float prob = frs[i]/(1-frs[i]);
-            for(unsigned int j=0;j<i;j++) {
-                prob*=(1-frs[j]);
-            }
-        probs.push_back(prob);
-    }
-    
-    return probs;
-
-} 
+}
 
 
+//____________________________________________________________________________
+float SUSY3L::getTF_DoubleFake(int ic){
+    /*
+        Function to extract transfer factor for TFF combination, 
+        i.e. for double fake combinations
+        parameters: number of fake-tight combination
+        return: transfer factors for given combination
+    */
+
+    if(_combType[ic]!=kIsDoubleFake){"WARNING: called 'getTFDoubleFake' for wrong combination"; return 0;}
+    //for double fake combinations with 3 leptons, always last two entries are the fakes
+    float f2=getFR(_combList[ic][1], _combIdxs[ic][1]);
+    float f3=getFR(_combList[ic][2], _combIdxs[ic][2]);
+    //calculate transfer factor
+    float tF = - f2*f3/((1-f2)*(1-f3));
+
+    return tF;
+
+}
+
+//____________________________________________________________________________
+float SUSY3L::getTF_TripleFake(int ic) {
+    /*
+        Function to extract transfer factor for TFF combination, 
+        i.e. for double fake combinations
+        parameters: number of fake-tight combination
+        return: transfer factors for given combination
+    */
+
+    if(_combType[ic]!=kIsTripleFake){"WARNING: called 'getTFTripleFake' for wrong combination"; return 0;}
+
+    //get all 3 fake rates
+    float f1=getFR(_combList[ic][0], _combIdxs[ic][0]);
+    float f2=getFR(_combList[ic][1], _combIdxs[ic][1]);
+    float f3=getFR(_combList[ic][2], _combIdxs[ic][2]);
+    //calculate transfer factor
+    float tF = (f1*f2*f3)/((1-f1)*(1-f2)*(1-f3));
+
+    return tF;
+
+}
 
 //____________________________________________________________________________
 void SUSY3L::wzCRSelection(){
