@@ -99,8 +99,6 @@ public:
   float bTagMediumEfficiency(Candidate* jet, bool isBTagged);
   float bTagMediumScaleFactor(Candidate* jet, bool isBTagged, int st);
   float bTagScaleFactor(unsigned int op, unsigned int mt, int st, unsigned int fl);
-  float M_T(float pt_lepton, float pt_met, float phi_lepton, float phi_met);
-  float DeltaPhi(float phi1, float phi2);
   CandList findZCand(const CandList* leps, float window, float MTcut);
 
   enum {kDenom=0,

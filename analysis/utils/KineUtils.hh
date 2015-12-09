@@ -65,5 +65,8 @@ public:
   //d0
   static float d0(const TVector3& pv,const TVector3& vtx, TVector3& p);
 
+  //calculate MT of lepton and MET
+  static float M_T(float pt_lepton, float pt_met, float phi_lepton, float phi_met);
+
 };
 #endif

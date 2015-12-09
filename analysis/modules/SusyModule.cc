@@ -1,6 +1,5 @@
 #include "analysis/modules/SusyModule.hh"
 
-
 SusyModule::SusyModule(VarClass* vc):
   _vc(vc),_dbm(nullptr)
 {
@@ -359,7 +358,7 @@ SusyModule::findZCand(const CandList* leps, float window, float MTcut) {
     if(zFound){ 
         for(int il=0;il<leps->size();il++) {
             if(il == il1_save || il == il2_save) continue;
-            float mt = M_T(leps->at(il)->pt(), _vc->get("met_pt"), leps->at(il)->phi(), _vc->get("met_phi"));
+            float mt = KineUtils::M_T(leps->at(il)->pt(), _vc->get("met_pt"), leps->at(il)->phi(), _vc->get("met_phi"));
             if(mt > MTcut){
                 clist[0] = leps->at(il1_save);
                 clist[1] = leps->at(il2_save);
@@ -938,23 +937,4 @@ SusyModule::bTagMediumScaleFactor(Candidate* jet, bool isBTagged, int st){
 
 }
 
- 
-float 
-SusyModule::M_T(float pt_lepton, float pt_met, float phi_lepton, float phi_met){
-
-        float deltaPhi = DeltaPhi(phi_lepton, phi_met);
-        float m_t = 0;
-        m_t = sqrt(2 * pt_lepton * pt_met * (1 - cos(deltaPhi) ));
-        return m_t;
-}
-
-float 
-SusyModule::DeltaPhi(float phi1, float phi2){
-
-        float result = phi1 - phi2;
-        while( result >   TMath::Pi() ) result -= TMath::TwoPi();
-        while( result <= -TMath::Pi() ) result += TMath::TwoPi();
-        
-        return TMath::Abs(result);
-}
 
