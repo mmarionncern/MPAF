@@ -526,7 +526,7 @@ void SUSY3L::collectKinematicObjects(){
                       isMu?0.105:0.0005);
 	
         if(!_susyMod->passMllMultiVeto( cand, &_looseLeps, 76, 106, true) || !_susyMod->passMllMultiVeto( cand, &_looseLeps, 0, 12, true) ) continue;
-	_looseLepsPtCutVeto.push_back( _looseLepsPtCut[il]);
+	    _looseLepsPtCutVeto.push_back( _looseLepsPtCut[il]);
         _looseLepsPtCorrCutVeto.push_back( _looseLepsPtCorrCut[il]);
         _looseLepsPtCorrCutVetoIdx.push_back(_looseLepsPtCorrCutIdx[il]);
     } 
@@ -552,7 +552,7 @@ void SUSY3L::collectKinematicObjects(){
         if(!fakableLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il], _looseLepsPtCorrCutVeto[il]->pdgId(),false)) continue; //not a fakable object
         _fakableLepsPtCutVeto.push_back(_looseLepsPtCutVeto[il]);
         _fakableLepsPtCutVetoIdx.push_back(_looseLepsPtCorrCutVetoIdx[il]);
-	_fakableLepsPtCorrCutVeto.push_back(_looseLepsPtCorrCutVeto[il]);
+	    _fakableLepsPtCorrCutVeto.push_back(_looseLepsPtCorrCutVeto[il]);
     }
 
     //tight lepton without Z selection
@@ -1180,7 +1180,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     if(_isMultiLep) return true;
 
 
-    _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableLepsPtCutVeto,_fakableLepsPtCorrCutVeto, _fakableLepsPtCutVetoIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, _onZ, _combIdxs, _combType );
+    _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableLepsPtCutVeto, _fakableLepsPtCorrCutVeto, _fakableLepsPtCutVetoIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, _onZ, _combIdxs, _combType );
     
     if(_combList.size()>0) _isFake = true;
 
@@ -1368,7 +1368,7 @@ bool SUSY3L::testRegion(){
 //____________________________________________________________________________
 vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
                 const CandList fakableLeps,
-		const CandList fakableLepsPtCorr, vector<unsigned int> idxsL,
+		        const CandList fakableLepsPtCorr, vector<unsigned int> idxsL,
                 int nHardestLeptons, float pt_cut_hardest_legs, 
                 int nHardLeptons, float pt_cut_hard_legs, bool onZ,
                 vector< vector<int> >& combIdxs, vector<int>& combType ) {
