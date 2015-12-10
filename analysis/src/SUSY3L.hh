@@ -51,7 +51,8 @@ private:
     void categorize();
     bool testRegion();
     vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
-                const CandList fakableLeps, vector<unsigned int> idxsL,
+		const CandList fakableLeps, const CandList fakableLepsPtCorr,
+		vector<unsigned int> idxsL,
                 int nHardestLepton, float pt_cut_hardest_legs, 
                 int nHardLeptons, float pt_cut_hard_legs, bool onZ,
                 vector< vector<int> >& combIdxs, vector<int>& combType ); 
@@ -179,10 +180,12 @@ private:
     CandList _looseLeps;
     CandList _looseLeps10;
     CandList _looseLepsPtCut;
+    CandList _looseLepsPtCutVeto;
     CandList _looseLepsPtCorrCut;
     CandList _looseLepsPtCorrCutVeto;
     CandList _jetCleanLeps10;
     CandList _fakableLepsPtCutVeto;
+    CandList _fakableLepsPtCorrCutVeto;
     CandList _tightLepsPtCut;
     CandList _tightLepsPtCutMllCut;
     CandList _tightLeps;

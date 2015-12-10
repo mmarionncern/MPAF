@@ -441,6 +441,8 @@ void SUSY3L::collectKinematicObjects(){
     _looseLepsPtCorrCut.clear();
     _looseLepsPtCorrCutIdx.clear();
     
+    _looseLepsPtCutVeto.clear();
+
     _looseLepsPtCorrCutVeto.clear();
     _looseLepsPtCorrCutVetoIdx.clear();
 
@@ -450,6 +452,8 @@ void SUSY3L::collectKinematicObjects(){
     _fakableLepsPtCutVeto.clear();   
     _fakableLepsPtCutVetoIdx.clear();   
 
+    _fakableLepsPtCorrCutVeto.clear();   
+ 
     _tightLepsPtCut.clear();
     _tightLepsPtCutIdx.clear();
  
@@ -520,8 +524,9 @@ void SUSY3L::collectKinematicObjects(){
                       _vc->get("LepGood_pdgId", _looseLepsPtCorrCutIdx[il]),
                       _vc->get("LepGood_charge", _looseLepsPtCorrCutIdx[il]),
                       isMu?0.105:0.0005);
-
+	
         if(!_susyMod->passMllMultiVeto( cand, &_looseLeps, 76, 106, true) || !_susyMod->passMllMultiVeto( cand, &_looseLeps, 0, 12, true) ) continue;
+	_looseLepsPtCutVeto.push_back( _looseLepsPtCut[il]);
         _looseLepsPtCorrCutVeto.push_back( _looseLepsPtCorrCut[il]);
         _looseLepsPtCorrCutVetoIdx.push_back(_looseLepsPtCorrCutIdx[il]);
     } 
@@ -545,8 +550,9 @@ void SUSY3L::collectKinematicObjects(){
     for(size_t il=0;il<_looseLepsPtCorrCutVeto.size();il++) {
         if(tightLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il], _looseLepsPtCorrCutVeto[il]->pdgId())) continue;
         if(!fakableLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il], _looseLepsPtCorrCutVeto[il]->pdgId(),false)) continue; //not a fakable object
-        _fakableLepsPtCutVeto.push_back(_looseLepsPtCorrCutVeto[il]);
+        _fakableLepsPtCutVeto.push_back(_looseLepsPtCutVeto[il]);
         _fakableLepsPtCutVetoIdx.push_back(_looseLepsPtCorrCutVetoIdx[il]);
+	_fakableLepsPtCorrCutVeto.push_back(_looseLepsPtCorrCutVeto[il]);
     }
 
     //tight lepton without Z selection
@@ -1174,7 +1180,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     if(_isMultiLep) return true;
 
 
-    _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableLepsPtCutVeto, _fakableLepsPtCutVetoIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, _onZ, _combIdxs, _combType );
+    _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableLepsPtCutVeto,_fakableLepsPtCorrCutVeto, _fakableLepsPtCutVetoIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, _onZ, _combIdxs, _combType );
     
     if(_combList.size()>0) _isFake = true;
 
@@ -1361,7 +1367,8 @@ bool SUSY3L::testRegion(){
 
 //____________________________________________________________________________
 vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
-                const CandList fakableLeps, vector<unsigned int> idxsL,
+                const CandList fakableLeps,
+		const CandList fakableLepsPtCorr, vector<unsigned int> idxsL,
                 int nHardestLeptons, float pt_cut_hardest_legs, 
                 int nHardLeptons, float pt_cut_hard_legs, bool onZ,
                 vector< vector<int> >& combIdxs, vector<int>& combType ) {
@@ -1373,6 +1380,10 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     CandList clist;
     clist.insert(clist.end(), tightLeps.begin(), tightLeps.end() );
     clist.insert(clist.end(), fakableLeps.begin(), fakableLeps.end() );
+
+    CandList clistPtCorr;
+    clistPtCorr.insert(clistPtCorr.end(), tightLeps.begin(), tightLeps.end() );
+    clistPtCorr.insert(clistPtCorr.end(), fakableLepsPtCorr.begin(), fakableLepsPtCorr.end() );
 
     vector<unsigned int> idxs;
     idxs.insert(idxs.end(), idxsT.begin(), idxsT.end());
@@ -1419,9 +1430,9 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
         for(size_t i2=0;i2<clist.size();i2++) {
             for(size_t i3=0;i3<clist.size();i3++) {
                 if(i1>=i2 || i1>=i3 || i2>=i3) continue;
-                tmpList[0] = clist[i1];
-                tmpList[1] = clist[i2];
-                tmpList[2] = clist[i3];
+                tmpList[0] = clistPtCorr[i1];
+                tmpList[1] = clistPtCorr[i2];
+                tmpList[2] = clistPtCorr[i3];
                 vector<int> tmp_idxs;
                 tmp_idxs.push_back(idxs[i1]);
                 tmp_idxs.push_back(idxs[i2]);
