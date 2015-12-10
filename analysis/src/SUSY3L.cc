@@ -246,10 +246,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    //if (_vc->get("isData") != 1){
-    //    _weight *= _vc->get("genWeight");
-    //    _weight *= _vc->get("vtxWeight");
-    //}
+    if (_vc->get("isData") != 1){
+        _weight *= _vc->get("genWeight");
+        _weight *= _vc->get("vtxWeight");
+    }
 
 }
 
@@ -283,26 +283,6 @@ void SUSY3L::run(){
     if(!baseSel){
         return;
     }
-
-/*
-    if(_isFake){ // && (_tightLepsPtCutMllCut.size() + _fakableLepsPtCutVeto.size() > 3)){
-        cout << "______________________________________________________" << endl;
-        cout << "number of tight leptons: " << _tightLepsPtCutMllCut.size() << endl;
-        cout << "number of FO leptons: " << _fakableLepsPtCutVeto.size() << endl;
-        cout << "_isFake: " << _isFake << endl;
-        for(int i=0;i<_tightLepsPtCutMllCut.size();i++){cout << _tightLepsPtCutMllCut[i]->pt() << " " << _tightLepsPtCutMllCut[i]->pdgId() << " " << _tightLepsPtCutMllCutIdx[i] << endl;}
-        for(int i=0;i<_fakableLepsPtCutVeto.size();i++){cout << _fakableLepsPtCutVeto[i]->pt() << " " << _fakableLepsPtCutVeto[i]->pdgId() << " " << _fakableLepsPtCutVetoIdx[i] << endl;}
-        cout << "---" << endl;
-        cout << "number of fake combinations: " << _combList.size() << endl;
-        for(int i=0;i<_combList.size();i++){
-            cout << "combination type " << _combType[i] << endl;
-            for(int j=0;j<_combList[i].size();j++){
-                cout << _combList[i][j]->pt() << " " << _combIdxs[i][j] <<endl;
-            }
-            cout << "........" << endl;
-        }
-    }
-*/
  
     counter("baseline selection");
  
@@ -440,10 +420,6 @@ void SUSY3L::collectKinematicObjects(){
   
     // clear object category vectors from previous event
     
-    _l1Cand=nullptr;
-    _l2Cand=nullptr;
-    _l3Cand=nullptr;
-    
     _mus.clear();
     _muIdx.clear();
  
@@ -488,7 +464,6 @@ void SUSY3L::collectKinematicObjects(){
     _jetsIdx.clear();
     _bJets.clear();
     _bJetsIdx.clear();
-  
   
     _combList.clear();
     _combType.clear();

@@ -193,13 +193,6 @@ private:
     Candidate* _lep1;
     Candidate* _lep2;
     
-    Candidate* _l1Cand;
-    Candidate* _l2Cand;
-    Candidate* _l3Cand;
-    int _idxL1;
-    int _idxL2;
-    int _idxL3;
-    
     float _HT;
     float _MT2;
     float _deltaR;
