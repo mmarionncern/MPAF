@@ -315,12 +315,14 @@ void SUSY3L::run(){
     //fake background event 
     else{
         //loop over all combinations of tight and fake leptons
+        float sumTF = 0;
         for(unsigned int ic=0;ic<_combList.size();ic++) {
             int type = _combType[ic];
-            if(type==kIsSingleFake){ _weight *= getTF_SingleFake(ic); }
-            if(type==kIsDoubleFake){ _weight *= getTF_DoubleFake(ic); }
-            if(type==kIsTripleFake){ _weight *= getTF_TripleFake(ic); }
-        } 
+            if(type==kIsSingleFake){ sumTF += getTF_SingleFake(ic); }
+            if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
+            if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
+        }
+        _weight *= sumTF;
         setWorkflow(kGlobalFake);
         counter("dispatching");
         advancedSelection( kGlobalFake );
