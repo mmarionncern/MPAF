@@ -1420,8 +1420,8 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     idxs.insert(idxs.end(), idxsL.begin(), idxsL.end());
 
     vector<unsigned int> idxsPtCorr;
-    idxsPtCorr.insert(idxs.end(), idxsT.begin(), idxsT.end());
-    idxsPtCorr.insert(idxs.end(), idxsLPtCorr.begin(), idxsLPtCorr.end());
+    idxsPtCorr.insert(idxsPtCorr.end(), idxsT.begin(), idxsT.end());
+    idxsPtCorr.insert(idxsPtCorr.end(), idxsLPtCorr.begin(), idxsLPtCorr.end());
 
     vector<int> typeLeps(tightLeps.size(), 1);
     vector<int> tLepsFake(fakableLepsPtCorr.size(), 0);
