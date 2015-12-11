@@ -51,11 +51,10 @@ private:
     void categorize();
     bool testRegion();
     vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
-		const CandList fakableLeps, const CandList fakableLepsPtCorr,
-		vector<unsigned int> idxsL,
-                int nHardestLepton, float pt_cut_hardest_legs, 
-                int nHardLeptons, float pt_cut_hard_legs, bool onZ,
-                vector< vector<int> >& combIdxs, vector<int>& combType ); 
+		const CandList fakableLeps, vector<unsigned int> idxsL, const CandList fakableLepsPtCorr,
+		vector<unsigned int> idxsLPtCorr, int nHardestLepton, float pt_cut_hardest_legs, 
+        int nHardLeptons, float pt_cut_hard_legs, bool onZ,
+        vector< vector<int> >& combIdxs, vector<int>& combType ); 
     void setBaselineRegion();
     void setSignalRegion();
     void setSelLine(string str);
@@ -78,14 +77,15 @@ private:
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
 
-    string _selectMuons;
-    string _selectElectrons;
-    string _selectTaus;
-    string _pairmass;
+    bool _selectMuons;
+    bool _selectElectrons;
+    bool _selectTaus;
+    bool _onZ;
     string _BR;
     string _SR;
     string _FR;
-    
+
+
 
 
 private:
@@ -148,12 +148,12 @@ private:
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
     std::vector<unsigned int> _looseLepsIdx;
-    std::vector<unsigned int> _looseLeps10Idx;
     std::vector<unsigned int> _looseLepsPtCutIdx;
     std::vector<unsigned int> _looseLepsPtCorrCutIdx;
-    std::vector<unsigned int> _looseLepsPtCorrCutVetoIdx;
-    std::vector<unsigned int> _jetCleanLeps10Idx;
-    std::vector<unsigned int> _fakableLepsPtCutVetoIdx;
+    std::vector<unsigned int> _fakableLepsIdx;
+    std::vector<unsigned int> _fakableLepsPtCutIdx;
+    std::vector<unsigned int> _fakableNotTightLepsPtCutIdx;
+    std::vector<unsigned int> _fakableNotTightLepsPtCorrCutIdx;
     std::vector<unsigned int> _tightLepsPtCutIdx;
     std::vector<unsigned int> _tightLepsPtCutMllCutIdx;
     std::vector<unsigned int> _tightLepsIdx;
@@ -178,14 +178,12 @@ private:
     CandList _bJets;
     CandList _leps;
     CandList _looseLeps;
-    CandList _looseLeps10;
     CandList _looseLepsPtCut;
-    CandList _looseLepsPtCutVeto;
     CandList _looseLepsPtCorrCut;
-    CandList _looseLepsPtCorrCutVeto;
-    CandList _jetCleanLeps10;
-    CandList _fakableLepsPtCutVeto;
-    CandList _fakableLepsPtCorrCutVeto;
+    CandList _fakableLeps;
+    CandList _fakableLepsPtCut;
+    CandList _fakableNotTightLepsPtCut;
+    CandList _fakableNotTightLepsPtCorrCut;
     CandList _tightLepsPtCut;
     CandList _tightLepsPtCutMllCut;
     CandList _tightLeps;
@@ -211,7 +209,6 @@ private:
     bool _categorization;
     bool _isMultiLep = false;
     bool _isFake = false;
-    bool _onZ;    
 
     //for fake background
     vector<CandList> _combList;
