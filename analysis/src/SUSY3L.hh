@@ -64,10 +64,10 @@ private:
     bool hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg);
     bool checkMultiIso();
     bool ZEventSelectionLoop(bool onz, bool loose_3rd_lep = false, float mt_cut = -1);
-    void fillEventPlots();
+    void fillHistos();
     void fillControlPlots();
     float getMT2();
-    void sortSelectedLeps();
+    void sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx);
     float lowestOssfMll(bool ossf = true);
     bool passMultiLine(bool doubleOnly, bool isolatedOnly);
     bool passHLTLine(string line);
@@ -147,6 +147,7 @@ private:
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
+    std::vector<unsigned int> _lepsIdx;
     std::vector<unsigned int> _looseLepsIdx;
     std::vector<unsigned int> _looseLepsPtCutIdx;
     std::vector<unsigned int> _looseLepsPtCorrCutIdx;
@@ -191,14 +192,14 @@ private:
 
     Candidate* _met;
     Candidate* _Z;
-    Candidate* _lep1;
-    Candidate* _lep2;
+    CandList _zPair;
     
     float _HT;
     float _MT2;
     float _deltaR;
     float _mll;
     float _metPt;
+    float _MT;
   
     std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
    

@@ -246,10 +246,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    if (_vc->get("isData") != 1){
-        _weight *= _vc->get("genWeight");
-        _weight *= _vc->get("vtxWeight");
-    }
+    //if (_vc->get("isData") != 1){
+   //     _weight *= _vc->get("genWeight");
+   //     _weight *= _vc->get("vtxWeight");
+    //}
 
 }
 
@@ -283,6 +283,8 @@ void SUSY3L::run(){
     if(!baseSel){
         return;
     }
+    
+    //fillSkimTree();
  
     counter("baseline selection");
  
@@ -296,30 +298,19 @@ void SUSY3L::run(){
     else{
         //loop over all combinations of tight and fake leptons
         float sumTF = 0;
-        bool debug = false;
-        //if(_combList.size()>1){debug=true;}
-        if(debug) cout << "________________________________" << endl;
         for(unsigned int ic=0;ic<_combList.size();ic++) {
             int type = _combType[ic];
             if(type==kIsSingleFake){ sumTF += getTF_SingleFake(ic); }
             if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
             if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
-            if(debug) cout << "Type: " << _combType[ic] << endl;
-            if(debug) cout << "sumTF: " << sumTF << endl;
         }
-        if(debug) cout << "weight before: " << _weight << endl;
         _weight *= sumTF;
-        if(debug)cout << "weight after: " << _weight << endl;
 
         setWorkflow(kGlobalFake);
         counter("dispatching");
         advancedSelection( kGlobalFake );
     }
-   
-    //fillSkimTree();
-    //fillControlPlots();
-    //fillEventPlots();
-    
+  
 }
 
 
@@ -338,17 +329,25 @@ void SUSY3L::defineOutput(){
         return: none
     */
     
-    //event based observables for baseline region 
+    //event based observables
     _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
     _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
     _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
     _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
 
-    //additional observables
+    //other important observables
+    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} of leading lepton [GeV]"        );
+    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} of 2nd lepton [GeV]"            );
+    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} of 3rd lepton [GeV]"            );
+    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]"         );
+
+    //on-Z only observables 
+    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                       );
     _hm->addVariable("Zmass"            ,  150,     0.0,  150.0,    "Z candidate mass [GeV]"            );
     _hm->addVariable("Zpt"              ,  150,     0.0,  150.0,    "Z candidate pt [GeV]"              );
-    _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
-    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "MT [GeV]"                          );
+
+    //additional observables
+/*    _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
     _hm->addVariable("3rd_lepton_flavor",  40,      -20,   20.0,    "3rd lepton pdgId"                  );
     _hm->addVariable("3rd_lepton_pt"    ,  200,       0,  200.0,    "3rd lepton pt"                     );
     _hm->addVariable("deltaR_elmu"      ,  500,     0.0,   10.0,    "delta R between el and mu"         );
@@ -356,10 +355,6 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "muon multiplicity"                 );
     _hm->addVariable("tau_multiplicity" ,  10,      0.0,   10.0,    "tau multiplicity"                  );
     _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "lepton multiplicity"               );
-    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "pt of leading lepton [GeV]"        );
-    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "pt of 2nd lepton [GeV]"            );
-    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "pt of 3rd lepton [GeV]"            );
-    _hm->addVariable("lowMll"           ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]"      );
     _hm->addVariable("muon_SIP3d"       ,   50,     0.0,    5.0,    "muon SIP3d"                        );
     _hm->addVariable("muon_dxy"         ,  200,     0.0,    0.2,    "muon dxy [cm]"                     );
     _hm->addVariable("muon_dz"          ,  200,     0.0,    0.2,    "muon dz [cm]"                      );
@@ -372,7 +367,7 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("el_JetPtRatio"    ,   60,     0.0,    2.0,    "electron jet pt ratio [GeV]"       );
     _hm->addVariable("el_JetPtRel"      ,   40,     0.0,  100.0,    "electron jet pt rel [GeV]"         );
     _hm->addVariable("el_miniRelIso"    ,   40,     0.0,    0.4,    "electron isolation"                );
-
+*/
 }
 
 
@@ -468,6 +463,8 @@ void SUSY3L::collectKinematicObjects(){
     _tightLepsIdx.clear();
     
     _leps.clear();
+    _lepsIdx.clear();
+
     _jets.clear();
     _jetsIdx.clear();
     _bJets.clear();
@@ -1106,26 +1103,26 @@ bool SUSY3L::baseSelection(){
 //        fill("Zpt"   , _Z->pt()        , _weight);
 //    }
     
-    fill("el_multiplicity" , _nEls , _weight);
-    fill("mu_multiplicity" , _nMus , _weight);
-    fill("tau_multiplicity" , _nTaus , _weight);
-    fill("lep_multiplicity" , _nEls + _nMus + _nTaus , _weight);
+    //fill("el_multiplicity" , _nEls , _weight);
+    //fill("mu_multiplicity" , _nMus , _weight);
+    //fill("tau_multiplicity" , _nTaus , _weight);
+    //fill("lep_multiplicity" , _nEls + _nMus + _nTaus , _weight);
 
     //sort leptons by pt and fill pt plots
-    sortSelectedLeps();
-    fill("pt_1st_lepton" , _leps[0]->pt() , _weight);
-    fill("pt_2nd_lepton" , _leps[1]->pt() , _weight);
-    if(_nMus + _nEls + _nTaus > 2){
-        fill("pt_3rd_lepton" , _leps[2]->pt() , _weight);
-    }
+    //sortSelectedLeps();
+    //fill("pt_1st_lepton" , _leps[0]->pt() , _weight);
+    //fill("pt_2nd_lepton" , _leps[1]->pt() , _weight);
+    //if(_nMus + _nEls + _nTaus > 2){
+    //    fill("pt_3rd_lepton" , _leps[2]->pt() , _weight);
+    //}
     
     //calculate MT2 and fill plot
-    if(_nMus + _nEls + _nTaus == 3){
-        _MT2 = getMT2();
+    //if(_nMus + _nEls + _nTaus == 3){
+    //    _MT2 = getMT2();
         //cut on MT2
         //if(!makeCut<float>( _MT2, _valCutMT2BR, _cTypeMT2BR, "mt2", _upValCutMT2BR) ) return false;
-        fill("MT2" , _MT2        , _weight);
-    }
+    //    fill("MT2" , _MT2        , _weight);
+    //}
       
 	return true;
 }
@@ -1159,6 +1156,18 @@ bool SUSY3L::multiLepSelection(bool onZ){
             if(pass){
                 _isMultiLep = true;
                 counter("Z selection");
+                //compute MT of 3rd lepton with MET
+                _zPair = _susyMod->findZCand( &_tightLepsPtCutMllCut, 15, -1);
+                float zMass = Candidate::create(_zPair[0], _zPair[1])->mass();
+                float zPt = Candidate::create(_zPair[0], _zPair[1])->pt();
+                for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
+                    if(_tightLepsPtCutMllCut[il]==_zPair[0] || _tightLepsPtCutMllCut[il]==_zPair[1]) continue;
+                    _MT = Candidate::create(_tightLepsPtCutMllCut[il], _met)->mass();
+                    break;
+                }
+                fill("MT"       , _MT                   , _weight);
+                fill("Zmass"    , zMass                 , _weight);
+                fill("Zpt"      , zPt                   , _weight);
             }
         }
         else{
@@ -1170,6 +1179,9 @@ bool SUSY3L::multiLepSelection(bool onZ){
             _isMultiLep = true;
             counter("Z veto");
         }
+    //lepton candidates
+    sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
+    
     } 
     
     
@@ -1205,16 +1217,19 @@ void SUSY3L::advancedSelection(int WF){
 
     counter("baseline");
  
+    fillHistos();
+
     //categorize events into signal regions
     if(_categorization){
         categorize();
         int wf = getCurrentWorkflow();
         setWorkflow(wf+offset);
         counter("signal region categorization");
-        fillEventPlots();
+        fillHistos();
+ 
     }
 
-    counter("selected");
+   counter("selected");
 
 }
 
@@ -1329,8 +1344,8 @@ void SUSY3L::wzCRSelection(){
     }
     if(!pass) return;
     counter("Z selection");
-    CandList zPair = _susyMod->findZCand( &_tightLepsPtCutMllCut, 15, 50);
-    if(zPair[0] == 0 && zPair[1] == 0) return;
+    _zPair = _susyMod->findZCand( &_tightLepsPtCutMllCut, 15, 50);
+    if(_zPair[0] == 0 && _zPair[1] == 0) return;
     counter("MT cut");
     if(!( _nJets == 1)) return;
     counter("jet multiplicity");
@@ -1339,7 +1354,22 @@ void SUSY3L::wzCRSelection(){
     if(!(_met->pt() > 30 && _met->pt() < 150)) return;
     counter("MET selection");
     counter("passing WZ selection");
-    fillEventPlots();
+  
+    //compute MT of 3rd lepton with MET
+    float zMass = Candidate::create(_zPair[0], _zPair[1])->mass();
+    float zPt = Candidate::create(_zPair[0], _zPair[1])->pt();
+    for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
+        if(_tightLepsPtCutMllCut[il]==_zPair[0] || _tightLepsPtCutMllCut[il]==_zPair[1]) continue;
+        _MT = Candidate::create(_tightLepsPtCutMllCut[il], _met)->mass();
+        break;
+    }
+    fill("MT"       , _MT                   , _weight);
+    fill("Zmass"    , zMass                 , _weight);
+    fill("Zpt"      , zPt                   , _weight);
+   
+    //get and sort lepton candidates 
+    sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
+    fillHistos();
     setWorkflow(kGlobal); 
     
 }
@@ -1486,6 +1516,10 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
             } 
         }
     }
+
+    //lepton candidates
+    sortSelectedLeps(clist, idxs);
+
     return vclist;
 }
 
@@ -1898,13 +1932,13 @@ bool SUSY3L::ZEventSelectionLoop(bool onz, bool loose_3rd_lep, float mt_cut){
 
 
 //____________________________________________________________________________
-float SUSY3L::getMT2(){
+//float SUSY3L::getMT2(){
     /*
         selected the two leptons that should be used for the MT2 calculation
         parameters: none
         return: none
     */
-    
+/*    
     bool allSameSigned = false;
     float ptsum = 0; 
     float ptsum_tmp = 0;
@@ -1959,7 +1993,7 @@ float SUSY3L::getMT2(){
               
     return MT2(_lep1, _lep2, _met, 0.0);
 }
-
+*/
 /*******************************************************************************
 * ******************************************************************************
 * ** EXECUTING TASKS                                                          **
@@ -1967,19 +2001,22 @@ float SUSY3L::getMT2(){
 * *****************************************************************************/
 
 //____________________________________________________________________________
-void SUSY3L::fillEventPlots(){
+void SUSY3L::fillHistos(){
     /*
         fills plots
         parameters: none
         return: none
     */
 
+    fill("HT"       , _HT                   , _weight);
+    fill("MET"      , _met->pt()            , _weight);
+    fill("NBJets"   , _nBJets               , _weight);
+    fill("NJets"    , _nJets                , _weight);
 
-    fill("HT"        , _HT                    , _weight);
-    fill("MET"       , _met->pt()             , _weight);
-    fill("NBJets"    , _nBJets                , _weight);
-    fill("NJets"     , _nJets                 , _weight);
-
+    fill("pt_1st_lepton" , _leps[0]->pt()   , _weight);
+    fill("pt_2nd_lepton" , _leps[1]->pt()   , _weight);
+    fill("pt_3rd_lepton" , _leps[2]->pt()   , _weight);
+    
 
 }
 
@@ -2081,24 +2118,23 @@ float SUSY3L::MT2(Candidate* lep1, Candidate* lep2, Candidate* met, double mass_
 }
 
 //____________________________________________________________________________
-void SUSY3L::sortSelectedLeps(){
+void SUSY3L::sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx){
     /*
-        joins all selected leptons into one candidate list ordered by pt
-        parameters: none
+        sorts a list of lepton candates according to their pt
+        parameters: the candidate list, the idx vector of the list
         return: none
     */
         CandList leps_tmp;
         CandList leps_tmp2;
+        std::vector<unsigned int> lepsIdx_tmp;
+        std::vector<unsigned int> lepsIdx_tmp2;
         
-        for(int im=0;im<_nMus;im++){
-            leps_tmp.push_back(_mus[im]);
+        for(int il=0;il<leps.size();il++){
+            leps_tmp.push_back(leps[il]);
+            lepsIdx_tmp.push_back(lepsIdx[il]);
         }
-        for(int ie=0;ie<_nEls;ie++){
-            leps_tmp.push_back(_els[ie]);
-        }
-        for(int it=0;it<_nTaus;it++){
-            leps_tmp.push_back(_taus[it]);
-        }
+        _leps.clear();
+        _lepsIdx.clear();
 
         while(leps_tmp.size()>0){
             float pt = -1;
@@ -2114,14 +2150,19 @@ void SUSY3L::sortSelectedLeps(){
             for(int i=0; i < leps_tmp.size(); i++){
                 if(i!=i_save){
                     leps_tmp2.push_back(leps_tmp[i]);
+                    lepsIdx_tmp2.push_back(lepsIdx_tmp[i]);
                 }
             }
             _leps.push_back(leps_tmp[i_save]);
+            _lepsIdx.push_back(lepsIdx_tmp[i_save]);
+            
             leps_tmp.clear();
+            lepsIdx_tmp.clear();
             leps_tmp = leps_tmp2;
+            lepsIdx_tmp = lepsIdx_tmp2;
             leps_tmp2.clear();
+            lepsIdx_tmp2.clear();
         }
-        _nleps = _leps.size();
  
 }
 
