@@ -64,10 +64,10 @@ void SUSY3L::initialize(){
     _hltLines.push_back("HLT_DoubleMuHT");
     _hltLines.push_back("HLT_DoubleElHT");
     //tri-lepton triggers
-    _hltLines.push_back("HLT_TripleEl");
-    _hltLines.push_back("HLT_TripleMu");
-    _hltLines.push_back("HLT_DoubleMuEl");
-    _hltLines.push_back("HLT_DoubleElMu");
+//    _hltLines.push_back("HLT_TripleEl");
+//    _hltLines.push_back("HLT_TripleMu");
+//    _hltLines.push_back("HLT_DoubleMuEl");
+//    _hltLines.push_back("HLT_DoubleElMu");
     //single lepton triggers (not used in RA7 at the moment)
     //_hltLines.push_back("HLT_SingleMu");
     //_hltLines.push_back("HLT_SingleEl");
@@ -203,35 +203,35 @@ void SUSY3L::initialize(){
 
     //FR databases
     if(_FR=="FO2C") {
-        //_dbm->loadDb("ElNIso"    , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_non");
-        //_dbm->loadDb("MuNIso"    , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_non");
-        _dbm->loadDb("ElIso"     , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_iso");
-        _dbm->loadDb("MuIso"     , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_iso");
+        //_dbm->loadDb("ElNIso"    , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_non");
+        //_dbm->loadDb("MuNIso"    , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_non");
+        //_dbm->loadDb("ElIso"     , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_iso");
+        //_dbm->loadDb("MuIso"     , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_iso");
 
-        //_dbm->loadDb("ElNIsoMC"  , "FR_RA7_Dec08.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMC"  , "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_non");
-        _dbm->loadDb("ElIsoMC"   , "FR_RA7_Dec08.root", "FRElPtCorr_qcd_iso");
-        _dbm->loadDb("MuIsoMC"   , "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_iso");
+        _dbm->loadDb("ElNIsoMC"  , "FR_RA7_Dec15.root", "FRElPtCorr_qcd_non");
+        _dbm->loadDb("MuNIsoMC"  , "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMC"   , "FR_RA7_Dec15.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMC"   , "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_iso");
 
-        //_dbm->loadDb("ElNIsoUp"  , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_HI_non");
-        //_dbm->loadDb("MuNIsoUp"  , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_HI_non");
-        //_dbm->loadDb("ElIsoUp"   , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_HI_iso");
-        //_dbm->loadDb("MuIsoUp"   , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_HI_iso");
+        //_dbm->loadDb("ElNIsoUp"  , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_HI_non");
+        //_dbm->loadDb("MuNIsoUp"  , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_HI_non");
+        //_dbm->loadDb("ElIsoUp"   , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_HI_iso");
+        //_dbm->loadDb("MuIsoUp"   , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_HI_iso");
     
-        //_dbm->loadDb("ElNIsoMCUp", "FR_RA7_Dec08.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMCUp", "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMCUp" , "FR_RA7_Dec08.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMCUp" , "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_iso");
+        //_dbm->loadDb("ElNIsoMCUp", "FR_RA7_Dec15.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMCUp", "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMCUp" , "FR_RA7_Dec15.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMCUp" , "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_iso");
     
-        //_dbm->loadDb("ElNIsoDo"  , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_LO_non");
-        //_dbm->loadDb("MuNIsoDo"  , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_LO_non");
-        //_dbm->loadDb("ElIsoDo"   , "FR_RA7_Dec08.root", "FRElPtCorr_UCSX_LO_iso");
-        //_dbm->loadDb("MuIsoDo"   , "FR_RA7_Dec08.root", "FRMuPtCorr_UCSX_LO_iso");
+        //_dbm->loadDb("ElNIsoDo"  , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_LO_non");
+        //_dbm->loadDb("MuNIsoDo"  , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_LO_non");
+        //_dbm->loadDb("ElIsoDo"   , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_LO_iso");
+        //_dbm->loadDb("MuIsoDo"   , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_LO_iso");
 
-        //_dbm->loadDb("ElNIsoMCDo", "FR_RA7_Dec08.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMCDo", "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMCDo" , "FR_RA7_Dec08.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMCDo" , "FR_RA7_Dec08.root", "FRMuPtCorr_qcd_iso");
+        //_dbm->loadDb("ElNIsoMCDo", "FR_RA7_Dec15.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMCDo", "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMCDo" , "FR_RA7_Dec15.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMCDo" , "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_iso");
     }
 
 
@@ -246,10 +246,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    //if (_vc->get("isData") != 1){
-   //     _weight *= _vc->get("genWeight");
-   //     _weight *= _vc->get("vtxWeight");
-    //}
+    if (_vc->get("isData") != 1){
+        _weight *= _vc->get("genWeight");
+        _weight *= _vc->get("vtxWeight");
+    }
 
 }
 
@@ -303,6 +303,7 @@ void SUSY3L::run(){
             if(type==kIsSingleFake){ sumTF += getTF_SingleFake(ic); }
             if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
             if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
+            fill("fake_type" , type       , _weight);
         }
         _weight *= sumTF;
 
@@ -310,7 +311,6 @@ void SUSY3L::run(){
         counter("dispatching");
         advancedSelection( kGlobalFake );
     }
-  
 }
 
 
@@ -346,6 +346,11 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("Zmass"            ,  150,     0.0,  150.0,    "Z candidate mass [GeV]"            );
     _hm->addVariable("Zpt"              ,  150,     0.0,  150.0,    "Z candidate pt [GeV]"              );
 
+    //auxiliary plots
+    _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "fake event type"                                   );
+    _hm->addVariable("nFO"              ,  7,     0.0,  7.0,    "number of tight plus fakable-not-tight leptons"    );
+
+    
     //additional observables
 /*    _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
     _hm->addVariable("3rd_lepton_flavor",  40,      -20,   20.0,    "3rd lepton pdgId"                  );
@@ -474,7 +479,6 @@ void SUSY3L::collectKinematicObjects(){
     _combType.clear();
     _combIdxs.clear();
 
-   
     //select loose leptons (note: not equivalent to LepGood)
     for(size_t il=0;il<_vc->get("nLepGood"); il++) {
         bool isMu=std::abs(_vc->get("LepGood_pdgId", il))==13;
@@ -832,7 +836,7 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    3, ">="  )  ;     //number of isolated leptons
+        setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
@@ -841,8 +845,8 @@ void SUSY3L::setBaselineRegion(){
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
         setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
-        setCut("HT"                 ,   60, ">" )  ;     //sum of jet pT's
-        setCut("MET"                ,   50, ">" )  ;     //missing transverse energy
+        setCut("HT"                 ,   60, ">=")  ;     //sum of jet pT's
+        setCut("MET"                ,   50, ">=")  ;     //missing transverse energy
         setCut("Mll"                ,   12, ">" )  ;     //invariant mass of ossf lepton pair
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
@@ -862,57 +866,57 @@ void SUSY3L::setSignalRegion() {
 
     //0 b-jets
     if( _SR== "SR001" ) {
-        setSelLine("NB:=:0|MET:[[:50:150|HT:[[:60:400");
+        setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:60:400");
     }
     else if( _SR== "SR002" ) {
-        setSelLine("NB:=:0|MET:[[:150:300|HT:[[:60:400");
+        setSelLine("NJ:>=:2|NB:=:0|MET:[[:150:300|HT:[[:60:400");
     }
     else if( _SR== "SR003" ) {
-        setSelLine("NB:=:0|MET:[[:50:150|HT:[[:400:600");
+        setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:400:600");
     }
     else if( _SR== "SR004" ) {
-        setSelLine("NB:=:0|MET:[[:150:300|HT:[[:400:600");
+        setSelLine("NJ:>=:2|NB:=:0|MET:[[:150:300|HT:[[:400:600");
     }
 
     //1 b-jet
     else if( _SR== "SR005" ) {
-        setSelLine("NB:=:1|MET:[[:50:150|HT:[[:60:400");
+        setSelLine("NJ:>=:2|NB:=:1|MET:[[:50:150|HT:[[:60:400");
     }
     else if( _SR== "SR006" ) {
-        setSelLine("NB:=:1|MET:[[:150:300|HT:[[:60:400");
+        setSelLine("NJ:>=:2|NB:=:1|MET:[[:150:300|HT:[[:60:400");
     }
     else if( _SR== "SR007" ) {
-        setSelLine("NB:=:1|MET:[[:50:150|HT:[[:400:600");
+        setSelLine("NJ:>=:2|NB:=:1|MET:[[:50:150|HT:[[:400:600");
     }
     else if( _SR== "SR008" ) {
-        setSelLine("NB:=:1|MET:[[:150:300|HT:[[:400:600");
+        setSelLine("NJ:>=:2|NB:=:1|MET:[[:150:300|HT:[[:400:600");
     }
 
     //2 b-jets
     else if( _SR== "SR009" ) {
-        setSelLine("NB:=:2|MET:[[:50:150|HT:[[:60:400");
+        setSelLine("NJ:>=:2|NB:=:2|MET:[[:50:150|HT:[[:60:400");
     }
     else if( _SR== "SR010" ) {
-        setSelLine("NB:=:2|MET:[[:150:300|HT:[[:60:400");
+        setSelLine("NJ:>=:2|NB:=:2|MET:[[:150:300|HT:[[:60:400");
     }
     else if( _SR== "SR011" ) {
-        setSelLine("NB:=:2|MET:[[:50:150|HT:[[:400:600");
+        setSelLine("NJ:>=:2|NB:=:2|MET:[[:50:150|HT:[[:400:600");
     }
     else if( _SR== "SR012" ) {
-        setSelLine("NB:=:2|MET:[[:150:300|HT:[[:400:600");
+        setSelLine("NJ:>=:2|NB:=:2|MET:[[:150:300|HT:[[:400:600");
     }
 
     //3 b-jets
     else if( _SR== "SR013" ) {
-        setSelLine("NB:=:3|MET:[[:50:300|HT:[[:60:600");
+        setSelLine("NJ:>=:2|NB:>=:3|MET:[[:50:300|HT:[[:60:600");
     }
 
     //ultra high MET and HT region
     else if( _SR== "SR014" ) {
-        setSelLine("NB:>=:0|MET:[[:50:300|HT:>=:600");
+        setSelLine("NJ:>=:2|NB:>=:0|MET:[[:50:300|HT:>=:600");
     }
     else if( _SR== "SR015" ) {
-        setSelLine("NB:>=:0|MET:>=:300");
+        setSelLine("NJ:>=:2|NB:>=:0|MET:>=:300|HT:>=60");
     }
 }
 
@@ -965,7 +969,7 @@ float SUSY3L::getFR(Candidate* cand, int idx) {
   
     //check hadronic activty (different maps for high and low HT)
     //if(_HT<300) db+= "Iso";
-    db+= "Iso";
+    db+= "NIso";
     //else db += "NIso";
 
     //distinguish data and mc
@@ -1140,7 +1144,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     _isFake = false;
 
     //three or more tight leptons
-    if(_tightLepsPtCutMllCut.size()>=3){
+    if(_tightLepsPtCutMllCut.size()==3){
         counter("lepton multiplicity");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
@@ -1200,7 +1204,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
 void SUSY3L::advancedSelection(int WF){
     /*
     */
-
+    
     int offset = 0;
     if(WF==kGlobalFake) offset=kSR015;
     
@@ -1216,7 +1220,7 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
- 
+    
     fillHistos();
 
     //categorize events into signal regions
@@ -1226,10 +1230,10 @@ void SUSY3L::advancedSelection(int WF){
         setWorkflow(wf+offset);
         counter("signal region categorization");
         fillHistos();
- 
     }
+    
+    counter("selected");
 
-   counter("selected");
 
 }
 
@@ -1459,8 +1463,8 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     bool passZsel=false;
    
-    //require at least 3 leptons
-    if(clist.size()<3){return vclist;}
+    //require certain number of fakable leptons
+    if(clist.size()!=3){return vclist;}
     
     //low invariant mass veto
     for(size_t il=0;il<clist.size();il++) {
@@ -1519,6 +1523,7 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     //lepton candidates
     sortSelectedLeps(clist, idxs);
+    fill("nFO", clist.size(),   _weight);
 
     return vclist;
 }
@@ -2189,7 +2194,7 @@ bool SUSY3L::passMultiLine(bool doubleOnly, bool isolatedOnly){
         return: true (if event has been triggered), false (else)
     */
 
-    for(size_t ih=0;ih<9;ih++) {
+    for(size_t ih=0;ih<_hltLines.size();ih++) {
         if(isolatedOnly && ih>2) continue;
         if(doubleOnly && ih>5) continue;
         if(passHLTLine(_hltLines[ih])) return true;
