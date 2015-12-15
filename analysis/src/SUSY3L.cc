@@ -916,7 +916,7 @@ void SUSY3L::setSignalRegion() {
         setSelLine("NJ:>=:2|NB:>=:0|MET:[[:50:300|HT:>=:600");
     }
     else if( _SR== "SR015" ) {
-        setSelLine("NJ:>=:2|NB:>=:0|MET:>=:300|HT:>=60");
+        setSelLine("NJ:>=:2|NB:>=:0|MET:>=:300|HT:>=:60");
     }
 }
 
@@ -1228,6 +1228,7 @@ void SUSY3L::advancedSelection(int WF){
         categorize();
         int wf = getCurrentWorkflow();
         setWorkflow(wf+offset);
+        if(getCurrentWorkflow()==kGlobalFake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
         fillHistos();
     }
@@ -1389,7 +1390,7 @@ void SUSY3L::categorize(){
 
     int offset=1;
     string categ="";
-    for(size_t ic=0;ic< _categs.size();ic++){
+    for(size_t ic=0;ic< (_categs.size()-2)/2;ic++){
         _SR = _categs[ic];
         if(testRegion() ) {setWorkflow(ic+offset); return;}
     }
