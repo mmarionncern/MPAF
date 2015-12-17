@@ -203,35 +203,35 @@ void SUSY3L::initialize(){
 
     //FR databases
     if(_FR=="FO2C") {
-        //_dbm->loadDb("ElNIso"    , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_non");
-        //_dbm->loadDb("MuNIso"    , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_non");
-        //_dbm->loadDb("ElIso"     , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_iso");
-        //_dbm->loadDb("MuIso"     , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_iso");
+        //_dbm->loadDb("ElNIso"    , "file_fo04_noemu.root", "FRElPtCorr_UCSX_non");
+        //_dbm->loadDb("MuNIso"    , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_non");
+        //_dbm->loadDb("ElIso"     , "file_fo04_noemu.root", "FRElPtCorr_UCSX_iso");
+        //_dbm->loadDb("MuIso"     , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_iso");
 
-        _dbm->loadDb("ElNIsoMC"  , "FR_RA7_Dec15.root", "FRElPtCorr_qcd_non");
-        _dbm->loadDb("MuNIsoMC"  , "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMC"   , "FR_RA7_Dec15.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMC"   , "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_iso");
+        _dbm->loadDb("ElNIsoMC"  , "file_fo04.root", "FRElPtCorr_qcd_non");
+        _dbm->loadDb("MuNIsoMC"  , "file_fo04.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMC"   , "file_fo04.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMC"   , "file_fo04.root", "FRMuPtCorr_qcd_iso");
 
-        //_dbm->loadDb("ElNIsoUp"  , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_HI_non");
-        //_dbm->loadDb("MuNIsoUp"  , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_HI_non");
-        //_dbm->loadDb("ElIsoUp"   , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_HI_iso");
-        //_dbm->loadDb("MuIsoUp"   , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_HI_iso");
+        //_dbm->loadDb("ElNIsoUp"  , "file_fo04_noemu.root", "FRElPtCorr_UCSX_HI_non");
+        //_dbm->loadDb("MuNIsoUp"  , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_HI_non");
+        //_dbm->loadDb("ElIsoUp"   , "file_fo04_noemu.root", "FRElPtCorr_UCSX_HI_iso");
+        //_dbm->loadDb("MuIsoUp"   , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_HI_iso");
     
-        //_dbm->loadDb("ElNIsoMCUp", "FR_RA7_Dec15.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMCUp", "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMCUp" , "FR_RA7_Dec15.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMCUp" , "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_iso");
+        //_dbm->loadDb("ElNIsoMCUp", "file_fo04_noemu.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMCUp", "file_fo04_noemu.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMCUp" , "file_fo04_noemu.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMCUp" , "file_fo04_noemu.root", "FRMuPtCorr_qcd_iso");
     
-        //_dbm->loadDb("ElNIsoDo"  , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_LO_non");
-        //_dbm->loadDb("MuNIsoDo"  , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_LO_non");
-        //_dbm->loadDb("ElIsoDo"   , "FR_RA7_Dec15.root", "FRElPtCorr_UCSX_LO_iso");
-        //_dbm->loadDb("MuIsoDo"   , "FR_RA7_Dec15.root", "FRMuPtCorr_UCSX_LO_iso");
+        //_dbm->loadDb("ElNIsoDo"  , "file_fo04_noemu.root", "FRElPtCorr_UCSX_LO_non");
+        //_dbm->loadDb("MuNIsoDo"  , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_LO_non");
+        //_dbm->loadDb("ElIsoDo"   , "file_fo04_noemu.root", "FRElPtCorr_UCSX_LO_iso");
+        //_dbm->loadDb("MuIsoDo"   , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_LO_iso");
 
-        //_dbm->loadDb("ElNIsoMCDo", "FR_RA7_Dec15.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMCDo", "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMCDo" , "FR_RA7_Dec15.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMCDo" , "FR_RA7_Dec15.root", "FRMuPtCorr_qcd_iso");
+        //_dbm->loadDb("ElNIsoMCDo", "file_fo04_noemu.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMCDo", "file_fo04_noemu.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMCDo" , "file_fo04_noemu.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMCDo" , "file_fo04_noemu.root", "FRMuPtCorr_qcd_iso");
     }
 
 
@@ -969,6 +969,7 @@ float SUSY3L::getFR(Candidate* cand, int idx) {
   
     //check hadronic activty (different maps for high and low HT)
     //if(_HT<300) db+= "Iso";
+    //db+= "Iso";
     db+= "NIso";
     //else db += "NIso";
 
