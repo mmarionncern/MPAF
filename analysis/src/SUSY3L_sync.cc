@@ -274,29 +274,24 @@ void SUSY3L_sync::run(){
     bool baseSel = multiLepSelection(_onZ);
     
     //blinding of signal regions
-    //if(_vc->get("isData") && baseSel && !_isFake) return; 
+    if(_vc->get("isData") && baseSel && !_isFake) return; 
   
     //select events for WZ control region
-    //bool wzSel = wzCRSelection();
-    //setWorkflow(kGlobal);
-    //if(wzSel){return;}	
-      
-    long int run = _vc->get("run");
-    long int lumi = _vc->get("lumi");
-    long int evt = _vc->get("evt");
-
+    bool wzSel = wzCRSelection();
+    setWorkflow(kGlobal);
+    if(wzSel){return;}	
+    
     if(!baseSel){return;}
-    
-    cout << run << " " << lumi << " " << evt << /*" " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets <<*/ endl;
-  
+ 
     //fillSkimTree();
-    
+
     //signal event
     if(!_isFake){
         setWorkflow(kGlobal);
         advancedSelection( kGlobal );
+    
     } 
-    /* 
+   
     //fake background event 
     else{
         //loop over all combinations of tight and fake leptons
@@ -313,7 +308,7 @@ void SUSY3L_sync::run(){
         setWorkflow(kGlobalFake);
         advancedSelection( kGlobalFake );
     }
-    */
+
 }
 
 
@@ -555,12 +550,21 @@ void SUSY3L_sync::collectKinematicObjects(){
         _tightLepsPtCutIdx.push_back(_looseLepsPtCutIdx[il]);
     }
 
+    int els = 0;
+    int mus = 0;
+
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
+		//no low mll cut in sync
         //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        //count muons and electrons
+        if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
+        if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
         _tightLepsPtCutMllCut.push_back(_tightLepsPtCut[il]);
         _tightLepsPtCutMllCutIdx.push_back(_tightLepsPtCutIdx[il]);
     }
+    _nMus = mus;
+    _nEls = els;
 
     //select taus
     if(_selectTaus == true){ 
@@ -587,6 +591,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //TODO: use pt corrected leptons for jet cleaning? 
     //clean jets
+	//not synchronized yet: use pt>10 for fakable objetcs for jet cleaning?
     _susyMod->cleanJets( &_fakableLeps, _jets, _jetsIdx, _bJets, _bJetsIdx,
 		       _lepJets, _lepJetsIdx, 30, 30, getUncName()=="JES", getUncDir() );
     _nJets = _jets.size();
@@ -1000,7 +1005,6 @@ bool SUSY3L_sync::multiLepSelection(bool onZ){
                     break;
                 }
             }
-
         }
         if(passMT){isOnZ=true;}
     
@@ -1050,6 +1054,12 @@ void SUSY3L_sync::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
+  
+    //printout for sync     
+    long int run = _vc->get("run");
+    long int lumi = _vc->get("lumi");
+    long int evt = _vc->get("evt");
+    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
    
     fillHistos();
 

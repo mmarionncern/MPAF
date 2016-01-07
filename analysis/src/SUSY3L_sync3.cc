@@ -265,7 +265,7 @@ void SUSY3L_sync3::run(){
     _lumi2 = -1;
     _evt2 = -1;
     _debug = false;
-    if(!_debug){cout << run << " " << lumi << " " << evt << /*" " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets <<*/ endl;}
+    if(!_debug){cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;}
 
     setWorkflow(kGlobal);
     counter("baseline");
@@ -2397,10 +2397,10 @@ bool SUSY3L_sync3::baseSelection(){
     //if(!makeCut( has_two_tighter_leptons , "multiIso tightening", "=") ) return false;
 
     //require minimum number of jets
-//    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
+    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR, kBase) ) return false;
 
     //require minimum number of b-tagged jets
-//    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR, kBase) ) return false;
+    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR, kBase) ) return false;
     
     //require minimum hadronic activity (sum of jet pT's)
 //    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR, kBase) ) return false;

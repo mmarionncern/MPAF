@@ -282,9 +282,9 @@ void SUSY3L::run(){
     if(wzSel){return;}	
   
     if(!baseSel){return;}
-        
+  
     //fillSkimTree();
- 
+
     //signal event
     if(!_isFake){
         setWorkflow(kGlobal);
@@ -972,17 +972,19 @@ bool SUSY3L::multiLepSelection(bool onZ){
         counter("hard leg selection");
         //selection of multi lepton events for signal regions
         
-        if(onZ){
-            //Z selection
-            bool pass = false;
-            for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
-                if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){pass = true;}
-            }
-            if(pass){
-                _isMultiLep = true;
-                counter("Z selection");
-                //compute MT of 3rd lepton with MET
-                _zPair = _susyMod->findZCand( &_tightLepsPtCutMllCut, 15, -1);
+        //Z selection
+        bool passMass = false;
+        bool passMT = false;
+        bool isOnZ = false;
+
+        for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
+            if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){passMass = true;}
+        }
+        if(passMass){
+            //compute MT of 3rd lepton with MET
+            _zPair = _susyMod->findZCand( &_tightLepsPtCutMllCut, _ZMassWindow, _M_T_3rdLep_MET_cut);
+            if(!(_zPair[0] == 0 && _zPair[1] == 0)){
+                passMT = true;
                 _zMass = Candidate::create(_zPair[0], _zPair[1])->mass();
                 _zPt = Candidate::create(_zPair[0], _zPair[1])->pt();
                 for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
@@ -992,15 +994,17 @@ bool SUSY3L::multiLepSelection(bool onZ){
                 }
             }
         }
-        else{
-            //Z veto
-            for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
-                if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){return false;}
-            }
-            
+        if(passMT){isOnZ=true;}
+    
+        if(onZ && isOnZ){
+            _isMultiLep = true;
+            counter("Z selection");
+        }
+        else if(!onZ &&! isOnZ){
             _isMultiLep = true;
             counter("Z veto");
         }
+
     //lepton candidates
     sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
     
@@ -1008,6 +1012,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     
     if(_isMultiLep) return true;
 
+    //TODO: make fakes compatible with MT cut in Z selection
     _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableNotTightLepsPtCut, _fakableNotTightLepsPtCutIdx, _fakableNotTightLepsPtCorrCut, _fakableNotTightLepsPtCorrCutIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, _onZ, _combIdxs, _combType );
     
     if(_combList.size()>0) _isFake = true;
@@ -1371,11 +1376,6 @@ float SUSY3L::lowestOssfMll(CandList leps){
         }
     }   
 
-    if(mll<12){
-        cout << mll << endl;
-        cout << _vc->get("lumi") << " " << _vc->get("evt") << endl;
-    }
- 
     //in case no ossf pair is found 
     if(mll==99999){mll = -999;}
      
