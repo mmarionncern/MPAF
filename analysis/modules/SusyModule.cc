@@ -136,7 +136,6 @@ SusyModule::multiIsoSel(int idx, int wp) const {
   if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
       (_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
        _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ){
-        //if(_vc->get("lumi") == 1104 && _vc->get("evt") == 365448){cout << "pass multiIso " << idx << " " << _vc->get("LepGood_miniRelIso", idx) << " " << _vc->get("LepGood_jetPtRatiov2", idx) << " " << _vc->get("LepGood_jetPtRelv2", idx)<< endl;}
         return true;}
   
   return false;
@@ -220,17 +219,11 @@ SusyModule::elHLTEmulSel(int idx, bool withIso) const {
 
   if(std::abs(_vc->get("LepGood_eta",idx))<1.479) {
 
-      //if(_vc->get("lumi")== 5262&& _vc->get("evt")==1052060){cout << "      entering elHLTEmulSel " << _vc->get("LepGood_sigmaIEtaIEta",idx)<< endl;}
     if(_vc->get("LepGood_sigmaIEtaIEta",idx) > 0.011 ) return false;
-      //if(_vc->get("lumi")== 5262&& _vc->get("evt")==1052060){cout << "      passing sigmaIEtaIEta" << endl;}
     if(std::abs(_vc->get("LepGood_dEtaScTrkIn",idx)) > 0.01 ) return false;
-      //if(_vc->get("lumi")== 5262&& _vc->get("evt")==1052060){cout << "      passing dEtaScTrkIn" << endl;}
     if(std::abs(_vc->get("LepGood_dPhiScTrkIn",idx)) > 0.04 ) return false;
-      //if(_vc->get("lumi")== 5262&& _vc->get("evt")==1052060){cout << "      passing dPhiScTrkIn" << endl;}
     if(_vc->get("LepGood_hadronicOverEm",idx) > 0.08 ) return false;
-      //if(_vc->get("lumi")== 5262&& _vc->get("evt")==1052060){cout << "      passing hadronicOverE" << endl;}
     if(std::abs(_vc->get("LepGood_eInvMinusPInv",idx)) > 0.01 ) return false;
-      //if(_vc->get("lumi")== 5262&& _vc->get("evt")==1052060){cout << "      passing eInvMinusPInv" << endl;}
   }
   else {
     if(_vc->get("LepGood_sigmaIEtaIEta",idx) > 0.031 ) return false;
@@ -754,16 +747,10 @@ SusyModule::cleanJets(CandList* leptons,
   map<Candidate*, std::pair<float,Candidate*> >::const_iterator it;
 
 //BEGIN hack to clean all overlapping jets
-  for(unsigned int ij=0;ij<jets.size();ij++) {
+/*  for(unsigned int ij=0;ij<jets.size();ij++) {
     bool clean = false;
     for(unsigned int il=0;il<leptons->size();il++) {
       float dR=leptons->at(il)->dR( jets[ij] );
-      //if(_vc->get("lumi")== 5262&& _vc->get("evt")==1052060){
-      //      cout << "-----" << endl;
-      //      cout << "dR " <<  dR << endl;
-      //      cout << "lep pt: " <<  leptons->at(il)->pt() << endl;
-      //      cout << "jet pt: " <<  jets[ij]->pt() << endl;
-      //}
       if(dR<0.4){clean=true;}
 
       }
@@ -788,13 +775,13 @@ SusyModule::cleanJets(CandList* leptons,
     }
   
   
-}
+}*/
 //END hack
 
 
 
 
-/*
+
 
 
 
@@ -841,7 +828,7 @@ SusyModule::cleanJets(CandList* leptons,
   } //loop jets
 
 }
-*/
+
 
 // Scale factors ====================================
 void 
