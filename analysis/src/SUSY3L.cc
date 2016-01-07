@@ -203,35 +203,35 @@ void SUSY3L::initialize(){
 
     //FR databases
     if(_FR=="FO2C") {
-        //_dbm->loadDb("ElNIso"    , "file_fo04_noemu.root", "FRElPtCorr_UCSX_non");
-        //_dbm->loadDb("MuNIso"    , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_non");
-        //_dbm->loadDb("ElIso"     , "file_fo04_noemu.root", "FRElPtCorr_UCSX_iso");
-        //_dbm->loadDb("MuIso"     , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_iso");
+        _dbm->loadDb("ElNIso"    , "file_fo04_noemu.root", "FRElPtCorr_UCSX_non");
+        _dbm->loadDb("MuNIso"    , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_non");
+        //_dbm->loadDb("ElIso"     , "file_fo04.root", "FRElPtCorr_UCSX_iso");
+        //_dbm->loadDb("MuIso"     , "file_fo04.root", "FRMuPtCorr_UCSX_iso");
 
-        _dbm->loadDb("ElNIsoMC"  , "file_fo04.root", "FRElPtCorr_qcd_non");
-        _dbm->loadDb("MuNIsoMC"  , "file_fo04.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElNIsoMC"  , "file_fo04.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMC"  , "file_fo04.root", "FRMuPtCorr_qcd_non");
         //_dbm->loadDb("ElIsoMC"   , "file_fo04.root", "FRElPtCorr_qcd_iso");
         //_dbm->loadDb("MuIsoMC"   , "file_fo04.root", "FRMuPtCorr_qcd_iso");
 
-        //_dbm->loadDb("ElNIsoUp"  , "file_fo04_noemu.root", "FRElPtCorr_UCSX_HI_non");
-        //_dbm->loadDb("MuNIsoUp"  , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_HI_non");
-        //_dbm->loadDb("ElIsoUp"   , "file_fo04_noemu.root", "FRElPtCorr_UCSX_HI_iso");
-        //_dbm->loadDb("MuIsoUp"   , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_HI_iso");
+        //_dbm->loadDb("ElNIsoUp"  , "file_fo04.root", "FRElPtCorr_UCSX_HI_non");
+        //_dbm->loadDb("MuNIsoUp"  , "file_fo04.root", "FRMuPtCorr_UCSX_HI_non");
+        //_dbm->loadDb("ElIsoUp"   , "file_fo04.root", "FRElPtCorr_UCSX_HI_iso");
+        //_dbm->loadDb("MuIsoUp"   , "file_fo04.root", "FRMuPtCorr_UCSX_HI_iso");
     
-        //_dbm->loadDb("ElNIsoMCUp", "file_fo04_noemu.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMCUp", "file_fo04_noemu.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMCUp" , "file_fo04_noemu.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMCUp" , "file_fo04_noemu.root", "FRMuPtCorr_qcd_iso");
+        //_dbm->loadDb("ElNIsoMCUp", "file_fo04.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMCUp", "file_fo04.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMCUp" , "file_fo04.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMCUp" , "file_fo04.root", "FRMuPtCorr_qcd_iso");
     
-        //_dbm->loadDb("ElNIsoDo"  , "file_fo04_noemu.root", "FRElPtCorr_UCSX_LO_non");
-        //_dbm->loadDb("MuNIsoDo"  , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_LO_non");
-        //_dbm->loadDb("ElIsoDo"   , "file_fo04_noemu.root", "FRElPtCorr_UCSX_LO_iso");
-        //_dbm->loadDb("MuIsoDo"   , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_LO_iso");
+        //_dbm->loadDb("ElNIsoDo"  , "file_fo04.root", "FRElPtCorr_UCSX_LO_non");
+        //_dbm->loadDb("MuNIsoDo"  , "file_fo04.root", "FRMuPtCorr_UCSX_LO_non");
+        //_dbm->loadDb("ElIsoDo"   , "file_fo04.root", "FRElPtCorr_UCSX_LO_iso");
+        //_dbm->loadDb("MuIsoDo"   , "file_fo04.root", "FRMuPtCorr_UCSX_LO_iso");
 
-        //_dbm->loadDb("ElNIsoMCDo", "file_fo04_noemu.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMCDo", "file_fo04_noemu.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMCDo" , "file_fo04_noemu.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMCDo" , "file_fo04_noemu.root", "FRMuPtCorr_qcd_iso");
+        //_dbm->loadDb("ElNIsoMCDo", "file_fo04.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMCDo", "file_fo04.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMCDo" , "file_fo04.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMCDo" , "file_fo04.root", "FRMuPtCorr_qcd_iso");
     }
 
 
@@ -286,14 +286,12 @@ void SUSY3L::run(){
     
     //fillSkimTree();
  
-    counter("baseline selection");
- 
     //signal event
     if(!_isFake){
         setWorkflow(kGlobal);
-        counter("dispatching");
         advancedSelection( kGlobal );
     } 
+    
     //fake background event 
     else{
         //loop over all combinations of tight and fake leptons
@@ -308,7 +306,6 @@ void SUSY3L::run(){
         _weight *= sumTF;
 
         setWorkflow(kGlobalFake);
-        counter("dispatching");
         advancedSelection( kGlobalFake );
     }
 }
@@ -712,7 +709,7 @@ bool SUSY3L::looseLepton(const Candidate* c, int idx, int pdgId) {
         if(c->pt() < 7) return false;
         if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
-        if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
+        //if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
     }
 
     return true;
@@ -737,7 +734,7 @@ bool SUSY3L::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass){
     else {
         if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
-        if(!_susyMod->elHLTEmulSel(idx, false ) ) return false;
+        //if(!_susyMod->elHLTEmulSel(idx, false ) ) return false;
     }
 
     return true;
@@ -836,7 +833,7 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
+        setCut("LepMultiplicity"   ,    3, ">="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
@@ -966,15 +963,17 @@ float SUSY3L::getFR(Candidate* cand, int idx) {
     //check candidate flavor
     if( std::abs(cand->pdgId())==13) db="Mu";
     else { db="El"; ptM=10;}
-  
+ 
+    //always use non-isolated maps 
+    db+= "NIso";
+    
     //check hadronic activty (different maps for high and low HT)
     //if(_HT<300) db+= "Iso";
     //db+= "Iso";
-    db+= "NIso";
     //else db += "NIso";
 
     //distinguish data and mc
-    if(_vc->get("isData")!=1) db +="MC";
+    //if(_vc->get("isData")!=1) db +="MC";
 
     //if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
     //if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
@@ -1145,7 +1144,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     _isFake = false;
 
     //three or more tight leptons
-    if(_tightLepsPtCutMllCut.size()==3){
+    if(_tightLepsPtCutMllCut.size()>=3){
         counter("lepton multiplicity");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
@@ -1253,16 +1252,7 @@ float SUSY3L::getTF_SingleFake(int ic){
     float f3=getFR(_combList[ic][2], _combIdxs[ic][2]);
     //calculate transfer factor
     float tF = f3/(1-f3);
-    /*
-    if(tF>1){
-        cout << "__________________" << endl;
-        cout << "singe Fake" << endl;
-        cout << "fake pdgId: " << _combList[ic][2]->pdgId() << endl;
-        cout << "fake pt: " << _combList[ic][2]->pt() << endl;
-        cout << "fake eta: " << _combList[ic][2]->eta() << endl;
-        cout << "fake rate: " << f3 << endl;
-    }
-    */
+    
     return tF;
 
 }
@@ -1283,16 +1273,7 @@ float SUSY3L::getTF_DoubleFake(int ic){
     float f3=getFR(_combList[ic][2], _combIdxs[ic][2]);
     //calculate transfer factor
     float tF = - f2*f3/((1-f2)*(1-f3));
-    /*
-    if(tF>1){
-        cout << "__________________" << endl;
-        cout << "double Fake" << endl;
-        cout << "fake pdgId: " << _combList[ic][1]->pdgId() << _combList[ic][2]->pdgId() << endl;
-        cout << "fake pt: " << _combList[ic][2]->pt() << " " << _combList[ic][2]->pt() << endl;
-        cout << "fake eta: " << _combList[ic][2]->eta() << " " << _combList[ic][2]->eta() << endl;
-        cout << "fake rate: " << f2 << " " << f3 << endl;
-    }
-    */
+    
     return tF;
 
 }
@@ -1314,16 +1295,7 @@ float SUSY3L::getTF_TripleFake(int ic) {
     float f3=getFR(_combList[ic][2], _combIdxs[ic][2]);
     //calculate transfer factor
     float tF = (f1*f2*f3)/((1-f1)*(1-f2)*(1-f3));
-    /*
-    if(tF>1){
-        cout << "__________________" << endl;
-        cout << "triple Fake" << endl;
-        cout << "fake pdgId: " << _combList[ic][0]->pdgId() << " " << _combList[ic][1]->pdgId() << " " << _combList[ic][2]->pdgId() <<  endl;
-        cout << "fake pt: " << _combList[ic][0]->pt() << " " << _combList[ic][1]->pt() << " " << _combList[ic][2]->pt() << endl;
-        cout << "fake eta: " << _combList[ic][0]->eta() << " " << _combList[ic][1]->eta() << " " <<  _combList[ic][2]->eta() << endl;
-        cout << "fake rate: " << f1 << " " << f2 << " " << f3 << endl;
-    }
-    */
+
     return tF;
 
 }

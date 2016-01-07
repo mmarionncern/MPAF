@@ -7,8 +7,8 @@ void susy3l_wz() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="wzcr1_noMET_MT50_cut"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="wzcr1_noMET_MT50_cut"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="yields"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="yields"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -18,9 +18,9 @@ void susy3l_wz() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "met_wzcr" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    string obs = "njets" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
     string sigs = "none"; 
-    bool data = true;
+    bool data = false;
 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
@@ -268,7 +268,7 @@ void susy3l_wz() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=1280; //pb-1 19470
+    float lumi=3000; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
@@ -306,28 +306,28 @@ void susy3l_wz() {
     md.anConf.addSample( "ZZZ"                                  ,  "VVV"             , kGreen+4   );
 
     //rare
-    md.anConf.addSample( "GGHZZ4L"                              ,  "rare SM"             , kCyan     );
-    md.anConf.addSample( "TTHnobb"                              ,  "rare SM"             , kCyan      );
-    md.anConf.addSample( "VHToNonbb"                            ,  "rare SM"             , kCyan      );
-
-    md.anConf.addSample( "WGToLNuG"                             ,  "rare SM"             , kCyan      );
-    md.anConf.addSample( "WpWpJJ"                               ,  "rare SM"             , kCyan      );
-    md.anConf.addSample( "WWDouble"                             ,  "rare SM"             , kCyan      );
-    md.anConf.addSample( "WWTo2L2Nu"                            ,  "rare SM"             , kCyan      );
-    //md.anConf.addSample( "ZGTo2LG"                              ,  "rare SM"             , kCyan      );
+    md.anConf.addSample( "GGHZZ4L"                              ,  "rare"             , kCyan     );
+    md.anConf.addSample( "TTHnobb"                              ,  "rare"             , kCyan      );
+    md.anConf.addSample( "VHToNonbb"                            ,  "rare"             , kCyan      );
+    md.anConf.addSample( "WGToLNuG"                             ,  "rare"             , kCyan      );
+    //md.anConf.addSample( "WpWpJJ"                               ,  "rare"             , kCyan      );
+    md.anConf.addSample( "WWDouble"                             ,  "rare"             , kCyan      );
+    md.anConf.addSample( "WWTo2L2Nu"                            ,  "rare"             , kCyan      );
+    //md.anConf.addSample( "ZGTo2LG"                              ,  "rare"             , kCyan      );
 
     //top production
-    md.anConf.addSample( "TbarToLeptons_tch"                ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TBar_tWch"                        ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "T_tWch"                           ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TToLeptons_sch_amcatnlo"          ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TToLeptons_tch"                   ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TGJets"                           ,  "single t"    , kRed+3      );
-    //md.anConf.addSample( "tZqll"                            ,  "single t"    , kRed+3      );
-    md.anConf.addSample( "TTJets"                           ,  "TT"    , kRed+2      );
-    md.anConf.addSample( "TTGJets"                          ,  "TT"    , kRed+2      );
-    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "TT"    , kRed+2      );
-    md.anConf.addSample( "TTTT"                             ,  "TT"    , kRed+2      );
+    md.anConf.addSample( "TbarToLeptons_tch"                ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "TBar_tWch"                        ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "T_tWch"                           ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "TToLeptons_sch_amcatnlo"          ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "TToLeptons_tch"                   ,  "single top"    , kRed+3      );
+    md.anConf.addSample( "TGJets"                           ,  "single top"    , kRed+3      );
+    //md.anConf.addSample( "tZqll"                            ,  "single top"    , kRed+3      );
+    //md.anConf.addSample( "TTJets"                           ,  "TT"    , kRed+2      );
+    md.anConf.addSample( "TT_pow"                           ,  "TT"    , kRed+1      );
+    md.anConf.addSample( "TTGJets"                          ,  "TT"    , kRed+1      );
+    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "TT"    , kRed+1      );
+    md.anConf.addSample( "TTTT"                             ,  "TT"    , kRed+1      );
 
     //W+Jets
     md.anConf.addSample( "WJetsToLNu"            ,  "WJets"    , kRed-6      );
@@ -338,11 +338,11 @@ void susy3l_wz() {
 
 
     //signal
-    if(sigs=="t"){
+    //if(sigs=="t"){
     md.anConf.addSample( "T1tttt_mGo1200_mChi800"                       ,  "T1t412 sig"     , kBlue-3 );
     md.anConf.addSample( "T1tttt_mGo1500_mChi100"                       ,  "T1t415 sig"     , kBlue-7  );
     md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"    ,  "T5t410 sig"     , kOrange+10  );
-    }
+    //}
     if(sigs=="q"){
     md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4WZ315 sig"  , kGreen+2  );
     md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4WZ325 sig"  , kMagenta  );
