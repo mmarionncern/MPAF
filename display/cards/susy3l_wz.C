@@ -7,8 +7,8 @@ void susy3l_wz() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="yields"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="yields"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="wz"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="wz"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -18,7 +18,7 @@ void susy3l_wz() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "njets" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    string obs = "zpeak" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll
     string sigs = "none"; 
     bool data = false;
 
@@ -114,9 +114,9 @@ void susy3l_wz() {
         //bool logYScale=true;
     }
     if(obs == "zpeak"){
-        md.dp.setObservables("Zmass");
-        int binning=2;
-        double rangeX[2]={60,120};
+        md.dp.setObservables("ZmassWZCR");
+        int binning=5;
+        double rangeX[2]={0,200};
         bool logYScale=false;
     }
     if(obs == "zpeak_wz"){
@@ -173,8 +173,8 @@ void susy3l_wz() {
         //bool logYScale=true;
     }
     if(obs == "mll"){
-        md.dp.setObservables("lowMll");
-        int binning=10;
+        md.dp.setObservables("lowestOssfMll");
+        int binning=6;
         double rangeX[2]={0,400};
         //bool logYScale=true;
     }
@@ -293,12 +293,12 @@ void susy3l_wz() {
     //if( md.isInitStatus() ) {
  
     //TTV
-    md.anConf.addSample( "TTWToLNu"                             ,  "ttW"          , kYellow   );
-    md.anConf.addSample( "TTZToLLNuNu"                          ,  "ttZ"          , kBlue     );
+//    md.anConf.addSample( "TTWToLNu"                             ,  "ttW"          , kYellow   );
+//    md.anConf.addSample( "TTZToLLNuNu"                          ,  "ttZ"          , kBlue     );
  
     //di-boson
     md.anConf.addSample( "WZTo3LNu"                             ,  "WZ"              , kGreen    );
-    md.anConf.addSample( "ZZTo4L"                               ,  "ZZ"              , kGreen+3  );
+/*    md.anConf.addSample( "ZZTo4L"                               ,  "ZZ"              , kGreen+3  );
  
     //VVV   
     md.anConf.addSample( "WWZ"                                  ,  "VVV"             , kGreen+4   );
@@ -335,14 +335,14 @@ void susy3l_wz() {
     //Drell-Yan
     md.anConf.addSample( "DYJetsToLL_M10to50"          ,  "DY"    , kRed     );
     md.anConf.addSample( "DYJetsToLL_M50"              ,  "DY"    , kRed     );
-
+*/
 
     //signal
-    //if(sigs=="t"){
+    if(sigs=="t"){
     md.anConf.addSample( "T1tttt_mGo1200_mChi800"                       ,  "T1t412 sig"     , kBlue-3 );
     md.anConf.addSample( "T1tttt_mGo1500_mChi100"                       ,  "T1t415 sig"     , kBlue-7  );
     md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"    ,  "T5t410 sig"     , kOrange+10  );
-    //}
+    }
     if(sigs=="q"){
     md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4WZ315 sig"  , kGreen+2  );
     md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4WZ325 sig"  , kMagenta  );

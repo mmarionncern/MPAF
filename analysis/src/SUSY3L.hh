@@ -34,20 +34,17 @@ private:
     void modifySkimming();
     void collectKinematicObjects();
     
-    bool electronSelection(const Candidate* c, int);
-    bool muonSelection(const Candidate* c, int);
     bool tauSelection(int);
     bool looseLepton(const Candidate* c, int idx, int pdgId);
     bool fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass);
     bool tightLepton(const Candidate* c, int idx, int pdgId);
     
-    bool baseSelection();
     bool multiLepSelection(bool onZ);
     void advancedSelection(int WF);
     float getTF_SingleFake(int ic);
     float getTF_DoubleFake(int ic);
     float getTF_TripleFake(int ic);
-    void wzCRSelection();
+    bool wzCRSelection();
     void categorize();
     bool testRegion();
     vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
@@ -60,15 +57,12 @@ private:
     void setSelLine(string str);
     float getFR(Candidate* cand, int idx);
     void setCut(std::string, float, std::string, float = 0);
-    bool hardLegSelection(int n_hardestLeg = 0, float cut_hardestLeg = -1., int n_hardLeg = 0, float cut_hardLeg = -1.);
     bool hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg);
-    bool checkMultiIso();
-    bool ZEventSelectionLoop(bool onz, bool loose_3rd_lep = false, float mt_cut = -1);
     void fillHistos();
     void fillControlPlots();
     float getMT2();
     void sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx);
-    float lowestOssfMll(bool ossf = true);
+    float lowestOssfMll(CandList leps);
     bool passMultiLine(bool doubleOnly, bool isolatedOnly);
     bool passHLTLine(string line);
 
@@ -144,8 +138,6 @@ private:
     float _upValCutMT2BR;
     
     //vectors for electron, muon, and tau candidates
-    std::vector<int> _elIdx;
-    std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
     std::vector<unsigned int> _lepsIdx;
     std::vector<unsigned int> _looseLepsIdx;
@@ -157,14 +149,11 @@ private:
     std::vector<unsigned int> _fakableNotTightLepsPtCorrCutIdx;
     std::vector<unsigned int> _tightLepsPtCutIdx;
     std::vector<unsigned int> _tightLepsPtCutMllCutIdx;
-    std::vector<unsigned int> _tightLepsIdx;
     std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
     std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
     std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
 
     //length of candiate vectors
-    float _nEls;
-    float _nMus;
     float _nTaus;
     float _nJets;
     float _nBJets;
@@ -187,7 +176,6 @@ private:
     CandList _fakableNotTightLepsPtCorrCut;
     CandList _tightLepsPtCut;
     CandList _tightLepsPtCutMllCut;
-    CandList _tightLeps;
     CandList _lepJets;
 
     Candidate* _met;
@@ -197,9 +185,11 @@ private:
     float _HT;
     float _MT2;
     float _deltaR;
-    float _mll;
+    float _lowOSSFMll;
     float _metPt;
     float _MT;
+    float _zMass;
+    float _zPt;
   
     std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
    
