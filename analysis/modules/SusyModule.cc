@@ -747,7 +747,7 @@ SusyModule::cleanJets(CandList* leptons,
   map<Candidate*, std::pair<float,Candidate*> >::const_iterator it;
 
 //BEGIN hack to clean all overlapping jets
-/*  for(unsigned int ij=0;ij<jets.size();ij++) {
+  for(unsigned int ij=0;ij<jets.size();ij++) {
     bool clean = false;
     for(unsigned int il=0;il<leptons->size();il++) {
       float dR=leptons->at(il)->dR( jets[ij] );
@@ -775,12 +775,12 @@ SusyModule::cleanJets(CandList* leptons,
     }
   
   
-}*/
+}
 //END hack
 
 
 
-
+/*
 
 
 
@@ -828,7 +828,7 @@ SusyModule::cleanJets(CandList* leptons,
   } //loop jets
 
 }
-
+*/
 
 // Scale factors ====================================
 void 

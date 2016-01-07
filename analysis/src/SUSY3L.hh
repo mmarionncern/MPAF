@@ -190,6 +190,8 @@ private:
     float _MT;
     float _zMass;
     float _zPt;
+    int _nEls;
+    int _nMus;
   
     std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
    

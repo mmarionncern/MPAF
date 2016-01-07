@@ -248,7 +248,7 @@ void SUSY3L_sync3::run(){
     //}
 
     //limit run number from json
-    if(_vc->get("run")>258750){return;}
+    //if(_vc->get("run")>258750){return;}
 
 	//baseline selection
     setBaselineRegion();
@@ -260,12 +260,12 @@ void SUSY3L_sync3::run(){
     long int run = _vc->get("run");
     long int lumi = _vc->get("lumi");
     long int evt = _vc->get("evt");
-    _lumi1 = 3502; 
-    _evt1 = 700068;
+    _lumi1 = 421; 
+    _evt1 = 139263;
     _lumi2 = -1;
     _evt2 = -1;
-    _debug = true;
-    if(!_debug){cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;}
+    _debug = false;
+    if(!_debug){cout << run << " " << lumi << " " << evt << /*" " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets <<*/ endl;}
 
     setWorkflow(kGlobal);
     counter("baseline");
@@ -748,9 +748,9 @@ void SUSY3L_sync3::setBaselineRegion(){
     if(_BR == "BR0"){
         setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
+        _nHardestLeptons              = 0           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardLeptons                 = 1           ;     //number of leptons which need to fulfill harder pt cut
+        _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  40         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
         setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
@@ -2375,6 +2375,18 @@ bool SUSY3L_sync3::baseSelection(){
     if(!makeCut<int>( _nMus + _nEls, _valCutLepMultiplicityBR, _cTypeLepMultiplicityBR, "lepton multiplicity", _upValCutLepMultiplicityBR, kBase ) ) return false;
     //if(!makeCut<int>( _nMus , 1, "=" , "muon multiplicity", 0 ) ) return false;
     //if(!makeCut<int>( _nTaus, 1, ">=" , "tau multiplicity", 0 ) ) return false;
+
+ 
+    //select on or off-Z events according to specification in config file
+    bool is_reconstructed_Z = false;
+    if(_pairmass == "off"){
+        is_reconstructed_Z = ZEventSelectionLoop(false, false, 0);
+        if(!makeCut( !is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
+    }
+    else if(_pairmass == "on"){
+        is_reconstructed_Z = ZEventSelectionLoop(true, false, _M_T_3rdLep_MET_cut);
+        if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
+    }
     
     //apply additional pt cuts on leptons
 //    bool has_hard_legs = hardLegSelection(_nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs);
@@ -2394,23 +2406,13 @@ bool SUSY3L_sync3::baseSelection(){
 //    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR, kBase) ) return false;
 
     //require minimum missing transvers energy (actually missing momentum)
-//    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR, kBase) ) return false;
+    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR, kBase) ) return false;
 
     //find smallest invariant mass of ossf pair and reject event if this is below a cut value
 //    _mll = lowestOssfMll();
 //    if(!makeCut<int>( _mll, _valCutMllBR, _cTypeMllBR, "low invariant mass", _upValCutMllBR, kBase) ) return false;
 //        fill("lowMll" , _mll        , _weight);
- 
-    //select on or off-Z events according to specification in config file
-//    bool is_reconstructed_Z = false;
-//    if(_pairmass == "off"){
-//        is_reconstructed_Z = ZEventSelectionLoop(false, false, 0);
-//        if(!makeCut( !is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
-//    }
-//    else if(_pairmass == "on"){
-//        is_reconstructed_Z = ZEventSelectionLoop(true, false, _M_T_3rdLep_MET_cut);
-//        if(!makeCut( is_reconstructed_Z, "mll selection", "=", kBase) ) return false;
-//    }
+
 /*    
     //fill plots 
     if(is_reconstructed_Z){
