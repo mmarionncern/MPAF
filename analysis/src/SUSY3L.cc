@@ -171,17 +171,17 @@ void SUSY3L::initialize(){
     //variables for validation plots
     _vc->registerVar("nLepGood10"                      );    //number of leptons in event with pt>10
     _vc->registerVar("mZ1"                             );    //
-    //_vc->get("minMllAFAS"                              );    
-    //_vc->get("htJet40j"                                );
-    //_vc->get("nBJetLoose25"                            );
-    //_vc->get("nBJetMedium25"                           );
-    //_vc->get("nBJetTight40"                            );
-    //_vc->get("nJet40"                                  );
+    _vc->registerVar("minMllAFAS"                      );    
+    _vc->registerVar("htJet40j"                        );
+    _vc->registerVar("nBJetLoose25"                    );
+    _vc->registerVar("nBJetMedium25"                   );
+    _vc->registerVar("nBJetTight40"                    );
+    _vc->registerVar("nJet40"                          );
  
     //event filters 
-    //_vc->get("hbheFilterNew25ns"                       );
-    //_vc->get("Flag_CSCTightHaloFilter"                 );
-    //_vc->get("Flag_eeBadScFilter"                      );   
+    _vc->registerVar("hbheFilterNew25ns"               );
+    _vc->registerVar("Flag_CSCTightHaloFilter"         );
+    _vc->registerVar("Flag_eeBadScFilter"              );   
     
     //weights
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
@@ -308,9 +308,9 @@ void SUSY3L::run(){
 
     //selections for validation plots
     if(_doValidationPlots) {
-        //if (ttbarSelection())   fillValidationHistos("ttbar");
-        //if (ZlSelection())      fillValidationHistos("Zl");
-        //if (WlSelection())      fillValidationHistos("Wl");
+        if (ttbarSelection())   fillValidationHistos("ttbar");
+        if (ZlSelection())      fillValidationHistos("Zl");
+        if (WlSelection())      fillValidationHistos("Wl");
         if (ZMuMuSelection())   fillValidationHistos("ZMuMu");
         if (ZElElSelection())     fillValidationHistos("ZElEl");
     }
@@ -415,11 +415,11 @@ void SUSY3L::defineOutput(){
     if(!_doValidationPlots) return; 
     //additional histograms  
     vector<string> reg;
-    //reg.push_back("ttbar");
+    reg.push_back("ttbar");
     reg.push_back("ZMuMu");
     reg.push_back("ZElEl");
-    //reg.push_back("Zl");
-    //reg.push_back("Wl");
+    reg.push_back("Zl");
+    reg.push_back("Wl");
   
     for (size_t r=0; r<reg.size(); r++) {
         // lepton variables
@@ -1297,7 +1297,7 @@ bool SUSY3L::ZMuMuSelection(){
         return: true: if event passes selection, false: else
     */
 
-    //if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_SingleMu"))) return false;
     if (_vc->get("nLepGood") < 2) return false;
     if (_vc->get("nLepGood10") != 2) return false;
@@ -1329,7 +1329,7 @@ bool SUSY3L::ZElElSelection(){
         return: true: if event passes selection, false: else
     */
 
-    //if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_SingleEl"))) return false;
     if (_vc->get("nLepGood") < 2) return false;
     if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
@@ -1362,7 +1362,7 @@ bool SUSY3L::ttbarSelection(){
         return: true: if event passes selection, false: else
     */
 
-    //if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
     if (_vc->get("nLepGood") < 2) return false;
     _idxL1 = 0;
@@ -1386,7 +1386,7 @@ bool SUSY3L::ZlSelection(){
         return: true: if event passes selection, false: else
     */
 
-    //if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
     if (_vc->get("nLepGood10") !=3 ) return false;
     if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
