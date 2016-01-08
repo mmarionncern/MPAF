@@ -45,6 +45,11 @@ private:
     float getTF_DoubleFake(int ic);
     float getTF_TripleFake(int ic);
     bool wzCRSelection();
+    bool ZMuMuSelection();
+    bool ttbarSelection();
+    bool ZElElSelection();
+    bool ZlSelection();
+    bool WlSelection();
     void categorize();
     bool testRegion();
     vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
@@ -59,14 +64,13 @@ private:
     void setCut(std::string, float, std::string, float = 0);
     bool hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg);
     void fillHistos();
-    void fillControlPlots();
+    void fillValidationHistos(string reg);
     float getMT2();
     void sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx);
     float lowestOssfMll(CandList leps);
     bool passMultiLine(bool doubleOnly, bool isolatedOnly);
     bool passHLTLine(string line);
 
-    float HT();
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
@@ -75,6 +79,7 @@ private:
     bool _selectElectrons;
     bool _selectTaus;
     bool _onZ;
+    bool _doValidationPlots;
     string _BR;
     string _SR;
     string _FR;
@@ -181,6 +186,8 @@ private:
     Candidate* _met;
     Candidate* _Z;
     CandList _zPair;
+    Candidate* _l1Cand;
+    Candidate* _l2Cand;
     
     float _HT;
     float _MT2;
@@ -192,6 +199,10 @@ private:
     float _zPt;
     int _nEls;
     int _nMus;
+    int _idxL1;
+    int _idxL2;
+ 
+    float _btagW;
   
     std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
    
