@@ -624,14 +624,6 @@ void SUSY3L::collectKinematicObjects(){
     //    _jetCleanLeps10Idx.push_back( _looseLepsIdx[il] );
     //} 
 
-    //fakable-not-tight leptons
-    for(size_t il=0;il<_looseLepsPtCorrCutVeto.size();il++) {
-        if(tightLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il], _looseLepsPtCorrCutVeto[il]->pdgId())) continue;
-        if(!fakableLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il], _looseLepsPtCorrCutVeto[il]->pdgId(),false)) continue; //not a fakable object
-        _fakableLepsPtCutVeto.push_back(_looseLepsPtCorrCutVeto[il]);
-        _fakableLepsPtCutVetoIdx.push_back(_looseLepsPtCorrCutVetoIdx[il]);
-    }
-
     //tight lepton without Z selection
     for(size_t il=0;il<_looseLepsPtCut.size();il++) {
         if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId()))  continue;
@@ -1152,13 +1144,13 @@ void SUSY3L::advancedSelection(int WF){
             _weight *= _btagW;
         }
         else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
-            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1);//, _fastSim); 
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1, _fastSim); 
         else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
-            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1);//, _fastSim); 
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1, _fastSim); 
         else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
-            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);//, _fastSim, 1); 
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 1); 
         else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
-            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);//, _fastSim, -1); 
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, -1); 
         else //other syst. variations
             _weight *= _btagW;
     }
@@ -1392,48 +1384,6 @@ bool SUSY3L::ttbarSelection(){
   
     return true;
 }
-
-//____________________________________________________________________________
-void SUSY3L::categorize(){
-    /*
-        switch to correct workflow if event is categorized to respective signal region
-        parameters: none
-        return: none
-    */
-
-    int offset=1;
-    string categ="";
-    for(size_t ic=0;ic< _categs.size();ic++){
-        _SR = _categs[ic];
-        if(testRegion() ) {setWorkflow(ic+offset); return;}
-    }
-    cout << "WARNING Baseline event not categorized. NJets/NBJets/HT/MET " << _nJets << " " << _nBJets << " " << _HT << " " << _metPt << endl;
-    setWorkflow(kGlobal);
-}
-
-
-//____________________________________________________________________________
-bool SUSY3L::testRegion(){
-    /*
-        categroizes events into signal regions defined in setSignalRegion()
-        parameters: none
-        return: none
-    */
-
-    bool passSel=true;
-
-    for(size_t is=0;is<_sels[_SR].size();is++) {
-        passSel=true;
-        for(size_t ii=0;ii<_sels[_SR][is].size();ii++) {
-            if(!_au->simpleCut<float>( (*(_val[_sels[_SR][is][ii][0] ])) , atof(_sels[_SR][is][ii][2].c_str() ), _sels[_SR][is][ii][1], atof(_sels[_SR][is][ii][3].c_str()) ) ) 
-                {passSel=false;break;}
-        }    
-    }
-    if(passSel) return true;
-
-    return false;
-}                               
-
 
 
 //____________________________________________________________________________

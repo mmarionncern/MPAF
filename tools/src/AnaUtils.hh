@@ -172,7 +172,7 @@ public:
   void getCategSystematics(string ds, string src, string lvl, string categ="", bool latex=false);
   void getYieldSysts(EffST eST, map<string,float>& rU, map<string,float>& rD,
 		       float& totUp, float& totDown, float& central);
-  //float getYield(int ids, string cName, int icat);
+  float getYield(int ids, string cName, int icat);
   //workflows
   void setWFEfficiencies(int ids, string cName, float w, bool acc, string uncName="");
   void setWFSystematics(int ids, string cName, string sName,
