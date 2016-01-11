@@ -22,7 +22,7 @@ for ig in range(0, mGluMax, step):
 
 for line in lines:
     
-    fileName=(line.split()[0]+"/T1tttt.root")
+    fileName=("dcap://t3se01.psi.ch:22125/"+line.split()[0]+"/T1tttt.root")
     print fileName
     f = ROOT.TFile.Open( fileName , "read")
     t = f.Get("tree")
@@ -56,10 +56,10 @@ for line in lines:
         massName="-"+str(gluMass)+"-"+str(lspMass)+"-"
         allMasses[massName]=line
 
-        os.system("cp /afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/cfg/ssdlScan_template_file.cfg /afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/cfg/tmpFiles/ssdlScan"+massName+".cfg")
-        os.system("sed -i 's|MASSBENCH|'"+massName+"'|' /afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/cfg/tmpFiles/ssdlScan"+massName+".cfg")
-        os.system("sed -i 's|FILE|'"+line.split()[1]+"'|' /afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/cfg/tmpFiles/ssdlScan"+massName+".cfg")
-        os.system("sed -i 's|PATH|'"+line.split()[0]+"'|' /afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/cfg/tmpFiles/ssdlScan"+massName+".cfg")
+        os.system("cp /shome/mmarionn/MPAF/cfg/ssdlScan_template_file.cfg /shome/mmarionn/MPAF/cfg/tmpFiles/ssdlScan"+massName+".cfg")
+        os.system("sed -i 's|MASSBENCH|'"+massName+"'|' /shome/mmarionn/MPAF/cfg/tmpFiles/ssdlScan"+massName+".cfg")
+        os.system("sed -i 's|FILE|'"+line.split()[1]+"'|' /shome/mmarionn/MPAF/cfg/tmpFiles/ssdlScan"+massName+".cfg")
+        os.system("sed -i 's|PATH|'"+line.split()[0]+"'|' /shome/mmarionn/MPAF/cfg/tmpFiles/ssdlScan"+massName+".cfg")
 
 
 
