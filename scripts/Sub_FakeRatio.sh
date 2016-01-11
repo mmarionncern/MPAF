@@ -12,3 +12,4 @@ rm $MPAF/workdir/logs/FakeRatio/FakeRatio2015Bel.out
 rm $MPAF/workdir/logs/FakeRatio/FakeRatio2015Bel.err
 qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/FakeRatio/FakeRatio2015Bel.out -e $MPAF/workdir/logs/FakeRatio/FakeRatio2015Bel.err $MPAF/scripts/submit.sh $MPAF/cfg/FakeRatio2015Bel.cfg
 
+

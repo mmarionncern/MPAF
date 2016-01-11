@@ -44,6 +44,7 @@ private:
                                                                                            vector<float> search_pts , vector<float> search_eta);
   vector<float> findTriggerPts(vector<vector<string> > trigger_lines, string name);
   void initialize();
+  void loadLeptonId();
   void run();
 
   void defineOutput(); 
@@ -51,6 +52,8 @@ private:
   void divideFRMaps();
   void doEwkSub();
   vector<float> doubleFit(string ext, TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin = 0, float hmax = 0); 
+  void doubleFit(vector<float>& scales, string ext, TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin = 0, float hmax = 0); 
+  float errorProp(float central1, float central2, float error1, float error2);
   vector<float> getScalesETH (string obs, float lumi);
   vector<float> getScalesUCSX(string obs, float lumi);
   vector<float> getScalesUCSXlite(string obs, float lumi);
@@ -60,14 +63,20 @@ private:
   void registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, string xaxis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis);
+  void registerLepVars();
   void registerTriggerVars();
   void registerVariable(string var, int nBin, float min, float max, string Xleg, bool isglb=true, bool prof=false, string type="m");
   void registerVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY, float maxY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
   void registerVariable(string var, int nBinX, vector<float> binsX, string Xleg, bool isglb=true, bool prof=false, string type="m");
   void registerVariable(string var, int nBinX, vector<float> binsX, int nBinY, vector<float> binsY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
   void setBinErrors(TH1*, TH1*, TH1*);
+  void setSystematics();
+  void setSystError(string obs, string postfix, int idx);
   float singleFit(string ext, TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
   void singleFit(vector<float>& scales, string ext, TH1* h_data, TH1* h_mc, float hmin = 0, float hmax = 0);
+  void subtractEwk(TH1* d, TH1* e, vector<float> scales, string obs, string postfix, int idx);
+  //void subtractEwkStat(TH1* d, TH1* e, vector<float> scales, string obs, string postfix, int idx);
+  //void subtractEwkSyst(TH1* d, TH1* e, vector<float> scales);
   void subtractPlots(string lep, int idx, vector<float> scales, string postfix);
   void subtractPlotsCERN(string lep, int idx, string postfix);
   void subtractPromptsCERN();
@@ -79,10 +88,11 @@ private:
   void writeOutput();
 
   void collectKinematicObjects();
-  bool denominatorElectronSelection(int);
-  bool denominatorMuonSelection(int);
-  bool numeratorElectronSelection(int);
-  bool numeratorMuonSelection(int);
+  void collectLeptons(int, string);
+  bool denominatorElectronSelection(int, string);
+  bool denominatorMuonSelection(int, string);
+  bool numeratorElectronSelection(int, string);
+  bool numeratorMuonSelection(int, string);
 
   void setCut(std::string, float, std::string, float = 0);
   void setMeasurementRegion();
@@ -98,19 +108,19 @@ private:
 
   void fillEventPlots();
   void fillEwkEventPlots();
-  void fillEwkLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
+  void fillEwkLepPlots(std::string, Candidate*, int, string, int = SusyModule::kTight);
   void fillEwkLeptonPlots();
   void fillFakeRatioMaps();
-  void fillFRMaps(std::string, Candidate*, int, int = SusyModule::kTight);
-  void fillLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
+  void fillFRMaps(std::string, Candidate*, int, string, int = SusyModule::kTight);
+  void fillLepPlots(std::string, Candidate*, int, string, int = SusyModule::kTight);
   void fillLeptonPlots();
   void fillJetPlots();
   void fillQcdEventPlots();
   void fillQcdFakeRatioMaps();
-  void fillQcdLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
+  void fillQcdLepPlots(std::string, Candidate*, int, string, int = SusyModule::kTight);
   void fillQcdLeptonPlots();
   void fillUcsxEwkEventPlots();
-  void fillUcsxEwkLepPlots(std::string, Candidate*, int, int = SusyModule::kTight);
+  void fillUcsxEwkLepPlots(std::string, Candidate*, int, string, int = SusyModule::kTight);
   void fillUcsxEwkLeptonPlots();
   void findTriggerExts();
   float overflowPt(float);
@@ -126,8 +136,12 @@ private:
   //counter categories, 0 is ALWAYS global (even if not specified later
   enum {kGlobal=0, kEwkSel, kUcsSel, kQcdSel, kTrigger, kSync, kDenEls, kDenMus, kNumEls, kNumMus, kVetEls, kVetMus, kGoodJets};
 
+  enum {kElIdWP, kElIsoWP, kElMvaWP, kElChCut, kElTrEmu, kMuIdWP, kMuIsoWP, kMuChCut};
+
   enum {kNoGenMatch=0, kMisMatchPdgId,
 	kMisChargePdgId, kGenMatched};
+
+  vector<int> _id;
 
   float _vtxWeight;
 
@@ -187,8 +201,10 @@ private:
   vector<vector<vector<string> > > _vTR_lineperpteta_mu_non;
   vector<vector<vector<string> > > _vTR_lineperpteta_mu_iso;
 
+  string _idS;
   string _norm;
   string _ewkSub;
+  string _ewkMet;
   bool _doEwkSubCERN;
   bool _doEwkSubETH;
   bool _doEwkSubUCSX;
@@ -220,16 +236,16 @@ private:
   CandList _bJets;
   CandList _goodJets;
 
-  vector<unsigned int> _denElsIdx;
-  vector<unsigned int> _denLepsIdx;
-  vector<unsigned int> _denMusIdx;
-  vector<unsigned int> _numElsIdx;
-  vector<unsigned int> _numLepsIdx;
-  vector<unsigned int> _isoLepsIdx;
-  vector<unsigned int> _numMusIdx;
-  vector<unsigned int> _vetElsIdx;
-  vector<unsigned int> _vetLepsIdx;
-  vector<unsigned int> _vetMusIdx;
+  vector<pair<unsigned int, string> > _denElsIdx;
+  vector<pair<unsigned int, string> > _denLepsIdx;
+  vector<pair<unsigned int, string> > _denMusIdx;
+  vector<pair<unsigned int, string> > _numElsIdx;
+  vector<pair<unsigned int, string> > _numLepsIdx;
+  vector<pair<unsigned int, string> > _isoLepsIdx;
+  vector<pair<unsigned int, string> > _numMusIdx;
+  vector<pair<unsigned int, string> > _vetElsIdx;
+  vector<pair<unsigned int, string> > _vetLepsIdx;
+  vector<pair<unsigned int, string> > _vetMusIdx;
   vector<unsigned int> _bJetsIdx;
   vector<unsigned int> _goodJetsIdx;
 
@@ -238,7 +254,7 @@ private:
 
   string _bvar;
   string _nvert;
-  string _leps;
+  vector<string> _leps;
   string _jets;
   string _djets;
   string _mets;

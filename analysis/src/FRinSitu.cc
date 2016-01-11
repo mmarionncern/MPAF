@@ -62,12 +62,13 @@ void FRinSitu::initialize(){
   string TR_lines_non[3] = {"HLT_BIT_HLT_DoubleMu8_Mass8_PFHT300_v"                    , \
                             "HLT_BIT_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v"  , \
                             "HLT_BIT_HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v"      };
-  string TR_lines_iso[4] = {"HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"            , \
+
+  string TR_lines_iso[5] = {"HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v"            , \
                             "HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v"          , \
+                            "HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"      , \ 
                             "HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v" , \
                             "HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v"  };
-                            //"HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_v"         , 
-                            //"HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v"      , 
+
   _vTR_lines_non = Tools::toVector(TR_lines_non);
   _vTR_lines_iso = Tools::toVector(TR_lines_iso);
 

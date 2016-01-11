@@ -2,6 +2,7 @@
 #define SusyModule_hh
 
 #include "analysis/core/VarClass.hh"
+#include "analysis/core/MPAF.hh"
 #include "analysis/tools/Candidate.hh"
 #include "analysis/utils/KineUtils.hh"
 #include "analysis/utils/mt2_bisect.h"
@@ -40,17 +41,17 @@ public:
   ~SusyModule();
 
   
-  bool elMvaSel(int elIdx, int wp) const;
-  bool muIdSel(int idx, int wp, bool invSIP = false) const;
-  bool elIdSel(int idx, int wp, int mvaWp = kTight, bool invSIP = false) const;
-  bool elHLTEmulSel(int, bool) const;
-  bool elHLTEmulSelIso(int, int mvaWP = kLooseHT) const;
-  bool multiIsoSel(int idx, int wp) const;
-  bool multiIsoSelCone(int idx, int wp) const;
-  bool multiIsoSelInSitu(int idx, int wp) const;
-  bool invMultiIsoSel(int idx, int wp) const;
-  bool invPtRelSel(int idx, int wp) const;
-  bool inSituFO(int idx, int wp) const;
+  bool elMvaSel(int elIdx, int wp, string branch = "LepGood") const;
+  bool muIdSel(int idx, int wp, bool chCut = true, bool invSIP = false, string branch = "LepGood") const;
+  bool elIdSel(int idx, int wp, int mvaWp = kTight, bool chCut = true, bool invSIP = false, string branch = "LepGood") const;
+  bool elHLTEmulSel(int, bool, string branch = "LepGood") const;
+  bool elHLTEmulSelIso(int, int mvaWP = kLooseHT, string branch = "LepGood") const;
+  bool multiIsoSel(int idx, int wp, string branch = "LepGood") const;
+  bool multiIsoSelCone(int idx, int wp, string branch = "LepGood") const;
+  bool multiIsoSelInSitu(int idx, int wp, string branch = "LepGood") const;
+  bool invMultiIsoSel(int idx, int wp, string branch = "LepGood") const;
+  bool invPtRelSel(int idx, int wp, string branch = "LepGood") const;
+  bool inSituFO(int idx, int wp, string branch = "LepGood") const;
   bool jetSel(int jetIdx) const;
   float HT(const CandList* jets);
 
@@ -88,10 +89,15 @@ public:
 				bool bypassMV, bool os, float pTthrMu, float pTthrEl,
 				vector<int>& idx1, vector<int>& idx2);
   
-  float closestJetPt(int idx) const;
-  float conePt(int idx, int isoWp = kTight) const; 
-  float coneMt(int, int, Candidate*) const;
-  float coneMt(int, Candidate*, Candidate*) const;
+  double closestJetPt(int idx, string branch = "LepGood") const;
+  double conePt(int idx, int isoWp = kTight, string branch = "LepGood") const; 
+  //double coneMt(int, int, Candidate*) const;
+  //double coneMt(int, Candidate*, Candidate*) const;
+  double Mt(Candidate* c1, Candidate* c2, int idx1 = -1, int idx2 = -1, string branch1 = "LepGood", string branch2 = "LepGood", int isoWp = kTight) const;
+  double rawMt(Candidate* c1, Candidate* c2) const;
+  double coneMt(Candidate* c1, Candidate* c2, int idx1 = -1, int idx2 = -1, string branch1 = "LepGood", string branch2 = "LepGood", int isoWp = kTight) const;
+
+  void correctFlipRate(float& rate, float eta);
 
   void applyHLTSF(const string& hltLine, const vector<Candidate*>& cands, float& weight);
   void applyLepSF(const CandList& cands, float& weight);

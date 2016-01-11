@@ -127,23 +127,20 @@ void FakeRatio::initialize(){
  
   string TR_lines_el_non[1] = {"HLT_FR_Ele12_CaloIdM_TrackIdM_PFJet30"};
   string TR_lines_el_iso[1] = {"HLT_FR_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30"};
-  //string TR_lines_mu_non[1] = {"HLT_FR_Mu17"};
-  //string TR_lines_mu_iso[1] = {"HLT_FR_Mu17_TrkIsoVVL"};
-
-
-  //string TR_lines_el_non[4] = {"HLT_FR_Ele8_CaloIdM_TrackIdM_PFJet30" , \
-  //                             "HLT_FR_Ele12_CaloIdM_TrackIdM_PFJet30", \
-  //                             "HLT_FR_Ele23_CaloIdM_TrackIdM_PFJet30", \
-  //                             "HLT_FR_Ele33_CaloIdM_TrackIdM_PFJet30"};
-  //string TR_lines_el_iso[3] = {"HLT_FR_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30", \
-  //                             "HLT_FR_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30", \
-  //                             "HLT_FR_Ele33_CaloIdL_TrackIdL_IsoVL_PFJet30"};
   string TR_lines_mu_non[2] = {"HLT_FR_Mu8" , \
                                "HLT_FR_Mu17"};
   string TR_lines_mu_iso[2] = {"HLT_FR_Mu8_TrkIsoVVL" , \
                                "HLT_FR_Mu17_TrkIsoVVL"};
+
+  //string TR_lines_el_non[5] = {"HLT_FR_Ele8_CaloIdM_TrackIdM_PFJet30" , \
+  //                             "HLT_FR_Ele12_CaloIdM_TrackIdM_PFJet30", \
   //                             "HLT_FR_Ele18_CaloIdM_TrackIdM_PFJet30", \
+  //                             "HLT_FR_Ele23_CaloIdM_TrackIdM_PFJet30", \
+  //                             "HLT_FR_Ele33_CaloIdM_TrackIdM_PFJet30"};
+  //string TR_lines_el_iso[3] = {"HLT_FR_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30", \
   //                             "HLT_FR_Ele18_CaloIdL_TrackIdL_IsoVL_PFJet30", \
+  //                             "HLT_FR_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30", \
+  //                             "HLT_FR_Ele33_CaloIdL_TrackIdL_IsoVL_PFJet30"};
   //string TR_lines_mu_non[4] = {"HLT_FR_Mu8" , \
   //                             "HLT_FR_Mu17", \
   //                             "HLT_FR_Mu24", \
@@ -175,24 +172,22 @@ void FakeRatio::initialize(){
                               "HLT_BIT_HLT_Mu17_TrkIsoVVL_v_prescaleL1Min"};
 
   // trigger effective luminosities
-  //float TR_efflum_el_non[1] = {getCfgVarF("LUMINOSITY_ELE12")};
-  //float TR_efflum_el_iso[1] = {getCfgVarF("LUMINOSITY_ELE12_ISO")};
-  //float TR_efflum_mu_non[1] = {getCfgVarF("LUMINOSITY_MU17")};
-  //float TR_efflum_mu_iso[1] = {getCfgVarF("LUMINOSITY_MU17_ISO")};
+  float TR_efflum_el_non[1] = {getCfgVarF("LUMINOSITY_ELE12"    )};
+  float TR_efflum_el_iso[1] = {getCfgVarF("LUMINOSITY_ELE12_ISO")};
+  float TR_efflum_mu_non[2] = {getCfgVarF("LUMINOSITY_MU8"      ) , \
+                               getCfgVarF("LUMINOSITY_MU17"     )};
+  float TR_efflum_mu_iso[2] = {getCfgVarF("LUMINOSITY_MU8_ISO"  ) , \
+                               getCfgVarF("LUMINOSITY_MU17_ISO" )};
 
-  float TR_efflum_el_non[5] = {getCfgVarF("LUMINOSITY_ELE8") , \
-                               getCfgVarF("LUMINOSITY_ELE12"), \
-                               getCfgVarF("LUMINOSITY_ELE18"), \
-                               getCfgVarF("LUMINOSITY_ELE23"), \
-                               getCfgVarF("LUMINOSITY_ELE33")};
-  float TR_efflum_el_iso[4] = {getCfgVarF("LUMINOSITY_ELE12_ISO"), \
-                               getCfgVarF("LUMINOSITY_ELE18_ISO"), \
-                               getCfgVarF("LUMINOSITY_ELE23_ISO"), \
-                               getCfgVarF("LUMINOSITY_ELE33_ISO")};
-  float TR_efflum_mu_non[2] = {getCfgVarF("LUMINOSITY_MU8") , \
-                               getCfgVarF("LUMINOSITY_MU17")};
-  float TR_efflum_mu_iso[2] = {getCfgVarF("LUMINOSITY_MU8_ISO") , \
-                               getCfgVarF("LUMINOSITY_MU17_ISO")};
+  //float TR_efflum_el_non[5] = {getCfgVarF("LUMINOSITY_ELE8") , \
+  //                             getCfgVarF("LUMINOSITY_ELE12"), \
+  //                             getCfgVarF("LUMINOSITY_ELE18"), \
+  //                             getCfgVarF("LUMINOSITY_ELE23"), \
+  //                             getCfgVarF("LUMINOSITY_ELE33")};
+  //float TR_efflum_el_iso[4] = {getCfgVarF("LUMINOSITY_ELE12_ISO"), \
+  //                             getCfgVarF("LUMINOSITY_ELE18_ISO"), \
+  //                             getCfgVarF("LUMINOSITY_ELE23_ISO"), \
+  //                             getCfgVarF("LUMINOSITY_ELE33_ISO")};
   //float TR_efflum_mu_non[4] = {getCfgVarF("LUMINOSITY_MU8") , \
   //                             getCfgVarF("LUMINOSITY_MU17"), \
   //                             getCfgVarF("LUMINOSITY_MU24"), \
@@ -260,14 +255,22 @@ void FakeRatio::initialize(){
 
 
   //Tree Variables
+  string sls[2] = {"LepGood", "LepOther"};
+  //string sls[1] = {"LepOther"};
+
   _bvar  = "nBJetMedium25";
-  _leps  = "LepGood";
+  _leps  = Tools::toVector(sls);
   _jets  = "Jet"; 
   _djets = "DiscJet"; 
   _mets  = "met";
   _nvert = "nVert";
 
   //Tree Branches
+  _vc->registerVar("nLepGood"                      );
+  _vc->registerVar("LepGood_pdgId"                 );
+  _vc->registerVar("LepGood_pt"                    );
+  _vc->registerVar("LepGood_eta"                   );
+  _vc->registerVar("LepGood_phi"                   );
   _vc->registerVar("run"                           );
   _vc->registerVar("lumi"                          );
   _vc->registerVar("evt"                           );
@@ -275,50 +278,6 @@ void FakeRatio::initialize(){
   _vc->registerVar("nTrueInt"                      );
   _vc->registerVar("vtxWeight"                     );
   _vc->registerVar("genWeight"                     );
-  _vc->registerVar("n" + _leps                     );
-  _vc->registerVar(_leps + "_pt"                   );
-  _vc->registerVar(_leps + "_eta"                  );
-  _vc->registerVar(_leps + "_phi"                  );
-  _vc->registerVar(_leps + "_charge"               );
-  _vc->registerVar(_leps + "_tightCharge"          );
-  _vc->registerVar(_leps + "_mediumMuonId"         );
-  _vc->registerVar(_leps + "_mvaIdPhys14"          );
-  _vc->registerVar(_leps + "_mvaIdSpring15"        );
-  _vc->registerVar(_leps + "_pdgId"                );
-  _vc->registerVar(_leps + "_relIso03"             );
-  _vc->registerVar(_leps + "_relIso04"             );
-  _vc->registerVar(_leps + "_jetPtRatiov2"         );
-  _vc->registerVar(_leps + "_jetPtRelv2"           );
-  _vc->registerVar(_leps + "_jetRawPt"             );
-  _vc->registerVar(_leps + "_jetCorrFactor_L1L2L3Res");
-  _vc->registerVar(_leps + "_miniRelIso"           );
-  _vc->registerVar(_leps + "_chargedHadRelIso03"   );
-  _vc->registerVar(_leps + "_miniRelIso"           );
-  _vc->registerVar(_leps + "_miniRelIso"           );
-  _vc->registerVar(_leps + "_dxy"                  );
-  _vc->registerVar(_leps + "_dz"                   );
-  _vc->registerVar(_leps + "_sip3d"                );
-  _vc->registerVar(_leps + "_pfMuonId"             );
-  _vc->registerVar(_leps + "_tightId"              );
-  _vc->registerVar(_leps + "_looseIdSusy"          );
-  _vc->registerVar(_leps + "_convVeto"             );
-  _vc->registerVar(_leps + "_lostHits"             );
-  _vc->registerVar(_leps + "_eleCutIdCSA14_50ns_v1");
-  _vc->registerVar(_leps + "_eleCutIdCSA14_50ns_v1");
-  _vc->registerVar(_leps + "_eleCutId2012_full5x5" );
-  _vc->registerVar(_leps + "_mvaSusyPHYS14"        );
-  _vc->registerVar(_leps + "_mvaSusy"              );
-  _vc->registerVar(_leps + "_mcMatchId"            );
-  _vc->registerVar(_leps + "_mcMatchAny"           );
-  _vc->registerVar(_leps + "_jetBTagCSV"           );
-  _vc->registerVar(_leps + "_sigmaIEtaIEta"        );
-  _vc->registerVar(_leps + "_hadronicOverEm"       );
-  _vc->registerVar(_leps + "_eInvMinusPInv"        );
-  _vc->registerVar(_leps + "_dEtaScTrkIn"          );
-  _vc->registerVar(_leps + "_dPhiScTrkIn"          );
-  _vc->registerVar(_leps + "_ecalPFClusterIso"     );
-  _vc->registerVar(_leps + "_hcalPFClusterIso"     );
-  _vc->registerVar(_leps + "_dr03TkSumPt"          );
   _vc->registerVar(_mets + "_pt"                   );
   _vc->registerVar(_mets + "_eta"                  );
   _vc->registerVar(_mets + "_phi"                  );
@@ -362,6 +321,7 @@ void FakeRatio::initialize(){
   _vc->registerVar("nSoftBJetMedium25"             );
 
   //triggers
+  registerLepVars();
   registerTriggerVars();
 
 
@@ -370,7 +330,6 @@ void FakeRatio::initialize(){
   _au->addCategory( kUcsSel  , "UCSX Ewk Enriched MR Sel");
   _au->addCategory( kQcdSel  , "Qcd Enriched MR Sel"     );
   _au->addCategory( kTrigger , "Trigger Sel"             );
-  _au->addCategory( kSync    , "Sync Sel"                );
   _au->addCategory( kDenEls  , "Denominator Electrons"   );
   _au->addCategory( kNumEls  , "Numerator Electrons"     );
   _au->addCategory( kVetEls  , "Veto Electrons"          );
@@ -379,6 +338,7 @@ void FakeRatio::initialize(){
   _au->addCategory( kVetMus  , "Veto Muons"              );
   _au->addCategory( kGoodJets, "Good Jets"               );
 
+
   //SusyModule
   _susyMod = new SusyModule(_vc, _dbm);
 
@@ -386,26 +346,59 @@ void FakeRatio::initialize(){
   _dbm -> loadDb   ("XS"         , "XSectionsSpring15.db");  
   _dbm -> loadDb   ("KF"         , "kFactorsSpring15.db" );  
 
-  // BTAGSF: need these libarries
-  //_dbm -> loadDb   ("BTagEffUSDG", "GC_BTagEffs.root"    , "h2_BTaggingEff_csv_med_Eff_udsg");
-  //_dbm -> loadDb   ("BTagEffCB"  , "GC_BTagEffs.root"    , "h2_BTaggingEff_csv_med_Eff_b"   );
-  //_dbm -> loadDbCSV("BTagSF"     , "CSVv2_50ns.csv"      , ','                              );
-
 
   //input Variables
   //_lumi   = getCfgVarF("LUMINOSITY");
-  _norm   = getCfgVarS("NORMALIZATION");
-  _ewkSub = getCfgVarS("EWKSUB"); // all, el, mu
+  _norm   = getCfgVarS("NORMALIZATION"); // data, lumi
+  _ewkSub = getCfgVarS("EWKSUB"       ); // all, el, mu
+  _ewkMet = getCfgVarS("EWKSUBMETHOD" ); // ECO20, ECO30, ECOlite, UCSX
+  _idS    = getCfgVarS("ID"           ); // RA5, RA7
 
   //default Variables
   _doEwkSubCERN = false;
   _doEwkSubETH  = false;
+
+  loadLeptonId();
+
+}
+
+
+//____________________________________________________________________________
+void FakeRatio::loadLeptonId(){
+
+  _id.resize(7);
+
+
+  // RA7
+  if(_idS == "RA7"){
+    _id[kElIdWP ] = SusyModule::kTight;
+    _id[kElIsoWP] = SusyModule::kMedium;
+    _id[kElMvaWP] = SusyModule::kTight ;
+    _id[kElChCut] = 0;
+    _id[kElTrEmu] = 0;
+    _id[kMuIdWP ] = SusyModule::kTight;
+    _id[kMuIsoWP] = SusyModule::kLoose;
+    _id[kMuChCut] = 0;
+  }
+
+  // RA5
+  else {
+    _id[kElIdWP ] = SusyModule::kTight ;
+    _id[kElIsoWP] = SusyModule::kTight ;
+    _id[kElMvaWP] = SusyModule::kTight ;
+    _id[kElChCut] = 0;
+    _id[kElTrEmu] = 1;
+    _id[kMuIdWP ] = SusyModule::kTight ;
+    _id[kMuIsoWP] = SusyModule::kMedium;
+    _id[kMuChCut] = 0;
+  }
 
 }
 
 
 //____________________________________________________________________________
 void FakeRatio::run(){
+
 
   _TR_lines.clear();
   _exts    .clear();
@@ -438,25 +431,17 @@ void FakeRatio::run(){
   counter("denominator", kEwkSel);
   counter("denominator", kUcsSel);
   counter("denominator", kQcdSel);
-  counter("all events" , kSync  );
-
-  // trigger selection for SYNC
-  //if(_vc->get("HLT_FR_Mu17") != 1) return;
-  //if(_vc->get("HLT_FR_Mu8") != 1) return;
-  //counter("trigger", kSync);
-  //_met = Candidate::create(_vc->get(_mets + "_pt"), _vc->get(_mets + "_phi") );
 
 
   // prepare event selection
   collectKinematicObjects();
 
-  // BTAGSF: this is how you use it!
-  //cout << _susyMod -> bTagSF("BTagEffCB", "BTagEffUSDG", "BTagSF", _goodJets, _goodJetsIdx, _bJets, _bJetsIdx, 0) << endl; 
 
   // skimming
   //if(!skimSelection()) return;
   //fillSkimTree();
   //return;
+
 
   // base Selection
   if(!baseSelection()) return;
@@ -481,6 +466,7 @@ void FakeRatio::run(){
 
   // measurement region selection
   if(mrSelection()){
+    //eventListSyncRA5 (); 
     fillEventPlots   ();
     fillFakeRatioMaps();
     fillJetPlots     ();
@@ -649,6 +635,11 @@ void FakeRatio::defineOutput(){
   registerLepPlots(vMR_els , "PtCorrFR"   , _vFR_bins_pt_el .size()-1, _vFR_bins_pt_el , "cone corr. P_T(e) [GeV]" );
   registerLepPlots(vMR_mus , "PtCorrFR"   , _vFR_bins_pt_mu .size()-1, _vFR_bins_pt_mu , "cone corr. P_T(e) [GeV]" );
 
+  registerLepPlots(vMR_els , "EtaFR1"     , _vFR_bins_eta_el.size()-1, _vFR_bins_eta_el, "#||{#eta(e)}"            );
+  registerLepPlots(vMR_mus , "EtaFR1"     , _vFR_bins_eta_mu.size()-1, _vFR_bins_eta_mu, "#||{#eta(#mu)}"          );
+  registerLepPlots(vMR_els , "PtCorrFR1"  , _vFR_bins_pt_el .size()-1, _vFR_bins_pt_el , "cone corr. P_T(e) [GeV]" );
+  registerLepPlots(vMR_mus , "PtCorrFR1"  , _vFR_bins_pt_mu .size()-1, _vFR_bins_pt_mu , "cone corr. P_T(e) [GeV]" );
+
   registerLepPlots(vMR_els , "EtaFRHI"    , _vFR_bins_eta_el.size()-1, _vFR_bins_eta_el, "#||{#eta(e)}"            );
   registerLepPlots(vMR_mus , "EtaFRHI"    , _vFR_bins_eta_mu.size()-1, _vFR_bins_eta_mu, "#||{#eta(#mu)}"          );
   registerLepPlots(vMR_els , "PtCorrFRHI" , _vFR_bins_pt_el .size()-1, _vFR_bins_pt_el , "cone corr. P_T(e) [GeV]" );
@@ -666,6 +657,8 @@ void FakeRatio::defineOutput(){
                                             _vFR_bins_eta_el.size()-1, _vFR_bins_eta_el, "P_T(jet closest to e) [GeV]"  , "#||{#eta}(e)"); 
   registerLepPlots(vMR_els, "MapPtCorr"   , _vFR_bins_pt_el .size()-1, _vFR_bins_pt_el , \
                                             _vFR_bins_eta_el.size()-1, _vFR_bins_eta_el, "cone corr. P_T(e) [GeV]"      , "#||{#eta}(e)"); 
+  registerLepPlots(vMR_els, "MapPtCorr1"  , _vFR_bins_pt_el .size()-1, _vFR_bins_pt_el , \
+                                            _vFR_bins_eta_el.size()-1, _vFR_bins_eta_el, "cone corr. P_T(e) [GeV]"      , "#||{#eta}(e)"); 
   registerLepPlots(vMR_els, "MapPtCorrHI" , _vFR_bins_pt_el .size()-1, _vFR_bins_pt_el , \
                                             _vFR_bins_eta_el.size()-1, _vFR_bins_eta_el, "cone corr. P_T(e) [GeV]"      , "#||{#eta}(e)"); 
   registerLepPlots(vMR_els, "MapPtCorrLO" , _vFR_bins_pt_el .size()-1, _vFR_bins_pt_el , \
@@ -677,6 +670,8 @@ void FakeRatio::defineOutput(){
   registerLepPlots(vMR_mus, "MapPtJet"    , _vFR_bins_pt_mu .size()-1, _vFR_bins_pt_mu , \
                                             _vFR_bins_eta_mu.size()-1, _vFR_bins_eta_mu, "P_T(jet closest to #mu) [GeV]", "#||{#eta}(#mu)"); 
   registerLepPlots(vMR_mus, "MapPtCorr"   , _vFR_bins_pt_mu .size()-1, _vFR_bins_pt_mu, \
+                                            _vFR_bins_eta_mu.size()-1, _vFR_bins_eta_mu, "cone corr. P_T(#mu) [GeV]"    , "#||{#eta}(#mu)"); 
+  registerLepPlots(vMR_mus, "MapPtCorr1"  , _vFR_bins_pt_mu .size()-1, _vFR_bins_pt_mu, \
                                             _vFR_bins_eta_mu.size()-1, _vFR_bins_eta_mu, "cone corr. P_T(#mu) [GeV]"    , "#||{#eta}(#mu)"); 
   registerLepPlots(vMR_mus, "MapPtCorrHI" , _vFR_bins_pt_mu .size()-1, _vFR_bins_pt_mu, \
                                             _vFR_bins_eta_mu.size()-1, _vFR_bins_eta_mu, "cone corr. P_T(#mu) [GeV]"    , "#||{#eta}(#mu)"); 
@@ -716,12 +711,18 @@ void FakeRatio::divideFRMaps(){
   for(unsigned int i = 0; i < _vTR_lines_mu_iso[0].size(); ++i) exts.push_back("iso" + Tools::intToString(i));
 
   for(unsigned int i = 0; i < exts.size(); ++i){
-    divideFRMap("ElMapPt_"     + exts[i]);
-    divideFRMap("ElMapPtJet_"  + exts[i]);
-    divideFRMap("ElMapPtCorr_" + exts[i]);
-    divideFRMap("MuMapPt_"     + exts[i]);
-    divideFRMap("MuMapPtJet_"  + exts[i]);
-    divideFRMap("MuMapPtCorr_" + exts[i]);
+    divideFRMap("ElMapPt_"       + exts[i]);
+    divideFRMap("ElMapPtJet_"    + exts[i]);
+    divideFRMap("ElMapPtCorr_"   + exts[i]);
+    divideFRMap("ElMapPtCorr1_"  + exts[i]);
+    divideFRMap("ElMapPtCorrHI_" + exts[i]);
+    divideFRMap("ElMapPtCorrLO_" + exts[i]);
+    divideFRMap("MuMapPt_"       + exts[i]);
+    divideFRMap("MuMapPtJet_"    + exts[i]);
+    divideFRMap("MuMapPtCorr_"   + exts[i]);
+    divideFRMap("MuMapPtCorr1_"  + exts[i]);
+    divideFRMap("MuMapPtCorrHI_" + exts[i]);
+    divideFRMap("MuMapPtCorrLO_" + exts[i]);
   }
 } 
 
@@ -806,6 +807,66 @@ vector<float> FakeRatio::doubleFit(string ext, TH1* h_data, TH1* h_ewk, TH1* h_q
 }  
 
 
+//  ____________________________________________________________________________
+void FakeRatio::doubleFit(vector<float>& scales, string ext, TH1* h_data, TH1* h_ewk, TH1* h_qcd, float hmin, float hmax){
+
+  TH1* ch_data = (TH1*) h_data -> Clone();
+  TH1* ch_ewk  = (TH1*) h_ewk  -> Clone();
+  TH1* ch_qcd  = (TH1*) h_qcd  -> Clone();
+
+  if(hmin == 0) hmin = h_data -> GetXaxis() -> GetXmin();
+  if(hmax == 0) hmax = h_data -> GetXaxis() -> GetXmax();
+
+  RooRealVar x("x", "x", hmin, hmax);
+
+  string rdhd = "rdh_data" + ext;
+  string rdhe = "rdh_ewk"  + ext;
+  string rdhq = "rdh_qcd"  + ext;
+  RooDataHist rdh_data(rdhd.c_str(), rdhd.c_str(), x, ch_data  );
+  RooDataHist rdh_ewk (rdhe.c_str(), rdhe.c_str(), x, ch_ewk   );
+  RooDataHist rdh_qcd (rdhq.c_str(), rdhq.c_str(), x, ch_qcd   );
+              
+  string pdfe = "pdf_ewk"  + ext;
+  string pdfq = "pdf_qcd"  + ext;
+  RooHistPdf  pdf_ewk (pdfe.c_str(), pdfe.c_str(), x, rdh_ewk );
+  RooHistPdf  pdf_qcd (pdfq.c_str(), pdfq.c_str(), x, rdh_qcd );
+
+  float int_data = h_data -> Integral(); //h_data -> GetXaxis() -> FindBin(hmin), h_data -> GetXaxis() -> FindBin(hmax));
+  float int_ewk  = h_ewk  -> Integral(); //h_ewk  -> GetXaxis() -> FindBin(hmin), h_ewk  -> GetXaxis() -> FindBin(hmax));
+  float int_qcd  = h_qcd  -> Integral(); //h_qcd  -> GetXaxis() -> FindBin(hmin), h_qcd  -> GetXaxis() -> FindBin(hmax));
+
+  string rrve = "rrv_ewk" + ext;
+  string rrvq = "rrv_qcd" + ext; 
+  //RooRealVar  rrv_ewk ("rrv_ewk" + ext, "rrv_ewk" , int_ewk, 1400, 14695 );
+  //RooRealVar  rrv_qcd ("rrv_qcd" + ext, "rrv_qcd" , int_qcd, 1400, 14695 );
+  RooRealVar  rrv_ewk (rrve.c_str(), rrve.c_str(), int_ewk, int_data * 0.1, int_data );
+  RooRealVar  rrv_qcd (rrvq.c_str(), rrvq.c_str(), int_qcd, int_data * 0.1, int_data );
+
+  RooArgList pdfs (pdf_ewk, pdf_qcd); 
+  RooArgList coeff(rrv_ewk, rrv_qcd); 
+
+  string tot = "totPdf" + ext;
+  RooAddPdf totPdf(tot.c_str(), tot.c_str(), pdfs, coeff);
+  totPdf.fitTo(rdh_data, RooFit::SumW2Error(false)); //, RooFit::Extended(), RooFit::PrintLevel(-1));
+
+  scales[0] = rrv_ewk.getVal() / int_ewk;
+  scales[1] = rrv_ewk.getVal() / int_ewk + rrv_ewk.getErrorHi() / int_ewk;
+  scales[2] = rrv_ewk.getVal() / int_ewk + rrv_ewk.getErrorLo() / int_ewk;
+  scales[3] = rrv_qcd.getVal() / int_qcd;
+  scales[4] = rrv_qcd.getVal() / int_qcd + rrv_qcd.getErrorHi() / int_qcd;
+  scales[5] = rrv_qcd.getVal() / int_qcd + rrv_qcd.getErrorLo() / int_qcd;
+
+}  
+
+
+//____________________________________________________________________________
+float FakeRatio::errorProp(float central1, float central2, float error1, float error2){
+
+  return sqrt(pow(central2, 2) * pow(error1, 2) + pow(central1, 2) * pow(error2, 2));
+
+}
+
+
 //____________________________________________________________________________
 vector<float> FakeRatio::getScalesETH(string obs, float lumi){
 
@@ -813,9 +874,14 @@ vector<float> FakeRatio::getScalesETH(string obs, float lumi){
   TH1 * h_ewk    = _hm -> getHisto(obs, _idx_ewk        );   
   TH1 * h_qcd    = _hm -> getHisto(obs, _idx_qcd        );   
 
-  vector<float> scales;
-  scales.push_back(1.);
-  scales.push_back(1.);
+  float sc[6]  = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+  float sc1[3] = {1.0, 1.0, 1.0};
+  vector<float> scales    = Tools::toVector(sc);
+  vector<float> sc_first  = Tools::toVector(sc);
+  vector<float> sc_second = Tools::toVector(sc1);
+  //vector<float> scales;
+  //scales.push_back(1.);
+  //scales.push_back(1.);
 
   if(lumi                   == 0) return scales;
   if(h_data -> GetEntries() == 0) return scales;
@@ -824,29 +890,42 @@ vector<float> FakeRatio::getScalesETH(string obs, float lumi){
 
   // first fit EWK and QCD together to data in range [0, infinity]
   string ext = obs.substr(obs.find_last_of("_"));
-  vector<float> sc_first = doubleFit(ext, h_data, h_ewk, h_qcd);
+  doubleFit(sc_first, ext, h_data, h_ewk, h_qcd);
 
-  if(sc_first[0] >= 0 && sc_first[1] >= 0){
+  if(sc_first[0] >= 0 && sc_first[3] >= 0){
 
-  // save plots after first fit
-  string nobs  = obs.substr(0, obs.find_last_of("_")) + "1" + ext;
-  TH1 * h_ewk1 = (TH1*) _hm -> getHisto(nobs, _idx_ewk);
-  TH1 * h_qcd1 = (TH1*) _hm -> getHisto(nobs, _idx_qcd);
-  h_ewk1 -> Scale(sc_first[0]);
-  h_qcd1 -> Scale(sc_first[1]);
+    // save plots after first fit
+    string nobs  = obs.substr(0, obs.find_last_of("_")) + "1" + ext;
+    TH1 * h_ewk1 = (TH1*) _hm -> getHisto(nobs, _idx_ewk);
+    TH1 * h_qcd1 = (TH1*) _hm -> getHisto(nobs, _idx_qcd);
+    h_ewk1 -> Scale(sc_first[0]);
+    h_qcd1 -> Scale(sc_first[3]);
 
-  // fix QCD and subtract from data
-  TH1 * h_dataqcdsub = (TH1*) h_data -> Clone(); 
-  h_dataqcdsub -> Add(h_qcd1, -1);
+    // fix QCD and subtract from data
+    TH1 * h_dataqcdsub = (TH1*) h_data -> Clone(); 
+    h_dataqcdsub -> Add(h_qcd1, -1);
 
-  // fit EWK to QCD-subtracted-data in range [50,120]
-  scales[0] = sc_first[0] * singleFit(ext, h_dataqcdsub, h_ewk1, 50, 120); // ewk scale
-  scales[1] = sc_first[1];                                            // qcd scale
+    // fit EWK to QCD-subtracted-data in range [50,120]
+    singleFit(sc_second, ext, h_dataqcdsub, h_ewk1, 50, 120);
+	float dev = errorProp(sc_first[0], sc_second[0], (sc_first[1] - sc_first[0]), (sc_second[1] - sc_second[0]));
+    float syserr = 0.04;
+    if(obs.find("ElMT") != std::string::npos && obs.find("_iso") != std::string::npos) syserr = 0.05;
+
+    scales[0] = sc_first[0] * sc_second[0]; // ewk central
+    scales[1] = scales[0] + dev + scales[0] * syserr; // ewk upper
+    scales[2] = scales[0] - dev - scales[0] * syserr; // ewk lower
+    scales[3] = sc_first[3]    ; // qcd central
+    scales[4] = sc_first[4]    ; // qcd upper
+    scales[5] = sc_first[5]    ; // qcd lower
+
+    // scale and save plots after full fit
+    h_ewk -> Scale(scales[0]);
+    h_qcd -> Scale(scales[3]);
   }
 
-cout << "ETH EWK fit performed for observable " << obs << endl;
-cout << "first : " << scales[0] << "; " << scales[1] << endl;
-cout << "second: " << (scales[0] / sc_first[0]) << endl;
+cout << "ECO/ETH EWK fit performed for observable " << obs << endl;
+cout << "EWK scale: " << scales[0] << " +" << std::abs(scales[1] - scales[0]) << " -" << std::abs(scales[0] - scales[2]) << endl;
+cout << "QCD scale: " << scales[3] << " +" << std::abs(scales[4] - scales[3]) << " -" << std::abs(scales[3] - scales[5]) << endl;
 
   return scales;
 
@@ -866,12 +945,29 @@ vector<float> FakeRatio::getScalesUCSX(string obs, float lumi){
   if(h_data -> GetEntries() == 0) return scales;
   if(h_data -> GetEntries() < 10) return scales;
 
+  // test: remove QCD from data before the fit to get level of bias of ignoring QCD
+  //TH1 * h_qcd    = _hm -> getHisto(obs, _idx_qcd        );   
+  //TH1 * h_dqs    = (TH1*) h_data -> Clone();
+  //h_dqs -> Add(h_qcd, -1);
+
   // fit EWK to QCD-subtracted-data in range [70,120]
   string ext = obs.substr(obs.find_last_of("_"));
   singleFit(scales, ext, h_data, h_ewk, 70, 120); // ewk scale
+  //singleFit(scales, ext, h_dqs, h_ewk, 70, 120); // ewk scale
+  
+  float syserr = 0.11;
+  if(obs.find("ElMT") != std::string::npos && obs.find("_iso") != std::string::npos) syserr = 0.13;
+  if(obs.find("MuMT") != std::string::npos && obs.find("_non") != std::string::npos) syserr = 0.06;
+  if(obs.find("MuMT") != std::string::npos && obs.find("_iso") != std::string::npos) syserr = 0.05;
 
-cout << "UCSX EWK fit performed for observable " << obs << endl;
-cout << "scale : " << scales[0] << endl;
+  scales[1] += scales[0] * syserr;
+  scales[2] -= scales[0] * syserr;
+
+  // scale and save plots after fit
+  h_ewk -> Scale(scales[0]); 
+
+cout << "ECOlite EWK fit performed for observable " << obs << endl;
+cout << "EWK scale: " << scales[0] << " +" << std::abs(scales[1] - scales[0]) << " -" << std::abs(scales[0] - scales[2]) << endl;
 
   return scales;
 
@@ -895,12 +991,15 @@ vector<float> FakeRatio::getScalesUCSXlite(string obs, float lumi){
   scales[0] = float(h_data -> Integral(h_data -> GetXaxis() -> FindBin(70), h_data -> GetXaxis() -> FindBin(120))) / 
               float(h_ewk  -> Integral(h_ewk  -> GetXaxis() -> FindBin(70), h_ewk  -> GetXaxis() -> FindBin(120)));
 
+  // scale and save plots after fit
+  h_ewk -> Scale(scales[0]); 
+
   float dev = std::abs(scales[0] - 1.0);
   scales[1] = scales[0] + dev;
   scales[2] = scales[0] - dev;
 
-cout << "UCSX lite EWK fit performed for observable " << obs << endl;
-cout << "scale : " << scales[0] << endl;
+cout << "UCSX EWK fit performed for observable " << obs << endl;
+cout << "EWK scale: " << scales[0] << " +" << dev << " -" << dev << endl;
 
   return scales;
 
@@ -1006,6 +1105,58 @@ void FakeRatio::registerLepPlots(vector<string> leps, string var, int nxbins, ve
 }
 
 
+//____________________________________________________________________________
+void FakeRatio::registerLepVars(){
+
+  for(unsigned int i = 0; i < _leps.size(); ++i){
+    _vc->registerVar("n" + _leps[i]                     );
+    _vc->registerVar(_leps[i] + "_pt"                   );
+    _vc->registerVar(_leps[i] + "_eta"                  );
+    _vc->registerVar(_leps[i] + "_phi"                  );
+    _vc->registerVar(_leps[i] + "_charge"               );
+    _vc->registerVar(_leps[i] + "_tightCharge"          );
+    _vc->registerVar(_leps[i] + "_mediumMuonId"         );
+    _vc->registerVar(_leps[i] + "_mvaIdPhys14"          );
+    _vc->registerVar(_leps[i] + "_mvaIdSpring15"        );
+    _vc->registerVar(_leps[i] + "_pdgId"                );
+    _vc->registerVar(_leps[i] + "_relIso03"             );
+    _vc->registerVar(_leps[i] + "_relIso04"             );
+    _vc->registerVar(_leps[i] + "_jetPtRatiov2"         );
+    _vc->registerVar(_leps[i] + "_jetPtRelv2"           );
+    _vc->registerVar(_leps[i] + "_jetRawPt"             );
+    _vc->registerVar(_leps[i] + "_jetCorrFactor_L1L2L3Res");
+    _vc->registerVar(_leps[i] + "_miniRelIso"           );
+    _vc->registerVar(_leps[i] + "_chargedHadRelIso03"   );
+    _vc->registerVar(_leps[i] + "_miniRelIso"           );
+    _vc->registerVar(_leps[i] + "_miniRelIso"           );
+    _vc->registerVar(_leps[i] + "_dxy"                  );
+    _vc->registerVar(_leps[i] + "_dz"                   );
+    _vc->registerVar(_leps[i] + "_sip3d"                );
+    _vc->registerVar(_leps[i] + "_pfMuonId"             );
+    _vc->registerVar(_leps[i] + "_tightId"              );
+    _vc->registerVar(_leps[i] + "_looseIdSusy"          );
+    _vc->registerVar(_leps[i] + "_convVeto"             );
+    _vc->registerVar(_leps[i] + "_lostHits"             );
+    _vc->registerVar(_leps[i] + "_eleCutIdCSA14_50ns_v1");
+    _vc->registerVar(_leps[i] + "_eleCutIdCSA14_50ns_v1");
+    _vc->registerVar(_leps[i] + "_eleCutId2012_full5x5" );
+    _vc->registerVar(_leps[i] + "_mvaSusyPHYS14"        );
+    _vc->registerVar(_leps[i] + "_mvaSusy"              );
+    _vc->registerVar(_leps[i] + "_mcMatchId"            );
+    _vc->registerVar(_leps[i] + "_mcMatchAny"           );
+    _vc->registerVar(_leps[i] + "_jetBTagCSV"           );
+    _vc->registerVar(_leps[i] + "_sigmaIEtaIEta"        );
+    _vc->registerVar(_leps[i] + "_hadronicOverEm"       );
+    _vc->registerVar(_leps[i] + "_eInvMinusPInv"        );
+    _vc->registerVar(_leps[i] + "_dEtaScTrkIn"          );
+    _vc->registerVar(_leps[i] + "_dPhiScTrkIn"          );
+    _vc->registerVar(_leps[i] + "_ecalPFClusterIso"     );
+    _vc->registerVar(_leps[i] + "_hcalPFClusterIso"     );
+    _vc->registerVar(_leps[i] + "_dr03TkSumPt"          );
+  }
+}
+
+
 //  ____________________________________________________________________________
 void FakeRatio::registerTriggerVars(){
 
@@ -1087,8 +1238,49 @@ void FakeRatio::registerVariable(string var, int nBinX, vector<float> binsX, int
     _hm->addVariable(var + "_iso" + Tools::intToString(i), nBinX, binsX, nBinY, binsY, Xleg, Yleg, isglb, prof, type);
 
 }
- 
 
+
+//  ____________________________________________________________________________
+void FakeRatio::setBinErrors(TH1* central, TH1* upper, TH1* lower){
+
+  for(unsigned int b = 1; b <= central->GetXaxis()->GetNbins(); ++b) {
+    for(unsigned int c = 1; c <= central->GetYaxis()->GetNbins(); ++c) {
+      float error = std::abs(upper->GetBinContent(b,c) - central->GetBinContent(b,c));
+      if(error < std::abs(central->GetBinContent(b,c) - lower->GetBinContent(b,c))) 
+        error = std::abs(central->GetBinContent(b,c) - lower->GetBinContent(b,c));
+      central -> SetBinError(b, c, error);
+    }
+  }
+
+}
+
+
+//  ____________________________________________________________________________
+void FakeRatio::setSystematics(){
+
+  int idx = _idx_datacorrUCSX;
+  if(_ewkMet == "ECO20" || _ewkMet == "ECO30") idx = _idx_datacorrETH; 
+
+  setSystError("MR_RatElMapPtCorr_non", "non", idx);
+  setSystError("MR_RatElMapPtCorr_iso", "iso", idx);
+  setSystError("MR_RatMuMapPtCorr_non", "non", idx);
+  setSystError("MR_RatMuMapPtCorr_iso", "iso", idx);
+
+}
+
+
+//  ____________________________________________________________________________
+void FakeRatio::setSystError(string obs, string postfix, int idx){
+
+  TH1 * d   = _hm -> getHisto(obs.substr(0, obs.rfind("_")) + "1_"  + postfix, idx);
+  TH1 * dHI = _hm -> getHisto(obs.substr(0, obs.rfind("_")) + "LO_" + postfix, idx);
+  TH1 * dLO = _hm -> getHisto(obs.substr(0, obs.rfind("_")) + "HI_" + postfix, idx);
+
+  setBinErrors(d, dLO, dHI);
+
+}
+
+ 
 //  ____________________________________________________________________________
 float FakeRatio::singleFit(string ext, TH1* h_data, TH1* h_mc, float hmin, float hmax){
 
@@ -1164,20 +1356,95 @@ void FakeRatio::singleFit(vector<float>& scales, string ext, TH1* h_data, TH1* h
   scales[0] = rrv_mc.getVal() / int_mc;
 
   // Giuseppe's error
-  float dev = std::abs(scales[0] - 1.);
-  scales[1] = scales[0] + dev;
-  scales[2] = scales[0] + dev;
+  //float dev = std::abs(scales[0] - 1.);
+  //scales[1] = scales[0] + dev;
+  //scales[2] = scales[0] + dev;
 
   // precise error
-  //scales[1] = rrv_mc.getVal() / int_mc + rrv_mc.getErrorHi() / int_mc;
-  //scales[2] = rrv_mc.getVal() / int_mc + rrv_mc.getErrorLo() / int_mc;
+  scales[1] = rrv_mc.getVal() / int_mc + rrv_mc.getErrorHi() / int_mc;
+  scales[2] = rrv_mc.getVal() / int_mc + rrv_mc.getErrorLo() / int_mc;
 
 } 
 
 
 //  ____________________________________________________________________________
+void FakeRatio::subtractEwk(TH1* d, TH1* e, vector<float> scales, string obs, string postfix, int idx){
+
+  TH1 * d1  = _hm -> getHisto(obs.substr(0, obs.rfind("_")) + "1_"  + postfix, idx);
+  TH1 * dHI = _hm -> getHisto(obs.substr(0, obs.rfind("_")) + "LO_" + postfix, idx);
+  TH1 * dLO = _hm -> getHisto(obs.substr(0, obs.rfind("_")) + "HI_" + postfix, idx);
+
+  d1  -> Reset();
+  dHI -> Reset();
+  dLO -> Reset();
+
+  d1  -> Add(d);
+  dHI -> Add(d);
+  dLO -> Add(d);
+
+  TH1* eHI = (TH1*) e -> Clone();
+  TH1* eLO = (TH1*) e -> Clone();
+
+  e   -> Scale(scales[0]);
+  eHI -> Scale(scales[1]);
+  eLO -> Scale(scales[2]);
+
+  d   -> Add(e  , -1);
+  d1  -> Add(e  , -1);
+  dHI -> Add(eHI, -1);
+  dLO -> Add(eLO, -1);
+
+}
+
+////  ____________________________________________________________________________
+//void FakeRatio::subtractEwkStat(TH1* d, TH1* e, vector<float> scales, string obs, string postfix, int idx){
+//
+//  TH1 * dHI = _hm -> getHisto(obs.substr(0, obs.rfind("_")) + "LO_" + postfix, idx);
+//  TH1 * dLO = _hm -> getHisto(obs.substr(0, obs.rfind("_")) + "HI_" + postfix, idx);
+//
+//  dHI -> Reset();
+//  dLO -> Reset();
+//
+//  dHI -> Add(d);
+//  dLO -> Add(d);
+//
+//  TH1* eHI = (TH1*) e -> Clone();
+//  TH1* eLO = (TH1*) e -> Clone();
+//
+//  e   -> Scale(scales[0]);
+//  eHI -> Scale(scales[1]);
+//  eLO -> Scale(scales[2]);
+//
+//  d   -> Add(e  , -1);
+//  dHI -> Add(eHI, -1);
+//  dLO -> Add(eLO, -1);
+//
+//}
+
+
+////  ____________________________________________________________________________
+//void FakeRatio::subtractEwkSyst(TH1* d, TH1* e, vector<float> scales){
+//
+//  TH1* dHI = (TH1*) d -> Clone();
+//  TH1* dLO = (TH1*) d -> Clone();
+//
+//  TH1* eHI = (TH1*) e -> Clone();
+//  TH1* eLO = (TH1*) e -> Clone();
+//
+//  e   -> Scale(scales[0]);
+//  eHI -> Scale(scales[1]);
+//  eLO -> Scale(scales[2]);
+//
+//  d   -> Add(e  , -1);
+//  dHI -> Add(eHI, -1);
+//  dLO -> Add(eLO, -1);
+//
+//  setBinErrors(d, dLO, dHI);
+//}
+
+//  ____________________________________________________________________________
 void FakeRatio::subtractPlots(string lep, int idx, vector<float> scales, string postfix){
-  //CH: only rescale ER and MR plots
+  //CH: rescale and subtract only MR plots
 
   vector<string> obs = _hm -> getObservables(true);
 
@@ -1186,6 +1453,8 @@ void FakeRatio::subtractPlots(string lep, int idx, vector<float> scales, string 
     if(obs[i].find("MR_")         == std::string::npos) continue;
     if(obs[i].find("MT0")         != std::string::npos) continue;
     if(obs[i].find("MT1")         != std::string::npos) continue;
+    if(obs[i].find("FR1_")        != std::string::npos) continue;
+    if(obs[i].find("Corr1_")      != std::string::npos) continue;
     if(obs[i].find("HI")          != std::string::npos) continue;
     if(obs[i].find("LO")          != std::string::npos) continue;
     if(obs[i].find(lep)           == std::string::npos) continue;
@@ -1224,25 +1493,30 @@ void FakeRatio::subtractPlots(string lep, int idx, vector<float> scales, string 
         // CH: careful here: we apply the up variation of the scale factor of the electroweak (eHI)
         // to dHI, but since more of the ewk is subtracted, the fake ratio will be lower, so it is
         // the down variation, hence we fill it into the LO map!
-        TH1 * dHI = _hm -> getHisto(obs[i].substr(0, obs[i].rfind("_")) + "LO_" + postfix + num, idx); // 1
-        TH1 * dLO = _hm -> getHisto(obs[i].substr(0, obs[i].rfind("_")) + "HI_" + postfix + num, idx); // 1
-		dHI -> Reset(); // 1
-        dLO -> Reset(); // 1
-		dHI -> Add(d); // 1
-        dLO -> Add(d); // 1
+
+		subtractEwk(d, e, scales, obs[i], postfix + num, idx);
+		//subtractEwkStat(d, e, scales, obs[i], postfix + num, idx); // 1
+        //subtractEwkSyst(d, e, scales); // 2
+
+        ////TH1 * dHI = _hm -> getHisto(obs[i].substr(0, obs[i].rfind("_")) + "LO_" + postfix + num, idx); // 1
+        ////TH1 * dLO = _hm -> getHisto(obs[i].substr(0, obs[i].rfind("_")) + "HI_" + postfix + num, idx); // 1
+		////dHI -> Reset(); // 1
+        ////dLO -> Reset(); // 1
+		////dHI -> Add(d); // 1
+        ////dLO -> Add(d); // 1
         //TH1* dHI = (TH1*) d -> Clone(); // 2
         //TH1* dLO = (TH1*) d -> Clone(); // 2
 
-        TH1* eHI = (TH1*) e -> Clone();
-        TH1* eLO = (TH1*) e -> Clone();
+        //TH1* eHI = (TH1*) e -> Clone();
+        //TH1* eLO = (TH1*) e -> Clone();
 
-        e   -> Scale(scales[0]);
-        eHI -> Scale(scales[1]);
-        eLO -> Scale(scales[2]);
+        //e   -> Scale(scales[0]);
+        //eHI -> Scale(scales[1]);
+        //eLO -> Scale(scales[2]);
 
-        d   -> Add(e  , -1);
-        dHI -> Add(eHI, -1);
-        dLO -> Add(eLO, -1);
+        //d   -> Add(e  , -1);
+        //dHI -> Add(eHI, -1);
+        //dLO -> Add(eLO, -1);
 
         //setBinErrors(d, dLO, dHI); // 2
       }
@@ -1250,25 +1524,32 @@ void FakeRatio::subtractPlots(string lep, int idx, vector<float> scales, string 
 
     // central values and errors for ewk and qcd scales
     else if(scales.size() == 6) {
-      d -> Add(e, -1);
+
+      // normal subtraction, no error propagation
+      if(obs[i].find("MapPtCorr") == std::string::npos && obs[i].find("FR") == std::string::npos){
+        e -> Scale(scales[0]);
+        d -> Add(e, -1);
+      }
+
+      // subtraction including systematic variation of ewk fit
+      else {
+        // CH: if you want to have the systematic uncertainty from the ewk fit to replace
+        // the statistical uncertainty of your histogram, then comment //1 and uncomment //2
+        // if you want to have the up and down variations of your histograms in separate
+        // HI and LO histograms, then uncomment //1 and comment //2!
+
+        // CH: careful here: we apply the up variation of the scale factor of the electroweak (eHI)
+        // to dHI, but since more of the ewk is subtracted, the fake ratio will be lower, so it is
+        // the down variation, hence we fill it into the LO map!
+
+        vector<float> sc(scales.begin(), scales.begin() + 3);
+		subtractEwk(d, e, sc, obs[i], postfix + num, idx);
+		//subtractEwkStat(d, e, sc, obs[i], postfix + num, idx); // 1
+        //subtractEwkSyst(d, e, sc); // 2
+
+      }
     }
   }
-}
-
-
-//  ____________________________________________________________________________
-void FakeRatio::setBinErrors(TH1* central, TH1* upper, TH1* lower){
-
-  unsigned int nbins = central -> GetXaxis() -> GetNbins();
-  if(central -> GetDimension() == 2) nbins *= central -> GetYaxis() -> GetNbins();
-
-  for(unsigned int b = 1; b <= nbins; ++b) {
-    float error = upper -> GetBinContent(b) - central -> GetBinContent(b);
-    if(central -> GetBinContent(b) - lower -> GetBinContent(b)) 
-      error = central -> GetBinContent(b) - lower -> GetBinContent(b);
-    central -> SetBinError(b, error);
-  }
-
 }
 
 
@@ -1359,16 +1640,20 @@ void FakeRatio::subtractPromptsUCSX(){
   // only with PS reweighting !
 
   // CH: the good way using shape information
-  //subtractPlots("El", _idx_datacorrUCSX, getScalesUCSX    ("UR_NumElMT_iso", 1.0), "iso");
-  //subtractPlots("Mu", _idx_datacorrUCSX, getScalesUCSX    ("UR_NumMuMT_iso", 1.0), "iso");
-  //subtractPlots("El", _idx_datacorrUCSX, getScalesUCSX    ("UR_NumElMT_non", 1.0), "non");
-  //subtractPlots("Mu", _idx_datacorrUCSX, getScalesUCSX    ("UR_NumMuMT_non", 1.0), "non");
+  if(_ewkMet == "ECOlite"){
+    subtractPlots("El", _idx_datacorrUCSX, getScalesUCSX    ("UR_NumElMT_iso", 1.0), "iso");
+    subtractPlots("Mu", _idx_datacorrUCSX, getScalesUCSX    ("UR_NumMuMT_iso", 1.0), "iso");
+    subtractPlots("El", _idx_datacorrUCSX, getScalesUCSX    ("UR_NumElMT_non", 1.0), "non");
+    subtractPlots("Mu", _idx_datacorrUCSX, getScalesUCSX    ("UR_NumMuMT_non", 1.0), "non");
+  }
 
   // CH: the bad way discarding shape information, just scaling one number to the other
-  subtractPlots("El", _idx_datacorrUCSX, getScalesUCSXlite("UR_NumElMT_iso", 1.0), "iso");
-  subtractPlots("Mu", _idx_datacorrUCSX, getScalesUCSXlite("UR_NumMuMT_iso", 1.0), "iso");
-  subtractPlots("El", _idx_datacorrUCSX, getScalesUCSXlite("UR_NumElMT_non", 1.0), "non");
-  subtractPlots("Mu", _idx_datacorrUCSX, getScalesUCSXlite("UR_NumMuMT_non", 1.0), "non");
+  else {
+    subtractPlots("El", _idx_datacorrUCSX, getScalesUCSXlite("UR_NumElMT_iso", 1.0), "iso");
+    subtractPlots("Mu", _idx_datacorrUCSX, getScalesUCSXlite("UR_NumMuMT_iso", 1.0), "iso");
+    subtractPlots("El", _idx_datacorrUCSX, getScalesUCSXlite("UR_NumElMT_non", 1.0), "non");
+    subtractPlots("Mu", _idx_datacorrUCSX, getScalesUCSXlite("UR_NumMuMT_non", 1.0), "non");
+  }
 
   return;
 
@@ -1383,7 +1668,15 @@ void FakeRatio::sumMaps(){
 
 
   vector<string> obs = _hm -> getObservables(true);
+  //vector<string> nobs;
   vector<float> ints_data;
+
+  //for(unsigned int j = 0; j < obs.size(); ++j){
+  //  if(obs[j].find("Map") != std::string::npos) continue;
+  //  if(obs[j].find("FR" ) != std::string::npos) continue;
+  //  nobs.push_back(obs[j]);
+  //}
+
   ints_data.resize(obs.size(), 0);
  
   for(int i = 0; i < _numDS; ++i){
@@ -1399,8 +1692,6 @@ void FakeRatio::sumMaps(){
     string sname = _datasets[i]->getName();
     bool normalize = false;
 
-    int nevts = _datasets[i]->getNProcEvents();
-	float xs = 0;
 	vector<unsigned int> idxs;
     if     (sname.find("data") != std::string::npos) {
 	  idxs.push_back(_idx_data        ); 
@@ -1414,7 +1705,6 @@ void FakeRatio::sumMaps(){
       if     (sname.find("DYJets") != std::string::npos) idxs.push_back(_idx_ewk_dy);
 	  else if(sname.find("TTJets") != std::string::npos) idxs.push_back(_idx_ewk_tt);
 	  else if(sname.find("WJets" ) != std::string::npos) idxs.push_back(_idx_ewk_wj);
-      xs = _dbm -> getDBValue("XS", sname); 
       normalize = true;
 	} 
     else if(sname.find("qcd")  != std::string::npos) {
@@ -1424,10 +1714,10 @@ void FakeRatio::sumMaps(){
       else if(sname.find("EMEnriched") != std::string::npos) idxs.push_back(_idx_qcd_em);
       else if(sname.find("Mu15"      ) != std::string::npos) idxs.push_back(_idx_qcd_mu15);
       else if(sname.find("Mu5"       ) != std::string::npos) idxs.push_back(_idx_qcd_mu5);
-      xs = _dbm -> getDBValue("XS", sname); 
       normalize = true;
 	} 
 
+    // summing the individual plots 
     for(unsigned int j = 0; j < obs.size(); ++j) {
       TH1 * sobs = _hm -> getHisto(obs[j], i);
       TH1 * cobs = (TH1*) sobs -> Clone();
@@ -1436,9 +1726,10 @@ void FakeRatio::sumMaps(){
 
       if(normalize){
         if(_norm == "lumi"){
-          unsigned int idx = atoi(obs[j].substr(obs[j].rfind("_")+3).c_str());
-          bool iso         = (obs[j].substr(obs[j].rfind("_"),3) == "iso");    
- 
+          unsigned int idx = atoi(obs[j].substr(obs[j].rfind("_")+4).c_str());
+          bool iso         = (obs[j].substr(obs[j].rfind("_")+1,3) == "iso");    
+          bool end         = (obs[j].substr(obs[j].length()-3,3) == "non" || obs[j].substr(obs[j].length()-3,3) == "iso"); 
+
           vector<string> linesel = _vTR_lines_el_non[0]; 
           vector<float>  effsel  = _vTR_efflum_el_non; 
           vector<float>  effsmu  = _vTR_efflum_mu_non; 
@@ -1448,12 +1739,12 @@ void FakeRatio::sumMaps(){
             effsmu  = _vTR_efflum_mu_iso;
           }
 
-          float lumi = 1;
-          if(linesel.size() <= idx) lumi = effsmu[idx];
-          else                      lumi = effsel[idx];
-          //factor = lumi;
-          factor = xs * lumi / nevts;
-        }        
+          // note: we normalized already to 1/pb in modifyWeight();
+          if(!end){
+            if(linesel.size() <= idx) factor = effsmu[idx - linesel.size()];
+            else                      factor = effsel[idx];
+          }
+        }
       }
  
       for(unsigned int k = 0; k < idxs.size(); ++k) {
@@ -1463,9 +1754,11 @@ void FakeRatio::sumMaps(){
     }
   }
 
+  // normalizing all of MC to the data
   if(_norm == "data"){
     for(unsigned int j = 0; j < obs.size(); ++j) {
       float factor = 0.;
+
       for(unsigned int i = 0; i < _idxsmc.size(); ++i){
         TH1 * sobs = _hm -> getHisto(obs[j], _idxsmc[i]);
         factor += sobs->Integral();
@@ -1552,13 +1845,19 @@ void FakeRatio::writeOutput(){
   sumTriggers();
 
   // subtract prompt contamination
+  // only use either of the three methods as they reweight the EWK and QCD stuffs
   //testEwkSub();
   //subtractPromptsCERN();
-  //subtractPromptsETH();    // only use either of the three methods as they reweight the EWK and QCD stuffs
-  subtractPromptsUCSX();
+  if(_ewkMet == "ECO20" || _ewkMet == "ECO30")
+    subtractPromptsETH();
+  if(_ewkMet == "UCSX" || _ewkMet == "ECOlite")
+    subtractPromptsUCSX();
 
   // make FR maps from numerators and denominators
   divideFRMaps();
+
+  // set systematic errors replacing statistical errors in xxxMapPtCorr1_xxx
+  setSystematics();
 
 }
 
@@ -1579,63 +1878,17 @@ void FakeRatio::collectKinematicObjects(){
     parameters: none
     return: none
   */
-  
-  for(int i = 0; i < _vc->get("n" + _leps); ++i){
+ 
+  for(int i = 0; i < _leps.size(); ++i)
+    for(int j = 0; j < _vc -> get("n" + _leps[i]); ++j)
+      collectLeptons(j, _leps[i]);
 
-    // electrons
-    if(std::abs(_vc->get(_leps + "_pdgId", i)) == 11){		  
-      if(denominatorElectronSelection(i)) {
-        _denEls.push_back( Candidate::create(_vc->get(_leps + "_pt", i),
-					  _vc->get(_leps + "_eta", i),
-					  _vc->get(_leps + "_phi", i),
-					  _vc->get(_leps + "_pdgId", i),
-					  _vc->get(_leps + "_charge", i),
-					  0.0005) );
-        _denElsIdx    .push_back(i);
-        _denLeps      .push_back( _denEls[ _denEls.size()-1 ] );
-        _denLepsIdx   .push_back(i);
-        if(_susyMod -> elHLTEmulSelIso(i)) _isoLepsIdx.push_back(i);
-      }
-      if(numeratorElectronSelection(i)) {
-        _numEls.push_back( Candidate::create(_vc->get(_leps + "_pt", i),
-					  _vc->get(_leps + "_eta", i),
-					  _vc->get(_leps + "_phi", i),
-					  _vc->get(_leps + "_pdgId", i),
-					  _vc->get(_leps + "_charge", i),
-					  0.0005) );
-        _numElsIdx    .push_back(i);
-        _numLeps      .push_back( _numEls[ _numEls.size()-1 ] );
-        _numLepsIdx   .push_back(i);
-      }
-    }
-
-    // muons
-    else if(std::abs(_vc->get(_leps + "_pdgId", i)) == 13){
-      if(denominatorMuonSelection(i)) {
-        _denMus.push_back( Candidate::create(_vc->get(_leps + "_pt", i),
-					  _vc->get(_leps + "_eta", i),
-					  _vc->get(_leps + "_phi", i),
-					  _vc->get(_leps + "_pdgId", i),
-					  _vc->get(_leps + "_charge", i),
-					  0.105) );
-        _denMusIdx .push_back(i);
-        _denLeps   .push_back( _denMus[ _denMus.size()-1 ] );
-        _denLepsIdx.push_back(i);
-        _isoLepsIdx.push_back(i);
-      }
-      if(numeratorMuonSelection(i)) {
-        _numMus.push_back( Candidate::create(_vc->get(_leps + "_pt", i),
-					  _vc->get(_leps + "_eta", i),
-					  _vc->get(_leps + "_phi", i),
-					  _vc->get(_leps + "_pdgId", i),
-					  _vc->get(_leps + "_charge", i),
-					  0.105) );
-        _numMusIdx .push_back(i);
-        _numLeps   .push_back( _numMus[ _numMus.size()-1 ] );
-        _numLepsIdx.push_back(i);
-      }
-    }
-  }
+  _nDenEls  = _denEls .size();
+  _nDenLeps = _denLeps.size();
+  _nDenMus  = _denMus .size();
+  _nNumEls  = _numEls .size();
+  _nNumLeps = _numLeps.size();
+  _nNumMus  = _numMus .size();
 
   _nDenEls  = _denEls .size();
   _nDenLeps = _denLeps.size();
@@ -1655,12 +1908,82 @@ void FakeRatio::collectKinematicObjects(){
 
 
 //____________________________________________________________________________
-bool FakeRatio::denominatorElectronSelection(int elIdx){
+void FakeRatio::collectLeptons(int idx, string branch){
+
+  // electrons
+  if(std::abs(_vc->get(branch + "_pdgId", idx)) == 11){		  
+    if(denominatorElectronSelection(idx, branch)) {
+      _denEls.push_back( Candidate::create(_vc->get(branch + "_pt", idx),
+  				  _vc->get(branch + "_eta", idx),
+  				  _vc->get(branch + "_phi", idx),
+  				  _vc->get(branch + "_pdgId", idx),
+  				  _vc->get(branch + "_charge", idx),
+  				  0.0005) );
+      _denElsIdx    .push_back(pair<int, string>(idx, branch));
+      _denLeps      .push_back( _denEls[ _denEls.size()-1 ] );
+      _denLepsIdx   .push_back(pair<int, string>(idx, branch));
+      if(!_id[kElTrEmu] || _susyMod -> elHLTEmulSelIso(idx, SusyModule::kLooseHT, branch)) 
+        _isoLepsIdx.push_back(pair<int, string>(idx, branch));
+    }
+    if(numeratorElectronSelection(idx, branch)) {
+      _numEls.push_back( Candidate::create(_vc->get(branch + "_pt", idx),
+  				  _vc->get(branch + "_eta"   , idx),
+  				  _vc->get(branch + "_phi"   , idx),
+  				  _vc->get(branch + "_pdgId" , idx),
+  				  _vc->get(branch + "_charge", idx),
+  				  0.0005) );
+      _numElsIdx    .push_back(pair<int, string>(idx, branch));
+      _numLeps      .push_back( _numEls[ _numEls.size()-1 ] );
+      _numLepsIdx   .push_back(pair<int, string>(idx, branch));
+    }
+  }
+
+  // muons
+  else if(std::abs(_vc->get(branch + "_pdgId", idx)) == 13){
+    if(denominatorMuonSelection(idx, branch)) {
+      _denMus.push_back( Candidate::create(_vc->get(branch + "_pt", idx),
+  				  _vc->get(branch + "_eta", idx),
+  				  _vc->get(branch + "_phi", idx),
+  				  _vc->get(branch + "_pdgId", idx),
+  				  _vc->get(branch + "_charge", idx),
+  				  0.105) );
+      _denMusIdx .push_back(pair<int, string>(idx, branch));
+      _denLeps   .push_back( _denMus[ _denMus.size()-1 ] );
+      _denLepsIdx.push_back(pair<int, string>(idx, branch));
+      _isoLepsIdx.push_back(pair<int, string>(idx, branch));
+    }
+    if(numeratorMuonSelection(idx, branch)) {
+      _numMus.push_back( Candidate::create(_vc->get(branch + "_pt", idx),
+  				  _vc->get(branch + "_eta", idx),
+  				  _vc->get(branch + "_phi", idx),
+  				  _vc->get(branch + "_pdgId", idx),
+  				  _vc->get(branch + "_charge", idx),
+  				  0.105) );
+      _numMusIdx .push_back(pair<int, string>(idx, branch));
+      _numLeps   .push_back( _numMus[ _numMus.size()-1 ] );
+      _numLepsIdx.push_back(pair<int, string>(idx, branch));
+    }
+  }
+}
+
+
+//____________________________________________________________________________
+bool FakeRatio::denominatorElectronSelection(int elIdx, string branch){
 
   counter("DenominatorElectrons", kDenEls);
 
-  if(!makeCut( _susyMod -> elIdSel     (elIdx, SusyModule::kTight, SusyModule::kLoose), "electron id", "=", kDenEls)) return false;
-  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false                                 ), "non-iso emu", "=", kDenEls)) return false;
+  if(!makeCut( _susyMod -> elIdSel     (elIdx, _id[kElIdWP], SusyModule::kLoose, (_id[kElChCut]>0), false, branch), "electron id", "=", kDenEls)) return false;
+  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch                                                     ), "non-iso emu", "=", kDenEls)) return false;
+
+  // electron cleaning 
+  float dr_cache = 999.;
+  for(unsigned int il=elIdx+1; il<_vc->get("nLepGood"); ++il){
+    float dr = KineUtils::dR(_vc->get("LepGood_eta", il), _vc->get("LepGood_eta", elIdx),
+                             _vc->get("LepGood_phi", il), _vc->get("LepGood_phi", elIdx));
+    if(std::abs(_vc->get("LepGood_pdgId")) == 13 && dr < dr_cache)
+      dr_cache = dr;
+  }
+  if(!makeCut<float>(dr_cache, 0.05, ">", "electron cleaning selection", 0, kDenEls) ) return false;
 
   return true;
 
@@ -1668,11 +1991,10 @@ bool FakeRatio::denominatorElectronSelection(int elIdx){
 
 
 //____________________________________________________________________________
-bool FakeRatio::denominatorMuonSelection(int muIdx){
-
+bool FakeRatio::denominatorMuonSelection(int muIdx, string branch){
   counter("DenominatorMuons", kDenMus);
 
-  if(!makeCut( _susyMod -> muIdSel(muIdx, SusyModule::kTight), "muon id", "=", kDenMus)) return false;
+  if(!makeCut( _susyMod -> muIdSel(muIdx, _id[kMuIdWP], (_id[kMuChCut]>0), false, branch), "muon id", "=", kDenMus)) return false;
 
   return true;
 
@@ -1680,14 +2002,24 @@ bool FakeRatio::denominatorMuonSelection(int muIdx){
 
 
 //____________________________________________________________________________
-bool FakeRatio::numeratorElectronSelection(int elIdx){
+bool FakeRatio::numeratorElectronSelection(int elIdx, string branch){
 
   counter("NumeratorElectrons", kNumEls);
 
-  if(!makeCut( _susyMod -> elIdSel     (elIdx, SusyModule::kTight, SusyModule::kLoose), "electron id ", "=", kNumEls)) return false;
-  if(!makeCut( _susyMod -> elMvaSel    (elIdx, SusyModule::kTight)                    , "electron mva", "=", kNumEls)) return false;    
-  if(!makeCut( _susyMod -> multiIsoSel (elIdx, SusyModule::kTight)                    , "isolation"   , "=", kNumEls)) return false; 
-  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false)                                 , "electron emu", "=", kNumEls)) return false;
+  if(!makeCut( _susyMod -> elIdSel     (elIdx, _id[kElIdWP ], SusyModule::kLoose, (_id[kElChCut]>0), false, branch), "electron id ", "=", kNumEls)) return false;
+  if(!makeCut( _susyMod -> elMvaSel    (elIdx, _id[kElMvaWP], branch                                              ), "electron mva", "=", kNumEls)) return false;    
+  if(!makeCut( _susyMod -> multiIsoSel (elIdx, _id[kElIsoWP], branch                                              ), "isolation"   , "=", kNumEls)) return false; 
+  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch                                                      ), "electron emu", "=", kNumEls)) return false;
+
+  // electron cleaning 
+  float dr_cache = 999.;
+  for(unsigned int il=elIdx+1; il<_vc->get("nLepGood"); ++il){
+    float dr = KineUtils::dR(_vc->get("LepGood_eta", il), _vc->get("LepGood_eta", elIdx),
+                             _vc->get("LepGood_phi", il), _vc->get("LepGood_phi", elIdx));
+    if(std::abs(_vc->get("LepGood_pdgId")) == 13 && dr < dr_cache)
+      dr_cache = dr;
+  }
+  if(!makeCut<float>(dr_cache, 0.05, ">", "electron cleaning selection", 0, kNumEls) ) return false;
 
   return true;
 
@@ -1695,12 +2027,13 @@ bool FakeRatio::numeratorElectronSelection(int elIdx){
 
 
 //____________________________________________________________________________
-bool FakeRatio::numeratorMuonSelection(int muIdx){
+bool FakeRatio::numeratorMuonSelection(int muIdx, string branch){
 
   counter("NumeratorMuons", kNumMus);
 
-  if(!makeCut( _susyMod -> muIdSel    (muIdx, SusyModule::kTight ), "muon id  ", "=", kNumMus)) return false;
-  if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kMedium), "isolation", "=", kNumMus)) return false;
+  if(!makeCut( _susyMod -> muIdSel    (muIdx, _id[kMuIdWP ], (_id[kMuChCut] > 0), false, branch), "muon id  ", "=", kNumMus)) return false;
+  if(!makeCut( _susyMod -> multiIsoSel(muIdx, _id[kMuIsoWP], branch                            ), "isolation", "=", kNumMus)) return false;
+
  
   return true;
 
@@ -1809,7 +2142,12 @@ bool FakeRatio::baseSelection(){
 bool FakeRatio::ewkSelection(){
 
   // MET INVERTED! 
-  if(!makeCut<float>( _met->pt() , 20.0, ">" , "MET selection"                 , 0, kEwkSel)) return false;
+  if(_ewkMet == "ECO30"){
+    if(!makeCut<float>( _met->pt() , 30.0, ">" , "MET selection"                 , 0, kEwkSel)) return false;
+  }
+  else{
+    if(!makeCut<float>( _met->pt() , 20.0, ">" , "MET selection"                 , 0, kEwkSel)) return false;
+  }
 
   return true;
 
@@ -1821,6 +2159,7 @@ bool FakeRatio::ucsxEwkSelection(){
 
   // MET INVERTED! 
   if(!makeCut<float>( _met->pt() , 30.0, ">" , "MET selection"                 , 0, kUcsSel)) return false;
+  //if(!makeCut<float>( _met->pt() , 50.0, ">" , "MET selection"                 , 0, kUcsSel)) return false;
 
   return true;
 
@@ -1831,65 +2170,19 @@ bool FakeRatio::ucsxEwkSelection(){
 bool FakeRatio::mrSelection(){
   // CH: fake ratio measurement for RA5 sync exercise May 2015
 
+
   // MET 
   if(!makeCut<float>( _met -> pt(), 20.0, "<", "MET selection"   )) return false;
 
+
   // MT
-  float MT = _susyMod -> coneMt(_denLepsIdx[0], _denLeps[0], _met);
+  float MT = _susyMod -> Mt(_denLeps[0], _met, _denLepsIdx[0].first, -1, _denLepsIdx[0].second, "", (std::abs(_denLeps[0]->pdgId()) == 13?SusyModule::kMedium : SusyModule::kTight));
   if(!makeCut<float>( MT          , 20.0, "<", "coneMT selection")) return false;
 
 
 
 
 return true;
-
-
-// sync stuff
-  int isotr = -1;
-  int nontr = -1;
-  for(int i = 0; i < _TR_lines.size(); ++i){
-    if(_TR_lines[i].find("IsoVVL") != std::string::npos || _TR_lines[i].find("IsoVL") != std::string::npos)
-      isotr = i;
-    else
-      nontr = i;
-  }
-
-  //if(_iso){
-    //if(_nDenEls == 1)
-    //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
-      //cout << Form("Electron RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[isotr].c_str(), _trws[isotr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
-    //if(_nDenMus == 1)
-    //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
-  //    cout << Form("Muon RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[isotr].c_str(), _trws[isotr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
-  //}
-
-  if(!_iso || _TR_lines.size() > 1){
-    //if(_nDenEls == 1)
-    //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[nontr]) << endl;
-  //    cout << Form("Electron RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[nontr].c_str(), _trws[nontr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
-    if(_nDenMus == 1)
-      cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[nontr]) << endl;
-  //    cout << Form("Muon RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[nontr].c_str(), _trws[nontr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]),  _met->pt(), MT, _nNumLeps) << endl;
-  }
-
-
-
-
-//if(_iso){
-//if(_nDenEls == 1)
-//  cout << Form("%7.f %4.f %10.f %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %5.2f %1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], wp), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), MT->mass(), _nNumLeps) << endl;
-  //cout << Form("Electron FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f MET=%5.2f MT=%5.2f isNum=%1i evt=%12.f", _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], wp), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), MT->mass(), _nNumLeps, _vc->get("evt")) << endl;
-//if(_nDenMus == 1)
-//  cout << Form("Muon FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f MET=%5.2f MT=%5.2f isNum=%1i evt=%10.f", _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], wp), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), MT->mass(), _nNumLeps, _vc->get("evt")) << endl;
-//}
-
-//cout << Form("%9.0f %9.0f %12.f\t%5.2f\%5.2f\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%2d\t%5.2f\t%5.2f\t%2d", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], wp), _denLeps[0]->eta(), _denLeps[0]->phi(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _nNumLeps, MT->mass(), _met ->pt(), _nJets) << endl; 
-//cout << _denLeps[0]->pt() << ":" << _denLeps[0]->eta() << ":" << _denLeps[0]->phi() << ":" << _vc->get("LepGood_miniRelIso", _denLepsIdx[0]) << ":" <<  MT->mass() << ":" << _vc->get("LepGood_mediumMuonId", _denLepsIdx[0]) << ":" << _vc->get("LepGood_tightCharge", _denLepsIdx[0]) << ":" << _met ->pt() << ":" << _nJets << endl;
-
-  //fillTriggerTestPlots();
-
-  return true;
-
 }
 
 
@@ -1904,7 +2197,7 @@ bool FakeRatio::qcdSelection(){
 //____________________________________________________________________________
 bool FakeRatio::skimSelection(){
 
-  if(!makeCut<int>( _nDenLeps, 1, "=" , "lepton multiplicity and flavor") ) return false;
+  if(!makeCut<int>( _nDenLeps, 1, ">=", "lepton multiplicity and flavor") ) return false;
   if(!makeCut<int>( _nJets   , 1, ">=", "jet multiplicity"              ) ) return false; 
 
   return true;
@@ -2024,7 +2317,6 @@ bool FakeRatio::triggerSelectionLite(){
   }
 
 
-
   // at least one auxiliary trigger per pt bin to be passed
   if(!makeCut(any, "at least one trigger path", "=", kTrigger)) return false;
 
@@ -2084,21 +2376,22 @@ void FakeRatio::fillEwkEventPlots(){
 
 
 //____________________________________________________________________________
-void FakeRatio::fillEwkLepPlots(string prepend, Candidate * lep, int lepIdx, int wp){
+void FakeRatio::fillEwkLepPlots(string prepend, Candidate * lep, int lepIdx, string branch, int wp){
   /*
     fills the control plots for leptons PER LEPTON
   */  
 
   //Candidate * mt = Candidate::create( lep, _met);0
-  float MT = _susyMod -> coneMt(lepIdx, lep, _met);
+  //float MT = _susyMod -> coneMt(lepIdx, lep, _met);
+  float MT = _susyMod -> Mt(_denLeps[0], _met, _denLepsIdx[0].first, -1, _denLepsIdx[0].second, "", (std::abs(_denLeps[0]->pdgId()) == 13?SusyModule::kMedium : SusyModule::kTight));
 
   for(unsigned int i = 0; i < _exts.size(); ++i){
-    //fill(prepend + "Pt_"      + _exts[i],          _vc->get(_leps + "_pt"        , lepIdx) , _weight * _trws[i]);
-    //fill(prepend + "Eta_"     + _exts[i], std::abs(_vc->get(_leps + "_eta"       , lepIdx)), _weight * _trws[i]);
-    //fill(prepend + "DXY_"     + _exts[i], std::abs(_vc->get(_leps + "_dxy"       , lepIdx)), _weight * _trws[i]);
-    //fill(prepend + "DZ_"      + _exts[i], std::abs(_vc->get(_leps + "_dz"        , lepIdx)), _weight * _trws[i]);
-    //fill(prepend + "SIP_"     + _exts[i],          _vc->get(_leps + "_sip3d"     , lepIdx) , _weight * _trws[i]);
-    //fill(prepend + "MiniIso_" + _exts[i],          _vc->get(_leps + "_miniRelIso", lepIdx) , _weight * _trws[i]);
+    //fill(prepend + "Pt_"      + _exts[i],          _vc->get(branch + "_pt"        , lepIdx) , _weight * _trws[i]);
+    //fill(prepend + "Eta_"     + _exts[i], std::abs(_vc->get(branch + "_eta"       , lepIdx)), _weight * _trws[i]);
+    //fill(prepend + "DXY_"     + _exts[i], std::abs(_vc->get(branch + "_dxy"       , lepIdx)), _weight * _trws[i]);
+    //fill(prepend + "DZ_"      + _exts[i], std::abs(_vc->get(branch + "_dz"        , lepIdx)), _weight * _trws[i]);
+    //fill(prepend + "SIP_"     + _exts[i],          _vc->get(branch + "_sip3d"     , lepIdx) , _weight * _trws[i]);
+    //fill(prepend + "MiniIso_" + _exts[i],          _vc->get(branch + "_miniRelIso", lepIdx) , _weight * _trws[i]);
     //fill(prepend + "MT_"      + _exts[i], mt -> mass()                                     , _weight * _trws[i]);
     //fill(prepend + "MT0_"     + _exts[i], mt -> mass()                                     , _weight * _trws[i]);
     //fill(prepend + "MT1_"     + _exts[i], mt -> mass()                                     , _weight * _trws[i]);
@@ -2118,21 +2411,21 @@ void FakeRatio::fillEwkLeptonPlots(){
     return: none
   */
 
-  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillEwkLepPlots("ER_DenEl"  , _denEls[i]  , _denElsIdx[i], SusyModule::kTight ); }
-  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillEwkLepPlots("ER_DenMu"  , _denMus[i]  , _denMusIdx[i], SusyModule::kMedium); }
-  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillEwkLepPlots("ER_NumEl"  , _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
-  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillEwkLepPlots("ER_NumMu"  , _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillEwkLepPlots("ER_DenEl"  , _denEls[i]  , _denElsIdx[i].first, _denElsIdx[i].second, SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillEwkLepPlots("ER_DenMu"  , _denMus[i]  , _denMusIdx[i].first, _denMusIdx[i].second, SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillEwkLepPlots("ER_NumEl"  , _numEls[i]  , _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillEwkLepPlots("ER_NumMu"  , _numMus[i]  , _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium); }
 
 }
 
 
 //____________________________________________________________________________
-void FakeRatio::fillFRMaps(string prepend, Candidate * lep, int lepIdx, int wp){
+void FakeRatio::fillFRMaps(string prepend, Candidate * lep, int lepIdx, string branch, int wp){
 
   for(unsigned int i = 0; i < _exts.size(); ++i){
-    fill(prepend + "MapPt_"     + _exts[i], overflowPt(_vc->get(_leps + "_pt", lepIdx)) , std::abs(_vc->get(_leps + "_eta", lepIdx)), _weight * _trws[i]);
-    fill(prepend + "MapPtJet_"  + _exts[i], overflowPt(_susyMod -> closestJetPt(lepIdx)), std::abs(_vc->get(_leps + "_eta", lepIdx)), _weight * _trws[i]);
-    fill(prepend + "MapPtCorr_" + _exts[i], overflowPt(_susyMod -> conePt(lepIdx, wp))  , std::abs(_vc->get(_leps + "_eta", lepIdx)), _weight * _trws[i]);
+    fill(prepend + "MapPt_"      + _exts[i], overflowPt(_vc->get(branch + "_pt", lepIdx))        , std::abs(_vc->get(branch + "_eta", lepIdx)), _weight * _trws[i]);
+    fill(prepend + "MapPtJet_"   + _exts[i], overflowPt(_susyMod -> closestJetPt(lepIdx, branch)), std::abs(_vc->get(branch + "_eta", lepIdx)), _weight * _trws[i]);
+    fill(prepend + "MapPtCorr_"  + _exts[i], overflowPt(_susyMod -> conePt(lepIdx, wp, branch))  , std::abs(_vc->get(branch + "_eta", lepIdx)), _weight * _trws[i]);
   }
 
 }
@@ -2146,38 +2439,38 @@ void FakeRatio::fillFakeRatioMaps(){
     return: none
   */
 
-  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillFRMaps("MR_DenEl", _denEls[i]  , _denElsIdx[i], SusyModule::kTight ); }
-  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillFRMaps("MR_DenMu", _denMus[i]  , _denMusIdx[i], SusyModule::kMedium); }
-  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillFRMaps("MR_NumEl", _numEls[i]  , _numElsIdx[i], SusyModule::kTight );
-                                                     fillFRMaps("MR_RatEl", _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
-  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillFRMaps("MR_NumMu", _numMus[i]  , _numMusIdx[i], SusyModule::kMedium);
-                                                     fillFRMaps("MR_RatMu", _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
+
+  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillFRMaps("MR_DenEl", _denEls[i]  , _denElsIdx[i].first, _denElsIdx[i].second, SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillFRMaps("MR_DenMu", _denMus[i]  , _denMusIdx[i].first, _denMusIdx[i].second, SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillFRMaps("MR_NumEl", _numEls[i]  , _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight );
+                                                     fillFRMaps("MR_RatEl", _numEls[i]  , _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillFRMaps("MR_NumMu", _numMus[i]  , _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium);
+                                                     fillFRMaps("MR_RatMu", _numMus[i]  , _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium); }
 
 }
 
 
 //____________________________________________________________________________
-void FakeRatio::fillLepPlots(string prepend, Candidate * lep, int lepIdx, int wp){
+void FakeRatio::fillLepPlots(string prepend, Candidate * lep, int lepIdx, string branch, int wp){
   /*
     fills the control plots for leptons PER LEPTON
   */  
 
-  float MT = _susyMod -> coneMt(lepIdx, lep, _met);
+  float MT = _susyMod -> Mt(_denLeps[0], _met, _denLepsIdx[0].first, -1, _denLepsIdx[0].second, "", (std::abs(_denLeps[0]->pdgId()) == 13?SusyModule::kMedium : SusyModule::kTight));
   for(unsigned int i = 0; i < _exts.size(); ++i){
-    fill(prepend + "Pt_"       + _exts[i],          _vc->get(_leps + "_pt"        , lepIdx) , _weight * _trws[i]);
-    fill(prepend + "Eta_"      + _exts[i], std::abs(_vc->get(_leps + "_eta"       , lepIdx)), _weight * _trws[i]);
-    fill(prepend + "EtaFR_"    + _exts[i], std::abs(_vc->get(_leps + "_eta"       , lepIdx)), _weight * _trws[i]);
-    fill(prepend + "DXY_"      + _exts[i], std::abs(_vc->get(_leps + "_dxy"       , lepIdx)), _weight * _trws[i]);
-    fill(prepend + "DZ_"       + _exts[i], std::abs(_vc->get(_leps + "_dz"        , lepIdx)), _weight * _trws[i]);
-    fill(prepend + "SIP_"      + _exts[i],          _vc->get(_leps + "_sip3d"     , lepIdx) , _weight * _trws[i]);
-    fill(prepend + "RelIso_"   + _exts[i],          _vc->get(_leps + "_relIso03"  , lepIdx) , _weight * _trws[i]);
-    fill(prepend + "MiniIso_"  + _exts[i],          _vc->get(_leps + "_miniRelIso", lepIdx) , _weight * _trws[i]);
-    fill(prepend + "PtRel_"    + _exts[i],          _vc->get(_leps + "_jetPtRelv2", lepIdx) , _weight * _trws[i]);
-    fill(prepend + "MT_"       + _exts[i], MT                                               , _weight * _trws[i]);
-    //fill(prepend + "MT_"       + _exts[i], Candidate::create( lep, _met) -> mass()          , _weight * _trws[i]);
-    fill(prepend + "PtJet_"    + _exts[i], _susyMod -> closestJetPt(lepIdx)                 , _weight * _trws[i]);
-    fill(prepend + "PtCorr_"   + _exts[i], _susyMod -> conePt(lepIdx, wp)                   , _weight * _trws[i]);
-    fill(prepend + "PtCorrFR_" + _exts[i], overflowPt(_susyMod -> conePt(lepIdx, wp))       , _weight * _trws[i]);
+    fill(prepend + "Pt_"        + _exts[i],          _vc->get(branch + "_pt"        , lepIdx)        , _weight * _trws[i]);
+    fill(prepend + "Eta_"       + _exts[i], std::abs(_vc->get(branch + "_eta"       , lepIdx))       , _weight * _trws[i]);
+    fill(prepend + "EtaFR_"     + _exts[i], std::abs(_vc->get(branch + "_eta"       , lepIdx))       , _weight * _trws[i]);
+    fill(prepend + "DXY_"       + _exts[i], std::abs(_vc->get(branch + "_dxy"       , lepIdx))       , _weight * _trws[i]);
+    fill(prepend + "DZ_"        + _exts[i], std::abs(_vc->get(branch + "_dz"        , lepIdx))       , _weight * _trws[i]);
+    fill(prepend + "SIP_"       + _exts[i],          _vc->get(branch + "_sip3d"     , lepIdx)        , _weight * _trws[i]);
+    fill(prepend + "RelIso_"    + _exts[i],          _vc->get(branch + "_relIso03"  , lepIdx)        , _weight * _trws[i]);
+    fill(prepend + "MiniIso_"   + _exts[i],          _vc->get(branch + "_miniRelIso", lepIdx)        , _weight * _trws[i]);
+    fill(prepend + "PtRel_"     + _exts[i],          _vc->get(branch + "_jetPtRelv2", lepIdx)        , _weight * _trws[i]);
+    fill(prepend + "MT_"        + _exts[i], MT                                                       , _weight * _trws[i]);
+    fill(prepend + "PtJet_"     + _exts[i], _susyMod -> closestJetPt(lepIdx, branch)                 , _weight * _trws[i]);
+    fill(prepend + "PtCorr_"    + _exts[i], _susyMod -> conePt(lepIdx, wp, branch)                   , _weight * _trws[i]);
+    fill(prepend + "PtCorrFR_"  + _exts[i], overflowPt(_susyMod -> conePt(lepIdx, wp, branch))       , _weight * _trws[i]);
   }
 
 }
@@ -2191,10 +2484,10 @@ void FakeRatio::fillLeptonPlots(){
     return: none
   */
 
-  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillLepPlots("MR_DenEl"  , _denEls[i]  , _denElsIdx[i], SusyModule::kTight ); }
-  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillLepPlots("MR_DenMu"  , _denMus[i]  , _denMusIdx[i], SusyModule::kMedium); }
-  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillLepPlots("MR_NumEl"  , _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
-  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillLepPlots("MR_NumMu"  , _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillLepPlots("MR_DenEl"  , _denEls[i]  , _denElsIdx[i].first, _denElsIdx[i].second, SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillLepPlots("MR_DenMu"  , _denMus[i]  , _denMusIdx[i].first, _denMusIdx[i].second, SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillLepPlots("MR_NumEl"  , _numEls[i]  , _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillLepPlots("MR_NumMu"  , _numMus[i]  , _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium); }
 
 }
 
@@ -2244,22 +2537,23 @@ void FakeRatio::fillQcdFakeRatioMaps(){
     return: none
   */
 
+
   if(_met -> pt() < 20){
-    for(unsigned int i = 0; i < _denEls.size(); ++i)   fillFRMaps("QR_small_DenEl", _denEls[i]  , _denElsIdx[i], SusyModule::kTight );
-    for(unsigned int i = 0; i < _denMus.size(); ++i)   fillFRMaps("QR_small_DenMu", _denMus[i]  , _denMusIdx[i], SusyModule::kMedium);
-    for(unsigned int i = 0; i < _numEls.size(); ++i) { fillFRMaps("QR_small_NumEl", _numEls[i]  , _numElsIdx[i], SusyModule::kTight );
-                                                       fillFRMaps("QR_small_RatEl", _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
-    for(unsigned int i = 0; i < _numMus.size(); ++i) { fillFRMaps("QR_small_NumMu", _numMus[i]  , _numMusIdx[i], SusyModule::kMedium);
-                                                       fillFRMaps("QR_small_RatMu", _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
+    for(unsigned int i = 0; i < _denEls.size(); ++i)   fillFRMaps("QR_small_DenEl", _denEls[i]  , _denElsIdx[i].first, _denElsIdx[i].second, SusyModule::kTight );
+    for(unsigned int i = 0; i < _denMus.size(); ++i)   fillFRMaps("QR_small_DenMu", _denMus[i]  , _denMusIdx[i].first, _denMusIdx[i].second, SusyModule::kMedium);
+    for(unsigned int i = 0; i < _numEls.size(); ++i) { fillFRMaps("QR_small_NumEl", _numEls[i]  , _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight );
+                                                       fillFRMaps("QR_small_RatEl", _numEls[i]  , _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight ); }
+    for(unsigned int i = 0; i < _numMus.size(); ++i) { fillFRMaps("QR_small_NumMu", _numMus[i]  , _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium);
+                                                       fillFRMaps("QR_small_RatMu", _numMus[i]  , _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium); }
   }
 
   if(_met -> pt() > 45 && _met -> pt() < 80){
-    for(unsigned int i = 0; i < _denEls.size(); ++i)   fillFRMaps("QR_large_DenEl", _denEls[i]  , _denElsIdx[i], SusyModule::kTight );
-    for(unsigned int i = 0; i < _denMus.size(); ++i)   fillFRMaps("QR_large_DenMu", _denMus[i]  , _denMusIdx[i], SusyModule::kMedium);
-    for(unsigned int i = 0; i < _numEls.size(); ++i) { fillFRMaps("QR_large_NumEl", _numEls[i]  , _numElsIdx[i], SusyModule::kTight );
-                                                       fillFRMaps("QR_large_RatEl", _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
-    for(unsigned int i = 0; i < _numMus.size(); ++i) { fillFRMaps("QR_large_NumMu", _numMus[i]  , _numMusIdx[i], SusyModule::kMedium);
-                                                       fillFRMaps("QR_large_RatMu", _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
+    for(unsigned int i = 0; i < _denEls.size(); ++i)   fillFRMaps("QR_large_DenEl", _denEls[i]  , _denElsIdx[i].first, _denElsIdx[i].second, SusyModule::kTight );
+    for(unsigned int i = 0; i < _denMus.size(); ++i)   fillFRMaps("QR_large_DenMu", _denMus[i]  , _denMusIdx[i].first, _denMusIdx[i].second, SusyModule::kMedium);
+    for(unsigned int i = 0; i < _numEls.size(); ++i) { fillFRMaps("QR_large_NumEl", _numEls[i]  , _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight );
+                                                       fillFRMaps("QR_large_RatEl", _numEls[i]  , _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight ); }
+    for(unsigned int i = 0; i < _numMus.size(); ++i) { fillFRMaps("QR_large_NumMu", _numMus[i]  , _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium);
+                                                       fillFRMaps("QR_large_RatMu", _numMus[i]  , _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium); }
   }
 
 }
@@ -2282,13 +2576,14 @@ void FakeRatio::fillUcsxEwkEventPlots(){
 
 
 //____________________________________________________________________________
-void FakeRatio::fillUcsxEwkLepPlots(string prepend, Candidate * lep, int lepIdx, int wp){
+void FakeRatio::fillUcsxEwkLepPlots(string prepend, Candidate * lep, int lepIdx, string branch, int wp){
   /*
     fills the control plots for leptons PER LEPTON
   */  
 
   //Candidate * mt = Candidate::create( lep, _met);0
-  float MT = _susyMod -> coneMt(lepIdx, lep, _met);
+  //float MT = _susyMod -> coneMt(lepIdx, lep, _met);
+  float MT = _susyMod -> Mt(_denLeps[0], _met, _denLepsIdx[0].first, -1, _denLepsIdx[0].second, "", (std::abs(_denLeps[0]->pdgId()) == 13?SusyModule::kMedium : SusyModule::kTight));
 
   for(unsigned int i = 0; i < _exts.size(); ++i){
     fill(prepend + "MT_"      + _exts[i], MT                                                , _weight * _trws[i]);
@@ -2307,10 +2602,10 @@ void FakeRatio::fillUcsxEwkLeptonPlots(){
     return: none
   */
 
-  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillUcsxEwkLepPlots("UR_DenEl"  , _denEls[i]  , _denElsIdx[i], SusyModule::kTight ); }
-  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillUcsxEwkLepPlots("UR_DenMu"  , _denMus[i]  , _denMusIdx[i], SusyModule::kMedium); }
-  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillUcsxEwkLepPlots("UR_NumEl"  , _numEls[i]  , _numElsIdx[i], SusyModule::kTight ); }
-  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillUcsxEwkLepPlots("UR_NumMu"  , _numMus[i]  , _numMusIdx[i], SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _denEls.size(); ++i) { fillUcsxEwkLepPlots("UR_DenEl", _denEls[i], _denElsIdx[i].first, _denElsIdx[i].second, SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _denMus.size(); ++i) { fillUcsxEwkLepPlots("UR_DenMu", _denMus[i], _denMusIdx[i].first, _denMusIdx[i].second, SusyModule::kMedium); }
+  for(unsigned int i = 0; i < _numEls.size(); ++i) { fillUcsxEwkLepPlots("UR_NumEl", _numEls[i], _numElsIdx[i].first, _numElsIdx[i].second, SusyModule::kTight ); }
+  for(unsigned int i = 0; i < _numMus.size(); ++i) { fillUcsxEwkLepPlots("UR_NumMu", _numMus[i], _numMusIdx[i].first, _numMusIdx[i].second, SusyModule::kMedium); }
 
 }
 
@@ -2367,6 +2662,40 @@ void FakeRatio::findTriggerExts(){
       }
     }
   }
+
+}
+
+
+//____________________________________________________________________________
+void FakeRatio::eventListSyncRA5() {
+
+  // sync stuff
+  int isotr = -1;
+  int nontr = -1;
+  for(int i = 0; i < _TR_lines.size(); ++i){
+    if(_TR_lines[i].find("IsoVVL") != std::string::npos || _TR_lines[i].find("IsoVL") != std::string::npos)
+      isotr = i;
+    else
+      nontr = i;
+  }
+
+  if(_iso){
+    if(_nDenEls == 1)
+      cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
+      //cout << Form("Electron RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[isotr].c_str(), _trws[isotr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
+    //if(_nDenMus == 1)
+    //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
+  //    cout << Form("Muon RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[isotr].c_str(), _trws[isotr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
+  //}
+
+  //if(!_iso || _TR_lines.size() > 1){
+    //if(_nDenEls == 1)
+    //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[nontr]) << endl;
+  //    cout << Form("Electron RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[nontr].c_str(), _trws[nontr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
+    //if(_nDenMus == 1)
+    //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0].first, SusyModule::kMedium, _denLepsIdx[0].second), _denLeps[0]->eta(), _vc->get(_denLepsIdx[0].second + "_miniRelIso", _denLepsIdx[0].first), _vc->get(_denLepsIdx[0].second + "_jetPtRatiov2", _denLepsIdx[0].first), _vc->get(_denLepsIdx[0].second + "_jetPtRelv2", _denLepsIdx[0].first), _met->pt(), _met->phi(), _nNumLeps, _trws[nontr]) << endl;
+  //    cout << Form("Muon RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[nontr].c_str(), _trws[nontr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]),  _met->pt(), MT, _nNumLeps) << endl;
+ // }
 
 }
 
