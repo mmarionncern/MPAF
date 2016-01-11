@@ -18,6 +18,8 @@ SSDL2015::~SSDL2015(){
 void
 SSDL2015::initialize(){
   
+  loadScanHistogram();
+
   readCSCevents();
   readEESCevents();
 
@@ -94,38 +96,47 @@ SSDL2015::initialize(){
   _vc->registerVar("LepGood_jetLepAwareJEC_energy"    );
   _vc->registerVar("LepGood_jetCorrFactor_L1L2L3Res"    );
 
-  _vc->registerVar("met_pt"                       );
-  _vc->registerVar("met_eta"                      );
-  _vc->registerVar("met_phi"                      );
-  _vc->registerVar("met_mass"                     );
-  _vc->registerVar("metNoHF_pt"                   );
-  _vc->registerVar("metNoHF_eta"                  );
-  _vc->registerVar("metNoHF_phi"                  );
-  _vc->registerVar("metNoHF_mass"                 );
-  _vc->registerVar("nJet25"                       );
-  _vc->registerVar("nJet40"                       );
+  vector<string> extsJEC({"","_jecUp","_jecDown"});
 
-  _vc->registerVar("nJet"                         );
-  _vc->registerVar("Jet_id"                       );
-  _vc->registerVar("Jet_pt"                       );
-  _vc->registerVar("Jet_rawPt"                    );
-  _vc->registerVar("Jet_eta"                      );
-  _vc->registerVar("Jet_phi"                      );
-  _vc->registerVar("Jet_mass"                     );
-  _vc->registerVar("Jet_btagCSV"                  );
+  for(unsigned int ie=0;ie<extsJEC.size();ie++) {
 
-  _vc->registerVar("Jet_CorrFactor_L1"            );
-  _vc->registerVar("Jet_CorrFactor_L1L2L3Res"     );
+    _vc->registerVar("met"+extsJEC[ie]+"_pt"                       );
+    _vc->registerVar("met"+extsJEC[ie]+"_eta"                      );
+    _vc->registerVar("met"+extsJEC[ie]+"_phi"                      );
+    _vc->registerVar("met"+extsJEC[ie]+"_mass"                     );
+  
+    // _vc->registerVar("metNoHF_pt"                   );
+    // _vc->registerVar("metNoHF_eta"                  );
+    // _vc->registerVar("metNoHF_phi"                  );
+    // _vc->registerVar("metNoHF_mass"                 );
+    // _vc->registerVar("nJet25"                       );
+    // _vc->registerVar("nJet40"                       );
+
+    _vc->registerVar("nJet"+extsJEC[ie]                            );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_id"                       );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_pt"                       );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_rawPt"                    );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_eta"                      );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_phi"                      );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_mass"                     );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_mcFlavour"                );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_btagCSV"                  );
+
+    _vc->registerVar("Jet"+extsJEC[ie]+"_CorrFactor_L1"            );
+    _vc->registerVar("Jet"+extsJEC[ie]+"_CorrFactor_L1L2L3Res"     );
 
 
-  _vc->registerVar("nDiscJet"                     );
-  _vc->registerVar("DiscJet_id"                   );
-  _vc->registerVar("DiscJet_pt"                   );
-  _vc->registerVar("DiscJet_rawPt"                );
-  _vc->registerVar("DiscJet_eta"                  );
-  _vc->registerVar("DiscJet_phi"                  );
-  _vc->registerVar("DiscJet_mass"                 );
-  _vc->registerVar("DiscJet_btagCSV"              );
+    _vc->registerVar("nDiscJet"+extsJEC[ie]                        );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_id"                   );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_pt"                   );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_rawPt"                );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_eta"                  );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_phi"                  );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_mass"                 );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_mcFlavour"            );
+    _vc->registerVar("DiscJet"+extsJEC[ie]+"_btagCSV"              );
+
+  }
 
   _vc->registerVar("nJetFwd"                      );
   _vc->registerVar("JetFwd_pt"                    );
@@ -147,6 +158,9 @@ SSDL2015::initialize(){
   _vc->registerVar("GenPart_phi"                  );
   _vc->registerVar("GenPart_pdgId"                );
   _vc->registerVar("GenPart_motherId"             );
+  _vc->registerVar("GenPart_mass");
+  _vc->registerVar("GenPart_charge");
+  _vc->registerVar("GenPart_status");
   
   //LHE gen level weights
   _vc->registerVar("nLHEweight"                   );
@@ -170,6 +184,10 @@ SSDL2015::initialize(){
   //pileup
   _vc->registerVar("puWeight"                     );
   _vc->registerVar("vtxWeight"                    );
+
+  //scan variables
+  _vc->registerVar("GenSusyMScan1"                );
+  _vc->registerVar("GenSusyMScan2"                );
 
   _susyMod = new SusyModule(_vc, _dbm);
   
@@ -259,6 +277,7 @@ SSDL2015::initialize(){
   addWorkflow( kWZCR, "WZCR");
 
   //extra input variables
+  _fastSim = getCfgVarI("FastSim", 0);
   _lepflav = getCfgVarS("LEPFLAV", "all");
   _leppt   = getCfgVarS("LEPPT"  , "all");
   _SR      = getCfgVarS("SR"     , "BR02H");
@@ -274,11 +293,14 @@ SSDL2015::initialize(){
   
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
-  //addManualSystSource("EWKFR",SystUtils::kNone);
-  addManualSystSource("Eff",SystUtils::kNone);
-  addManualSystSource("Theory",SystUtils::kNone);
-  addManualSystSource("jes",SystUtils::kNone);
-  addManualSystSource("bTag",SystUtils::kNone);
+   //addManualSystSource("EWKFR",SystUtils::kNone);
+   addManualSystSource("Eff",SystUtils::kNone);
+   //addManualSystSource("Theory",SystUtils::kNone);
+   addManualSystSource("JES",SystUtils::kNone);
+   addManualSystSource("BTAG",SystUtils::kNone);
+   addManualSystSource("BTAGFS",SystUtils::kNone);
+   addManualSystSource("LepEffFS",SystUtils::kNone);
+   addManualSystSource("ISR",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -334,6 +356,16 @@ SSDL2015::initialize(){
   _dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
   _dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
 
+  //=== signal Xsection, easier to normalize from here.
+  _dbm->loadDb("T1ttttXsect", "SignalXsect.db");
+ 
+  int ilhe = _LHESYS;
+  bool tmp_ismux = ilhe >= 1001 && ilhe <= 1009;
+  bool tmp_ispdf = ilhe >= 2001 && ilhe <= 2100;
+  
+  if (!tmp_ismux && !tmp_ispdf) {
+    _LHESYS = 0;
+  }
 
 }
 
@@ -345,7 +377,8 @@ SSDL2015::modifyWeight() {
     if (_LHESYS == 0) {_weight *= _vc->get("genWeight");}
     else {_weight *= _susyMod->getLHEweight(_LHESYS);}
     //pileup weights
-    _weight *= _vc->get("vtxWeight");
+    //_weight *= _vc->get("vtxWeight");
+    _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
   }
 
 }
@@ -425,7 +458,9 @@ SSDL2015::writeOutput() {
 
 void
 SSDL2015::run() {
- 
+  
+  if(_fastSim && !checkMassBenchmark() ) return;
+  
   if(_vc->get("isData") && !checkDoubleCount()) return;
   
   counter("denominator");
@@ -451,23 +486,42 @@ SSDL2015::run() {
     setWorkflow(kGlobal); //MANDATORY (otherwise double counting in other categories)
     return;
   }
-   counter("SS like pair");
+  counter("SS like pair");
 
-   // BTAG SF
-   if(!_vc->get("isData") ) {
-     if(!isInUncProc())  {
-       _btagW = _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets, _bJetsIdx, 0);
-       _weight *= _btagW;
-     }
-     else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
-       _weight *= _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets, _bJetsIdx, 1); 
-     else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
-       _weight *= _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets, _bJetsIdx, -1); 
-     else //other syst. variations
-       _weight *= _btagW;
+  // BTAG SF
+  if(!_vc->get("isData") ) {
+    if(!isInUncProc())  {
+      _btagW = _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
+      //cout<<" --> "<<_btagW<<endl;
+      _weight *= _btagW;
+    }
+    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+      _weight *= _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets,
+				   _bJetsIdx, 1, _fastSim); 
+    else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+      _weight *= _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets,
+				   _bJetsIdx, -1, _fastSim); 
+    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
+      _weight *= _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets,
+				   _bJetsIdx, 0, _fastSim, 1); 
+    else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
+      _weight *= _susyMod->bTagSF( _allJets, _allJetsIdx, _bJets,
+				   _bJetsIdx, 0, _fastSim, -1); 
+    else //other syst. variations
+      _weight *= _btagW;
         
-   }
-   counter("btag SF");
+  }
+  counter("btag SF");
+
+  if(_fastSim){
+    if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
+      _susyMod->applyISRWeight(0, 1 , _weight); // up variation
+    }
+    else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
+      _susyMod->applyISRWeight(0, -1, _weight); // down variation
+    }
+  }
+
 
 
    //===============================================
@@ -539,55 +593,40 @@ SSDL2015::advancedSelection(int WF) {
 
   //HLT variables wrong, use bits instead
   //if(!hltSelection() ) return;
-  if(!passHLTbit()) return;
+  if(!_fastSim) {
+    if(!passHLTbit()) return;
+  }
   counter("HLT");
   
   // HLT AND LEPTON SFs ======================
   if(!_isData){
-    // trigger * lep1 SF * lep2 SF 
-    _weight*=_susyMod->GCeventScaleFactor(_l1Cand->pdgId(), _l2Cand->pdgId(),
-					  _l1Cand->pt   (), _l2Cand->pt   (),      
-					  _l1Cand->eta  (), _l2Cand->eta  (), _HT);
-    //if(FASTSIM) {
-    // _weight *= _susyMod -> LTFastSimTriggerEfficiency(_HT, _l1Cand->pt(), _l1Cand->pdgId(), 
-    //                                                        _l2Cand->pt(), _l2Cand->pdgId()); // trigger
-    // lep1 SF * lep2 SF
-    //_weight *= _susyMod -> getFastSimLepSF(_l1Cand, _l2Cand, _vc->get("nVert")); 
-    //}
+    // trigger * lep1 SF * lep2 SF
+    if(!_fastSim) {
+      _weight*=_susyMod->GCeventScaleFactor(_l1Cand->pdgId(), _l2Cand->pdgId(),
+					    _l1Cand->pt   (), _l2Cand->pt   (),      
+					    _l1Cand->eta  (), _l2Cand->eta  (), _HT);
+    } else {
+      _weight*=_susyMod->LTFastSimTriggerEfficiency(_HT, _l1Cand->pt(),
+						    _l1Cand->pdgId(), 
+						    _l2Cand->pt(),
+						    _l2Cand->pdgId()); // trigger
+      //lep1 SF * lep2 SF
+       _weight *= _susyMod -> getFastSimLepSF(_l1Cand, _l2Cand, _vc->get("nVert")); 
+       //uncertainties
+       if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
+       	_weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, 1);
+       if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
+       	_weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
+    
+    }
   }
   
   //===============================
   _mTmin=min( Candidate::create(_l1Cand, _met)->mass(),
 	      Candidate::create(_l2Cand, _met)->mass() );
   //===============================
-    counter("lepton baseline");
+  counter("lepton baseline");
 
-
-  if(!_vc->get("isData") ) {
-    if(!isInUncProc())  {
-      _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);
-      _weight *= _btagW;
-    }
-    else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kUp )
-      _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 1); 
-    else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kDown )
-      _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1); 
-    else //other syst. variations
-      _weight *= _btagW;
-        
-
-    // if(isInUncProc() && getUncName()=="Eff" && getUncDir()==SystUtils::kUp )
-    //   _weight *= 1.045;
-    // if(isInUncProc() && getUncName()=="Eff" && getUncDir()==SystUtils::kDown )
-    //   _weight *= 0.955;
-
-    // if(isInUncProc() && getUncName()=="Theory" && getUncDir()==SystUtils::kUp )
-    //   _weight *= ((_HT>300 || (_l1Cand->pt()<25 && _l2Cand->pt()<25))?1.158:1.139);
-    // if(isInUncProc() && getUncName()=="Theory" && getUncDir()==SystUtils::kDown )
-    //   _weight *= ((_HT>300 || (_l1Cand->pt()<25 && _l2Cand->pt()<25))?0.842:0.861);
-
-  }
-  counter("btag SF");
   
   //default cuts for baseline
   if(_HT<80) return;
@@ -2017,9 +2056,10 @@ SSDL2015::selectLeptons() {
   }
   
   _susyMod->cleanJets( &_jetCleanLeps10, _allJets, _allJetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, 25, 25, getUncName()=="jes", getUncDir() );
+		       _lepJets, _lepJetsIdx, 25, 25, getUncName()=="JES", getUncDir() );
   _susyMod->ptJets(_allJets, _allJetsIdx, _jets, _jetsIdx, 40);
   _HT=_susyMod->HT( &(_jets) );
+  //cout<<"HT :"<<getUncName()<<" / "<<getUncDir()<<" --> "<<_HT<<endl;
   
    //OS case with no Z Veto!======================
   for(size_t il=0;il<_looseLepsPtCut.size();il++) {
@@ -2067,25 +2107,25 @@ SSDL2015::selectLeptons() {
 TVector2
 SSDL2015::varyMET() {
 
-  unsigned int nJets=_vc->get("nJet");
-  unsigned int nDiscJets=_vc->get("nDiscJet");
-  unsigned int nFwdJets=_vc->get("nJetFwd");
-  if(!isInUncProc() ) {//first, store the jets
-    _uncleanJets.clear();
-    _uncleanDiscJets.clear();
-    _uncleanFwdJets.clear();
-    for(unsigned int ij=0;ij<nJets;ij++) { 
-      TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij), _vc->get("Jet_phi", ij)   );
-      _uncleanJets.push_back(jet);
-    }
-    for(unsigned int ij=0;ij<nDiscJets;ij++) { 
-      TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
-      _uncleanDiscJets.push_back(jet);
-    }
-    for(unsigned int ij=0;ij<nFwdJets;ij++) { 
-      TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij),_vc->get("JetFwd_phi", ij));
-      _uncleanFwdJets.push_back(jet);
-    }
+  // unsigned int nJets=_vc->get("nJet");
+  // unsigned int nDiscJets=_vc->get("nDiscJet");
+  // unsigned int nFwdJets=_vc->get("nJetFwd");
+  // if(!isInUncProc() ) {//first, store the jets
+  //   _uncleanJets.clear();
+  //   _uncleanDiscJets.clear();
+  //   _uncleanFwdJets.clear();
+  //   for(unsigned int ij=0;ij<nJets;ij++) { 
+  //     TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij), _vc->get("Jet_phi", ij)   );
+  //     _uncleanJets.push_back(jet);
+  //   }
+  //   for(unsigned int ij=0;ij<nDiscJets;ij++) { 
+  //     TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
+  //     _uncleanDiscJets.push_back(jet);
+  //   }
+  //   for(unsigned int ij=0;ij<nFwdJets;ij++) { 
+  //     TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij),_vc->get("JetFwd_phi", ij));
+  //     _uncleanFwdJets.push_back(jet);
+  //   }
   
     // for(unsigned int ij=0;ij<nJets;ij++) {
     //   cout<<getUncName()<<" -> "<<_vc->get("Jet_pt", ij)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
@@ -2096,55 +2136,61 @@ SSDL2015::varyMET() {
     // for(unsigned int ij=0;ij<nFwdJets;ij++) {
     //   cout<<getUncName()<<" -> "<<_vc->get("JetFwd_pt", ij)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
     // }
-  }
+  //}
 
-  TVector2 met; met.SetMagPhi(_vc->get("met_pt"), _vc->get("met_phi") );
-  if(!(isInUncProc() &&  getUncName()=="jes") ) return met;
+  string ext="met";
+  if((isInUncProc() &&  getUncName()=="JES") )
+    ext += ((SystUtils::kUp==getUncDir())?"_jecUp":"_jecDown");
 
-  for(unsigned int ij=0;ij<nJets;ij++) { 
+  TVector2 met; met.SetMagPhi(_vc->get(ext+"_pt"), _vc->get(ext+"_phi") );
+  //cout<<"MET :"<<getUncName()<<" / "<<getUncDir()<<" --> "<<met.Mod()<<endl;
+  return met;
+  //if(!(isInUncProc() &&  getUncName()=="jes") ) return met;
+  
+  // for(unsigned int ij=0;ij<nJets;ij++) { 
     
-    bool find=false;
-    for(unsigned int iv=0;iv<_lepJetsIdx.size();iv++) {
-      if("Jet"==_lepJetsIdx[iv].first && ij==_lepJetsIdx[iv].second) { find=true; break;}
-    }
-    if(find) continue; //bloody lepton cleaning
+  //   bool find=false;
+  //   for(unsigned int iv=0;iv<_lepJetsIdx.size();iv++) {
+  //     if("Jet"==_lepJetsIdx[iv].first && ij==_lepJetsIdx[iv].second) { find=true; break;}
+  //   }
+  //   if(find) continue; //bloody lepton cleaning
    
-    //add back the standard jets
-    met += _uncleanJets[ij];
-    //JES varied jets
-    float scale=_dbm->getDBValue("jes", _vc->get("Jet_eta", ij), _vc->get("Jet_pt", ij));
-    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
-    TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij)*(1+scale), _vc->get("Jet_phi", ij)   );
-    met -= jet;
-    //cout<<" -> "<<_vc->get("Jet_pt", ij)*(1+scale)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
-  }
-  for(unsigned int ij=0;ij<nDiscJets;ij++) { 
+  //   //add back the standard jets
+  //   met += _uncleanJets[ij];
+  //   //JES varied jets
+  //   float scale=_dbm->getDBValue("jes", _vc->get("Jet_eta", ij), _vc->get("Jet_pt", ij));
+  //   scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
+  //   TVector2 jet; jet.SetMagPhi( _vc->get("Jet_pt", ij)*(1+scale), _vc->get("Jet_phi", ij)   );
+  //   met -= jet;
+  //   //cout<<" -> "<<_vc->get("Jet_pt", ij)*(1+scale)<<" / "<<_vc->get("Jet_eta", ij)<<endl;
+  // }
+  // for(unsigned int ij=0;ij<nDiscJets;ij++) { 
     
-    bool find=false;
-    for(unsigned int iv=0;iv<_lepJetsIdx.size();iv++) {
-      if("DiscJet"==_lepJetsIdx[iv].first && ij==_lepJetsIdx[iv].second) { find=true; break;}
-    }
-    if(find) continue; //bloody lepton cleaning
+  //   bool find=false;
+  //   for(unsigned int iv=0;iv<_lepJetsIdx.size();iv++) {
+  //     if("DiscJet"==_lepJetsIdx[iv].first && ij==_lepJetsIdx[iv].second) { find=true; break;}
+  //   }
+  //   if(find) continue; //bloody lepton cleaning
     
-    //add back the standard jets
-    met += _uncleanDiscJets[ij];
-    //JES varied jets
-    float scale=_dbm->getDBValue("jes", _vc->get("DiscJet_eta", ij), _vc->get("DiscJet_pt", ij));
-    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
-    TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
-    met -= jet;
-    //cout<<" -> "<<_vc->get("DiscJet_pt", ij)*(1+scale)<<" / "<<_vc->get("DiscJet_eta", ij)<<endl;
-  }
-  for(unsigned int ij=0;ij<nFwdJets;ij++) { 
-    //add back the standard jets
-    met += _uncleanFwdJets[ij];
-    //JES varied jets
-    float scale=_dbm->getDBValue("jes", _vc->get("JetFwd_eta", ij), _vc->get("JetFwd_pt", ij));
-    scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
-    TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij), _vc->get("JetFwd_phi", ij) );
-    met -= jet;
-    //cout<<" -> "<<_vc->get("JetFwd_pt", ij)*(1+scale)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
-  }
+  //   //add back the standard jets
+  //   met += _uncleanDiscJets[ij];
+  //   //JES varied jets
+  //   float scale=_dbm->getDBValue("jes", _vc->get("DiscJet_eta", ij), _vc->get("DiscJet_pt", ij));
+  //   scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
+  //   TVector2 jet; jet.SetMagPhi( _vc->get("DiscJet_pt", ij), _vc->get("DiscJet_phi", ij)   );
+  //   met -= jet;
+  //   //cout<<" -> "<<_vc->get("DiscJet_pt", ij)*(1+scale)<<" / "<<_vc->get("DiscJet_eta", ij)<<endl;
+  // }
+  // for(unsigned int ij=0;ij<nFwdJets;ij++) { 
+  //   //add back the standard jets
+  //   met += _uncleanFwdJets[ij];
+  //   //JES varied jets
+  //   float scale=_dbm->getDBValue("jes", _vc->get("JetFwd_eta", ij), _vc->get("JetFwd_pt", ij));
+  //   scale = ((SystUtils::kUp==getUncDir())?1:(-1))*scale;
+  //   TVector2 jet; jet.SetMagPhi(_vc->get("JetFwd_pt", ij), _vc->get("JetFwd_phi", ij) );
+  //   met -= jet;
+  //   //cout<<" -> "<<_vc->get("JetFwd_pt", ij)*(1+scale)<<" / "<<_vc->get("JetFwd_eta", ij)<<endl;
+  // }
 
   return met;
 }
@@ -2463,4 +2509,45 @@ SSDL2015::registerTriggerVars(){
     _vc->registerVar(_vTR_lines_iso_em[i]);
   for(unsigned int i=0;i<_vTR_lines_iso_mm.size();++i) 
     _vc->registerVar(_vTR_lines_iso_mm[i]);
+}
+
+bool
+SSDL2015::checkMassBenchmark() {
+
+  float M1=_vc->get("GenSusyMScan1");
+  float M2=_vc->get("GenSusyMScan2");
+
+  ostringstream os,os1;
+  os<<M1;
+  os1<<M2;
+  string s="-"+os.str()+"-"+os1.str()+"-";
+  
+  if(_ie==0) {
+    unsigned int p=_sampleName.find("-");
+    unsigned int p1=_sampleName.find("-",p+1);
+    unsigned int p2=_sampleName.find("-",p1+1);
+    //cout<<_sampleName<<"  "<<" "<<_sampleName.substr(p+1,p1-p-1)<<endl;
+    float m1=stof( _sampleName.substr(p+1,p1-p-1) );
+    float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
+    float xb = _hScanWeight->GetXaxis()->FindBin(m1);
+    float yb = _hScanWeight->GetYaxis()->FindBin(m2);
+    float zb = _hScanWeight->GetZaxis()->FindBin(1);
+  
+    _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
+    // cout<<M1<<"/"<<M2<<" -> "<<xb<<"/"<<yb<<"/"<<zb<<" --> "
+    // 	<<_hScanWeight->GetBinContent(xb,yb,zb)<<"   "
+    // 	<<_dbm->getDBValue("T1tttXsect",M1)<<"  "<<_dbm->getDBValue("T1tttXsect",M1)*2110/_nProcEvtScan<<"  "<<_weight<<endl;
+  }
+
+  if(_sampleName.find(s)==string::npos) return false;
+  _weight *= _dbm->getDBValue("T1ttttXsect",M1)*2110/_nProcEvtScan;
+  return true;
+}
+
+void
+SSDL2015::loadScanHistogram() {
+  //TFile* file=new TFile("/home/mmarionn/Documents/CMS/MPAF/workdir/data/test/test.root");
+  string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScanT1tttt.root";
+  TFile* file=new TFile(mpafenv.c_str(),"read");
+  _hScanWeight=(TH3D*)file->Get("CountSMS");
 }

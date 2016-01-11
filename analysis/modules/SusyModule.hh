@@ -103,10 +103,12 @@ public:
 
 
   float bTagSF(CandList& jets , vector<pair<string, unsigned int> >& jetIdx ,
-               CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx, int st);
+               CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx,
+	       int st, bool fastSim=false, int fssf=0);
   float bTagMediumEfficiency(Candidate* jet, unsigned int flavor);
   float bTagMediumScaleFactor(Candidate* jet, unsigned int flavor, int st);
-  float bTagScaleFactor(unsigned int op, unsigned int mt, int st, unsigned int fl);
+  //float bTagScaleFactor(unsigned int op, unsigned int mt, int st, unsigned int fl);
+  float bTagMediumScaleFactorFastSim(Candidate* jet, unsigned int flavor, int st);
   float bTagPt(float);
 
   float GCtriggerScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float ht);
@@ -116,6 +118,12 @@ public:
   float GCleptonScaleFactor(int pdgId, float pt, float eta, float ht);
   float GCeventScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht);
   double LTFastSimTriggerEfficiency(double HT, double l1_Pt, int l1_pdgId, double l2_Pt, int l2_pdgId);
+
+  float getVarWeightFastSimLepSF(const Candidate* l1, const Candidate* l2, int dir);
+
+  float getPuWeight(unsigned int nvtx);
+
+  void applyISRWeight(unsigned int process, int var, float& weight);
 
   enum {kDenom=0,
 	kVLoose,
@@ -137,9 +145,16 @@ public:
 private:
 
   void defineLeptonWPS();
+  void loadBTagFastSimReader();
   void loadBTagReader();
   void loadDBs();
-  //const
+  void initPUWeights(); 
+
+ 
+  void isrWeight(int var, float pt, float& weight);
+  CandList collectGenParticles(int pdgId, int status);
+
+ //const
   VarClass* _vc;
   DataBaseManager* _dbm;
 
@@ -154,6 +169,17 @@ private:
   BTagCalibrationReader* _reader_l_up;
   BTagCalibrationReader* _reader_l_do;
 
+  BTagCalibration* _calibFS;
+  BTagCalibrationReader* _readerFS_b_cv;
+  BTagCalibrationReader* _readerFS_b_up;
+  BTagCalibrationReader* _readerFS_b_do;
+  BTagCalibrationReader* _readerFS_c_cv;
+  BTagCalibrationReader* _readerFS_c_up;
+  BTagCalibrationReader* _readerFS_c_do;
+  BTagCalibrationReader* _readerFS_l_cv;
+  BTagCalibrationReader* _readerFS_l_up;
+  BTagCalibrationReader* _readerFS_l_do;
+
   vector<float> _cLostHitWP;
   vector<float> _tChWP;
   vector<float> _dxyWP;
@@ -167,6 +193,8 @@ private:
   vector<vector<float> > _elMvaIdWP;
   vector<vector<float> > _multiIsoWP;
   vector<vector<float> > _ptWP;
+
+  vector<float> _puWeights;
 
 };
 

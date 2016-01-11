@@ -121,6 +121,8 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
   
   if(filename=="") return;
  
+  int tmpICat=icat;
+
   vector<std::pair<CatId, ValId> > catMap;
   string ndb = filename;
   ifstream fDb( ndb.c_str(), ios::in );
@@ -175,23 +177,33 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	}
 
 	if(categ!="global" || uncTag!="") {
-	  if(uncTag=="")
-	    _au->addCategory(icat, categ);
-	  else
-	    _au->addCategory(icat, categ, uncTag);
+	  // int icatTmp=_au->getCategUniqueId(categ, uncTag);
+	  // //cout<<tks[1]<<" ==> "<<icatTmp<<"  "<<categ<<"  "<<uncTag<<endl;
+	  // if(icatTmp!=-1) {
+	  //   icat=icatTmp;
+	  // } else
+	    {
+	    if(uncTag=="")
+	      _au->addCategory(icat, categ);
+	    else
+	      _au->addCategory(icat, categ, uncTag);
+	  }
+	    //cout<<categ<<"/"<<uncTag<<" --> "<<icat<<"  "<<tmpICat<<endl;
 	} 
         else {
 	  icat=0;
 	}
       }
       else if(tks[0]=="endcateg") { //fill the maps
+	//icat=tmpICat;
 	if(icat==0) icat +=2; // 1 is nominal
         else icat++;
+	//tmpICat=icat;
       }
       else if(tks[0]=="selection") continue;
  
       else {
-	
+	//cout<<"begin "<<line<<endl;
         size_t n=tks.size()-4;
         cname="";
         for(size_t i=0;i<n-1;i++)
@@ -228,24 +240,8 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	vals.eyield = eyield;
 	vals.gen = gen;
 
-	// bool found=false;
-	// for(size_t ii=0;ii<catMap.size();ii++) {
-	//   if(catMap[ii].first.categ==id.categ && 
-	//      catMap[ii].first.cname==id.cname && 
-	//      catMap[ii].first.sname==id.sname && 
-	//      catMap[ii].first.useExt==id.useExt && 
-	//      catMap[ii].first.redCateg==id.redCateg && 
-	//      catMap[ii].first.ext==id.ext && 
-	//      catMap[ii].first.uncTag==id.uncTag && 
-	//      catMap[ii].first.upVar==id.upVar ) {
-	//     found=true;
-	//     break;
-	//   }
-	// }
-	// if(!found) {
 	catMap.push_back(std::make_pair(id, vals));
-	  //}
-
+	//cout<<"end "<<line<<endl;
       }
 
     } //end while line
@@ -302,6 +298,9 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
       dss=anConf.findDSS( catMap[ic].first.sname );
       int icat=_au->getCategId( catMap[ic].first.categ );
       for(unsigned int i=0;i<dss.size();i++) {
+	// if(catMap[ic].first.uncTag=="") //dss[i]->getName()=="T1tttt-1125-900")
+	//   cout<<dss[i]->getName()<<"  "<<catMap[ic].first.cname<<"  "<<catMap[ic].first.sname
+	//       <<"  "<<icat<<"  "<<catMap[ic].first.categ<<"  "<<catMap[ic].first.uncTag<<" ---> "<<catMap[ic].second.yield<<endl;
 	storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
 		      catMap[ic].second.gen, icat,
 		      catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
@@ -1083,15 +1082,18 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       
       if(_dsNames[id]=="data") continue;
       
+     
       valCentral[ _dsNames[id] ] += uncShapes[ic].begin()->second[ _dsNames[id] ][0];
       hCentral[ _dsNames[id] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
-      
+      // if(_dsNames[id]=="T1tttt_1200_450")
+      // 	cout<<" ==== > "<<categs[ic]<<"  "<<uncShapes[ic].begin()->second[ _dsNames[id] ][0]<<"   "<<valCentral[ _dsNames[id] ]<<endl;
       for(size_t iu=0;iu<uncNames.size();iu++) {
 	if(uncShapes[ic].find(uncNames[iu])!=uncShapes[ic].end() && 
 	   uncShapes[ic][ uncNames[iu] ].find(_dsNames[id])!=uncShapes[ic][ uncNames[iu] ].end() ) {
-	  // cout<<_dsNames[id]+"_"+uncNames[iu]<<" --> "
-	  //     <<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
-	  //     <<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
+	  // if("T1tttt_1200_450"==_dsNames[id] && uncNames[iu].find("BTAG")!=string::npos)
+	  //   cout<<_dsNames[id]+"_"+uncNames[iu]<<" --> "
+	  // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
+	  // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
 
 	  hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
 	  hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
@@ -1142,6 +1144,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       yieldStr += os.str()+"\t";
       
     } else if(_dsNames[ids]==sigName) {
+      cout<<" --> "<<_dsNames[ids]<<"   "<<valCentral[_dsNames[ids]]<<endl;
       sumSig = valCentral[_dsNames[ids]];
     }
   }

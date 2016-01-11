@@ -37,7 +37,7 @@ __dummy := $(shell mkdir -p $(OBJDIR) $(DEPDIR) $(BINDIR) $(SOLIBDIR))
 CXX        := g++
 LD         := g++
 OUTPUTOPT  := -o
-OPTFLAGS   := -g -O2 -Wall -fPIC -Wno-deprecated
+OPTFLAGS   := -g -O2 -Wall -fPIC -Wno-deprecated -std=c++11
 CXXFLAGS   := $(OPTFLAGS)
 LDFLAGS    := -shared
 LIBS       :=

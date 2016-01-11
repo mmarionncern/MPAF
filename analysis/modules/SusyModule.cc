@@ -14,6 +14,8 @@ SusyModule::SusyModule(VarClass* vc, DataBaseManager* dbm):
   defineLeptonWPS();
   loadDBs();
   loadBTagReader();
+  loadBTagFastSimReader();
+  initPUWeights();
 }
 
 SusyModule::~SusyModule() {
@@ -22,7 +24,33 @@ SusyModule::~SusyModule() {
 }
 
 void
-SusyModule::loadBTagReader(){
+SusyModule::loadBTagFastSimReader() {
+
+  // setup calibration readers
+  string filename=(string) getenv("MPAF") + "/workdir/database/CSV_13TEV_Combined_20_11_2015.csv";
+  _calibFS=new BTagCalibration("csvFast", "workdir/database/CSV_13TEV_Combined_20_11_2015.csv");//filename.c_str());
+  _readerFS_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
+  _readerFS_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
+  _readerFS_b_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
+  _readerFS_c_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
+  _readerFS_c_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
+  _readerFS_c_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
+  _readerFS_l_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
+  _readerFS_l_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
+  _readerFS_l_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
+  _readerFS_b_cv->load(*_calibFS, BTagEntry::FLAV_B   , "fastsim");
+  _readerFS_b_up->load(*_calibFS, BTagEntry::FLAV_B   , "fastsim");
+  _readerFS_b_do->load(*_calibFS, BTagEntry::FLAV_B   , "fastsim");
+  _readerFS_c_cv->load(*_calibFS, BTagEntry::FLAV_C   , "fastsim");
+  _readerFS_c_up->load(*_calibFS, BTagEntry::FLAV_C   , "fastsim");
+  _readerFS_c_do->load(*_calibFS, BTagEntry::FLAV_C   , "fastsim");
+  _readerFS_l_cv->load(*_calibFS, BTagEntry::FLAV_UDSG, "fastsim");
+  _readerFS_l_up->load(*_calibFS, BTagEntry::FLAV_UDSG, "fastsim");
+  _readerFS_l_do->load(*_calibFS, BTagEntry::FLAV_UDSG, "fastsim");
+}
+
+void
+SusyModule::loadBTagReader() {
 
   // setup calibration readers
   string filename=(string) getenv("MPAF") + "/workdir/database/BTagSF_CSVv2_25ns.csv";
@@ -729,22 +757,28 @@ SusyModule::cleanJets(CandList* leptons,
   for(size_t it=0;it<jetTypes.size();it++) {
     string jType=jetTypes[it];
     
-    for(int ij=0;ij<_vc->get("n"+jType);ij++) {
-      if(_vc->get(jType+"_id",ij)<1) continue;
-      
-      float scale=0.;
-      if(isJESVar) {
-	scale = _dbm->getDBValue("jes", _vc->get(jType+"_eta", ij), _vc->get(jType+"_pt", ij) );
-	scale = ((SystUtils::kUp==dir)?1:(-1))*scale;
-      }
+    string ext="";
+    if(isJESVar) {
+      ext=((SystUtils::kUp==dir)?"_jecUp":"_jecDown");
+    }
 
-    Candidate* jet=Candidate::create(_vc->get(jType+"_pt", ij)*(1+scale),
-				       _vc->get(jType+"_eta", ij),
-				       _vc->get(jType+"_phi", ij) );
+    for(int ij=0;ij<_vc->get("n"+jType+ext);ij++) {
+      if(_vc->get(jType+ext+"_id",ij)<1) continue;
+      
+      // float scale=0.;
+      // if(isJESVar) {
+      // 	scale = _dbm->getDBValue("jes", _vc->get(jType+"_eta", ij), _vc->get(jType+"_pt", ij) );
+      // 	scale = ((SystUtils::kUp==dir)?1:(-1))*scale;
+      // }
+    
+
+      Candidate* jet=Candidate::create(_vc->get(jType+ext+"_pt", ij),
+				       _vc->get(jType+ext+"_eta", ij),
+				       _vc->get(jType+ext+"_phi", ij) );
 
       jets.push_back(jet);
-      bvals.push_back( _vc->get(jType+"_btagCSV",ij)<0.890 );//0.814
-      tmpIdxs.push_back(make_pair(jType, ij));
+      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.890 );//0.814
+      tmpIdxs.push_back(make_pair(jType+ext, ij));
     }
   }
 
@@ -894,8 +928,10 @@ float
 SusyModule::bTagSF(CandList& jets , 
 		   vector<pair<string, unsigned int> >& jetIdx,
                    CandList& bJets, 
-		   vector<pair<string, unsigned int> >& bJetIdx, int st){
+		   vector<pair<string, unsigned int> >& bJetIdx, int st, 
+		   bool fastSim, int fsst){
   // put st = -1 / 0 / +1 for down / central / up
+  // put fsst = -1 / 0 / +1 for down / central / up for fast-fullSim CF
 
   float pdata = 1.0;
   float pmc   = 1.0;
@@ -909,18 +945,25 @@ SusyModule::bTagSF(CandList& jets ,
     for(unsigned int iv=0;iv<bJets.size();iv++) {
       if(jetIdx[i].first==bJetIdx[iv].first && jetIdx[i].second==bJetIdx[iv].second) { find=true; break;}
     }
+
+    float fsSF=1.;
+    if(fastSim) fsSF=bTagMediumScaleFactorFastSim(jets[i], flavor, fsst);
+    // cout<<fsSF<<endl;
+      //fsSF=1;
+
     if(find){
       pdata*=bTagMediumEfficiency(jets[i], flavor) * 
-	bTagMediumScaleFactor(jets[i], flavor, st);
-      pmc*=bTagMediumEfficiency(jets[i], flavor);
+	bTagMediumScaleFactor(jets[i], flavor, st)*fsSF;
+      pmc*=bTagMediumEfficiency(jets[i], flavor)*fsSF;
     }
     else {
       pdata*=(1-bTagMediumEfficiency(jets[i], flavor) * 
-	      bTagMediumScaleFactor(jets[i], flavor, st));
-      pmc*=(1-bTagMediumEfficiency(jets[i], flavor));
+	      bTagMediumScaleFactor(jets[i], flavor, st)*fsSF);
+      pmc*=(1-bTagMediumEfficiency(jets[i], flavor)*fsSF);
     }
   }
 
+  //cout<<"pd " <<pdata<<"  "<<pmc<<endl;
   if(pmc != 0) return pdata/pmc;
   return 1.0;
 
@@ -974,7 +1017,40 @@ SusyModule::bTagMediumScaleFactor(Candidate* jet, unsigned int flavor, int st){
     else             reader = _reader_l_do;
   }
  
-  float sf = reader->eval(fl, jet -> eta(), std::max((float)30.,jet->pt()));
+  
+  float sf = reader->eval(fl, jet -> eta(), std::max((float)30.,std::min((float)669.,jet->pt())));
+  return sf;
+
+} 
+
+float
+SusyModule::bTagMediumScaleFactorFastSim(Candidate* jet, unsigned int flavor, int st) {
+
+  BTagCalibrationReader* reader = nullptr;
+  BTagEntry::JetFlavor fl = BTagEntry::FLAV_UDSG;
+  
+  // mujets for b jets
+  if(flavor == 0){
+    fl = BTagEntry::FLAV_B;
+    if     (st == 0) reader = _readerFS_b_cv;
+    else if(st == 1) reader = _readerFS_b_up;
+    else             reader = _readerFS_b_do;
+  }
+  // mujets for c jets
+  else if(flavor == 1){
+    fl = BTagEntry::FLAV_C;
+    if     (st == 0) reader = _readerFS_c_cv;
+    else if(st == 1) reader = _readerFS_c_up;
+    else             reader = _readerFS_c_do;
+  }
+  // comb for light jets
+  else {
+    if     (st == 0) reader = _readerFS_l_cv;
+    else if(st == 1) reader = _readerFS_l_up;
+    else             reader = _readerFS_l_do;
+  }
+ 
+  float sf = reader->eval(fl, jet -> eta(), std::max((float)30.,std::min((float)799.,jet->pt())));
   return sf;
 
 } 
@@ -982,10 +1058,9 @@ SusyModule::bTagMediumScaleFactor(Candidate* jet, unsigned int flavor, int st){
 
 float
 SusyModule::bTagPt(float rawPt){
-
+  if(rawPt>600) return 600;
   if(rawPt < 30) return 30;
   return rawPt;
-
 }
 
 
@@ -1916,4 +1991,176 @@ SusyModule::LTFastSimTriggerEfficiency(double HT, double l1_Pt, int l1_pdgId, do
   return 0;
 }
 
+
+float
+SusyModule::getVarWeightFastSimLepSF(const Candidate* l1, 
+				     const Candidate* l2, int dir) {
+
+  float unc=1;
+  if(std::abs(l1->pdgId())==11) {
+    if(l1->pt()<20) unc+=0.10*dir;
+    else if(l1->pt()<30) unc+=0.10*dir;
+    else if(l1->pt()<200) unc+=0.05*dir;
+  }
+  if(std::abs(l1->pdgId())==13) {
+    if(l1->pt()<20) unc+=0.10*dir;
+    else if(l1->pt()<30) unc+=0.03*dir;
+    else if(l1->pt()<200) unc+=0.03*dir;
+  }
+  
+  float unc2=1;
+  if(std::abs(l2->pdgId())==11) {
+    if(l2->pt()<20) unc2+=0.10*dir;
+    else if(l2->pt()<30) unc2+=0.10*dir;
+    else if(l2->pt()<200) unc2+=0.05*dir;
+  }
+  if(std::abs(l2->pdgId())==13) {
+    if(l2->pt()<20) unc2+=0.10*dir;
+    else if(l2->pt()<30) unc2+=0.03*dir;
+    else if(l2->pt()<200) unc2+=0.03*dir;
+  }
+  
+  return unc*unc2;
+
+}
+
+float 
+SusyModule::getPuWeight(unsigned int nvtx) {
+  if(nvtx>_puWeights.size()-1) return 1;
+  return _puWeights[nvtx];
+}
+
+void
+SusyModule::initPUWeights() {
+
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(3.153000427291265);
+  _puWeights.push_back(2.4535501340758543);
+  _puWeights.push_back(2.353696182351581);
+  _puWeights.push_back(2.3718057802881676);
+  _puWeights.push_back(2.3508262193470397);
+  _puWeights.push_back(2.291773427755106);
+  _puWeights.push_back(2.129929297304804);
+  _puWeights.push_back(1.9422796094930384);
+  _puWeights.push_back(1.7126175249202766);
+  _puWeights.push_back(1.4622401225778663);
+  _puWeights.push_back(1.2063711142884181);
+  _puWeights.push_back(0.9608504360968657);
+  _puWeights.push_back(0.7484941355600901);
+  _puWeights.push_back(0.5769889517104192);
+  _puWeights.push_back(0.4315759540480359);
+  _puWeights.push_back(0.3195820162866148);
+  _puWeights.push_back(0.2306052595765186);
+  _puWeights.push_back(0.1691819686464576);
+  _puWeights.push_back(0.12324466445693416);
+  _puWeights.push_back(0.08833641123547825);
+  _puWeights.push_back(0.06306193566475429);
+  _puWeights.push_back(0.047857788612281564);
+  _puWeights.push_back(0.034655984107483044);
+  _puWeights.push_back(0.02358209210941948);
+  _puWeights.push_back(0.019535383939466185);
+  _puWeights.push_back(0.01500976654907348);
+  _puWeights.push_back(0.009407396052837736);
+  _puWeights.push_back(0.006332906010381258);
+  _puWeights.push_back(0.008524617116368491);
+  _puWeights.push_back(0.003145186350322339);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.006930381551001214);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(0.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(1.0);
+  _puWeights.push_back(1.0);
+
+}
+
+
+
+void
+SusyModule::applyISRWeight(unsigned int process, int var, float& weight) {
+  // process = 0 (gluino-gluino production)
+  // var = 0 (central), -1 (down), +1 (up)
+
+  CandList collection;
+  if(process==0) collection = collectGenParticles(1000021, 3);
+  //cout<<" number of gluinos "<<collection.size()<<endl;
+  if(collection.size()!=2) return;
+
+  Candidate* cand=Candidate::create(collection[0],collection[1]);
+
+  // Candidate* cand=collection[0];
+  // for(unsigned int i=1;i<collection.size(); ++i)
+  //   //pt += collection[i] -> pt();
+  //   cand = Candidate::create(collection[i],cand);
+
+  float pt=cand->pt();
+  isrWeight(var, pt, weight);
+
+}
+
+
+void
+SusyModule::isrWeight(int var, float pt, float& weight){
+  // var = 0 (central), -1 (down), +1 (up)
+
+  // down variation
+  if(var == -1){
+    if     (pt > 600) weight *= 0.7;
+    else if(pt > 400) weight *= 0.85;
+  }
+
+  // up variation
+  else if(var == 1){
+    if     (pt > 600) weight *= 1.3;
+    else if(pt > 400) weight *= 1.15;
+  }
+
+  // central value
+  // else {
+  // }
+
+}
+
+
+CandList
+SusyModule::collectGenParticles(int pdgId, int status){
+
+  CandList list;
+  //cout<<_vc->get("nGenPart")<<endl;
+  for(unsigned int i = 0; i < _vc->get("nGenPart"); ++i){
+    //    cout<<(int)_vc->get("GenPart_pdgId")<<"   "<<pdgId<<"   "<<(std::abs(_vc->get("GenPart_pdgId")) == pdgId)<<"   "<<_vc->get("GenPart_pt"    , i)<<"   "<<_vc->get("GenPart_eta"    , i)<<"  "<<_vc->get("GenPart_status")<<endl;
+    if(std::abs(_vc->get("GenPart_pdgId",i)) == pdgId)// &&
+       //_vc->get("GenPart_status",i) == status)
+      list.push_back(Candidate::create(_vc->get("GenPart_pt"    , i), 
+                                       _vc->get("GenPart_eta"   , i),
+                                       _vc->get("GenPart_phi"   , i),
+				       _vc->get("GenPart_pdgId"   , i),
+				       _vc->get("GenPart_charge", i),
+				       _vc->get("GenPart_mass"  , i)
+				       ));
+  }
+  return list;
+}
 

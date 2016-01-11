@@ -35,7 +35,7 @@ __dummy := $(shell mkdir -p $(OBJDIR) $(DEPDIR) $(BINDIR) $(SOLIBDIR))
 CXX        := g++
 LD         := g++
 OUTPUTOPT  := -o
-OPTFLAGS   := -g -O2 -Wall -fPIC -Wno-deprecated
+OPTFLAGS   := -g -O2 -Wall -fPIC -Wno-deprecated -std=c++11
 CXXFLAGS   := $(OPTFLAGS)
 LDFLAGS    := -shared
 LIBS       := -L$(MPAFTools)/lib -lMPAFTools
@@ -70,7 +70,7 @@ CXXFLAGS   += -I. -I.. $(patsubst %, -I%, $(MODULES))
 ### External libraries
 # ROOT
 ROOTCFLAGS := $(shell root-config --cflags)
-ROOTGLIBS  := $(shell root-config --glibs) -lMinuit -lMinuit2 -lHtml -lEG -lThread -lRooFit -lRooFitCore -lFoam
+ROOTGLIBS  := $(shell root-config --glibs) -lMinuit -lMinuit2 -lHtml -lEG -lThread -lRooFit -lRooFitCore -lFoam -lHistPainter
 
 # add possible new dependencies
 # -lMinuit2
