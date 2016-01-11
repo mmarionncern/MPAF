@@ -1398,7 +1398,7 @@ DisplayClass::drawDataMCRatio() {
   //if(_empty!=nullptr) emptyHisto=(TH1*)_empty->Clone();
   emptyHisto->Reset("ICEM");
 
-  TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC );
+  TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC, _mcOnly );
   ratio->SetName( ("ratio") );
  
   for(int ib=0;ib<emptyHisto->GetNbinsX()+2;ib++)
@@ -1587,16 +1587,16 @@ DisplayClass::ratioObservables(vector<const hObs*> theObs) {
   // compute the ratios ===================
   TGraphAsymmErrors* ratioData(0);
   if(!_mcOnly) {
-    ratioData = HistoUtils::ratioHistoToGraph(numHD, _hData,"nP");
+    ratioData = HistoUtils::ratioHistoToGraph(numHD, _hData,false,"nP");
     ratioData->SetName("ratioData");
   }
 
-  TGraphAsymmErrors* ratioMC = HistoUtils::ratioHistoToGraph(numHMc, _hMC,"");
+  TGraphAsymmErrors* ratioMC = HistoUtils::ratioHistoToGraph(numHMc, _hMC,false,"");
   ratioMC->SetName("ratioMC");
   
   vector<TGraphAsymmErrors*> ratioClones;
   for(size_t ii=0;ii<_hClones.size();ii++) {
-    ratioClones.push_back( HistoUtils::ratioHistoToGraph(numHClones[ii], _hClones[ii] ,"") );
+    ratioClones.push_back( HistoUtils::ratioHistoToGraph(numHClones[ii], _hClones[ii] ,false,"") );
 
     _itCol = _colors.find( _names[_nhmc-ii-1] );
 
@@ -2100,7 +2100,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
   
   size_t idat=(_mcOnly)?-1:( vals[0].second.size()-1);
   if(isMultiScheme) { //overwrite the data plot -> means we have two parallel scheme to look at in MC
-    if(idat!=-1) {
+    if(idat!=(size_t)-1) {
       for(size_t ic=0;ic<nVals;ic++) {
 	vals[ic].second[0][0]["tot"] = vals[ic].second[idat][0]["tot"]; 
 	vals[ic].second[0][1]["tot"] = vals[ic].second[idat][1]["tot"]; 
@@ -2465,8 +2465,11 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
 	if(ib==0 && _uncDet) {
 	  _uncNames[iv] = (*itS).first;
 	}
-      }
 
+	// if(ib==1)
+	//   cout<<"  "<<(*itS).first<<"  "<<_hMC->GetBinContent(ib)<<"  "<<sU<<"  "<<sD<<" // "<<systU[iv]<<"  "<<systD[iv]<<endl;
+      }
+      
       if(_uncDet) nu++;
     } //asym
     
@@ -2520,7 +2523,10 @@ DisplayClass::drawDetailSystematics(bool cumul) {
 
   computeSystematics(_isProf, cumul);
 
-  TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC );
+  if(_mcOnly)
+    _hData = (TH1F*)_hMC->Clone();
+
+  TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC, _mcOnly,"" );
   
   TH1F* emptyHisto = (TH1F*)_hMC->Clone();
   emptyHisto->Reset("ICEM");
@@ -2615,7 +2621,7 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   emptyHisto->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   emptyHisto->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
   emptyHisto->GetXaxis()->SetTitle( Xtitle.c_str() );
-  emptyHisto->GetYaxis()->SetTitle( "Data/MC" );
+  emptyHisto->GetYaxis()->SetTitle( (_mcOnly?("#DeltaN/N "):("Data/MC") ) );
   emptyHisto->GetXaxis()->SetTitleSize(0.11);
   emptyHisto->GetXaxis()->SetTitleOffset(0.70);
   emptyHisto->GetXaxis()->SetLabelSize(0.09);
@@ -2631,7 +2637,7 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   ratio->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   ratio->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
   ratio->GetXaxis()->SetTitle( Xtitle.c_str() );
-  ratio->GetYaxis()->SetTitle( "Data/MC" );
+  ratio->GetYaxis()->SetTitle( (_mcOnly?("#DeltaN/N "):("Data/MC") ) );
   ratio->GetXaxis()->SetTitleSize(0.12);
   ratio->GetXaxis()->SetTitleOffset(0.72);
   ratio->GetXaxis()->SetLabelSize(0.09);
@@ -2650,7 +2656,7 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   }
 
   TLine* line=new TLine(_xmin,1,_xmax,1);
-  line->SetLineColor(kRed+1);
+  line->SetLineColor(kGray+3);
   line->SetLineStyle(7);
   line->SetLineWidth(2);
 
@@ -2668,7 +2674,7 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   legSyst->SetFillColor(0);
   legSyst->SetShadowColor(0);
   
-  legSyst->AddEntry(ratio,"data/MC","pl");
+  legSyst->AddEntry(ratio, (_mcOnly?("stat."):("data/MC") ),"pl");
   
   int iui=0;
   for(int iu=0;iu<(int)sysBand.size();iu++) {

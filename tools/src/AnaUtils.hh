@@ -189,7 +189,9 @@ public:
   vector< pair<string, vector<vector<map<string,float> > > > > 
   retrieveNumbers(string categ, string cname, int mcat, string opt="");
   
-  bool getDataCardLines(map<string,string>& lines, vector<string> dsNames,
+  bool getDataCardLines(map<string,string>& lines, 
+			shapeM& shapes, 
+			vector<string> dsNames,
 			string sigName,	string categ, string cname, int bin,
 			map<string,vector<string> > intNuisPars,
 			map<string,bool > nuisParExt,
@@ -219,9 +221,11 @@ public:
   //int getUncWorkflow(string wf);
 
   int getCategId(string categ);
+  int getCategUniqueId(string categ, string uncTag);
   int getNCateg() {return _categories.size(); };
-  //vector<string> getCategories();
-  //vector<string> getSelections(int ids, int icat);
+  vector<string> getCategories();
+  vector<string> getSelections(int ids, int icat);
+  bool isUncCateg(int catId);
 
 private:
 

@@ -28,6 +28,7 @@
 #include <TBits.h>
 #include <TChain.h>
 #include <TLeaf.h>
+#include <TBranch.h>
 
 #include "tools/src/SystUtils.hh"
 
@@ -288,6 +289,12 @@ public:
   ~VarClass();
 	
   void reset();
+
+  void setEvent(int ie) {
+    _ie=ie;
+    for(map<int,bool>::iterator it=_loaded.begin();it!=_loaded.end();it++)
+      it->second = false;
+  };
 	
   void registerVar(string name);
   void registerVar(string name, string type);
@@ -342,7 +349,7 @@ private:
   double findValue(int id, int idx);
   void initIds();
 
-  void setIds(string name, int cont, int type, int& id);
+  void setIds(string name, int cont, int type, int& id, TTree* tree);
 
   double findSVal(int tType, int key);
   double findVVal(int tType, int key, int idx);
@@ -388,7 +395,13 @@ private:
      kNConts=4
    };
   //static string objectType[VarClass::kNTypes];
-  
+
+  //event number
+  int _ie;
+  map<int,TBranch*> _branches;
+  map<int,bool> _loaded;
+
+
   //mapping names-ids
   static int oC_;
   static int oT_;

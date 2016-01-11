@@ -149,8 +149,9 @@ void MPAF::analyze(){
       _au->setCurrentWorkflow(_curWF);
 
       // get tree entry, i.e. load branches
-      _datasets[i]->getTree()->GetEntry(_ie);
-      
+      //_datasets[i]->getTree()->GetEntry(_ie);
+      _vc->setEvent(_ie);
+
       // get event weight, PU reweight it if needed 
       modifyWeight();
       
@@ -461,10 +462,10 @@ void MPAF::fill(string var, float valx, float weight) {
     }
     else {
       if(_uDir==SystUtils::kUp)
-	_hm->fill( var, _unc, valx, weight,"Up");
+	_hm->fill( var, _inds, _unc, valx, weight,"Up");
       //fillUnc(var,_unc,valx,weight,"Up");
       if(_uDir==SystUtils::kDown)
-	_hm->fill( var, _unc, valx, weight,"Do");
+	_hm->fill( var, _inds, _unc, valx, weight,"Do");
       //fillUnc(var,_unc,valx,weight,"Do");
     }
   }
@@ -474,10 +475,10 @@ void MPAF::fill(string var, float valx, float weight) {
     }
     else {
       if(_uDir==SystUtils::kUp)
-	_hm->fill( var, _unc, valx, weight,"Up");
+	_hm->fill( var, _inds, _unc, valx, weight,"Up");
       //fillUnc(var,_unc,valx,weight,"Up");
       if(_uDir==SystUtils::kDown)
-	_hm->fill( var, _unc, valx, weight,"Do");
+	_hm->fill( var, _inds, _unc, valx, weight,"Do");
     }
   }
 
@@ -522,11 +523,11 @@ void MPAF::fillUnc(string var, string unc, float val, float weight, string dir) 
   if(_isData) return;
 
   if(_curWF!=-100) { //single workflow
-    _hm->fill( var+_wfNames[_curWF], unc, val, weight,dir);
+    _hm->fill( var+_wfNames[_curWF], _inds, unc, val, weight,dir);
   }
   else { //multiple workflows
     for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
-      _hm->fill( var+_itWF->second, unc, val, weight,dir);
+      _hm->fill( var+_itWF->second, _inds, unc, val, weight,dir);
     }
   }
 }

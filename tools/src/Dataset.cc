@@ -147,15 +147,19 @@ int
 Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
   string p= string(getenv ("MPAF"))+"/workdir";
   string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
+  if(dir=="") NameF = p+"/"+path+"/"+fileName+".root";
   if(path.find("psi.ch")!=(size_t)-1) {
     if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
     NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
   }
-  else if(path.find(":")!=(size_t)-1) 
+  else if(path.find(":")!=(size_t)-1)  {
+    if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);   
     NameF=path+"/"+fileName+".root";
+  }
   if(dir.find("psi.ch")!=(size_t)-1)
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
 
+  cout<<NameF<<endl;
   TFile* file = TFile::Open( NameF.c_str() );
   if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hname.c_str() );
@@ -180,10 +184,14 @@ Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtnam
     if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
     NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
   }
-  else if(path.find(":")!=(size_t)-1) NameF=path+"/"+fileName+".root";
+  else if(path.find(":")!=(size_t)-1)  {
+    if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
+    NameF=path+"/"+fileName+".root";
+  }
   if(dir.find("psi.ch")!=(size_t)-1)
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
   
+  cout<<NameF<<endl;
   TFile* file = TFile::Open( NameF.c_str() );
   if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hwgtname.c_str() );
@@ -298,6 +306,7 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
   if(dir.find("psi.ch")!=(size_t)-1)
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+sname+".root";
 
+  cout<<NameF<<endl;
   datafile = TFile::Open(NameF.c_str());
   if(datafile==nullptr) { 
     cout<<" No such file "<<sname<<endl; return;
@@ -346,7 +355,7 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
   if(path.find(":")!=(size_t)-1) NameF=dir+"/"+filename+".root";
   if(dir.find("psi.ch")!=(size_t)-1)
     NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+filename+".root";
-
+  
   datafile = TFile::Open(NameF.c_str());
 
   if(datafile==nullptr) {cout<<"warning, unable to load histograms"<<endl; return;}
@@ -364,10 +373,20 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
     string varName(obj->GetName());
     map<string, TH1*> tmp;
     
-    if(_usefulVars.size()!=0 && 
-       find(_usefulVars.begin(), _usefulVars.end(), varName)==_usefulVars.end() &&
-       find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() ) continue;
+    bool find=false;
+    for(size_t i=0;i<_usefulVars.size();i++) {
+      if(_usefulVars[i]==varName ||
+	 _usefulVars[i]==varName+optCat ||
+	 varName.find(_usefulVars[i]+"Unc")!=string::npos) {
+	find=true; break;
+      }
+    }
 
+    if(_usefulVars.size()!=0 && !find) continue; 
+       // find(_usefulVars.begin(), _usefulVars.end(), varName)==_usefulVars.end() &&
+       // find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() &&
+       // !findUnc ) continue;
+    
 
     if(optCat!="") {
       size_t op=varName.find(optCat);

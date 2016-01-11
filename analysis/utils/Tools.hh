@@ -38,6 +38,13 @@ namespace Tools {
 
 	// Non-template members
 
+    float add(const std::vector<std::string>);
+    float subtract(const std::vector<std::string>);
+    std::vector<std::string> split(const std::string, char);
+	std::vector<float> strToFloat(const std::vector<std::string>);
+    float evalSimpleFormula(std::string);
+    std::string trim(std::string, std::string chr = " ");
+
 	float AngleAddition(float, float);
 	float AngleSubtraction(float, float);
 	bool checkDirWritePermission(std::string);
@@ -45,13 +52,15 @@ namespace Tools {
 	bool compareSL(const SortableLep & i, const SortableLep & j);
 	float dPhi(float, float);
 	float dR(float, float, float, float);
-        float dR2(float, float, float, float);
+    float dR2(float, float, float, float);
 	int execCmd(std::string);
 	std::vector<std::string> explodeString(std::string, std::string);
 	TDirectory * findOrCreateTDir(TString&, TFile*);
 	std::string getTimestamp();
 	std::string getTimestampDir();
+    std::vector<std::string> insertIntoVectorS(std::vector<std::string> vector, std::vector<std::string> append);
 	float interpretCut(TString);
+	std::string intToString(int);
 	std::string replace(std::string, std::string, std::string);
 	float toFloat(std::string);
 	RunMode toRunMode(std::string);
@@ -63,7 +72,7 @@ namespace Tools {
 	TString toTString(std::string);
 	VerbosityLevel toVerbosityLevel(std::string);
 
-
+ 
 
 	int countOccurrences(std::string, std::string, size_t = 0, size_t = -1);
 	std::string joinStrings(std::vector<std::string>, std::string);
@@ -97,6 +106,20 @@ namespace Tools {
 
 
 	// Template members
+
+ 
+	//____________________________________________________________________________
+    template<typename KeyType, typename ValueType> std::vector<ValueType> insertIntoVector(std::vector<ValueType> vector, std::vector<ValueType> append){
+
+      for(unsigned int i = 0; i < append.size(); ++i){
+        if(std::find(vector.begin(), vector.end(), append[i]) == vector.end())
+          vector.push_back(append[i]);
+      }
+
+      return vector;
+
+    }
+
 
 	//____________________________________________________________________________
 	template<typename KeyType, typename ValueType> bool findInMapByKey(std::map<KeyType, ValueType> map, KeyType element){

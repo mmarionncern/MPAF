@@ -271,7 +271,6 @@ void SUSY3L::initialize(){
 
 
 
-
 }
 
 
@@ -283,10 +282,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    if (_vc->get("isData") != 1){
-        _weight *= _vc->get("genWeight");
-        _weight *= _vc->get("vtxWeight");
-    }
+    //if (_vc->get("isData") != 1){
+    //    _weight *= _vc->get("genWeight");
+    //    _weight *= _vc->get("vtxWeight");
+    //}
 
 }
 
@@ -508,7 +507,6 @@ void SUSY3L::collectKinematicObjects(){
     */
   
     // clear object category vectors from previous event
-
     _taus.clear();
     _tauIdx.clear();
     
@@ -617,6 +615,36 @@ void SUSY3L::collectKinematicObjects(){
         _fakableNotTightLepsPtCut.push_back( _looseLepsPtCut[il] );
         _fakableNotTightLepsPtCutIdx.push_back( _looseLepsPtCutIdx[il] );
     } 
+ 
+    //intermediate choice for RA7 sync
+    //select leptons for jet cleaning using a tigher fakable object selection, no pt requirement
+    //for(size_t il=0;il<_looseLeps.size();il++){
+    //    if(!fakableLepton(_looseLeps[il], _looseLepsIdx[il], _looseLeps[il]->pdgId(), true)) continue;
+    //    _jetCleanLeps10.push_back( _looseLeps[il] );
+    //    _jetCleanLeps10Idx.push_back( _looseLepsIdx[il] );
+    //} 
+
+    //fakable-not-tight leptons
+    for(size_t il=0;il<_looseLepsPtCorrCutVeto.size();il++) {
+        if(tightLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il], _looseLepsPtCorrCutVeto[il]->pdgId())) continue;
+        if(!fakableLepton(_looseLepsPtCorrCutVeto[il], _looseLepsPtCorrCutVetoIdx[il], _looseLepsPtCorrCutVeto[il]->pdgId(),false)) continue; //not a fakable object
+        _fakableLepsPtCutVeto.push_back(_looseLepsPtCorrCutVeto[il]);
+        _fakableLepsPtCutVetoIdx.push_back(_looseLepsPtCorrCutVetoIdx[il]);
+    }
+
+    //tight lepton without Z selection
+    for(size_t il=0;il<_looseLepsPtCut.size();il++) {
+        if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId()))  continue;
+        _tightLepsPtCut.push_back(_looseLepsPtCut[il]);
+        _tightLepsPtCutIdx.push_back(_looseLepsPtCutIdx[il]);
+    }
+
+    //tight leptons with low mll veto
+    for(size_t il=0;il<_tightLepsPtCut.size();il++) {
+        if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        _tightLepsPtCutMllCut.push_back(_tightLepsPtCut[il]);
+        _tightLepsPtCutMllCutIdx.push_back(_tightLepsPtCutIdx[il]);
+    }
 
     //fakable-not-tight leptons, pt corrected
     for(size_t il=0;il<_looseLepsPtCorrCut.size();il++) {
@@ -1364,6 +1392,48 @@ bool SUSY3L::ttbarSelection(){
   
     return true;
 }
+
+//____________________________________________________________________________
+void SUSY3L::categorize(){
+    /*
+        switch to correct workflow if event is categorized to respective signal region
+        parameters: none
+        return: none
+    */
+
+    int offset=1;
+    string categ="";
+    for(size_t ic=0;ic< _categs.size();ic++){
+        _SR = _categs[ic];
+        if(testRegion() ) {setWorkflow(ic+offset); return;}
+    }
+    cout << "WARNING Baseline event not categorized. NJets/NBJets/HT/MET " << _nJets << " " << _nBJets << " " << _HT << " " << _metPt << endl;
+    setWorkflow(kGlobal);
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L::testRegion(){
+    /*
+        categroizes events into signal regions defined in setSignalRegion()
+        parameters: none
+        return: none
+    */
+
+    bool passSel=true;
+
+    for(size_t is=0;is<_sels[_SR].size();is++) {
+        passSel=true;
+        for(size_t ii=0;ii<_sels[_SR][is].size();ii++) {
+            if(!_au->simpleCut<float>( (*(_val[_sels[_SR][is][ii][0] ])) , atof(_sels[_SR][is][ii][2].c_str() ), _sels[_SR][is][ii][1], atof(_sels[_SR][is][ii][3].c_str()) ) ) 
+                {passSel=false;break;}
+        }    
+    }
+    if(passSel) return true;
+
+    return false;
+}                               
+
 
 
 //____________________________________________________________________________

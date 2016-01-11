@@ -501,7 +501,7 @@ void HistoManager::fill(string var, int ds, float valx, float valy, float weight
 
 
 //____________________________________________________________________________
-void HistoManager::fill(string var, string type, float value, float weight, string dir) {
+void HistoManager::fill(string var, int ds, string type, float value, float weight, string dir) {
   /*
     fills a variable (var) of type (type) with value (value) that has a weight (weight)
     parameters: var, type (possible values??), value, weight, dir (direction of uncertainty, possible values??)
@@ -516,22 +516,25 @@ void HistoManager::fill(string var, string type, float value, float weight, stri
 
   else {
 	  
-    string nameH = var + "Unc" + type + dir;
+    string nameH=var + "Unc" + type + dir;
 		
     _itVar = _variables.find(nameH);
     if( _itVar == _variables.end() ) {
+
+      bool isGbl=_variables[var].IsGlobal();
+
       if( _cItVar->second.binsX.size() == 2) {
 	addVariable(nameH, _cItVar->second.nBX, _cItVar->second.binsX[0], _cItVar->second.binsX[1],
-		    _cItVar->second.titleX, (_cItVar->second.htype.find("P") != (size_t) -1), "u");
+		    _cItVar->second.titleX, isGbl, (_cItVar->second.htype.find("P") != (size_t) -1), "u");
       }
       else {
 	addVariable(nameH, _cItVar->second.nBX, _cItVar->second.binsX, 
-		    _cItVar->second.titleX, (_cItVar->second.htype.find("P") != (size_t) -1), "u");
+		    _cItVar->second.titleX, isGbl, (_cItVar->second.htype.find("P") != (size_t) -1), "u");
       }
       //and point to the good object
       _itVar = _variables.find(nameH);
     }
-    _itVar->second.hs[0]->Fill(value, weight);
+    _itVar->second.hs[ds]->Fill(value, weight);
   }
   
 }

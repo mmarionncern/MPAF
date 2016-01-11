@@ -153,10 +153,11 @@ public:
   void addDataCardSample(string sName, string dsName, float w=1);
   void addDataCardSigSample(string sName, string dsName, float w=1);
   void addNuisanceParameter(string npName, string dss, string scheme,  string vals) ;
+  void overwriteNuisanceParameter(string npName, string dss, string vals);
   vector<string> getExternalNuisanceParameters(string sigName);
   void makeSingleDataCard(string sigName, string categ, string cname, string cardName);
-
-  void overwriteNuisanceParameter(string npName, string dss, string vals);
+  void makeMultiDataCard(string sigName, vector<string> categs, 
+			 string cname, string cardname);
 
   ClassDef(MPAFDisplay,0)
 

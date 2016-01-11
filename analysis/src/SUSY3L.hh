@@ -70,7 +70,6 @@ private:
     float lowestOssfMll(CandList leps);
     void registerTriggerVars();
     bool passHLTbit();
-
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
@@ -84,8 +83,6 @@ private:
     string _SR;
     string _FR;
     int _fastSim;
-
-
 
 
 private:
