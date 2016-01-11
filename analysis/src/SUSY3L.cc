@@ -55,23 +55,20 @@ void SUSY3L::initialize(){
         return: none
     */
 
-    //triggers to be used
-    //double lepton triggers (isolated)
-    _hltLines.push_back("HLT_DoubleMu");
-    _hltLines.push_back("HLT_DoubleEl");
-    _hltLines.push_back("HLT_MuEG");
-    //double lepton triggers plus HT (non-isolated)
-    _hltLines.push_back("HLT_DoubleMuHT");
-    _hltLines.push_back("HLT_DoubleElHT");
-    //tri-lepton triggers
-//    _hltLines.push_back("HLT_TripleEl");
-//    _hltLines.push_back("HLT_TripleMu");
-//    _hltLines.push_back("HLT_DoubleMuEl");
-//    _hltLines.push_back("HLT_DoubleElMu");
-    //single lepton triggers (not used in RA7 at the moment)
-    //_hltLines.push_back("HLT_SingleMu");
-    //_hltLines.push_back("HLT_SingleEl");
-
+    //trigger bits (i.e. decitions of each individual HLT line, in contrast to prcessed OR of a set of lines)
+    //non-isolated triggers
+    _vTR_lines.push_back("HLT_BIT_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_DoubleMu8_Mass8_PFHT300_v");
+    //isolated triggers
+    _vTR_lines.push_back("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");  
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");  
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    
+    //register HLT trigger bit tree variables 
+    registerTriggerVars();
 
     //event characteristics
     _vc->registerVar("run"                             );    //run number
@@ -224,6 +221,7 @@ void SUSY3L::initialize(){
     _FR = getCfgVarS("FR" , "FO2C"); 
     _categorization = getCfgVarI("categorization", 1);
     _doValidationPlots = getCfgVarI("doValidationPlots", 0);
+    _fastSim = getCfgVarI("FastSim", 0);
 
     //FR databases
     if(_FR=="FO2C") {
@@ -300,7 +298,9 @@ void SUSY3L::run(){
     counter("denominator");
 
     //check HLT trigger decition, only let triggered events pass
-    if(!passMultiLine(true, false)) return;
+    if(!_fastSim) {
+        if(!passHLTbit()) return;
+    }
     counter("HLT");
 
     //minimal selection and collection of kinematic variables
@@ -1117,18 +1117,22 @@ void SUSY3L::advancedSelection(int WF){
     
     counter("weighting");
 
-    //b-tag scale factors
+    //btag -scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
-            _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);
+            _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);//, _fastSim, 0);
             _weight *= _btagW;
         }
-    else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kUp )
-        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 1); 
-    else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kDown )
-        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1); 
-    else //other syst. variations
-        _weight *= _btagW;
+        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1);//, _fastSim); 
+        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1);//, _fastSim); 
+        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);//, _fastSim, 1); 
+        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);//, _fastSim, -1); 
+        else //other syst. variations
+            _weight *= _btagW;
     }
     counter("btag SF");
 
@@ -1568,7 +1572,7 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
                 if(cType==1) combType.push_back(kIsDoubleFake);
                 if(cType==2) combType.push_back(kIsSingleFake);
                 if(cType==3) {
-                    cout<<"WARNING:  a signal event is in the fake background application region! "<<endl;
+                    cout<<"WARNING: a signal event is in the fake background application region! "<<endl;
                 }
             } 
         }
@@ -1764,12 +1768,12 @@ void SUSY3L::fillValidationHistos(string reg){
     fill(reg+"_lep2_SIP3D"     , _vc->get("LepGood_sip3d", _idxL2)                  , _weight);
     
     fill(reg+"_MET"            , _vc->get("met_pt")                                 , _weight);
-    //fill(reg+"_htJet40j"       , _vc->get("htJet40j")                               , _weight);
+    fill(reg+"_htJet40j"       , _vc->get("htJet40j")                               , _weight);
     fill(reg+"_mZ1"            , _vc->get("mZ1")                                    , _weight);
-    //fill(reg+"_NBJetsLoose25"  , _vc->get("nBJetLoose25")                           , _weight);
-    //fill(reg+"_NBJetsMedium25" , _vc->get("nBJetMedium25")                          , _weight);
-    //fill(reg+"_NBJetsTight40"  , _vc->get("nBJetTight40")                           , _weight);
-    //fill(reg+"_NJets40"        , _vc->get("nJet40")                                 , _weight);
+    fill(reg+"_NBJetsLoose25"  , _vc->get("nBJetLoose25")                           , _weight);
+    fill(reg+"_NBJetsMedium25" , _vc->get("nBJetMedium25")                          , _weight);
+    fill(reg+"_NBJetsTight40"  , _vc->get("nBJetTight40")                           , _weight);
+    fill(reg+"_NJets40"        , _vc->get("nJet40")                                 , _weight);
     
 }  
 
@@ -1877,36 +1881,39 @@ void SUSY3L::sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx){
 
 
 //____________________________________________________________________________
-bool SUSY3L::passHLTLine(string line){
+void SUSY3L::registerTriggerVars(){
     /*
-        checks if the event has been triggerd by a specific HLT trigger line
-        parameters: trigger path
-        return: true (if event has been triggered), false (else)
+        register tree variables for trigger bits
+        parameters: none
+        return: none
     */
 
-    if(_vc->get(line)) return true;
-    else return false;
+    for(unsigned int i=0;i<_vTR_lines.size();++i) 
+        _vc->registerVar(_vTR_lines[i]);
 }
 
 
 //____________________________________________________________________________
-bool SUSY3L::passMultiLine(bool doubleOnly, bool isolatedOnly){
+bool SUSY3L::passHLTbit(){
     /*
         checks if the event has been triggerd by any of the HLT trigger lines
-        parameters: doubleOnly if only dilepton paths should be selected,
-        isolatedOnly if only isolated di-lepton paths should be selected
+        parameters: none
         return: true (if event has been triggered), false (else)
     */
 
-    for(size_t ih=0;ih<_hltLines.size();ih++) {
-        if(isolatedOnly && ih>2) continue;
-        if(doubleOnly && ih>5) continue;
-        if(passHLTLine(_hltLines[ih])) return true;
+    vector<string> lines;
+
+    lines = _vTR_lines;
+
+    for(unsigned int i = 0; i < lines.size(); ++i){
+        if(_vc->get(lines[i]) == 1) {
+            return true;
+        }
     }
 
     return false;
-}
 
+}
 
 
 

@@ -68,8 +68,8 @@ private:
     float getMT2();
     void sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx);
     float lowestOssfMll(CandList leps);
-    bool passMultiLine(bool doubleOnly, bool isolatedOnly);
-    bool passHLTLine(string line);
+    void registerTriggerVars();
+    bool passHLTbit();
 
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
@@ -83,6 +83,7 @@ private:
     string _BR;
     string _SR;
     string _FR;
+    int _fastSim;
 
 
 
@@ -208,6 +209,9 @@ private:
    
     float _jetThreshold;
     float _bjetThreshold;
+   
+    //HLT
+    vector<string> _vTR_lines;
     
     vector<string> _categs;
     bool _categorization;
