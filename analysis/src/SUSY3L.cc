@@ -223,7 +223,7 @@ void SUSY3L::initialize(){
     _BR = getCfgVarS("baselineRegion", "BR0");
     _FR = getCfgVarS("FR" , "FO2C"); 
     _categorization = getCfgVarI("categorization", 1);
-    _doValidationPlots = getCfgVarI("doValidationPlots", 1);
+    _doValidationPlots = getCfgVarI("doValidationPlots", 0);
 
     //FR databases
     if(_FR=="FO2C") {
@@ -232,8 +232,8 @@ void SUSY3L::initialize(){
         //_dbm->loadDb("ElIso"     , "file_fo04.root", "FRElPtCorr_UCSX_iso");
         //_dbm->loadDb("MuIso"     , "file_fo04.root", "FRMuPtCorr_UCSX_iso");
 
-        //_dbm->loadDb("ElNIsoMC"  , "file_fo04.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMC"  , "file_fo04.root", "FRMuPtCorr_qcd_non");
+        _dbm->loadDb("ElNIsoMC"  , "file_fo04_noemu.root", "FRElPtCorr_qcd_non");
+        _dbm->loadDb("MuNIsoMC"  , "file_fo04_noemu.root", "FRMuPtCorr_qcd_non");
         //_dbm->loadDb("ElIsoMC"   , "file_fo04.root", "FRElPtCorr_qcd_iso");
         //_dbm->loadDb("MuIsoMC"   , "file_fo04.root", "FRMuPtCorr_qcd_iso");
 
@@ -330,7 +330,8 @@ void SUSY3L::run(){
     if(wzSel){return;}	
   
     if(!baseSel){return;}
- 
+
+    /* 
     //b-tag scale factors
     if(!_vc->get("isData") ){
         if(!isInUncProc())  {
@@ -346,7 +347,8 @@ void SUSY3L::run(){
         _weight *= _btagW;
     }
     counter("btag SF"); 
-  
+    */
+
     //fillSkimTree();
 
     //signal event
@@ -439,11 +441,11 @@ void SUSY3L::defineOutput(){
         // event variables 
         _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
         _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]", false);
-        //_hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} [GeV]", false);
-        //_hm->addVariable(reg[r]+"_NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
-        //_hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
-        //_hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
-        //_hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
+        _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
+        _hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
+        _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
+        _hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
     }
 
  
@@ -836,7 +838,7 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    3, ">="  )  ;     //number of isolated leptons
+        setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
@@ -976,7 +978,7 @@ float SUSY3L::getFR(Candidate* cand, int idx) {
     //else db += "NIso";
 
     //distinguish data and mc
-    //if(_vc->get("isData")!=1) db +="MC";
+    if(_vc->get("isData")!=1) db +="MC";
 
     //if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
     //if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
@@ -1066,7 +1068,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     _isFake = false;
 
     //three or more tight leptons
-    if(_tightLepsPtCutMllCut.size()>=3){
+    if(_tightLepsPtCutMllCut.size()==3){
         counter("lepton multiplicity");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
@@ -1134,19 +1136,19 @@ void SUSY3L::advancedSelection(int WF){
     counter("weighting");
 
     //b-tag scale factors
-    if(!_vc->get("isData") ) {
-        if(!isInUncProc())  {
-            _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);
-            _weight *= _btagW;
-        }
-    else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kUp )
-        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 1); 
-    else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kDown )
-        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1); 
-    else //other syst. variations
-        _weight *= _btagW;
-    }
-    counter("btag SF");
+    //if(!_vc->get("isData") ) {
+    //    if(!isInUncProc())  {
+    //        _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);
+    //        _weight *= _btagW;
+    //    }
+    //else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kUp )
+    //    _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 1); 
+    //else if(isInUncProc() && getUncName()=="bTag" && getUncDir()==SystUtils::kDown )
+    //    _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1); 
+    //else //other syst. variations
+    //    _weight *= _btagW;
+    //}
+    //counter("btag SF");
 
     //require minimum number of jets
     if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
