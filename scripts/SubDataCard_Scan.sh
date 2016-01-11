@@ -16,7 +16,7 @@ N=0
 for i in `ls $MPAF/workdir/stats/SSDL2015/ssdlScan-*-*-.dat`; do
 #while [[ $N -lt ${#SIGS[*]} ]]; do
 
-tmp=${i#"/afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/workdir/stats/SSDL2015/ssdlScan"}
+tmp=${i#"/shome/mmarionn/MPAF/workdir/stats/SSDL2015/ssdlScan"}
 mass=${tmp%"-.dat"}
 bench=`echo $mass | tr "-" "_"`
 

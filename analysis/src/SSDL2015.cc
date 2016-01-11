@@ -626,12 +626,12 @@ SSDL2015::advancedSelection(int WF) {
 						    _l2Cand->pt(),
 						    _l2Cand->pdgId()); // trigger
       //lep1 SF * lep2 SF
-      _weight *= _susyMod -> getFastSimLepSF(_l1Cand, _l2Cand, _vc->get("nVert")); 
-      //uncertainties
-      if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
-	_weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, 1);
-      if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
-	_weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
+       _weight *= _susyMod -> getFastSimLepSF(_l1Cand, _l2Cand, _vc->get("nVert")); 
+       //uncertainties
+       if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
+       	_weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, 1);
+       if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
+       	_weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
     
     }
   }
