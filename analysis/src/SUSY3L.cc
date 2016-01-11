@@ -70,6 +70,10 @@ void SUSY3L::initialize(){
     //register HLT trigger bit tree variables 
     registerTriggerVars();
 
+    //event filters to remove detector artifacts
+    readCSCevents();
+    readEESCevents();
+
     //event characteristics
     _vc->registerVar("run"                             );    //run number
     _vc->registerVar("lumi"                            );    //lumi section number
@@ -132,6 +136,7 @@ void SUSY3L::initialize(){
     _vc->registerVar("Jet_muEF"                        );     //fraction of muon pt in jet
     _vc->registerVar("Jet_mass"                        );     //jet mass
     _vc->registerVar("Jet_rawPt"                       );
+    _vc->registerVar("Jet_mcFlavour"                   );
 
     //discarded jets (because of leptons cleaning)
     _vc->registerVar("nDiscJet"                        );
@@ -142,6 +147,7 @@ void SUSY3L::initialize(){
     _vc->registerVar("DiscJet_phi"                     );
     _vc->registerVar("DiscJet_mass"                    );
     _vc->registerVar("DiscJet_btagCSV"                 );
+    _vc->registerVar("DiscJet_mcFlavour"               );
 
     //forward jets
     _vc->registerVar("nJetFwd"                         );
@@ -179,7 +185,9 @@ void SUSY3L::initialize(){
     _vc->registerVar("hbheFilterNew25ns"               );
     _vc->registerVar("Flag_CSCTightHaloFilter"         );
     _vc->registerVar("Flag_eeBadScFilter"              );   
-    
+    _vc->registerVar("hbheFilterIso"                   );
+    _vc->registerVar("Flag_goodVertices"               );
+ 
     //weights
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
     _vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
@@ -295,6 +303,10 @@ void SUSY3L::run(){
 
     // increment event counter, used as denominator for yield calculation
     counter("denominator");
+
+    //event filter
+    if(!passNoiseFilters()) return;
+    counter("JME filters");
 
     //check HLT trigger decition, only let triggered events pass
     if(!_fastSim) {
@@ -1140,7 +1152,7 @@ void SUSY3L::advancedSelection(int WF){
     //btag -scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
-            _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0);//, _fastSim, 0);
+            _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
             _weight *= _btagW;
         }
         else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
@@ -1936,5 +1948,129 @@ bool SUSY3L::passHLTbit(){
 }
 
 
+//____________________________________________________________________________
+void SUSY3L::readCSCevents(){
+    /*
+        apply CSC event filter
+        parameters: none
+        return: true (if event passes filter), false (else)
+    */
 
+    string files[3] = {(string) getenv("MPAF") + "/workdir/database/eventlist_DoubleEG_csc2015.txt"  , \
+                     (string) getenv("MPAF") + "/workdir/database/eventlist_DoubleMuon_csc2015.txt", \
+                     (string) getenv("MPAF") + "/workdir/database/eventlist_MuonEG_csc2015.txt"    };
+    vector<string> f = Tools::toVector(files);
+    readFilteredEvents(_filteredCSCEvents, f);
+
+}
+
+//____________________________________________________________________________
+void SUSY3L::readEESCevents(){
+    /*
+        apply EESC event filter
+        parameters: none
+        return: true (if event passes filter), false (else)
+    */
+
+    string files[3] = {(string) getenv("MPAF") + "/workdir/database/eventlist_DoubleEG_ecalscn1043093.txt"  , \
+                     (string) getenv("MPAF") + "/workdir/database/eventlist_DoubleMuon_ecalscn1043093.txt", \
+                     (string) getenv("MPAF") + "/workdir/database/eventlist_MuonEG_ecalscn1043093.txt"    };
+    vector<string> f = Tools::toVector(files);
+    readFilteredEvents(_filteredEESCEvents, f);
+
+}
+
+
+//____________________________________________________________________________
+void SUSY3L::readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >& evts, vector<string> files){
+    /*
+        
+    */
+
+    for(unsigned int i = 0; i < files.size(); ++i){
+
+        string line;
+        ifstream fs(files[i].c_str());
+        if(!fs.is_open()) continue;
+
+        while(getline(fs, line)){
+      
+        vector<string> splitted = Tools::split(Tools::trim(line, "\n"), ':');
+        std::pair<int, unsigned long int> tmp(atoi(splitted[1].c_str()), strtoul(splitted[2].c_str(), NULL, 0));
+        std::pair<int, std::pair<int, unsigned long int> > tmp2(atoi(splitted[0].c_str()), tmp);
+        evts[ tmp2 ] = 0;
+        }
+        fs.close();
+    }
+
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L::passNoiseFilters(){
+    /*
+        
+    */
+
+    if(!_vc->get("isData")) return true;
+
+    if(_vc->get("hbheFilterNew25ns" ) == 0) return false;
+    if(_vc->get("hbheFilterIso"     ) == 0) return false;
+    if(_vc->get("Flag_eeBadScFilter") == 0) return false;
+    if(_vc->get("Flag_goodVertices" ) == 0) return false;
+    if(_sampleName.find("Run2015C") != std::string::npos){
+        if(_vc -> get("Flag_CSCTightHaloFilter") == 0) return false;
+    }
+    else {
+        if(!passCSCfilter()                          ) return false;
+        if(!passEESCfilter()                         ) return false;
+    }
+
+    return true;
+
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L::passCSCfilter(){
+    /*
+        
+    */
+
+    if(!_vc->get("isData")) return true;
+
+    int run=_vc->get("run");
+    int lumi=_vc->get("lumi");
+    unsigned long int evt=(unsigned long int)_vc->get("evt");
+  
+    std::pair<int, unsigned long int> tmp(lumi, evt);
+    std::pair<int, std::pair<int, unsigned long int> > tmp2(run, tmp);
+
+    if(_filteredCSCEvents.count(tmp2) > 0) return false;
+
+    return true;
+
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L::passEESCfilter(){
+    /*
+        
+    */
+
+    if(!_vc->get("isData")) return true;
+
+    int run=_vc->get("run");
+    int lumi=_vc->get("lumi");
+    unsigned long int evt=(unsigned long int)_vc->get("evt");
+  
+    std::pair<int, unsigned long int> tmp(lumi, evt);
+    std::pair<int, std::pair<int, unsigned long int> > tmp2(run, tmp);
+
+    if(_filteredEESCEvents.count(tmp2) > 0) return false;
+
+    return true;
+
+}
 

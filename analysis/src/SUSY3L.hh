@@ -69,7 +69,16 @@ private:
     void sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx);
     float lowestOssfMll(CandList leps);
     void registerTriggerVars();
+    void readCSCevents();
+    void readEESCevents();
+    void readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >&, vector<string>);
+
     bool passHLTbit();
+    
+    bool passNoiseFilters();
+    bool passCSCfilter();
+    bool passEESCfilter(); 
+    
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
@@ -219,6 +228,11 @@ private:
     vector<CandList> _combList;
     vector< vector<int> > _combIdxs;
     vector<int> _combType;
+
+    //for event filter
+    map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredCSCEvents;
+    map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredEESCEvents;
+
 };
 
 #endif
