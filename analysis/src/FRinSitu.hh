@@ -43,6 +43,7 @@ private:
   void registerLepPlots(vector<string> leps, string var, int nbins, float bmin, float bmax, string axis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, string xaxis);
   void registerLepPlots(vector<string> leps, string var, int nxbins, vector<float> xbins, int nybins, vector<float> ybins, string xaxis, string yaxis);
+  void registerLepVars();
   void registerTriggerVars();
   void registerVariable(string var, int nBin, float min, float max, string Xleg, bool isglb=true, bool prof=false, string type="m");
   void registerVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY, float maxY, string Xleg, string Yleg, bool isglb=true, bool prof=false, string type="m");
@@ -54,17 +55,19 @@ private:
   void sumTriggerPlots(string obs, int ds, string ext);
 
   void collectKinematicObjects();
-  bool cleanElectronSelection(unsigned int);
-  bool cleanMuonSelection(unsigned int);
-  bool denominatorElectronSelection(unsigned int);
-  bool denominatorMuonSelection(unsigned int);
-  bool goodJetSelection(unsigned int);
-  bool numeratorElectronSelection(unsigned int);
-  bool numeratorMuonSelection(unsigned int);
-  bool signalRegionElectronSelection(unsigned int);
-  bool signalRegionMuonSelection(unsigned int);
-  bool vetoElectronSelection(unsigned int);
-  bool vetoMuonSelection(unsigned int);
+  void collectLeptons(int, string);
+
+  bool cleanElectronSelection       (Candidate*, unsigned int, string);
+  bool cleanMuonSelection           (Candidate*, unsigned int, string);
+  bool denominatorElectronSelection (Candidate*, unsigned int, string);
+  bool denominatorMuonSelection     (Candidate*, unsigned int, string);
+  bool goodJetSelection             (unsigned int);
+  bool numeratorElectronSelection   (Candidate*, unsigned int, string);
+  bool numeratorMuonSelection       (Candidate*, unsigned int, string);
+  bool signalRegionElectronSelection(Candidate*, unsigned int, string);
+  bool signalRegionMuonSelection    (Candidate*, unsigned int, string);
+  bool vetoElectronSelection        (Candidate*, unsigned int, string);
+  bool vetoMuonSelection            (Candidate*, unsigned int, string);
 
   void setCut(std::string, float, std::string, float = 0); 
   void setMeasurementRegion();
@@ -75,17 +78,17 @@ private:
   bool triggerSelection();
 
   void fillEventPlots();
-  void fillLepPlots(std::string, Candidate*, unsigned int, int);
+  void fillLepPlots(std::string, Candidate*, pair<unsigned int, string>, int);
   void fillLeptonPlots();
-  void fillFRMaps(std::string, unsigned int, int);
+  void fillFRMaps(std::string, pair<unsigned int, string>, int);
   void fillFakeRatioMaps();
 
   string findLepAbbr(Candidate*);
-  string findLepAbbr(unsigned int);
+  string findLepAbbr(pair<unsigned int, string>);
   int findLepWP(Candidate*);
-  int findLepWP(unsigned int);
+  int findLepWP(pair<unsigned int, string>);
   void findTriggerExts();
-  bool genMatchedToFake(unsigned int);
+  bool genMatchedToFake(pair<unsigned int, string>);
   float overflowPt(float);
 
 private: 
@@ -155,18 +158,20 @@ private:
   float _upValCutNJetsSB;
   float _upValCutNBJetsSB;
 	
-  std::vector<unsigned int> _denElsIdx;
-  std::vector<unsigned int> _denLepsIdx;
-  std::vector<unsigned int> _denMusIdx;
-  std::vector<unsigned int> _isoLepsIdx;
-  std::vector<unsigned int> _numElsIdx;
-  std::vector<unsigned int> _numLepsIdx;
-  std::vector<unsigned int> _numMusIdx;
-  std::vector<unsigned int> _sigLepsIdx;
-  std::vector<unsigned int> _vetLepsIdx;
-  std::vector<unsigned int> _clLepsIdx;
-  std::vector<unsigned int> _goodJetsIdx;
-  std::vector<unsigned int> _bJetsIdx;
+  std::vector<pair<unsigned int, string> > _denElsIdx;
+  std::vector<pair<unsigned int, string> > _denLepsIdx;
+  std::vector<pair<unsigned int, string> > _denMusIdx;
+  std::vector<pair<unsigned int, string> > _isoLepsIdx;
+  std::vector<pair<unsigned int, string> > _numElsIdx;
+  std::vector<pair<unsigned int, string> > _numLepsIdx;
+  std::vector<pair<unsigned int, string> > _numMusIdx;
+  std::vector<pair<unsigned int, string> > _sigLepsIdx;
+  std::vector<pair<unsigned int, string> > _vetLepsIdx;
+  std::vector<pair<unsigned int, string> > _clLepsIdx;
+
+  std::vector<pair<string, unsigned int> > _bJetsIdx;
+  std::vector<pair<string, unsigned int> > _goodJetsIdx;
+  std::vector<pair<string, unsigned int> > _lepJetsIdx;
 
   unsigned int _nDenEls;
   unsigned int _nDenLeps;
@@ -189,15 +194,17 @@ private:
   CandList _sigLeps;
   CandList _vetLeps;
   CandList _clLeps;
-  CandList _goodJets;
+
   CandList _bJets;
+  CandList _goodJets;
+  CandList _lepJets;
 
   Candidate * _met;
   Candidate * _lep1;
   Candidate * _lep2;
 
-  int _lep1idx;
-  int _lep2idx;
+  pair<unsigned int, string> _lep1idx;
+  pair<unsigned int, string> _lep2idx;
  
   float _HT;
 
@@ -207,7 +214,7 @@ private:
 
   string _bvar;
   string _nvert;
-  string _leps;
+  vector<string> _leps;
   string _jets;
   string _djets;
   string _mets;

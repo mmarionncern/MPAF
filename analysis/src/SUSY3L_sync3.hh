@@ -14,6 +14,7 @@
 #define SUSY3L_sync3_HH
 
 #include "analysis/core/MPAF.hh"
+#include "analysis/modules/SusyModule.hh"
 
 class SUSY3L_sync3: public MPAF {
 
@@ -33,38 +34,36 @@ private:
 
     void modifySkimming();
 
-    void setMultiIsoWP();
     void collectKinematicObjects();
-    bool electronSelection(int);
-    bool muonSelection(int);
+    bool electronSelection(const Candidate* c, int);
+    bool muonSelection(const Candidate* c, int);
     bool tauSelection(int);
-    bool vetoElectronSelection(int);
-    bool vetoMuonSelection(int);
-    bool bJetSelection(int);
-    bool goodJetSelection(int);
-
+    bool looseLepton(const Candidate* c, int idx, int pdgId);
+    bool fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass);
+    
     bool baseSelection();
+    bool wzCRSelection();
     void setBaselineRegion();
     void setSignalRegion();
     void setCut(std::string, float, std::string, float = 0);
     bool hardLegSelection();
     bool checkMultiIso();
-    bool ZEventSelection();
-    bool ZEventSelectionLoop();
+    bool ZEventSelectionLoop(bool onz, bool loose_3rd_lep = false);
     bool srSelection();
-    bool electronMvaCut(int, int);
-    bool multiIsolation(int, float, float, float);
-    void fillEventPlots(std::string);
+    void fillEventPlots();
+    void fillControlPlots();
     float getMT2();
     void sortSelectedLeps();
     float lowestOssfMll(bool ossf = true);
-    bool passMultiLine(bool doubleOnly);
+    bool passMultiLine(bool doubleOnly, bool isolatedOnly);
     bool passHLTLine(string line);
 
     float HT();
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
+    void printBefore();
+    void printAfter();
 
     string _selectMuons;
     string _selectElectrons;
@@ -78,7 +77,15 @@ private:
 private:
 
     //counter categories, 0 is ALWAYS global (even if not specified later)
-    enum {kGlobal=0, kElId, kElVeto, kMuId, kMuVeto, kTauId, kTauVeto, kJetId, kBJetId, conZEvents};
+    enum {
+        kGlobal=0,                                      //global counter
+        kElId, kMuId, kTauId,                           //objects counter
+        kBase,kWZ,kSignalRegion,
+        kWZCR, 
+        kSR                                
+        };
+    
+    SusyModule* _susyMod;
 
     //cut variables
     float _valCutLepMultiplicityBR;
@@ -100,6 +107,7 @@ private:
     float _valCutNBJetsSR;
     float _valCutMllBR;
     float _valCutMT2BR;
+
     std::vector<std::string> _hltLines;
     
     std::string _cTypeLepMultiplicityBR;
@@ -113,7 +121,7 @@ private:
     std::string _cTypeMETSR;
     std::string _cTypeMllBR;
     std::string _cTypeMT2BR;
-
+    
     float _upValCutLepMultiplicityBR;
     float _upValCutNJetsBR;
     float _upValCutNBJetsBR;
@@ -125,11 +133,18 @@ private:
     float _upValCutMETSR;
     float _upValCutMllBR;
     float _upValCutMT2BR;
-
+    
     //vectors for electron, muon, and tau candidates
     std::vector<int> _elIdx;
     std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
+    std::vector<unsigned int> _looseLepsIdx;
+    std::vector<unsigned int> _tightLepsIdx;
+    std::vector<unsigned int> _looseLeps10Idx;
+    std::vector<unsigned int> _jetCleanLeps10Idx;
+    std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
+    std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
+    std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
 
     //length of candiate vectors
     int _nEls;
@@ -142,26 +157,40 @@ private:
     int _nBJets;
     int _nleps;
 
+
     //list of object candidates
     CandList _els;
-    CandList _vEls;
     CandList _mus;
-    CandList _vMus;
     CandList _taus;
-    CandList _vTaus;
     CandList _jets;
     CandList _bJets;
     CandList _leps;
+    CandList _looseLeps;
+    CandList _tightLeps;
+    CandList _looseLeps10;
+    CandList _jetCleanLeps10;
+    CandList _lepJets;
+
     Candidate* _met;
     Candidate* _Z;
     Candidate* _lep1;
     Candidate* _lep2;
-
+    
     float _HT;
     float _MT2;
     float _deltaR;
     float _mll;
-  
+   
+    float _jetThreshold;
+    float _bjetThreshold;
+    float _evt1;
+    float _evt2;
+    float _lumi1;
+    float _lumi2;
+    bool _debug;
+    
+    //HLT
+    bool _hltDLHT; 
     
 };
 

@@ -54,6 +54,10 @@ void Dataset::freeMemory() {
   delete _chain;
 }
 
+void
+Dataset::setUsefulVars(vector<string> vars) {
+  _usefulVars = vars;
+}
 
 //____________________________________________________________________________
 void Dataset::addSample(const SampleId sId, string path, string dir, string objName, string hname, string hwgtname, float xSect, float kFact, float lumi, float eqLumi, bool loadH) {
@@ -143,22 +147,10 @@ Dataset::addFriend(string friendname){
 int
 Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
 
-
   string NameF = goodFilePath(path, dir, fileName);
 
-  //if(dir=="") dir=path;
-  //string p= string(getenv ("MPAF"))+"/workdir";
-  //string NameF = p+"/data/"+dir+"/"+fileName+".root"; 
-  //if(path.find("psi.ch")!=(size_t)-1) {
-  //  if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
-  //  NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
-  //}
-  //else if(path.find(":")!=(size_t)-1) 
-  //  NameF=path+"/"+fileName+".root";
-  //if(dir.find("psi.ch")!=(size_t)-1)
-  //  NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
-
   TFile* file = TFile::Open( NameF.c_str() );
+  if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hname.c_str() );
   int nProc=-1;
   if(htmp) {
@@ -177,18 +169,9 @@ double
 Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtname) {
 
   string NameF = goodFilePath(path, dir, fileName);
-  //if(dir=="") dir=path;
-  //string p= string(getenv ("MPAF"))+"/workdir";
-  //string NameF = p+"/data/"+dir+"/"+fileName+".root"; 
-  //if(path.find("psi.ch")!=(size_t)-1) {
-  //  if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
-  //  NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
-  //}
-  //else if(path.find(":")!=(size_t)-1) NameF=path+"/"+fileName+".root";
-  //if(dir.find("psi.ch")!=(size_t)-1)
-  //  NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
   
   TFile* file = TFile::Open( NameF.c_str() );
+  if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hwgtname.c_str() );
   double nProc=-1;
   if(htmp) {
@@ -294,14 +277,6 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
   TFile* datafile(nullptr);
 
   string NameF = goodFilePath(path, dir, sname);
-  //if(dir=="") dir=path;
-  //string p= string(getenv ("MPAF"))+"/workdir";
-  //string NameF = p+"/data/"+dir+"/"+sname+".root"; 
-  //if(path.find("psi.ch")!=(size_t)-1)
-  //  NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+sname+".root";
-  //else if(path.find(":")!=(size_t)-1) NameF=path+"/"+sname+".root";
-  //if(dir.find("psi.ch")!=(size_t)-1)
-  //  NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+sname+".root";
 
   datafile = TFile::Open(NameF.c_str());
   if(datafile==nullptr) { 
@@ -313,13 +288,18 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
   if(tmptree != nullptr ) {
     _chain->Add( (NameF+"/"+objName).c_str() ); 
 
+    //cleaning friends if needed
+    TList* lfriends = _chain->GetListOfFriends();
+    TIter next(lfriends);
+    TObject* fr = 0;
+    while ((fr = next())) {
+      _chain->RemoveFriend((TTree*)fr);
+    }
+
+
     // adding friend-trees
     for (size_t ft=0; ft<_friends.size(); ft++){
       string NameFr = goodFilePath(path, dir, _friends[ft] + "/evVarFriend_" + sname);
-      //string NameFr = p+"/data/"+dir+"/"+_friends[ft]+"/evVarFriend_"+sname+".root";
-      //if(dir.find("psi.ch")!=(size_t)-1)
-      //  NameFr="dcap://t3se01.psi.ch:22125/"+dir+"/"+_friends[ft]+"/evVarFriend_"+sname+".root";
-
       string name = _friends[ft]+" = sf/t";
       _chain->AddFriend((name).c_str(),(NameFr).c_str());
     } 
@@ -332,28 +312,18 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
 
   delete tmptree;
   delete datafile;
- 
-  //event database
-
-  // bool empty=_events.size()==0;
-  // int m=empty?0:_events.back().second;
-  // int M=empty?nEvent:_events.back().second+nEvent;
-  // pair<int,int> p(m,M);
-  // _events.push_back(p);
-  
+   
 }
 
 void 
 Dataset::loadHistos(string path, string dir, string filename, string hname, string optCat) {
   TFile* datafile(nullptr);
   
-  //string NameF = path+"/"+dir+"/"+filename+".root"; 
-  //if(path.find(":")!=(size_t)-1) NameF=dir+"/"+filename+".root";
-  //if(dir.find("psi.ch")!=(size_t)-1)
-  //  NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+filename+".root";
 
   string NameF = goodFilePath(path, dir, filename);
   datafile = TFile::Open(NameF.c_str());
+
+  if(datafile==nullptr) {cout<<"warning, unable to load histograms"<<endl; return;}
 
   //scan the file to retrieve the histograms
   TIter nextkey(datafile->GetListOfKeys());
@@ -368,9 +338,20 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
     string varName(obj->GetName());
     map<string, TH1*> tmp;
     
-    //MM FIXME, jsut take a too long time to load everything, should be done in a better way thatn disabling everything 
-    if(varName.find("Fake")!=string::npos || varName.find("SR")!=string::npos) continue;
-  
+    bool find=false;
+    for(size_t i=0;i<_usefulVars.size();i++) {
+      if(_usefulVars[i]==varName ||
+	 _usefulVars[i]==varName+optCat ||
+	 varName.find(_usefulVars[i]+"Unc")!=string::npos) {
+	find=true; break;
+      }
+    }
+
+    if(_usefulVars.size()!=0 && !find) continue; 
+       // find(_usefulVars.begin(), _usefulVars.end(), varName)==_usefulVars.end() &&
+       // find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() &&
+       // !findUnc ) continue;
+    
 
     if(optCat!="") {
       size_t op=varName.find(optCat);

@@ -172,12 +172,12 @@ void FakeRatio::initialize(){
                               "HLT_BIT_HLT_Mu17_TrkIsoVVL_v_prescaleL1Min"};
 
   // trigger effective luminosities
-  float TR_efflum_el_non[1] = {getCfgVarF("LUMINOSITY_ELE12"    )};
-  float TR_efflum_el_iso[1] = {getCfgVarF("LUMINOSITY_ELE12_ISO")};
-  float TR_efflum_mu_non[2] = {getCfgVarF("LUMINOSITY_MU8"      ) , \
-                               getCfgVarF("LUMINOSITY_MU17"     )};
-  float TR_efflum_mu_iso[2] = {getCfgVarF("LUMINOSITY_MU8_ISO"  ) , \
-                               getCfgVarF("LUMINOSITY_MU17_ISO" )};
+  float TR_efflum_el_non[1] = {getCfgVarF("LUMINOSITY_ELE12"    , 1.0)};
+  float TR_efflum_el_iso[1] = {getCfgVarF("LUMINOSITY_ELE12_ISO", 1.0)};
+  float TR_efflum_mu_non[2] = {getCfgVarF("LUMINOSITY_MU8"      , 1.0) , \
+                               getCfgVarF("LUMINOSITY_MU17"     , 1.0)};
+  float TR_efflum_mu_iso[2] = {getCfgVarF("LUMINOSITY_MU8_ISO"  , 1.0) , \
+                               getCfgVarF("LUMINOSITY_MU17_ISO" , 1.0)};
 
   //float TR_efflum_el_non[5] = {getCfgVarF("LUMINOSITY_ELE8") , \
   //                             getCfgVarF("LUMINOSITY_ELE12"), \
@@ -349,10 +349,10 @@ void FakeRatio::initialize(){
 
   //input Variables
   //_lumi   = getCfgVarF("LUMINOSITY");
-  _norm   = getCfgVarS("NORMALIZATION"); // data, lumi
-  _ewkSub = getCfgVarS("EWKSUB"       ); // all, el, mu
-  _ewkMet = getCfgVarS("EWKSUBMETHOD" ); // ECO20, ECO30, ECOlite, UCSX
-  _idS    = getCfgVarS("ID"           ); // RA5, RA7
+  _norm   = getCfgVarS("NORMALIZATION", "data"); // data, lumi
+  _ewkSub = getCfgVarS("EWKSUB"       , "all" ); // all, el, mu
+  _ewkMet = getCfgVarS("EWKSUBMETHOD" , "UCSX"); // ECO20, ECO30, ECOlite, UCSX
+  _idS    = getCfgVarS("ID"           , "RA5" ); // RA5, RA7
 
   //default Variables
   _doEwkSubCERN = false;
@@ -414,18 +414,21 @@ void FakeRatio::run(){
   _vetLeps   .clear();
   _vetMus    .clear();
 
-  _bJets        .clear();
-  _goodJets     .clear();
-
-  _bJetsIdx     .clear();
   _denElsIdx    .clear();
   _denLepsIdx   .clear();
   _denMusIdx    .clear();
-  _goodJetsIdx  .clear();
   _isoLepsIdx   .clear();
   _numElsIdx    .clear();
   _numLepsIdx   .clear();
   _numMusIdx    .clear();
+
+  _bJets        .clear();
+  _goodJets     .clear();
+  _lepJets      .clear();
+
+  _bJetsIdx     .clear();
+  _goodJetsIdx  .clear();
+  _lepJetsIdx   .clear();
 
   counter("denominator");
   counter("denominator", kEwkSel);
@@ -1897,7 +1900,7 @@ void FakeRatio::collectKinematicObjects(){
   _nNumLeps = _numLeps.size();
   _nNumMus  = _numMus .size();
  
-  _susyMod -> cleanJets( &_denLeps, _goodJets, _goodJetsIdx, _bJets, _bJetsIdx, 40, 25);
+  _susyMod -> cleanJets( &_denLeps, _goodJets, _goodJetsIdx, _bJets, _bJetsIdx, _lepJets, _lepJetsIdx, 40, 25);
   _susyMod -> awayJets ( &_denLeps, _goodJets, _goodJetsIdx, 1.0);
 
   _nJets  = _goodJets.size();
@@ -1910,28 +1913,26 @@ void FakeRatio::collectKinematicObjects(){
 //____________________________________________________________________________
 void FakeRatio::collectLeptons(int idx, string branch){
 
+  Candidate* c = nullptr;
+
   // electrons
   if(std::abs(_vc->get(branch + "_pdgId", idx)) == 11){		  
-    if(denominatorElectronSelection(idx, branch)) {
-      _denEls.push_back( Candidate::create(_vc->get(branch + "_pt", idx),
-  				  _vc->get(branch + "_eta", idx),
-  				  _vc->get(branch + "_phi", idx),
-  				  _vc->get(branch + "_pdgId", idx),
+    c = Candidate::create(_vc->get(branch + "_pt", idx),
+  				  _vc->get(branch + "_eta"   , idx),
+  				  _vc->get(branch + "_phi"   , idx),
+  				  _vc->get(branch + "_pdgId" , idx),
   				  _vc->get(branch + "_charge", idx),
-  				  0.0005) );
+  				  0.0005);
+    if(denominatorElectronSelection(c, idx, branch)) {
+      _denEls       .push_back( c );
       _denElsIdx    .push_back(pair<int, string>(idx, branch));
       _denLeps      .push_back( _denEls[ _denEls.size()-1 ] );
       _denLepsIdx   .push_back(pair<int, string>(idx, branch));
       if(!_id[kElTrEmu] || _susyMod -> elHLTEmulSelIso(idx, SusyModule::kLooseHT, branch)) 
         _isoLepsIdx.push_back(pair<int, string>(idx, branch));
     }
-    if(numeratorElectronSelection(idx, branch)) {
-      _numEls.push_back( Candidate::create(_vc->get(branch + "_pt", idx),
-  				  _vc->get(branch + "_eta"   , idx),
-  				  _vc->get(branch + "_phi"   , idx),
-  				  _vc->get(branch + "_pdgId" , idx),
-  				  _vc->get(branch + "_charge", idx),
-  				  0.0005) );
+    if(numeratorElectronSelection(c, idx, branch)) {
+      _numEls       .push_back( c );
       _numElsIdx    .push_back(pair<int, string>(idx, branch));
       _numLeps      .push_back( _numEls[ _numEls.size()-1 ] );
       _numLepsIdx   .push_back(pair<int, string>(idx, branch));
@@ -1940,25 +1941,21 @@ void FakeRatio::collectLeptons(int idx, string branch){
 
   // muons
   else if(std::abs(_vc->get(branch + "_pdgId", idx)) == 13){
-    if(denominatorMuonSelection(idx, branch)) {
-      _denMus.push_back( Candidate::create(_vc->get(branch + "_pt", idx),
+    c = Candidate::create(_vc->get(branch + "_pt", idx),
   				  _vc->get(branch + "_eta", idx),
   				  _vc->get(branch + "_phi", idx),
   				  _vc->get(branch + "_pdgId", idx),
   				  _vc->get(branch + "_charge", idx),
-  				  0.105) );
+  				  0.105);
+    if(denominatorMuonSelection(c, idx, branch)) {
+      _denMus    .push_back( c );
       _denMusIdx .push_back(pair<int, string>(idx, branch));
       _denLeps   .push_back( _denMus[ _denMus.size()-1 ] );
       _denLepsIdx.push_back(pair<int, string>(idx, branch));
       _isoLepsIdx.push_back(pair<int, string>(idx, branch));
     }
-    if(numeratorMuonSelection(idx, branch)) {
-      _numMus.push_back( Candidate::create(_vc->get(branch + "_pt", idx),
-  				  _vc->get(branch + "_eta", idx),
-  				  _vc->get(branch + "_phi", idx),
-  				  _vc->get(branch + "_pdgId", idx),
-  				  _vc->get(branch + "_charge", idx),
-  				  0.105) );
+    if(numeratorMuonSelection(c, idx, branch)) {
+      _numMus    .push_back( c ); 
       _numMusIdx .push_back(pair<int, string>(idx, branch));
       _numLeps   .push_back( _numMus[ _numMus.size()-1 ] );
       _numLepsIdx.push_back(pair<int, string>(idx, branch));
@@ -1968,12 +1965,13 @@ void FakeRatio::collectLeptons(int idx, string branch){
 
 
 //____________________________________________________________________________
-bool FakeRatio::denominatorElectronSelection(int elIdx, string branch){
+bool FakeRatio::denominatorElectronSelection(Candidate* c, int elIdx, string branch){
 
   counter("DenominatorElectrons", kDenEls);
 
-  if(!makeCut( _susyMod -> elIdSel     (elIdx, _id[kElIdWP], SusyModule::kLoose, (_id[kElChCut]>0), false, branch), "electron id", "=", kDenEls)) return false;
-  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch                                                     ), "non-iso emu", "=", kDenEls)) return false;
+  if(!makeCut<float>( c -> pt()                                                                             , 10, ">", "electron pt", 0  , kDenEls)) return false;
+  if(!makeCut( _susyMod -> elIdSel     (c, elIdx, _id[kElIdWP], SusyModule::kLoose, (_id[kElChCut]>0), false, branch), "electron id", "=", kDenEls)) return false;
+  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch)                                                        , "non-iso emu", "=", kDenEls)) return false;
 
   // electron cleaning 
   float dr_cache = 999.;
@@ -1991,10 +1989,11 @@ bool FakeRatio::denominatorElectronSelection(int elIdx, string branch){
 
 
 //____________________________________________________________________________
-bool FakeRatio::denominatorMuonSelection(int muIdx, string branch){
+bool FakeRatio::denominatorMuonSelection(Candidate* c, int muIdx, string branch){
   counter("DenominatorMuons", kDenMus);
 
-  if(!makeCut( _susyMod -> muIdSel(muIdx, _id[kMuIdWP], (_id[kMuChCut]>0), false, branch), "muon id", "=", kDenMus)) return false;
+  if(!makeCut<float>( c -> pt()                                                    , 10, ">", "muon pt", 0  , kDenMus)) return false;
+  if(!makeCut( _susyMod -> muIdSel(c, muIdx, _id[kMuIdWP], (_id[kMuChCut]>0), false, branch), "muon id", "=", kDenMus)) return false;
 
   return true;
 
@@ -2002,14 +2001,15 @@ bool FakeRatio::denominatorMuonSelection(int muIdx, string branch){
 
 
 //____________________________________________________________________________
-bool FakeRatio::numeratorElectronSelection(int elIdx, string branch){
+bool FakeRatio::numeratorElectronSelection(Candidate* c, int elIdx, string branch){
 
   counter("NumeratorElectrons", kNumEls);
 
-  if(!makeCut( _susyMod -> elIdSel     (elIdx, _id[kElIdWP ], SusyModule::kLoose, (_id[kElChCut]>0), false, branch), "electron id ", "=", kNumEls)) return false;
-  if(!makeCut( _susyMod -> elMvaSel    (elIdx, _id[kElMvaWP], branch                                              ), "electron mva", "=", kNumEls)) return false;    
-  if(!makeCut( _susyMod -> multiIsoSel (elIdx, _id[kElIsoWP], branch                                              ), "isolation"   , "=", kNumEls)) return false; 
-  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch                                                      ), "electron emu", "=", kNumEls)) return false;
+  if(!makeCut<float>( c -> pt()                                                                              , 10, ">", "electron pt ", 0  , kNumEls))  return false;
+  if(!makeCut( _susyMod -> elIdSel     (c, elIdx, _id[kElIdWP ], SusyModule::kLoose, (_id[kElChCut]>0), false, branch), "electron id ", "=", kNumEls)) return false;
+  if(!makeCut( _susyMod -> elMvaSel    (elIdx, _id[kElMvaWP], branch)                                                 , "electron mva", "=", kNumEls)) return false;    
+  if(!makeCut( _susyMod -> multiIsoSel (elIdx, _id[kElIsoWP], branch)                                                 , "isolation"   , "=", kNumEls)) return false; 
+  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch)                                                         , "electron emu", "=", kNumEls)) return false;
 
   // electron cleaning 
   float dr_cache = 999.;
@@ -2027,12 +2027,13 @@ bool FakeRatio::numeratorElectronSelection(int elIdx, string branch){
 
 
 //____________________________________________________________________________
-bool FakeRatio::numeratorMuonSelection(int muIdx, string branch){
+bool FakeRatio::numeratorMuonSelection(Candidate* c, int muIdx, string branch){
 
   counter("NumeratorMuons", kNumMus);
 
-  if(!makeCut( _susyMod -> muIdSel    (muIdx, _id[kMuIdWP ], (_id[kMuChCut] > 0), false, branch), "muon id  ", "=", kNumMus)) return false;
-  if(!makeCut( _susyMod -> multiIsoSel(muIdx, _id[kMuIsoWP], branch                            ), "isolation", "=", kNumMus)) return false;
+  if(!makeCut<float>( c -> pt()                                                           , 10, ">", "muon pt"  , 0  , kNumMus)) return false;
+  if(!makeCut( _susyMod -> muIdSel    (c, muIdx, _id[kMuIdWP ], (_id[kMuChCut] > 0), false, branch), "muon id"  , "=", kNumMus)) return false;
+  if(!makeCut( _susyMod -> multiIsoSel(muIdx, _id[kMuIsoWP], branch)                               , "isolation", "=", kNumMus)) return false;
 
  
   return true;
@@ -2679,23 +2680,23 @@ void FakeRatio::eventListSyncRA5() {
       nontr = i;
   }
 
-  if(_iso){
-    if(_nDenEls == 1)
-      cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
+  //if(_iso){
+    //if(_nDenEls == 1)
+      //cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
       //cout << Form("Electron RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[isotr].c_str(), _trws[isotr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
     //if(_nDenMus == 1)
     //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
   //    cout << Form("Muon RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[isotr].c_str(), _trws[isotr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
   //}
 
-  //if(!_iso || _TR_lines.size() > 1){
+  if(!_iso || _TR_lines.size() > 1){
     //if(_nDenEls == 1)
     //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[nontr]) << endl;
   //    cout << Form("Electron RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f mva=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[nontr].c_str(), _trws[nontr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), MT, _nNumLeps) << endl;
-    //if(_nDenMus == 1)
-    //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0].first, SusyModule::kMedium, _denLepsIdx[0].second), _denLeps[0]->eta(), _vc->get(_denLepsIdx[0].second + "_miniRelIso", _denLepsIdx[0].first), _vc->get(_denLepsIdx[0].second + "_jetPtRatiov2", _denLepsIdx[0].first), _vc->get(_denLepsIdx[0].second + "_jetPtRelv2", _denLepsIdx[0].first), _met->pt(), _met->phi(), _nNumLeps, _trws[nontr]) << endl;
+    if(_nDenMus == 1)
+      cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0].first, SusyModule::kMedium, _denLepsIdx[0].second), _denLeps[0]->eta(), _vc->get(_denLepsIdx[0].second + "_miniRelIso", _denLepsIdx[0].first), _vc->get(_denLepsIdx[0].second + "_jetPtRatiov2", _denLepsIdx[0].first), _vc->get(_denLepsIdx[0].second + "_jetPtRelv2", _denLepsIdx[0].first), _met->pt(), _met->phi(), _nNumLeps, _trws[nontr]) << endl;
   //    cout << Form("Muon RunNb=%8.f LumiSc=%4.f EventNb=%10.f Trigger=%s PS=%5.f FO raw pt=%6.2f corr pt=%6.2f eta=%5.2f miniiso=%.2f ptratio=%.2f ptrel=%5.2f MET=%5.2f MT=%5.2f isNum=%1i", _vc->get("run"), _vc->get("lumi"), _vc->get("evt"), _TR_lines[nontr].c_str(), _trws[nontr], _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]),  _met->pt(), MT, _nNumLeps) << endl;
- // }
+  }
 
 }
 

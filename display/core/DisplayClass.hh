@@ -164,7 +164,8 @@ private:
   //uncertainties
   bool _uncDet;
   vector<string> _uncNames;
-
+  bool _mcSystComputed;
+  
   bool _comSyst;
 
   //plot format
@@ -177,8 +178,7 @@ private:
   bool _cumulative;
   
   vector<string> _cNames;
-
-
+  
 public:
 
   DisplayClass();
@@ -229,8 +229,8 @@ public:
 
   void saveHistos(string hname, const hObs* theObs);
   
-  void prepareStatistics( vector<pair<string,vector<vector<float> > > > vals, vector<string> dsnames, bool isMultiScheme);
-  void drawStatistics( vector<pair<string,vector<vector<float> > > > vals, vector<string> dsnames, bool isMultiScheme);
+  void prepareStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, vector<string> dsnames, bool isMultiScheme);
+  void drawStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, vector<string> dsnames, bool isMultiScheme);
   void drawDetailSystematics(bool cumul);
 
   void addText(float x, float y, float s, string text);

@@ -89,10 +89,10 @@ private:
 
   void collectKinematicObjects();
   void collectLeptons(int, string);
-  bool denominatorElectronSelection(int, string);
-  bool denominatorMuonSelection(int, string);
-  bool numeratorElectronSelection(int, string);
-  bool numeratorMuonSelection(int, string);
+  bool denominatorElectronSelection(Candidate*, int, string);
+  bool denominatorMuonSelection    (Candidate*, int, string);
+  bool numeratorElectronSelection  (Candidate*, int, string);
+  bool numeratorMuonSelection      (Candidate*, int, string);
 
   void setCut(std::string, float, std::string, float = 0);
   void setMeasurementRegion();
@@ -124,6 +124,7 @@ private:
   void fillUcsxEwkLeptonPlots();
   void findTriggerExts();
   float overflowPt(float);
+  void eventListSyncRA5();
 
   void testEwkSub();
   bool triggerEmulation(int idx, int label);
@@ -233,8 +234,6 @@ private:
   CandList _vetEls;
   CandList _vetLeps;
   CandList _vetMus;
-  CandList _bJets;
-  CandList _goodJets;
 
   vector<pair<unsigned int, string> > _denElsIdx;
   vector<pair<unsigned int, string> > _denLepsIdx;
@@ -246,8 +245,14 @@ private:
   vector<pair<unsigned int, string> > _vetElsIdx;
   vector<pair<unsigned int, string> > _vetLepsIdx;
   vector<pair<unsigned int, string> > _vetMusIdx;
-  vector<unsigned int> _bJetsIdx;
-  vector<unsigned int> _goodJetsIdx;
+
+  CandList _bJets;
+  CandList _goodJets;
+  CandList _lepJets;
+
+  vector<pair<string, unsigned int> > _bJetsIdx;
+  vector<pair<string, unsigned int> > _goodJetsIdx;
+  vector<pair<string, unsigned int> > _lepJetsIdx;
 
   Candidate * _met;
   float _HT;

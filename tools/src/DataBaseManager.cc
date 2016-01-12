@@ -13,19 +13,16 @@ DataBaseManager::~DataBaseManager() {
 
 void
 DataBaseManager::loadDb(string key,string dbName) {
+
+  _isTF1Db[key]=false;
   readDb(key,dbName);
 }
 
 void
 DataBaseManager::loadDb(string key,string dbName, string hname) {
+  _isTF1Db[key]=false;
   readDbHisto(key,dbName,hname);
 }
-
-void
-DataBaseManager::loadDbCSV(string key, string dbName, char separator){
-  readDbCSV(key, dbName, separator);
-}
-
 
 void
 DataBaseManager::readDb(string key, string dbName) {
@@ -40,14 +37,11 @@ DataBaseManager::readDb(string key, string dbName) {
   
   string ndb= (string)getenv("MPAF")+"/workdir/database/"+dbName;
   ifstream fDb( ndb.c_str(), ios::in );
-
-  if(fDb)
+   if(fDb)
     {
       string line;
       while(getline(fDb, line)) 
         {
-	  //cout << line << endl;
-
 	  istringstream iss(line);
 	  vector<string> tks;
 	  copy(istream_iterator<string>(iss),
@@ -97,7 +91,7 @@ DataBaseManager::readDb(string key, string dbName) {
 	    bool isReg=false;
 	    for(size_t ib=0;ib<_cDbLim[key][i].size();ib++) {
 	      if(_cDbLim[key][i][ib]==val ||
-		 fabs(_cDbLim[key][i][ib]-val) < 0.00001 ) isReg=true; // ... = condition does not perfectly work
+		 std::abs(_cDbLim[key][i][ib]-val) < 0.00001 ) isReg=true; // ... = condition does not perfectly work
 	    }
 
 	    if(!isReg) {
@@ -120,7 +114,6 @@ DataBaseManager::readDb(string key, string dbName) {
 	max[i] = _cDbLim[key][i].back();
       }
       
-      
       _mDBs[ key ] = new THnSparseF(key.c_str(),key.c_str(),nV,nBins,min,max);
       _mDBEHs[ key ] = new THnSparseF((key+"EH").c_str(),(key+"EH").c_str(),nV,nBins,min,max);
       _mDBELs[ key ] = new THnSparseF((key+"EL").c_str(),(key+"EL").c_str(),nV,nBins,min,max);
@@ -129,6 +122,7 @@ DataBaseManager::readDb(string key, string dbName) {
       fDb.clear();
       fDb.seekg (0, fDb.beg);
       
+      int nForm=0;
       while(getline(fDb, line)) 
 	{
 	  
@@ -154,42 +148,77 @@ DataBaseManager::readDb(string key, string dbName) {
 	    
 	    vbin[i] = StatUtils::findBin<float>(val, _cDbLim[key][i]);
 	  }
-	  
-	  _mDBs[ key ]->SetBinContent(vbin, atof(tks[nV].c_str()) ); //value
+	  if(!_isTF1Db[key]) {
+	    _mDBs[ key ]->SetBinContent(vbin, atof(tks[nV].c_str()) ); //value
+	  } else {
+	    _formulas[nForm]=tks[nV];
+	    _mDBs[ key ]->SetBinContent(vbin, nForm); //value
+	  }
 	  idxs[  _mDBs[ key ]->GetBin( vbin ) ] = vbin;
 
 	  switch(nE) {
 
-	  case 0:
-	    _mDBEHs[ key ]->SetBinContent(vbin, 0 );
-	    _mDBELs[ key ]->SetBinContent(vbin, 0 );
-	    break;
+	  case 0: {
+	    if(!_isTF1Db[key]) {
+	      _mDBEHs[ key ]->SetBinContent(vbin, 0 );
+	      _mDBELs[ key ]->SetBinContent(vbin, 0 );
+	      break;
+	    } else {
+	      _formulasEHs[nForm]="1";
+	      _formulasELs[nForm]="1";
+	      _mDBEHs[ key ]->SetBinContent(vbin, nForm );
+	      _mDBELs[ key ]->SetBinContent(vbin, nForm );
+	      break;
+	    }
+	  }
 
-	  case 1:
-	    _mDBEHs[ key ]->SetBinContent(vbin, atof(tks[nV+1].c_str()) );
-	    _mDBELs[ key ]->SetBinContent(vbin, atof(tks[nV+1].c_str()) );
-	    break;
-
-	  case 2:
-	    _mDBEHs[ key ]->SetBinContent(vbin, atof(tks[nV+1].c_str()) );
-	    _mDBELs[ key ]->SetBinContent(vbin, atof(tks[nV+2].c_str()) );
-	    break;
-	    
-	  case 3:
-	    {
+	  case 1: {
+	    if(!_isTF1Db[key]) {
+	      _mDBEHs[ key ]->SetBinContent(vbin, atof(tks[nV+1].c_str()) );
+	      _mDBELs[ key ]->SetBinContent(vbin, atof(tks[nV+1].c_str()) );
+	      break;
+	    } else {
+	      _formulasEHs[nForm]=tks[nV+1];
+	      _formulasELs[nForm]=tks[nV+1];
+	      _mDBEHs[ key ]->SetBinContent(vbin, nForm );
+	      _mDBELs[ key ]->SetBinContent(vbin, nForm );
+	      break;
+	    }
+	  }
+	  case 2: {
+	    if(!_isTF1Db[key]) {
+	      _mDBEHs[ key ]->SetBinContent(vbin, atof(tks[nV+1].c_str()) );
+	      _mDBELs[ key ]->SetBinContent(vbin, atof(tks[nV+2].c_str()) );
+	      break;
+	    } else {
+	      _formulasEHs[nForm]=tks[nV+1];
+	      _formulasELs[nForm]=tks[nV+2];
+	      _mDBEHs[ key ]->SetBinContent(vbin, nForm );
+	      _mDBELs[ key ]->SetBinContent(vbin, nForm );
+	      break;
+	    }
+	  }
+	  case 3: {
+	    if(!_isTF1Db[key]) {
 	      float em = sqrt( pow( atof(tks[nV+1].c_str()), 2) + pow( atof(tks[nV+3].c_str()), 2) );
 	      float eM =  sqrt( pow( atof(tks[nV+2].c_str()), 2) + pow( atof(tks[nV+3].c_str()), 2) );
 	      _mDBEHs[ key ]->SetBinContent(vbin, em );
 	      _mDBELs[ key ]->SetBinContent(vbin, eM );
-	    break;
-	    }	    
-
+	      break;
+	    } else { //not supported for TF1
+	      _formulasEHs[nForm]="1";
+	      _formulasELs[nForm]="1";
+	      _mDBEHs[ key ]->SetBinContent(vbin, nForm );
+	      _mDBELs[ key ]->SetBinContent(vbin, nForm );
+	    }
+	  }	    
 	  default:
 	    cout<<"Error, database format unrecognized ( "<<dbName<<" ) "<<endl;
 	    abort();
 	    break;
 	  }
 	  
+	  nForm++;
 	}//getline
 
       fDb.close();
@@ -200,42 +229,6 @@ DataBaseManager::readDb(string key, string dbName) {
   }
 
   _cDbIdx[ key]=idxs;
-
-}
-
-
-void
-DataBaseManager::readDbCSV(string key, string dbName, char separator){
-
-  string ndb= (string)getenv("MPAF")+"/workdir/database/"+dbName;
-  ifstream dbFile(ndb.c_str());
-
-  if(!dbFile.is_open()) {
-    cout << "ERROR, database file " << ndb << " could not be opened." << endl;
-    return;
-  }
-
-  vector<vector<float> > eF;
-  vector<vector<string> > eS;
-  _csvDbValS.insert(pair<string, vector<vector<string> > >(key, eS));
-  _csvDbValF.insert(pair<string, vector<vector<float > > >(key, eF));
-  
-  string line;
-  while( getline(dbFile, line) ) {
-//DUMP(line);
-    vector<string> cols = Tools::split(line, separator);
-    for(unsigned int i = 0; i < cols.size(); ++i)
-      cols[i] = Tools::trim(Tools::trim(cols[i]), "\"");
-//DUMPVECTOR(cols);
-    _csvDbValS[key].push_back(cols);
-//DUMPVECTOR(Tools::strToFloat(cols));
-    _csvDbValF[key].push_back(Tools::strToFloat(cols));
-  }
-
-//DUMPVECTOR(_csvDbValF[key][0]);
-//DUMPVECTOR(_csvDbValF[key][1]);
-
-  dbFile.close();
 
 }
 
@@ -270,8 +263,6 @@ DataBaseManager::readDbHisto(string key, string dbName, string hname) {
   else{ //1D histo, or profile, or something strange that noone does but the W guys
     nV=1;  
   }
-
-  //cout<< nV<<"   "<<cName<<((string)cName).find("2")<<endl;
 
   vector<vector<float> > tmp(nV,vector<float>(0,0)); 
   _cDbLim[key] = tmp;
@@ -440,6 +431,15 @@ DataBaseManager::exists(string key) {
   return (it!=_mDBs.end());
 }
 
+float
+DataBaseManager::getTF1DBValue(string key, float x, float v1, float v2, float v3, float v4,
+			       float v5, float v6,float v7, float v8, float v9, float v10) {
+
+  int id=getDBValue(key,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10);
+  TFormula f("f",_formulas[id].c_str() );
+  return f.Eval(x);
+}
+
 float 
 DataBaseManager::getDBValue(string key, float v1, float v2, float v3, float v4,
 			    float v5, float v6,float v7, float v8, float v9, float v10) {
@@ -509,6 +509,25 @@ DataBaseManager::getDBErrL(string key, float v1, float v2, float v3, float v4,
   return _mDBELs[ key ]->GetBinContent( vbin );
 }
 
+
+float
+DataBaseManager::getTF1DBErrH(string key, float x, float v1, float v2, float v3, float v4,
+			       float v5, float v6,float v7, float v8, float v9, float v10) {
+
+  int id=getDBValue(key,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10);
+  TFormula f("f",_formulasEHs[id].c_str() );
+  return f.Eval(x);
+}
+
+
+float
+DataBaseManager::getTF1DBErrL(string key, float x, float v1, float v2, float v3, float v4,
+			       float v5, float v6,float v7, float v8, float v9, float v10) {
+
+  int id=getDBValue(key,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10);
+  TFormula f("f",_formulasELs[id].c_str() );
+  return f.Eval(x);
+}
 
 float 
 DataBaseManager::getDBValue(string key, string v1) {

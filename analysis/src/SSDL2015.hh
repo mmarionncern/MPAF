@@ -2,8 +2,10 @@
 #define SSDL2015_HH
 
 #include "analysis/core/MPAF.hh"
-
 #include "analysis/modules/SusyModule.hh"
+#include "analysis/utils/Tools.hh"
+
+#include "TH3D.h"
 
 class SSDL2015: public MPAF {
 
@@ -22,7 +24,6 @@ private:
   void run();
   void defineOutput();
   void modifyWeight();
-  double lheWeight();
   void writeOutput();
 
   void modifySkimming();
@@ -40,12 +41,16 @@ private:
   bool genMatchedToFake(int id);
 
   bool passGenSelection();
-  
+
+  bool checkMassBenchmark();
+  void loadScanHistogram();
+
   float getFR(Candidate* cand, int idx);
   
   void chargeFlipProb();
 
   TVector2 varyMET();
+  Candidate* varyJetLepAware(Candidate* lep, int idx);
 
   //============================
   void retrieveObjects();
@@ -62,6 +67,9 @@ private:
   //advanced fast selection
   bool testRegion();
   void categorize();
+  
+  int getMergedSR(int wf);
+
 
   bool passCERNSelection();
   bool looseLepton(const Candidate*c, int idx, int pdgId);
@@ -70,6 +78,11 @@ private:
   
   bool hltSelection();
   bool passHLT(std::string id);
+  bool passHLTbit();
+  
+  bool passNoiseFilters();
+  bool passCSCfilter();
+  bool passEESCfilter();
 
   void advancedSelection(int WF);
 
@@ -85,6 +98,13 @@ private:
   void fillhistos();
   void fillValidationHistos(std::string reg);
 
+  bool checkDoubleCount();
+
+  void registerTriggerVars();
+  void readCSCevents();
+  void readEESCevents();
+  void readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >&, vector<string>);
+  
 private: 
 
   enum {kIsOS=0,kIsFake, kIsDFake};
@@ -177,6 +197,14 @@ private:
 
   //HLT
   bool _hltDLHT;
+  string _hltBit;
+
+  vector<string> _vTR_lines_non_ee;
+  vector<string> _vTR_lines_non_em;
+  vector<string> _vTR_lines_non_mm;
+  vector<string> _vTR_lines_iso_ee;
+  vector<string> _vTR_lines_iso_em;
+  vector<string> _vTR_lines_iso_mm;
 
   //charge misId
   bool _isOS;
@@ -223,11 +251,18 @@ private:
   CandList _tightLepsOSPtCut;
   std::vector<unsigned int>  _tightLepsOSPtCutIdx;
 
+  CandList _allJets;
+  std::vector<std::pair<std::string, unsigned int> >  _allJetsIdx;
+
   CandList _jets;
-  std::vector<unsigned int>  _jetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
   
   CandList _bJets;
-  std::vector<unsigned int>  _bJetsIdx;
+  std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
+
+
+  CandList _lepJets;
+  std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
   
   unsigned int _nLooseLeps;
  
@@ -248,8 +283,8 @@ private:
   string _leptl;
   string _SR;
   string _FR;
-  string _filter;
-  string _LHESYS;
+  int _LHESYS;
+  int _fastSim;
 
   int _fakeEl;
   int _fakeMu;
@@ -261,19 +296,37 @@ private:
 
   vector<string> _categs;
   bool _categorization;
+  bool _mergeSRs;
   bool _DoValidationPlots;
 
   vector<TVector2> _uncleanJets;
+  vector<TVector2> _uncleanDiscJets;
   vector<TVector2> _uncleanFwdJets;
 
+  float _btagW;
 
   //background pairs===============
   vector<CandList> _auxPairs;
   vector<int> _auxFlags;
   vector<vector<int> > _auxIdxs;
 
-  vector<unsigned int> _events;
-  void fillEvents();
+  // vector<unsigned int> _events;
+  // void fillEvents();
+
+  //double counting====
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> > _events;
+  map< std::pair<int,std::pair<int,unsigned long int> > , std::pair<string,int> >::iterator _itEvt;
+
+  //CSC events
+  map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredCSCEvents;
+  map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredEESCEvents;
+
+  vector<float> _jetLepACorFactor;
+
+
+  //scan =======
+  TH3D* _hScanWeight;
+  int _nProcEvtScan;
 
 };
 

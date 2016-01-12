@@ -87,14 +87,14 @@ void FRinSitu::initialize(){
 
  
   // trigger effective luminosities
-  float TR_efflum_non[3] = {getCfgVarF("LUMINOSITY_DOUBLEMU8"     ), \
-                            getCfgVarF("LUMINOSITY_DOUBLEELE8"    ), \
-                            getCfgVarF("LUMINOSITY_MU8ELE3"       )  };
-  float TR_efflum_iso[5] = {getCfgVarF("LUMINOSITY_MU17MU8_ISO"   ), \
-                            getCfgVarF("LUMINOSITY_MU17TKMU8_ISO" ), \
-                            getCfgVarF("LUMINOSITY_ELE17ELE12_ISO"), \
-                            getCfgVarF("LUMINOSITY_MU8ELE17_ISO"  ), \
-                            getCfgVarF("LUMINOSITY_MU17ELE12_ISO" )  };
+  float TR_efflum_non[3] = {getCfgVarF("LUMINOSITY_DOUBLEMU8"     , 1.0), \
+                            getCfgVarF("LUMINOSITY_DOUBLEELE8"    , 1.0), \
+                            getCfgVarF("LUMINOSITY_MU8ELE3"       , 1.0)  };
+  float TR_efflum_iso[5] = {getCfgVarF("LUMINOSITY_MU17MU8_ISO"   , 1.0), \
+                            getCfgVarF("LUMINOSITY_MU17TKMU8_ISO" , 1.0), \
+                            getCfgVarF("LUMINOSITY_ELE17ELE12_ISO", 1.0), \
+                            getCfgVarF("LUMINOSITY_MU8ELE17_ISO"  , 1.0), \
+                            getCfgVarF("LUMINOSITY_MU17ELE12_ISO" , 1.0)  };
   _vTR_efflum_non = Tools::toVector(TR_efflum_non);
   _vTR_efflum_iso = Tools::toVector(TR_efflum_iso);
 
@@ -116,8 +116,9 @@ void FRinSitu::initialize(){
 
 
   //Tree Variables
+ string ls[1] = {"LepGood"};
   _bvar  = "nBJetMedium25";
-  _leps  = "LepGood";
+  _leps = Tools::toVector(ls);
   _jets  = "Jet";
   _djets = "DiscJet";
   _mets  = "met";
@@ -131,50 +132,6 @@ void FRinSitu::initialize(){
   _vc->registerVar("nTrueInt"                      );
   _vc->registerVar("vtxWeight"                     );
   _vc->registerVar("genWeight"                     );
-  _vc->registerVar("n" + _leps                     );
-  _vc->registerVar(_leps + "_pt"                   );
-  _vc->registerVar(_leps + "_eta"                  );
-  _vc->registerVar(_leps + "_phi"                  );
-  _vc->registerVar(_leps + "_charge"               );
-  _vc->registerVar(_leps + "_tightCharge"          );
-  _vc->registerVar(_leps + "_mediumMuonId"         );
-  _vc->registerVar(_leps + "_mvaIdPhys14"          );
-  _vc->registerVar(_leps + "_mvaIdSpring15"        );
-  _vc->registerVar(_leps + "_pdgId"                );
-  _vc->registerVar(_leps + "_relIso03"             );
-  _vc->registerVar(_leps + "_relIso04"             );
-  _vc->registerVar(_leps + "_jetPtRatiov2"         );
-  _vc->registerVar(_leps + "_jetPtRelv2"           );
-  _vc->registerVar(_leps + "_jetRawPt"             );
-  _vc->registerVar(_leps + "_jetCorrFactor_L1L2L3Res");
-  _vc->registerVar(_leps + "_miniRelIso"           );
-  _vc->registerVar(_leps + "_chargedHadRelIso03"   );
-  _vc->registerVar(_leps + "_miniRelIso"           );
-  _vc->registerVar(_leps + "_miniRelIso"           );
-  _vc->registerVar(_leps + "_dxy"                  );
-  _vc->registerVar(_leps + "_dz"                   );
-  _vc->registerVar(_leps + "_sip3d"                );
-  _vc->registerVar(_leps + "_pfMuonId"             );
-  _vc->registerVar(_leps + "_tightId"              );
-  _vc->registerVar(_leps + "_looseIdSusy"          );
-  _vc->registerVar(_leps + "_convVeto"             );
-  _vc->registerVar(_leps + "_lostHits"             );
-  _vc->registerVar(_leps + "_eleCutIdCSA14_50ns_v1");
-  _vc->registerVar(_leps + "_eleCutIdCSA14_50ns_v1");
-  _vc->registerVar(_leps + "_eleCutId2012_full5x5" );
-  _vc->registerVar(_leps + "_mvaSusyPHYS14"        );
-  _vc->registerVar(_leps + "_mvaSusy"              );
-  _vc->registerVar(_leps + "_mcMatchId"            );
-  _vc->registerVar(_leps + "_mcMatchAny"           );
-  _vc->registerVar(_leps + "_jetBTagCSV"           );
-  _vc->registerVar(_leps + "_sigmaIEtaIEta"        );
-  _vc->registerVar(_leps + "_hadronicOverEm"       );
-  _vc->registerVar(_leps + "_eInvMinusPInv"        );
-  _vc->registerVar(_leps + "_dEtaScTrkIn"          );
-  _vc->registerVar(_leps + "_dPhiScTrkIn"          );
-  _vc->registerVar(_leps + "_ecalPFClusterIso"     );
-  _vc->registerVar(_leps + "_hcalPFClusterIso"     );
-  _vc->registerVar(_leps + "_dr03TkSumPt"          );
   _vc->registerVar(_mets + "_pt"                   );
   _vc->registerVar(_mets + "_eta"                  );
   _vc->registerVar(_mets + "_phi"                  );
@@ -218,6 +175,7 @@ void FRinSitu::initialize(){
   _vc->registerVar("nSoftBJetMedium25"             );
 
   //triggers
+  registerLepVars();
   registerTriggerVars();
 
   //additional counter categories
@@ -237,8 +195,8 @@ void FRinSitu::initialize(){
 
   //extra input variables
   //_MR          = getCfgVarS("MR"           );
-  _norm        = getCfgVarS("NORMALIZATION");
-  _genMatching = getCfgVarF("GENMATCHING"  );
+  _norm        = getCfgVarS("NORMALIZATION", "data"); // data, lumi
+  _genMatching = getCfgVarF("GENMATCHING"  , 0     ); // 1, 0
 
   //SusyModule
   _susyMod = new SusyModule(_vc); 
@@ -263,8 +221,6 @@ void FRinSitu::run(){
   _sigLeps .clear();
   _vetLeps .clear();
   _clLeps  .clear();
-  _goodJets.clear();
-  _bJets   .clear();
 
   _denElsIdx  .clear();
   _denLepsIdx .clear();
@@ -275,9 +231,15 @@ void FRinSitu::run(){
   _sigLepsIdx .clear();
   _vetLepsIdx .clear();
   _clLepsIdx  .clear();
-  _goodJetsIdx.clear();
   _isoLepsIdx .clear();
+
+  _bJets   .clear();
+  _goodJets.clear();
+  _lepJets .clear();
+
   _bJetsIdx   .clear();
+  _goodJetsIdx.clear();
+  _lepJetsIdx .clear();
 
   _exts    .clear();
   _trws    .clear();
@@ -481,6 +443,57 @@ void FRinSitu::registerLepPlots(vector<string> leps, string var, int nxbins, vec
 
 }
 
+
+//____________________________________________________________________________
+void FRinSitu::registerLepVars(){
+
+  for(unsigned int i = 0; i < _leps.size(); ++i){
+    _vc->registerVar("n" + _leps[i]                     );
+    _vc->registerVar(_leps[i] + "_pt"                   );
+    _vc->registerVar(_leps[i] + "_eta"                  );
+    _vc->registerVar(_leps[i] + "_phi"                  );
+    _vc->registerVar(_leps[i] + "_charge"               );
+    _vc->registerVar(_leps[i] + "_tightCharge"          );
+    _vc->registerVar(_leps[i] + "_mediumMuonId"         );
+    _vc->registerVar(_leps[i] + "_mvaIdPhys14"          );
+    _vc->registerVar(_leps[i] + "_mvaIdSpring15"        );
+    _vc->registerVar(_leps[i] + "_pdgId"                );
+    _vc->registerVar(_leps[i] + "_relIso03"             );
+    _vc->registerVar(_leps[i] + "_relIso04"             );
+    _vc->registerVar(_leps[i] + "_jetPtRatiov2"         );
+    _vc->registerVar(_leps[i] + "_jetPtRelv2"           );
+    _vc->registerVar(_leps[i] + "_jetRawPt"             );
+    _vc->registerVar(_leps[i] + "_jetCorrFactor_L1L2L3Res");
+    _vc->registerVar(_leps[i] + "_miniRelIso"           );
+    _vc->registerVar(_leps[i] + "_chargedHadRelIso03"   );
+    _vc->registerVar(_leps[i] + "_miniRelIso"           );
+    _vc->registerVar(_leps[i] + "_miniRelIso"           );
+    _vc->registerVar(_leps[i] + "_dxy"                  );
+    _vc->registerVar(_leps[i] + "_dz"                   );
+    _vc->registerVar(_leps[i] + "_sip3d"                );
+    _vc->registerVar(_leps[i] + "_pfMuonId"             );
+    _vc->registerVar(_leps[i] + "_tightId"              );
+    _vc->registerVar(_leps[i] + "_looseIdSusy"          );
+    _vc->registerVar(_leps[i] + "_convVeto"             );
+    _vc->registerVar(_leps[i] + "_lostHits"             );
+    _vc->registerVar(_leps[i] + "_eleCutIdCSA14_50ns_v1");
+    _vc->registerVar(_leps[i] + "_eleCutIdCSA14_50ns_v1");
+    _vc->registerVar(_leps[i] + "_eleCutId2012_full5x5" );
+    _vc->registerVar(_leps[i] + "_mvaSusyPHYS14"        );
+    _vc->registerVar(_leps[i] + "_mvaSusy"              );
+    _vc->registerVar(_leps[i] + "_mcMatchId"            );
+    _vc->registerVar(_leps[i] + "_mcMatchAny"           );
+    _vc->registerVar(_leps[i] + "_jetBTagCSV"           );
+    _vc->registerVar(_leps[i] + "_sigmaIEtaIEta"        );
+    _vc->registerVar(_leps[i] + "_hadronicOverEm"       );
+    _vc->registerVar(_leps[i] + "_eInvMinusPInv"        );
+    _vc->registerVar(_leps[i] + "_dEtaScTrkIn"          );
+    _vc->registerVar(_leps[i] + "_dPhiScTrkIn"          );
+    _vc->registerVar(_leps[i] + "_ecalPFClusterIso"     );
+    _vc->registerVar(_leps[i] + "_hcalPFClusterIso"     );
+    _vc->registerVar(_leps[i] + "_dr03TkSumPt"          );
+  }
+}
 
 //  ____________________________________________________________________________
 void FRinSitu::registerTriggerVars(){
@@ -801,131 +814,11 @@ void FRinSitu::collectKinematicObjects(){
     parameters: none
     return: none
   */
-  
-  for(int i = 0; i < _vc->get("nLepGood"); ++i){
-
-    // electrons
-    if(std::abs(_vc->get("LepGood_pdgId", i)) == 11){		  
-      // sip > 4.0
-      if(denominatorElectronSelection(i)){
-        _denEls.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-					  _vc->get("LepGood_eta", i),
-					  _vc->get("LepGood_phi", i),
-					  _vc->get("LepGood_pdgId", i),
-					  _vc->get("LepGood_charge", i),
-					  0.0005) );
-        _denElsIdx .push_back(i);
-        _denLeps   .push_back( _denEls[ _denEls.size()-1 ] );
-        _denLepsIdx.push_back(i);
-        if(_vc->get("evt") == 930292) cout << "added lepton " << i << " with " << _susyMod -> elHLTEmulSelIso(i, SusyModule::kInSituHT) << endl;
-        if(_susyMod -> elHLTEmulSelIso(i, SusyModule::kInSituHT)) _isoLepsIdx.push_back(i);
-
-        if(numeratorElectronSelection(i)) {
-          _numEls.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-	      			  _vc->get("LepGood_eta", i),
-	      			  _vc->get("LepGood_phi", i),
-	      			  _vc->get("LepGood_pdgId", i),
-	      			  _vc->get("LepGood_charge", i),
-	      			  0.0005) );
-          _numElsIdx .push_back(i);
-          _numLeps   .push_back( _numEls[ _numEls.size()-1 ] );
-          _numLepsIdx.push_back(i);
-        }
-      }
-      // sip < 4.0
-      else {
-        if(signalRegionElectronSelection(i)){
-          _sigLeps.push_back(Candidate::create(_vc->get("LepGood_pt", i),
-		  			  _vc->get("LepGood_eta", i),
-		  			  _vc->get("LepGood_phi", i),
-		  			  _vc->get("LepGood_pdgId", i),
-		  			  _vc->get("LepGood_charge", i),
-		  			  0.0005) );
-          _sigLepsIdx.push_back(i);
-        }
-        if(cleanElectronSelection(i))  {
-          _clLeps.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-	      			  _vc->get("LepGood_eta", i),
-	      			  _vc->get("LepGood_phi", i),
-	      			  _vc->get("LepGood_pdgId", i),
-	      			  _vc->get("LepGood_charge", i),
-	      			  0.0005) );
-          _clLepsIdx .push_back(i);
-        }
-      }
-      // sip < 1000.
-      if(vetoElectronSelection(i))  {
-        _vetLeps.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-	    			  _vc->get("LepGood_eta", i),
-	    			  _vc->get("LepGood_phi", i),
-	    			  _vc->get("LepGood_pdgId", i),
-	    			  _vc->get("LepGood_charge", i),
-	    			  0.0005) );
-        _vetLepsIdx .push_back(i);
-      }
-    }
-
-    // muons
-    else if(std::abs(_vc->get("LepGood_pdgId", i)) == 13){
-      // sip > 4.0
-      if(denominatorMuonSelection(i)) {
-        _denMus.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-					  _vc->get("LepGood_eta", i),
-					  _vc->get("LepGood_phi", i),
-					  _vc->get("LepGood_pdgId", i),
-					  _vc->get("LepGood_charge", i),
-					  0.105) );
-        _denMusIdx.push_back(i);
-        _denLeps.push_back( _denMus[ _denMus.size()-1 ] );
-        _denLepsIdx.push_back(i);
-        _isoLepsIdx.push_back(i);
-
-        if(numeratorMuonSelection(i)) {
-          _numMus.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-	      			  _vc->get("LepGood_eta", i),
-	      			  _vc->get("LepGood_phi", i),
-	      			  _vc->get("LepGood_pdgId", i),
-	      			  _vc->get("LepGood_charge", i),
-	      			  0.105) );
-          _numMusIdx.push_back(i);
-          _numLeps.push_back( _numMus[ _numMus.size()-1 ] );
-          _numLepsIdx.push_back(i);
-        }
-      }
-      // sip < 4.0
-      else {
-        if(signalRegionMuonSelection(i)) {
-          _sigLeps.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-	      			  _vc->get("LepGood_eta", i),
-	      			  _vc->get("LepGood_phi", i),
-	      			  _vc->get("LepGood_pdgId", i),
-	      			  _vc->get("LepGood_charge", i),
-	      			  0.105) );
-          _sigLepsIdx.push_back(i);
-        }
-        if(cleanMuonSelection(i)) {
-          _clLeps.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-	      			  _vc->get("LepGood_eta", i),
-	      			  _vc->get("LepGood_phi", i),
-	      			  _vc->get("LepGood_pdgId", i),
-	      			  _vc->get("LepGood_charge", i),
-	      			  0.105) );
-          _clLepsIdx.push_back(i);
-        }
-      }
-      // sip < 1000.
-      if(vetoMuonSelection(i)) {
-        _vetLeps.push_back( Candidate::create(_vc->get("LepGood_pt", i),
-	    			  _vc->get("LepGood_eta", i),
-	    			  _vc->get("LepGood_phi", i),
-	    			  _vc->get("LepGood_pdgId", i),
-	    			  _vc->get("LepGood_charge", i),
-	    			  0.105) );
-        _vetLepsIdx.push_back(i);
-      }
-    }
-  }
  
+
+  for(int i = 0; i < _leps.size(); ++i)
+    for(int j = 0; j < _vc -> get("n" + _leps[i]); ++j)
+      collectLeptons(j, _leps[i]);
 
   _nDenEls    = _denEls   .size();
   _nDenLeps   = _denLeps  .size();
@@ -936,7 +829,7 @@ void FRinSitu::collectKinematicObjects(){
   _nSigLeps   = _sigLeps  .size();
   _nVetLeps   = _vetLeps  .size();
 
-  _susyMod -> cleanJets( &_clLeps ,  _goodJets, _goodJetsIdx, _bJets, _bJetsIdx, 40, 25);
+  _susyMod -> cleanJets( &_clLeps ,  _goodJets, _goodJetsIdx, _bJets, _bJetsIdx, _lepJets, _lepJetsIdx, 40, 25);
   _susyMod -> cleanLeps(  _sigLeps, &_vetLeps );
 
   _nGoodJets = _goodJets.size();
@@ -948,14 +841,107 @@ void FRinSitu::collectKinematicObjects(){
 
 
 //____________________________________________________________________________
-bool FRinSitu::cleanElectronSelection(unsigned int elIdx){
+void FRinSitu::collectLeptons(int idx, string branch){
+ 
+  Candidate * c = nullptr;
+
+  // electrons
+  if(std::abs(_vc->get(branch + "_pdgId", idx)) == 11){		  
+
+    c  = Candidate::create(_vc->get(branch + "_pt"    , idx),
+                           _vc->get(branch + "_eta"   , idx),
+                           _vc->get(branch + "_phi"   , idx),
+                           _vc->get(branch + "_pdgId" , idx),
+                           _vc->get(branch + "_charge", idx),
+                           0.0005);
+
+    // sip > 4.0
+    if(denominatorElectronSelection(c, idx, branch)){
+      _denEls    .push_back( c );
+      _denElsIdx .push_back(pair<int, string>(idx, branch));
+      _denLeps   .push_back( _denEls[ _denEls.size()-1 ] );
+      _denLepsIdx.push_back(pair<int, string>(idx, branch));
+      if(_susyMod -> elHLTEmulSelIso(idx, SusyModule::kInSituHT, branch)) 
+        _isoLepsIdx.push_back(pair<int, string>(idx, branch));
+
+      if(numeratorElectronSelection(c, idx, branch)) {
+        _numEls    .push_back( c );
+        _numElsIdx .push_back(pair<int, string>(idx, branch));
+        _numLeps   .push_back( _numEls[ _numEls.size()-1 ] );
+        _numLepsIdx.push_back(pair<int, string>(idx, branch));
+      }
+    }
+    // sip < 4.0
+    else {
+      if(signalRegionElectronSelection(c, idx, branch)){
+        _sigLeps   .push_back( c );
+        _sigLepsIdx.push_back(pair<int, string>(idx, branch));
+      }
+      if(cleanElectronSelection(c, idx, branch))  {
+        _clLeps   .push_back( c );
+        _clLepsIdx.push_back(pair<int, string>(idx, branch));
+      }
+    }
+    // sip < 1000.
+    if(vetoElectronSelection(c, idx, branch))  {
+      _vetLeps   .push_back( c );
+      _vetLepsIdx.push_back(pair<int, string>(idx, branch));
+    }
+  }
+
+  // muons
+  else if(std::abs(_vc->get(branch + "_pdgId", idx)) == 13){
+    c = Candidate::create(_vc->get(branch + "_pt"    , idx),
+                          _vc->get(branch + "_eta"   , idx),
+                          _vc->get(branch + "_phi"   , idx),
+                          _vc->get(branch + "_pdgId" , idx),
+                          _vc->get(branch + "_charge", idx),
+                          0.105);
+
+    // sip > 4.0
+    if(denominatorMuonSelection(c, idx, branch)) {
+      _denMus    .push_back( c );
+      _denMusIdx .push_back(pair<int, string>(idx, branch));
+      _denLeps   .push_back( _denMus[ _denMus.size()-1 ] );
+      _denLepsIdx.push_back(pair<int, string>(idx, branch));
+      _isoLepsIdx.push_back(pair<int, string>(idx, branch));
+
+      if(numeratorMuonSelection(c, idx, branch)) {
+        _numMus    .push_back( c );
+        _numMusIdx .push_back(pair<int, string>(idx, branch));
+        _numLeps   .push_back( _numMus[ _numMus.size()-1 ] );
+        _numLepsIdx.push_back(pair<int, string>(idx, branch));
+      }
+    }
+    // sip < 4.0
+    else {
+      if(signalRegionMuonSelection(c, idx, branch)) {
+        _sigLeps   .push_back( c );
+        _sigLepsIdx.push_back(pair<int, string>(idx, branch));
+      }
+      if(cleanMuonSelection(c, idx, branch)) {
+        _clLeps   .push_back( c );
+        _clLepsIdx.push_back(pair<int, string>(idx, branch));
+      }
+    }
+    // sip < 1000.
+    if(vetoMuonSelection(c, idx, branch)) {
+      _vetLeps   .push_back( c );
+      _vetLepsIdx.push_back(pair<int, string>(idx, branch));
+    }
+  }
+}
+
+
+//____________________________________________________________________________
+bool FRinSitu::cleanElectronSelection(Candidate* c, unsigned int elIdx, string branch){
   // veto electron -> jet lepton cleaning only
   //               -> default FO selection
 
   counter("CleanElectrons", kClEls);
 
-  if(!_susyMod -> elIdSel     (elIdx, SusyModule::kTight, SusyModule::kLoose) ) return false;
-  if(!_susyMod -> elHLTEmulSel(elIdx, false                                 ) ) return false;
+  if(!_susyMod -> elIdSel     (c, elIdx, SusyModule::kTight, SusyModule::kLoose, true, false, branch) ) return false;
+  if(!_susyMod -> elHLTEmulSel(   elIdx, false, branch                                              ) ) return false;
 
   return true;
 
@@ -963,13 +949,13 @@ bool FRinSitu::cleanElectronSelection(unsigned int elIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::cleanMuonSelection(unsigned int muIdx){
+bool FRinSitu::cleanMuonSelection(Candidate* c, unsigned int muIdx, string branch){
   // veto muon -> jet lepton cleaning only
   //           -> default FO selection
 
   counter("CleanMuons", kClMus);
 
-  if(!_susyMod -> muIdSel    (muIdx, SusyModule::kTight) ) return false;
+  if(!_susyMod -> muIdSel(c, muIdx, SusyModule::kTight, true, false, branch) ) return false;
 
   return true;
 
@@ -977,7 +963,7 @@ bool FRinSitu::cleanMuonSelection(unsigned int muIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::denominatorElectronSelection(unsigned int elIdx){
+bool FRinSitu::denominatorElectronSelection(Candidate* c, unsigned int elIdx, string branch){
   /*
     does the selection of loose electrons
     parameters: elIdx
@@ -985,16 +971,11 @@ bool FRinSitu::denominatorElectronSelection(unsigned int elIdx){
   */
 
   counter("DenominatorElectrons", kDenEls);
-//if(_vc->get("evt") == 17567099) cout << "hello0: " << elIdx << endl;
 
-  if(!_susyMod -> elIdSel     (elIdx, SusyModule::kTight, SusyModule::kInSitu, true)) return false;
-//if(_vc->get("evt") == 17567099) cout << "hello1: " << elIdx << endl;
-  if(!_susyMod -> inSituFO    (elIdx, SusyModule::kTight                           )) return false;
-//if(_vc->get("evt") == 17567099) cout << "hello2: " << elIdx << endl;
-  if(!_susyMod -> elHLTEmulSel(elIdx, false                                        )) return false;
-//if(_vc->get("evt") == 17567099) cout << "hello3: " << elIdx << endl;
-  //if(!_susyMod -> invPtRelSel (elIdx, SusyModule::kTight                           )) return false;
-//if(_vc->get("evt") == 17567099) cout << "hello4: " << elIdx << endl;
+  if(!_susyMod -> elIdSel     (c, elIdx, SusyModule::kTight, SusyModule::kInSitu, true, true, branch)) return false;
+  if(!_susyMod -> inSituFO    (   elIdx, SusyModule::kTight, branch                                 )) return false;
+  if(!_susyMod -> elHLTEmulSel(   elIdx, false, branch                                              )) return false;
+  //if(!_susyMod -> invPtRelSel (elIdx, SusyModule::kTight                             )) return false;
 
   return true;
 
@@ -1002,7 +983,7 @@ bool FRinSitu::denominatorElectronSelection(unsigned int elIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::denominatorMuonSelection(unsigned int muIdx){
+bool FRinSitu::denominatorMuonSelection(Candidate* c, unsigned int muIdx, string branch){
   /*
     does the selection of loose muons
     parameters: muIdx
@@ -1011,9 +992,9 @@ bool FRinSitu::denominatorMuonSelection(unsigned int muIdx){
 
   counter("DenominatorMuons", kDenMus);
 
-  if(!_susyMod -> muIdSel    (muIdx, SusyModule::kTight , true)) return false;
-  if(!_susyMod -> inSituFO   (muIdx, SusyModule::kMedium      )) return false;
-  //if(!_susyMod -> invPtRelSel(muIdx, SusyModule::kMedium      )) return false;
+  if(!_susyMod -> muIdSel(c, muIdx, SusyModule::kTight , true, true, branch)) return false;
+  if(!_susyMod -> inSituFO  (muIdx, SusyModule::kMedium, branch            )) return false;
+  //if(!_susyMod -> invPtRelSel(muIdx, SusyModule::kMedium        )) return false;
 
   return true;
 
@@ -1021,7 +1002,7 @@ bool FRinSitu::denominatorMuonSelection(unsigned int muIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::numeratorElectronSelection(unsigned int elIdx){
+bool FRinSitu::numeratorElectronSelection(Candidate* c, unsigned int elIdx, string branch){
   /*
     does the selection of tight electrons
     parameters: elIdx
@@ -1031,12 +1012,12 @@ bool FRinSitu::numeratorElectronSelection(unsigned int elIdx){
 
   counter("NumeratorElectrons", kNumEls);
 
-  if(!makeCut( _susyMod -> elIdSel     (elIdx, SusyModule::kTight, SusyModule::kLoose, true), "electron id "  , "=", kNumEls)) return false;
-  if(!makeCut( _susyMod -> elMvaSel    (elIdx, SusyModule::kTight                          ), "electron mva"  , "=", kNumEls)) return false;
-  //if(!makeCut( _susyMod -> multiIsoSel (elIdx, SusyModule::kTight                          ), "isolation"     , "=", kNumEls)) return false;
-  if(!makeCut( _susyMod -> multiIsoSelInSitu (elIdx, SusyModule::kTight                          ), "isolation"     , "=", kNumEls)) return false;
-  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false                                       ), "electron emu"  , "=", kNumEls)) return false;
-  //if(!makeCut( _susyMod -> invPtRelSel (elIdx, SusyModule::kTight                          ), "only low pTrel", "=", kNumEls)) return false;
+  if(!makeCut( _susyMod -> elIdSel       (c, elIdx, SusyModule::kTight, SusyModule::kLoose, true, true, branch), "electron id "  , "=", kNumEls)) return false;
+  if(!makeCut( _susyMod -> elMvaSel         (elIdx, SusyModule::kTight, branch                                ), "electron mva"  , "=", kNumEls)) return false;
+  if(!makeCut( _susyMod -> multiIsoSelInSitu(elIdx, SusyModule::kTight, branch                                ), "isolation"     , "=", kNumEls)) return false;
+  if(!makeCut( _susyMod -> elHLTEmulSel     (elIdx, false, branch                                             ), "electron emu"  , "=", kNumEls)) return false;
+  //if(!makeCut( _susyMod -> multiIsoSel (elIdx, SusyModule::kTight                            ), "isolation"     , "=", kNumEls)) return false;
+  //if(!makeCut( _susyMod -> invPtRelSel (elIdx, SusyModule::kTight                            ), "only low pTrel", "=", kNumEls)) return false;
 
   return true;
 
@@ -1044,7 +1025,7 @@ bool FRinSitu::numeratorElectronSelection(unsigned int elIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::numeratorMuonSelection(unsigned int muIdx){
+bool FRinSitu::numeratorMuonSelection(Candidate* c, unsigned int muIdx, string branch){
   /*
     does the selection of tight muons
     parameters: muIdx
@@ -1053,9 +1034,9 @@ bool FRinSitu::numeratorMuonSelection(unsigned int muIdx){
 
   counter("NumeratorMuons", kNumMus);
 
-  if(!makeCut( _susyMod -> muIdSel    (muIdx, SusyModule::kTight , true), "mu id selection", "=", kNumMus)) return false;
+  if(!makeCut( _susyMod -> muIdSel       (c, muIdx, SusyModule::kTight , true, true, branch), "mu id selection", "=", kNumMus)) return false;
+  if(!makeCut( _susyMod -> multiIsoSelInSitu(muIdx, SusyModule::kMedium, branch            ), "isolation"      , "=", kNumMus)) return false;
   //if(!makeCut( _susyMod -> multiIsoSel(muIdx, SusyModule::kMedium      ), "isolation"      , "=", kNumMus)) return false;
-  if(!makeCut( _susyMod -> multiIsoSelInSitu(muIdx, SusyModule::kMedium      ), "isolation"      , "=", kNumMus)) return false;
   //if(!makeCut( _susyMod -> invPtRelSel(muIdx, SusyModule::kMedium      ), "only low pTrel" , "=", kNumMus)) return false;
 
   return true;
@@ -1064,13 +1045,13 @@ bool FRinSitu::numeratorMuonSelection(unsigned int muIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::signalRegionElectronSelection(unsigned int elIdx){
+bool FRinSitu::signalRegionElectronSelection(Candidate* c, unsigned int elIdx, string branch){
 
   counter("SignalRegionElectrons", kSigEls);
 
-  if(!_susyMod -> elIdSel     (elIdx, SusyModule::kTight, SusyModule::kTight, false) ) return false;
-  if(!_susyMod -> multiIsoSel (elIdx, SusyModule::kTight                           ) ) return false; //denom on purpose
-  if(!_susyMod -> elHLTEmulSel(elIdx, (_HT < 300)                                  ) ) return false; //_hltDLHT
+  if(!_susyMod -> elIdSel     (c, elIdx, SusyModule::kTight, SusyModule::kTight, true, false, branch) ) return false;
+  if(!_susyMod -> multiIsoSel (   elIdx, SusyModule::kTight, branch                                 ) ) return false;
+  if(!_susyMod -> elHLTEmulSel(   elIdx, (_HT < 300), branch                                        ) ) return false;
 
   return true;
 
@@ -1078,12 +1059,12 @@ bool FRinSitu::signalRegionElectronSelection(unsigned int elIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::signalRegionMuonSelection(unsigned int muIdx){
+bool FRinSitu::signalRegionMuonSelection(Candidate* c, unsigned int muIdx, string branch){
 
   counter("SignalRegionMuons", kSigMus);
 
-  if(!_susyMod -> muIdSel    (muIdx, SusyModule::kTight , false) ) return false;
-  if(!_susyMod -> multiIsoSel(muIdx, SusyModule::kMedium       ) ) return false;
+  if(!_susyMod -> muIdSel    (c, muIdx, SusyModule::kTight, true, false, branch) ) return false;
+  if(!_susyMod -> multiIsoSel(   muIdx, SusyModule::kMedium, branch            ) ) return false;
 
   return true;
 
@@ -1091,14 +1072,14 @@ bool FRinSitu::signalRegionMuonSelection(unsigned int muIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::vetoElectronSelection(unsigned int elIdx){
+bool FRinSitu::vetoElectronSelection(Candidate* c, unsigned int elIdx, string branch){
   // veto electron -> for Z and gamma* veto
 
   counter("VetoElectrons", kVetEls);
 
-  if(!_susyMod -> elIdSel     (elIdx, SusyModule::kLoose, SusyModule::kLoose) ) return false;
-  if(!_susyMod -> multiIsoSel (elIdx, SusyModule::kDenom                    ) ) return false;
-  if(!_susyMod -> elHLTEmulSel(elIdx, false                                 ) ) return false;
+  if(!_susyMod -> elIdSel     (c, elIdx, SusyModule::kLoose, SusyModule::kLoose, true, false, branch) ) return false;
+  if(!_susyMod -> multiIsoSel (   elIdx, SusyModule::kDenom, branch                                 ) ) return false;
+  if(!_susyMod -> elHLTEmulSel(   elIdx, false, branch                                              ) ) return false;
 
   return true;
 
@@ -1106,13 +1087,13 @@ bool FRinSitu::vetoElectronSelection(unsigned int elIdx){
 
 
 //____________________________________________________________________________
-bool FRinSitu::vetoMuonSelection(unsigned int muIdx){
+bool FRinSitu::vetoMuonSelection(Candidate* c, unsigned int muIdx, string branch){
   // veto muon -> for Z and gamma* veto
 
   counter("VetoMuons", kVetMus);
 
-  if(!_susyMod -> muIdSel    (muIdx, SusyModule::kLoose) ) return false;
-  if(!_susyMod -> multiIsoSel(muIdx, SusyModule::kDenom) ) return false;
+  if(!_susyMod -> muIdSel    (c, muIdx, SusyModule::kLoose, true, false, branch) ) return false;
+  if(!_susyMod -> multiIsoSel(   muIdx, SusyModule::kDenom, branch             ) ) return false;
 
   return true;
 
@@ -1498,18 +1479,12 @@ bool FRinSitu::baseSelection(){
     return: true (if event passes selection), false (else)
   */
 
-if(_vc->get("evt") != 1479832348) return false;
-cout << "here0" << endl;
-
   // triggers
   if(!makeCut(triggerSelection()         , "trigger selection"             )) return false;
-cout << "here1" << endl;
 
   // lepton multiplicity
   if(!makeCut<int>( _nSigLeps            , 1, "=", "exactly one tight lep")) return false;
-cout << "here2" << endl;
   if(!makeCut<int>( _nDenLeps            , 1, "=", "exactly one FO"       )) return false;
-cout << "here3" << endl;
 
   // jet multiplicity
   //if(!makeCut<int>( _nGoodJets           , 2, ">=", "jet multiplicity"     )) return false;
@@ -1526,7 +1501,6 @@ cout << "here3" << endl;
 
   // same sign
   if(!makeCut( _lep1 -> charge() * _lep2 -> charge() > 0                   , "same sign requirement")) return false;
-cout << "here4" << endl;
 
   // cross flavor for single lepton dataset
   if(_sampleName.find("datasl") != std::string::npos) {
@@ -1540,8 +1514,6 @@ cout << "here4" << endl;
 
   // mll veto
   if(!makeCut(_susyMod -> passMllSingleVeto(_lep1, _lep2,  0,   8, false)     , "low mass veto"        )) return false;
-cout << "here5" << endl;
-DUMPVECTOR(_exts);
 
   return true;
 
@@ -1564,7 +1536,7 @@ bool FRinSitu::mrSelection(){
 
   if(_iso){
     if(_nDenEls == 1)
-      cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kTight), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
+      cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0].first, SusyModule::kTight, _denLepsIdx[0].second), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0].first), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0].first), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0].first), _vc->get("LepGood_mvaIdSpring15", _denLepsIdx[0].first), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
     //if(_nDenMus == 1)
     //  cout << Form("%d %6.2f %6.2f %5.2f %.2f %.2f %5.2f %5.2f %1.2f %1i %6.0f", int(_vc->get("evt")), _denLeps[0]->pt(), _susyMod->conePt(_denLepsIdx[0], SusyModule::kMedium), _denLeps[0]->eta(), _vc->get("LepGood_miniRelIso", _denLepsIdx[0]), _vc->get("LepGood_jetPtRatiov2", _denLepsIdx[0]), _vc->get("LepGood_jetPtRelv2", _denLepsIdx[0]), _met->pt(), _met->phi(), _nNumLeps, _trws[isotr]) << endl;
   }
@@ -1663,14 +1635,14 @@ bool FRinSitu::triggerSelection(){
     for(unsigned int i = 0; i < trlines.size(); ++i){
 
       if(Tools::trim(trlines[i]) != ""){
-cout << "testing " << trlines[i] << endl;
+//cout << "testing " << trlines[i] << endl;
         bool testiso = false;
         if(trlines[i].find("IsoVL") != std::string::npos || trlines[i].find("IsoVVL") != std::string::npos) 
           testiso = true;
-DUMP(testiso);
-DUMP(_vc->get(Tools::trim(trlines[i])));
-DUMPVECTOR(_denLepsIdx);
-DUMPVECTOR(_isoLepsIdx);
+//DUMP(testiso);
+//DUMP(_vc->get(Tools::trim(trlines[i])));
+//DUMPVECTOR(_denLepsIdx);
+//DUMPVECTOR(_isoLepsIdx);
         if(_vc->get(Tools::trim(trlines[i])) == 1) {
           if(testiso){
            if(_isoLepsIdx.size() == 0 || _isoLepsIdx[0] != _denLepsIdx[0])
@@ -1697,8 +1669,8 @@ DUMPVECTOR(_isoLepsIdx);
     }
   }
 
-DUMPVECTOR(trlines);
-DUMPVECTOR(_TR_lines);
+//DUMPVECTOR(trlines);
+//DUMPVECTOR(_TR_lines);
   // at least one auxiliary trigger per pt bin to be passed
   if(!makeCut(any, "at least one trigger path", "=", kTrigger)) return false;
 
@@ -1747,12 +1719,12 @@ void FRinSitu::fillEventPlots(){
 
 
 //____________________________________________________________________________
-void FRinSitu::fillFRMaps(string prepend, unsigned int lepIdx, int wp){
+void FRinSitu::fillFRMaps(string prepend, pair<unsigned int, string> lepIdx, int wp){
 
   for(unsigned int i = 0; i < _exts.size(); ++i){
-    fill(prepend + "MapPt_"     + _exts[i], overflowPt(_vc->get(_leps + "_pt", lepIdx)) , std::abs(_vc->get(_leps + "_eta", lepIdx)), _weight * _trws[i]);
-    fill(prepend + "MapPtJet_"  + _exts[i], overflowPt(_susyMod -> closestJetPt(lepIdx)), std::abs(_vc->get(_leps + "_eta", lepIdx)), _weight * _trws[i]);
-    fill(prepend + "MapPtCorr_" + _exts[i], overflowPt(_susyMod -> conePt(lepIdx, wp))  , std::abs(_vc->get(_leps + "_eta", lepIdx)), _weight * _trws[i]);
+    fill(prepend + "MapPt_"     + _exts[i], overflowPt(_vc->get(lepIdx.second + "_pt", lepIdx.first            )), std::abs(_vc->get(lepIdx.second + "_eta", lepIdx.first)), _weight * _trws[i]);
+    fill(prepend + "MapPtJet_"  + _exts[i], overflowPt(_susyMod -> closestJetPt(lepIdx.first, lepIdx.second    )), std::abs(_vc->get(lepIdx.second + "_eta", lepIdx.first)), _weight * _trws[i]);
+    fill(prepend + "MapPtCorr_" + _exts[i], overflowPt(_susyMod -> conePt      (lepIdx.first, wp, lepIdx.second)), std::abs(_vc->get(lepIdx.second + "_eta", lepIdx.first)), _weight * _trws[i]);
   }
 
 }
@@ -1785,25 +1757,27 @@ void FRinSitu::fillFakeRatioMaps(){
 
  
 //____________________________________________________________________________ 
-void FRinSitu::fillLepPlots(string prepend, Candidate * lep, unsigned int lepIdx, int wp){ 
+void FRinSitu::fillLepPlots(string prepend, Candidate * lep, pair<unsigned int, string> lepIdx, int wp){ 
   /* 
     fills the control plots for leptons PER LEPTON 
   */   
 
+  float MT = _susyMod -> Mt(lep, _met, lepIdx.first, -1, lepIdx.second, "", findLepWP(lep));
+
   for(unsigned int i = 0; i < _exts.size(); ++i){
-    fill(prepend + "Pt_"       + _exts[i],          _vc->get(_leps + "_pt"        , lepIdx) , _weight * _trws[i]);
-    fill(prepend + "Eta_"      + _exts[i], std::abs(_vc->get(_leps + "_eta"       , lepIdx)), _weight * _trws[i]);
-    fill(prepend + "EtaFR_"    + _exts[i], std::abs(_vc->get(_leps + "_eta"       , lepIdx)), _weight * _trws[i]);
-    fill(prepend + "DXY_"      + _exts[i], std::abs(_vc->get(_leps + "_dxy"       , lepIdx)), _weight * _trws[i]);
-    fill(prepend + "DZ_"       + _exts[i], std::abs(_vc->get(_leps + "_dz"        , lepIdx)), _weight * _trws[i]);
-    fill(prepend + "SIP_"      + _exts[i],          _vc->get(_leps + "_sip3d"     , lepIdx) , _weight * _trws[i]);
-    fill(prepend + "RelIso_"   + _exts[i],          _vc->get(_leps + "_relIso03"  , lepIdx) , _weight * _trws[i]);
-    fill(prepend + "MiniIso_"  + _exts[i],          _vc->get(_leps + "_miniRelIso", lepIdx) , _weight * _trws[i]);
-    fill(prepend + "PtRel_"    + _exts[i],          _vc->get(_leps + "_jetPtRelv2", lepIdx) , _weight * _trws[i]);
-    fill(prepend + "MT_"       + _exts[i], Candidate::create( lep, _met) -> mass()          , _weight * _trws[i]);
-    fill(prepend + "PtJet_"    + _exts[i], _susyMod -> closestJetPt(lepIdx)                 , _weight * _trws[i]);
-    fill(prepend + "PtCorr_"   + _exts[i], _susyMod -> conePt(lepIdx, wp)                   , _weight * _trws[i]);
-    fill(prepend + "PtCorrFR_" + _exts[i], overflowPt(_susyMod -> conePt(lepIdx, wp))       , _weight * _trws[i]);
+    fill(prepend + "Pt_"       + _exts[i],          _vc->get(lepIdx.second + "_pt"        , lepIdx.first) , _weight * _trws[i]);
+    fill(prepend + "Eta_"      + _exts[i], std::abs(_vc->get(lepIdx.second + "_eta"       , lepIdx.first)), _weight * _trws[i]);
+    fill(prepend + "EtaFR_"    + _exts[i], std::abs(_vc->get(lepIdx.second + "_eta"       , lepIdx.first)), _weight * _trws[i]);
+    fill(prepend + "DXY_"      + _exts[i], std::abs(_vc->get(lepIdx.second + "_dxy"       , lepIdx.first)), _weight * _trws[i]);
+    fill(prepend + "DZ_"       + _exts[i], std::abs(_vc->get(lepIdx.second + "_dz"        , lepIdx.first)), _weight * _trws[i]);
+    fill(prepend + "SIP_"      + _exts[i],          _vc->get(lepIdx.second + "_sip3d"     , lepIdx.first) , _weight * _trws[i]);
+    fill(prepend + "RelIso_"   + _exts[i],          _vc->get(lepIdx.second + "_relIso03"  , lepIdx.first) , _weight * _trws[i]);
+    fill(prepend + "MiniIso_"  + _exts[i],          _vc->get(lepIdx.second + "_miniRelIso", lepIdx.first) , _weight * _trws[i]);
+    fill(prepend + "PtRel_"    + _exts[i],          _vc->get(lepIdx.second + "_jetPtRelv2", lepIdx.first) , _weight * _trws[i]);
+    fill(prepend + "MT_"       + _exts[i], MT                                                             , _weight * _trws[i]);
+    fill(prepend + "PtJet_"    + _exts[i], _susyMod -> closestJetPt(lepIdx.first, lepIdx.second)          , _weight * _trws[i]);
+    fill(prepend + "PtCorr_"   + _exts[i], _susyMod -> conePt(lepIdx.first, wp, lepIdx.second)            , _weight * _trws[i]);
+    fill(prepend + "PtCorrFR_" + _exts[i], overflowPt(_susyMod -> conePt(lepIdx.first, wp, lepIdx.second)), _weight * _trws[i]);
   }
  
 } 
@@ -1842,9 +1816,9 @@ string FRinSitu::findLepAbbr(Candidate* lep){
 
 
 //____________________________________________________________________________
-string FRinSitu::findLepAbbr(unsigned int idx){
+string FRinSitu::findLepAbbr(pair<unsigned int, string> idx){
 
-  if(std::abs(_vc->get(_leps + "_pdgId", idx)) == 11) return "El";
+  if(std::abs(_vc->get(idx.second + "_pdgId", idx.first)) == 11) return "El";
   return "Mu";
 
 }
@@ -1860,9 +1834,9 @@ int FRinSitu::findLepWP(Candidate* lep){
 
 
 //____________________________________________________________________________
-int FRinSitu::findLepWP(unsigned int idx){
+int FRinSitu::findLepWP(pair<unsigned int, string> idx){
 
-  if(std::abs(_vc->get(_leps + "_pdgId", idx)) == 11) return SusyModule::kTight;
+  if(std::abs(_vc->get(idx.second + "_pdgId", idx.first)) == 11) return SusyModule::kTight;
   return SusyModule::kMedium;
 
 }
@@ -1894,11 +1868,11 @@ void FRinSitu::findTriggerExts(){
 
 
 //____________________________________________________________________________
-bool FRinSitu::genMatchedToFake(unsigned int idx) {
+bool FRinSitu::genMatchedToFake(pair<unsigned int, string> idx) {
 
   if (_vc->get("isData") == 1) return false;
 
-  int id1  = _vc->get("LepGood_mcMatchId" ,idx); 
+  int id1  = _vc->get(idx.second + "_mcMatchId" , idx.first); 
   if(id1==0) return true;
 
   return false;

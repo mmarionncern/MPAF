@@ -29,6 +29,7 @@
 #include <TBits.h>
 #include <TChain.h>
 #include <TLeaf.h>
+#include <TBranch.h>
 
 #include "tools/src/SystUtils.hh"
 
@@ -132,7 +133,13 @@ private:
 
   template<typename T> inline vector<float> convertVal(T* vals) {
     
-    vector<float> vf(vals, vals + sizeof(vals) / sizeof(vals[0]));
+    //vector<float> vf(vals, vals + sizeof(vals) / sizeof(vals[0]));
+    vector<float> vf;
+    int sa=sizeof(vals)/sizeof(vals[0]);
+    for(size_t iv=0; iv<sa; ++iv) {
+      vf.push_back( (float)vals[iv] );
+    }
+
     return vf;
   };
 
@@ -150,14 +157,12 @@ private:
     typename map<int, T>::const_iterator it = cmap.find(mvar);
     if( it == cmap.end() ) { // variable not yet registered in the backup map	
       cmap[ mvar ] = imap[ mvar ];
-      //cout<<" init step : "<<mvar<<"  "<<cmap[ mvar ]<<" / "<<imap[ mvar ]<<"   "<<(&(cmap[ mvar ]))<<endl;
     }
     else {   // variable already registered, reinitialization
       if(_nextEvent)
   	cmap[ mvar ] = imap[ mvar ];
       else
   	imap[ mvar ] = cmap[ mvar ];
-      //cout<<" back step : "<<cmap[ mvar ]<<" / "<<imap[ mvar ]<<"   "<<(&(cmap[ mvar ]))<<endl;
     }
   };
 
@@ -178,7 +183,6 @@ private:
       cmap[ mvar ] = new vector<T>;
       for(size_t ie = 0; ie < imap[mvar]->size(); ++ie) {
   	cmap[ mvar ]->push_back( imap[ mvar ]->at(ie) );
-  	//cout << " init step : " << cmap[ mvar ]->at(ie) << " / " << imap[ mvar ]->at(ie) << endl;
       }
     }
     else { // variable already registered, reinitialization 
@@ -191,7 +195,6 @@ private:
       else {
   	for(size_t ie = 0; ie < imap[mvar]->size(); ++ie) {
   	  imap[ mvar ]->at(ie) = cmap[ mvar ]->at(ie);
-  	  //cout << " back step : " << cmap[ mvar ]->at(ie) << " / " << imap[ mvar ]->at(ie) << endl;
   	}
       }
     }
@@ -208,7 +211,6 @@ private:
       cmap[mvar] = new vector<T>;
       for(size_t ie=0;ie<as;++ie) {
   	cmap[mvar]->push_back( imap[mvar][ie] );
-  	//cout << " init step : " << cmap[ mvar ]->at(ie) << " / " << imap[ mvar ]->at(ie) << endl;
       }
     }
     else { // variable already registered, reinitialization 
@@ -221,10 +223,10 @@ private:
       else {
   	for(size_t ie=0;ie<as;++ie) {
   	  imap[mvar][ie] = cmap[ mvar]->at(ie);
-  	  //cout << " back step : " << cmap[ mvar ]->at(ie) << " / " << imap[ mvar ]->at(ie) << endl;
-  	}
+	}
       }
     }
+
   };
 
 
@@ -268,10 +270,10 @@ private:
     */
 	
     typename map<int, vector<T>* >::const_iterator it;
-	
     for(it = cmap.begin(); it != cmap.end(); ++it) {
-      for(size_t ie = 0; ie <it->second->size(); ++ie)
+      for(size_t ie = 0; ie <it->second->size(); ++ie) {
   	imap[ it->first ][ie]=it->second->at(ie);
+      }
     }
 	
   };
@@ -288,6 +290,12 @@ public:
   ~VarClass();
 	
   void reset();
+
+  void setEvent(int ie) {
+    _ie=ie;
+    for(map<int,bool>::iterator it=_loaded.begin();it!=_loaded.end();it++)
+      it->second = false;
+  };
 	
   void registerVar(string name);
   void registerVar(string name, string type);
@@ -317,7 +325,8 @@ public:
   //systematic ucnertainty propagation     ============
   void applySystVar(string name, int dir, string mvar, float mag, string type);
   void applySystVar(string name, int dir, string mvar, 
-		    vector<string> vars, string db, string type);
+		    vector<string> vars, vector<bool> specVars,
+		    string db, string type);
   void backPortVar(int mvar);
   void backPortAllVars();
   // void applyWSystVar(string name, int dir, float& w, vector<string> vars, 
@@ -341,7 +350,7 @@ private:
   double findValue(int id, int idx);
   void initIds();
 
-  void setIds(string name, int cont, int type, int& id);
+  void setIds(string name, int cont, int type, int& id, TTree* tree);
 
   double findSVal(int tType, int key);
   double findVVal(int tType, int key, int idx);
@@ -387,7 +396,13 @@ private:
      kNConts=4
    };
   //static string objectType[VarClass::kNTypes];
-  
+
+  //event number
+  int _ie;
+  map<int,TBranch*> _branches;
+  map<int,bool> _loaded;
+
+
   //mapping names-ids
   static int oC_;
   static int oT_;
@@ -482,8 +497,6 @@ private:
 
   bool _nextEvent;
 	
-  //ClassDef(VarClass,0)
-
 };
 
 #endif
