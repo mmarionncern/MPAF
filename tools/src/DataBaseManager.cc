@@ -232,7 +232,6 @@ DataBaseManager::readDb(string key, string dbName) {
 
 }
 
-
 void
 DataBaseManager::readDbHisto(string key, string dbName, string hname) {
 
@@ -540,38 +539,6 @@ DataBaseManager::getDBValue(string key, string v1) {
 
   return getDBValue(key, _mSIt->second);
 }
-
-
-float
-DataBaseManager::getDBValueCSV(string key, vector<pair<int, float> > fCheck, vector<pair<int, string> > sCheck, int col){
-
-  for(unsigned int i = 0; i < _csvDbValS[key].size(); ++i){
-
-    bool found = true;
-    for(unsigned int j = 0; j < fCheck.size(); ++j){
-      if(_csvDbValF[key][i][fCheck[j].first] != fCheck[j].second){
-        found = false;
-        break;
-      }
-    }
-
-    if(!found) continue;
-
-    for(unsigned int j = 0; j < sCheck.size(); ++j){
-      if(_csvDbValS[key][i][sCheck[j].first] != sCheck[j].second){
-        found = false;
-        break;
-      }
-    }
-
-    if(!found) continue;
-    return _csvDbValF[key][i][col];
-
-  }
-
-  return -9999;
-
-} 
 
 float 
 DataBaseManager::getDBErrL(string key, string v1) {

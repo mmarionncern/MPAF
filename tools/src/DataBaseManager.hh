@@ -21,8 +21,7 @@
 #include "TGraph.h"
 
 #include "tools/src/StatUtils.hh"
-//#include "analysis/utils/Debug.cc"
-//#include "analysis/utils/Tools.hh"
+
 
 class DataBaseManager {
 
@@ -54,9 +53,6 @@ void loadDb(std::string key, std::string dbName);//, bool isTf1Db=false);
   float getDBValue(std::string key, std::string v1);
   float getDBErrL(std::string key, std::string v1);
   float getDBErrH(std::string key, std::string v1);
-  // csv stuff
-  float getDBValueCSV(std::string key, std::vector<std::pair<int, float> > fCheck, 
-                                       std::vector<std::pair<int, std::string> > sCheck, int col);
 
   std::vector<std::vector<float> > getDB(std::string key);
 
@@ -83,11 +79,7 @@ void loadDb(std::string key, std::string dbName);//, bool isTf1Db=false);
 private:
   
   void readDb(std::string key, std::string dbName);
-  void readDbCSV(std::string key, std::string dbName, char separator);
   void readDbHisto(std::string key, std::string dbName, std::string hname);
-
-  std::map<std::string, std::vector<std::vector<string> > > _csvDbValS;
-  std::map<std::string, std::vector<std::vector<float> > > _csvDbValF;
 
   std::map<std::string,std::vector<std::vector<float> > > _cDbLim;
   std::map<std::string,std::map<int, int* > > _cDbIdx;
