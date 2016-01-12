@@ -17,7 +17,6 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <algorithm>
 
 #include <TROOT.h>
 #include <TLorentzVector.h>

@@ -28,7 +28,7 @@ SusyModule::loadBTagFastSimReader() {
 
   // setup calibration readers
   string filename=(string) getenv("MPAF") + "/workdir/database/CSV_13TEV_Combined_20_11_2015.csv";
-  _calibFS=new BTagCalibration("csvFast", "workdir/database/CSV_13TEV_Combined_20_11_2015.csv");//filename.c_str());
+  _calibFS=new BTagCalibration("csvFast", filename.c_str());
   _readerFS_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _readerFS_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
   _readerFS_b_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
@@ -54,7 +54,7 @@ SusyModule::loadBTagReader() {
 
   // setup calibration readers
   string filename=(string) getenv("MPAF") + "/workdir/database/BTagSF_CSVv2_25ns.csv";
-  _calib=new BTagCalibration("csvv2", "workdir/database/BTagSF_CSVv2_25ns.csv");//filename.c_str());
+  _calib=new BTagCalibration("csvv2", filename.c_str());
   _reader_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _reader_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
   _reader_b_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
@@ -152,7 +152,6 @@ SusyModule::defineLeptonWPS() {
   _tChWP[kLoose]=-1;
   _tChWP[kTight]=1;
 
-
   //el mva id ======================
   //Phys14 50ns?
   // _elMvaIdWP[kEBC][kLoose] = -0.11;
@@ -187,8 +186,6 @@ SusyModule::defineLeptonWPS() {
   //multiIso =======================
 
   _multiIsoWP[kMiniIso][kDenom]      = 0.4 ; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
-  //_multiIsoWP[kMiniIso][kDenom]      = 0.6 ; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
-  //_multiIsoWP[kMiniIso][kDenom]      = 0.8; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
   _multiIsoWP[kMiniIso][kVLoose]     = 0.25; _multiIsoWP[kPtRatio][kVLoose]     = 0.67; _multiIsoWP[kPtRel][kVLoose]     = 6.0;
   _multiIsoWP[kMiniIso][kLoose]      = 0.20; _multiIsoWP[kPtRatio][kLoose]      = 0.69; _multiIsoWP[kPtRel][kLoose]      = 6.0;
   _multiIsoWP[kMiniIso][kMedium]     = 0.16; _multiIsoWP[kPtRatio][kMedium]     = 0.76; _multiIsoWP[kPtRel][kMedium]     = 7.2; 
@@ -297,14 +294,14 @@ SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, 
   int wpIso=kDenom;
 
   if(std::abs(c->eta())                               > 2.5            ) return false; 
-  if(         _vc->get(branch + "_convVeto"   , idx)  != 1             ) return false;//cout<<" conv "<<endl;
-  if(         _vc->get(branch + "_lostHits"   , idx)  > _cLostHitWP[wp]) return false;//cout<<" losthit "<<endl;
+  if(         _vc->get(branch + "_convVeto"   , idx)  != 1             ) return false;
+  if(         _vc->get(branch + "_lostHits"   , idx)  > _cLostHitWP[wp]) return false;
 
-  if(chCut && _vc->get(branch + "_tightCharge", idx)  <= _tChWP[wp]    ) return false;//cout<<" charge "<<_tChWP[wp]<<endl;
-  if(std::abs(_vc->get(branch + "_dxy"        , idx)) > _dxyWP[wp]     ) return false;//cout<<" dx "<<endl;
-  if(std::abs(_vc->get(branch + "_dz"         , idx)) > _dzWP[wp]      ) return false;//cout<<" dz "<<endl;
-  if(!elMvaSel(idx, mvaWp, branch)                                     ) return false;//cout<<" mvaId "<<endl;
-  if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;//cout<<" iso "<<endl;
+  if(chCut && _vc->get(branch + "_tightCharge", idx)  <= _tChWP[wp]    ) return false;
+  if(std::abs(_vc->get(branch + "_dxy"        , idx)) > _dxyWP[wp]     ) return false;
+  if(std::abs(_vc->get(branch + "_dz"         , idx)) > _dzWP[wp]      ) return false;
+  if(!elMvaSel(idx, mvaWp, branch)                                     ) return false;
+  if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
 
   if(invSIP){
     if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
@@ -457,7 +454,6 @@ SusyModule::bestSSPair(const CandList* leps, bool byflav,
 		       float pTthrMu, float pTthrEl,
 		       int& idx1, int& idx2) {
 
-//HACK: replaced nullptr with NULL
   CandList clist(2,nullptr);
   int tmpFlav=0;
   int tmpSt=0;
@@ -470,8 +466,6 @@ SusyModule::bestSSPair(const CandList* leps, bool byflav,
   for(unsigned int il1=0;il1<leps->size()-1;il1++) {
     for(unsigned int il2=il1+1;il2<leps->size();il2++) {
       
-      //conditional pt threshold, could evolve in CERN code 
- 
       pTthr1 = (std::abs(leps->at(il1)->pdgId())==11)?pTthrEl:pTthrMu;
       pTthr2 = (std::abs(leps->at(il2)->pdgId())==11)?pTthrEl:pTthrMu;
 

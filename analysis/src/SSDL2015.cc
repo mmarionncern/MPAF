@@ -1529,7 +1529,7 @@ SSDL2015::getFR(Candidate* cand, int idx) {
 
   int wp=std::abs(cand->pdgId())==11?SusyModule::kTight:SusyModule::kMedium;
 
-  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (float)ptM);
+  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (double)ptM);
   if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
   ptVal=std::max(ptVal, ptM);

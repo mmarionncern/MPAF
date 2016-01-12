@@ -7,8 +7,8 @@
 #include "analysis/tools/Candidate.hh"
 #include "analysis/utils/KineUtils.hh"
 #include "analysis/utils/mt2_bisect.h"
-#include "analysis/utils/Tools.hh"
-#include "analysis/utils/Debug.cc"
+//#include "analysis/utils/Tools.hh"
+//#include "analysis/utils/Debug.cc"
 
 #include "tools/src/DataBaseManager.hh"
 #include "tools/src/SystUtils.hh"
@@ -147,10 +147,10 @@ public:
 
   enum {kDenom=0,
 	kVLoose,
-    kInSitu,
-    kInSituHT,
+	kInSitu,
+	kInSituHT,
 	kLoose,
-    kLooseHT,
+	kLooseHT,
 	kMedium,
 	kTight,
 	kVTight,
