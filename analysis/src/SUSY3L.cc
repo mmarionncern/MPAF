@@ -290,10 +290,10 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    //if (_vc->get("isData") != 1){
-    //    _weight *= _vc->get("genWeight");
-    //    _weight *= _vc->get("vtxWeight");
-    //}
+    if (_vc->get("isData") != 1){
+        _weight *= _vc->get("genWeight");
+        _weight *= _vc->get("vtxWeight");
+    }
 
 }
 
@@ -628,38 +628,16 @@ void SUSY3L::collectKinematicObjects(){
         _fakableNotTightLepsPtCut.push_back( _looseLepsPtCut[il] );
         _fakableNotTightLepsPtCutIdx.push_back( _looseLepsPtCutIdx[il] );
     } 
- 
-    //intermediate choice for RA7 sync
-    //select leptons for jet cleaning using a tigher fakable object selection, no pt requirement
-    //for(size_t il=0;il<_looseLeps.size();il++){
-    //    if(!fakableLepton(_looseLeps[il], _looseLepsIdx[il], _looseLeps[il]->pdgId(), true)) continue;
-    //    _jetCleanLeps10.push_back( _looseLeps[il] );
-    //    _jetCleanLeps10Idx.push_back( _looseLepsIdx[il] );
-    //} 
-
-    //tight lepton without Z selection
-    for(size_t il=0;il<_looseLepsPtCut.size();il++) {
-        if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId()))  continue;
-        _tightLepsPtCut.push_back(_looseLepsPtCut[il]);
-        _tightLepsPtCutIdx.push_back(_looseLepsPtCutIdx[il]);
-    }
-
-    //tight leptons with low mll veto
-    for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-        if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
-        _tightLepsPtCutMllCut.push_back(_tightLepsPtCut[il]);
-        _tightLepsPtCutMllCutIdx.push_back(_tightLepsPtCutIdx[il]);
-    }
 
     //fakable-not-tight leptons, pt corrected
     for(size_t il=0;il<_looseLepsPtCorrCut.size();il++) {
         if(tightLepton(_looseLepsPtCorrCut[il], _looseLepsPtCorrCutIdx[il], _looseLepsPtCorrCut[il]->pdgId())) continue;
         if(!fakableLepton(_looseLepsPtCorrCut[il], _looseLepsPtCorrCutIdx[il], _looseLepsPtCorrCut[il]->pdgId(),false)) continue; 
-	    _fakableNotTightLepsPtCorrCut.push_back(_looseLepsPtCorrCut[il]);
-	    _fakableNotTightLepsPtCorrCutIdx.push_back(_looseLepsPtCorrCutIdx[il]);
-    }
+        _fakableNotTightLepsPtCorrCut.push_back(_looseLepsPtCorrCut[il]);
+        _fakableNotTightLepsPtCorrCutIdx.push_back(_looseLepsPtCorrCutIdx[il]);
+    } 
 
-    //tight lepton without Z selection
+    //tight lepton
     for(size_t il=0;il<_looseLepsPtCut.size();il++) {
         if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId()))  continue;
         _tightLepsPtCut.push_back(_looseLepsPtCut[il]);
@@ -780,7 +758,6 @@ bool SUSY3L::tightLepton(const Candidate* c, int idx, int pdgId){
 
     return true;
 }
-
 
 
 //____________________________________________________________________________
