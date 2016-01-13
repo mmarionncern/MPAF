@@ -19,8 +19,8 @@ for ds in ${DATASETS[@]}; do
 	sed -i 's|FILE|'$ds'|' $MPAF/cfg/tmpFiles/ssdlBkg_${ds}.cfg
 	sed -i 's|PATH|'$dir'|' $MPAF/cfg/tmpFiles/ssdlBkg_${ds}.cfg
 
-	#qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/SSDL2015/ssdlBkg_${ds}.out -e $MPAF/workdir/logs/SSDL2015/ssdlBkg_${ds}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/ssdlBkg_${ds}.cfg
-#	bsub -q 8nh source submitLxbatch.sh $MPAF/cfg/tmpFiles/ssdlBkg_${ds}.cfg
+	qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/SSDL2015/ssdlBkg_${ds}.out -e $MPAF/workdir/logs/SSDL2015/ssdlBkg_${ds}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/ssdlBkg_${ds}.cfg
+	#bsub -q 8nh source submitLxbatch.sh $MPAF/cfg/tmpFiles/ssdlBkg_${ds}.cfg
 
 	N=`echo $N + 1 | bc`
   
