@@ -34,48 +34,64 @@ private:
     void modifySkimming();
     void collectKinematicObjects();
     
-    bool electronSelection(const Candidate* c, int);
-    bool muonSelection(const Candidate* c, int);
     bool tauSelection(int);
     bool looseLepton(const Candidate* c, int idx, int pdgId);
     bool fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass);
     bool tightLepton(const Candidate* c, int idx, int pdgId);
     
-    bool baseSelection();
     bool multiLepSelection(bool onZ);
     void advancedSelection(int WF);
-    void wzCRSelection();
+    float getTF_SingleFake(int ic);
+    float getTF_DoubleFake(int ic);
+    float getTF_TripleFake(int ic);
+    bool wzCRSelection();
+    bool ZMuMuSelection();
+    bool ttbarSelection();
+    bool ZElElSelection();
+    bool ZlSelection();
+    bool WlSelection();
     void categorize();
     bool testRegion();
+    vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
+		const CandList fakableLeps, vector<unsigned int> idxsL, const CandList fakableLepsPtCorr,
+		vector<unsigned int> idxsLPtCorr, int nHardestLepton, float pt_cut_hardest_legs, 
+        int nHardLeptons, float pt_cut_hard_legs, bool onZ,
+        vector< vector<int> >& combIdxs, vector<int>& combType ); 
     void setBaselineRegion();
     void setSignalRegion();
     void setSelLine(string str);
+    float getFR(Candidate* cand, int idx);
     void setCut(std::string, float, std::string, float = 0);
-    bool hardLegSelection(int n_hardestLeg = 0, float cut_hardestLeg = -1., int n_hardLeg = 0, float cut_hardLeg = -1.);
     bool hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg);
-    bool checkMultiIso();
-    bool ZEventSelectionLoop(bool onz, bool loose_3rd_lep = false, float mt_cut = -1);
-    void fillEventPlots();
-    void fillControlPlots();
+    void fillHistos();
+    void fillValidationHistos(string reg);
     float getMT2();
-    void sortSelectedLeps();
-    float lowestOssfMll(bool ossf = true);
-    bool passMultiLine(bool doubleOnly, bool isolatedOnly);
-    bool passHLTLine(string line);
+    void sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx);
+    float lowestOssfMll(CandList leps);
+    void registerTriggerVars();
+    void readCSCevents();
+    void readEESCevents();
+    void readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >&, vector<string>);
 
-    float HT();
+    bool passHLTbit();
+    
+    bool passNoiseFilters();
+    bool passCSCfilter();
+    bool passEESCfilter(); 
+    
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
 
-    string _selectMuons;
-    string _selectElectrons;
-    string _selectTaus;
-    string _pairmass;
+    bool _selectMuons;
+    bool _selectElectrons;
+    bool _selectTaus;
+    bool _onZ;
+    bool _doValidationPlots;
     string _BR;
     string _SR;
     string _FR;
-    
+    int _fastSim;
 
 
 private:
@@ -92,8 +108,9 @@ private:
     kGlobalFake,
     
     kWZCR
-  };
- 
+    };
+
+    enum {kIsSingleFake=0,kIsDoubleFake,kIsTripleFake };
     
     SusyModule* _susyMod;
 
@@ -133,26 +150,22 @@ private:
     float _upValCutMT2BR;
     
     //vectors for electron, muon, and tau candidates
-    std::vector<int> _elIdx;
-    std::vector<int> _muIdx;
     std::vector<int> _tauIdx;
+    std::vector<unsigned int> _lepsIdx;
     std::vector<unsigned int> _looseLepsIdx;
-    std::vector<unsigned int> _looseLeps10Idx;
     std::vector<unsigned int> _looseLepsPtCutIdx;
     std::vector<unsigned int> _looseLepsPtCorrCutIdx;
-    std::vector<unsigned int> _looseLepsPtCorrCutVetoIdx;
-    std::vector<unsigned int> _jetCleanLeps10Idx;
-    std::vector<unsigned int> _fakableLepsPtCutVetoIdx;
+    std::vector<unsigned int> _fakableLepsIdx;
+    std::vector<unsigned int> _fakableLepsPtCutIdx;
+    std::vector<unsigned int> _fakableNotTightLepsPtCutIdx;
+    std::vector<unsigned int> _fakableNotTightLepsPtCorrCutIdx;
     std::vector<unsigned int> _tightLepsPtCutIdx;
     std::vector<unsigned int> _tightLepsPtCutMllCutIdx;
-    std::vector<unsigned int> _tightLepsIdx;
     std::vector<std::pair<std::string, unsigned int> >  _jetsIdx;
     std::vector<std::pair<std::string, unsigned int> >  _bJetsIdx;
     std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
 
     //length of candiate vectors
-    float _nEls;
-    float _nMus;
     float _nTaus;
     float _nJets;
     float _nBJets;
@@ -167,43 +180,58 @@ private:
     CandList _bJets;
     CandList _leps;
     CandList _looseLeps;
-    CandList _looseLeps10;
     CandList _looseLepsPtCut;
     CandList _looseLepsPtCorrCut;
-    CandList _looseLepsPtCorrCutVeto;
-    CandList _jetCleanLeps10;
-    CandList _fakableLepsPtCutVeto;
+    CandList _fakableLeps;
+    CandList _fakableLepsPtCut;
+    CandList _fakableNotTightLepsPtCut;
+    CandList _fakableNotTightLepsPtCorrCut;
     CandList _tightLepsPtCut;
     CandList _tightLepsPtCutMllCut;
-    CandList _tightLeps;
     CandList _lepJets;
 
     Candidate* _met;
     Candidate* _Z;
-    Candidate* _lep1;
-    Candidate* _lep2;
+    CandList _zPair;
+    Candidate* _l1Cand;
+    Candidate* _l2Cand;
     
     float _HT;
     float _MT2;
     float _deltaR;
-    float _mll;
+    float _lowOSSFMll;
     float _metPt;
+    float _MT;
+    float _zMass;
+    float _zPt;
+    int _nEls;
+    int _nMus;
+    int _idxL1;
+    int _idxL2;
+ 
+    float _btagW;
   
     std::map<std::string, std::vector<std::vector<std::vector<std::string> > > > _sels;
    
     float _jetThreshold;
     float _bjetThreshold;
+   
+    //HLT
+    vector<string> _vTR_lines;
     
     vector<string> _categs;
     bool _categorization;
     bool _isMultiLep = false;
     bool _isFake = false;
-    bool _onZ;    
 
     //for fake background
-    vector<CandList> _auxLeps;
-    vector<int> _auxFlags;
-    vector<vector<int> > _auxIdxs; 
+    vector<CandList> _combList;
+    vector< vector<int> > _combIdxs;
+    vector<int> _combType;
+
+    //for event filter
+    map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredCSCEvents;
+    map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredEESCEvents;
 
 };
 
