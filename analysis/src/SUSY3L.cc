@@ -1536,7 +1536,7 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     //for separation of closure by flavors
     //only consider TTF events
-    if(fakableLeps.size()!=1){return vclist;}
+    //if(fakableLeps.size()!=1){return vclist;}
     //only pick one flavor
     //if(fakableLeps[0]
     
