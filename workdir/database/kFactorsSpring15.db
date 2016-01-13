@@ -2,6 +2,9 @@
 //keep this header format!!
 SMS_T1tttt_2J_mGl1200_mLSP800	1
 SMS_T1tttt_2J_mGl1500_mLSP100	1
+T1tttt_mGo1200_mChi800          1
+T1tttt_mGo1500_mChi100          1
+
 T5qqqqWWDeg_mGo1000_mCh310_mChi300_dilep    1
 T5qqqqWWDeg_mGo1000_mCh310_mChi300		    1
 T5qqqqWWDeg_mGo1000_mCh315_mChi300_dilep	1
@@ -156,3 +159,5 @@ GGHZZ4L         1
 VHToNonbb       1
 TTLLJets_m1to10 1
 TTTT            1
+ZGTo2LG         1
+tZq_ll          1
