@@ -98,17 +98,17 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
 	
   //Looking for the tree if not data-driven
   //string tmpPath=isTreeType()?("data/"+path):"root"; //CH: why? what about absolute paths?
-  string tmpPath=isTreeType()?(path):"root";
+  string subdir=isTreeType()?"data":"root";
   string tmpFName=isTreeType()?(sId.name):objName;
-  int nProcEvt = (hname=="")?-1:getNProcEvents(tmpPath, dir, tmpFName, hname);
-  double sumProcWgt = (hwgtname=="")?-1:getSumProcWgts(tmpPath, dir, tmpFName, hwgtname);
+  int nProcEvt = (hname=="")?-1:getNProcEvents(path, dir, subdir, tmpFName, hname);
+  double sumProcWgt = (hwgtname=="")?-1:getSumProcWgts(path, dir, subdir, tmpFName, hwgtname);
   
   Sample s(sId, nProcEvt, sumProcWgt, xSect, kFact, eqLumi);
   _samples.push_back(s);
   
   //tree analysis 
   if(isTreeType()) {
-    loadTree(path, dir, sId.name, objName);
+    loadTree(path, dir, subdir, sId.name, objName);
 	
     cout<<" Adding "<<sId.name<<"  to "<<_name
 	<<"   :  nEvt "<<_chain->GetEntries()<<" ("<<nProcEvt
@@ -116,7 +116,7 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
   }
   else {
     if(loadH) { //reading histograms only when needed (disabled for datacards)
-      loadHistos(path, dir, objName, hname, sId.cr);
+      loadHistos(path, dir, subdir, objName, hname, sId.cr);
     }
     if(sId.norm==-1) {
       if(sId.cr=="" && sId.dd==false)
@@ -145,9 +145,9 @@ Dataset::addFriend(string friendname){
 }
 
 int
-Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
+Dataset::getNProcEvents(string path, string dir, string subdir, string fileName, string hname) {
 
-  string NameF = goodFilePath(path, dir, fileName);
+  string NameF = goodFilePath(path, dir, fileName, subdir);
 
   TFile* file = TFile::Open( NameF.c_str() );
   if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
@@ -166,9 +166,9 @@ Dataset::getNProcEvents(string path, string dir, string fileName, string hname) 
 }
 
 double
-Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtname) {
+Dataset::getSumProcWgts(string path, string dir, string subdir, string fileName, string hwgtname) {
 
-  string NameF = goodFilePath(path, dir, fileName);
+  string NameF = goodFilePath(path, dir, fileName, subdir);
   
   TFile* file = TFile::Open( NameF.c_str() );
   if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
@@ -273,10 +273,10 @@ Dataset::getSample(string sname) const {
 
 
 void 
-Dataset::loadTree(string path, string dir, string sname, string objName) {
+Dataset::loadTree(string path, string dir, string subdir, string sname, string objName) {
   TFile* datafile(nullptr);
 
-  string NameF = goodFilePath(path, dir, sname);
+  string NameF = goodFilePath(path, dir, sname, subdir);
 
   datafile = TFile::Open(NameF.c_str());
   if(datafile==nullptr) { 
@@ -299,7 +299,7 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
 
     // adding friend-trees
     for (size_t ft=0; ft<_friends.size(); ft++){
-      string NameFr = goodFilePath(path, dir, _friends[ft] + "/evVarFriend_" + sname);
+      string NameFr = goodFilePath(path, dir, _friends[ft] + "/evVarFriend_" + sname, subdir);
       string name = _friends[ft]+" = sf/t";
       _chain->AddFriend((name).c_str(),(NameFr).c_str());
     } 
@@ -316,11 +316,11 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
 }
 
 void 
-Dataset::loadHistos(string path, string dir, string filename, string hname, string optCat) {
+Dataset::loadHistos(string path, string dir, string subdir, string filename, string hname, string optCat) {
   TFile* datafile(nullptr);
   
 
-  string NameF = goodFilePath(path, dir, filename);
+  string NameF = goodFilePath(path, dir, filename, subdir);
   datafile = TFile::Open(NameF.c_str());
 
   if(datafile==nullptr) {cout<<"warning, unable to load histograms"<<endl; return;}
@@ -446,7 +446,7 @@ Dataset::goodPath(string path){
 }
 
 string
-Dataset::goodFilePath(string path, string dir, string fileName){
+Dataset::goodFilePath(string path, string dir, string fileName, string subdir){
   // CH: path is the "dir" variable given in the config file
   //     dir  is the "dir" attribute given to the dataset (if so), whose name is fileName
 
@@ -474,7 +474,11 @@ Dataset::goodFilePath(string path, string dir, string fileName){
   if(path.substr(0,1) == "/") 
     return goodPath(path + "/" + fileName + ".root");
 
-  // relative path -> relative to MPAF/workdir/data!
-  return string(getenv("MPAF")) + "/workdir/data/" + path + "/" + fileName + ".root";
+  // ignore empty subdirs (in case data or root is already appended to path)
+  if(subdir.length() > 0) 
+    path = subdir + "/" + path;
+
+  // relative path -> relative to MPAF/workdir! data or root given in subdir
+  return string(getenv("MPAF")) + "/workdir/" + path + "/" + fileName + ".root";
 
 }

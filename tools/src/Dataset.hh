@@ -105,7 +105,7 @@ public:
   float getWeight(string sname) const;
 
   string goodPath(string path);
-  string goodFilePath(string path, string dir, string fileName);
+  string goodFilePath(string path, string dir, string fileName, string subdir = "data");
 	
   TTree* getTree() {return _chain;};
   int getNEvents() { return _chain->GetEntries(); };
@@ -125,14 +125,14 @@ public:
 
 private:
 
-  void loadTree(std::string path, std::string dir, std::string sname, std::string objName);
-  void loadHistos(std::string path, std::string dir, std::string sname, std::string hname, std::string optCat);
+  void loadTree(std::string path, std::string dir, string subdir, std::string sname, std::string objName);
+  void loadHistos(std::string path, std::string dir, string subdir, std::string sname, std::string hname, std::string optCat);
 
   // float computeWeight(float nEvts, float xSect, float kFact,
   // 		      float lumi, float& eqLumi);
   
-  int getNProcEvents(string path, string dir, string sname, string hname);
-  double getSumProcWgts(string path, string dir, string sname, string hwgtname);
+  int getNProcEvents(string path, string dir, string subdir, string sname, string hname);
+  double getSumProcWgts(string path, string dir, string subdir, string sname, string hwgtname);
   
 
   ClassDef(Dataset,0)
