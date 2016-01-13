@@ -28,7 +28,7 @@ SusyModule::loadBTagFastSimReader() {
 
   // setup calibration readers
   string filename=(string) getenv("MPAF") + "/workdir/database/CSV_13TEV_Combined_20_11_2015.csv";
-  _calibFS=new BTagCalibration("csvFast", "workdir/database/CSV_13TEV_Combined_20_11_2015.csv");//filename.c_str());
+  _calibFS=new BTagCalibration("csvFast", filename.c_str());
   _readerFS_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _readerFS_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
   _readerFS_b_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
@@ -54,7 +54,7 @@ SusyModule::loadBTagReader() {
 
   // setup calibration readers
   string filename=(string) getenv("MPAF") + "/workdir/database/BTagSF_CSVv2_25ns.csv";
-  _calib=new BTagCalibration("csvv2", "workdir/database/BTagSF_CSVv2_25ns.csv");//filename.c_str());
+  _calib=new BTagCalibration("csvv2", filename.c_str());
   _reader_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _reader_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
   _reader_b_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
@@ -133,7 +133,7 @@ SusyModule::defineLeptonWPS() {
   //pt ============================
   _ptWP[kEl][kDenom] = 7 ; _ptWP[kMu][kDenom] = 5 ;
   _ptWP[kEl][kLoose] = 7 ; _ptWP[kMu][kLoose] = 5 ;
-  _ptWP[kEl][kTight] = 15; _ptWP[kMu][kTight] = 10;
+  _ptWP[kEl][kTight] = 10; _ptWP[kMu][kTight] = 10;
 
   //sip & IP ======================
   _sipWP[kDenom] = 4.0; 
@@ -148,7 +148,7 @@ SusyModule::defineLeptonWPS() {
   _dzWP[kLoose] = 0.1; //cm
   _dzWP[kTight] = 0.1; //cm
 
-  //ithgt charge
+  //tight charge
   _tChWP[kLoose]=-1;
   _tChWP[kTight]=1;
 
@@ -161,6 +161,15 @@ SusyModule::defineLeptonWPS() {
   // _elMvaIdWP[kEBC][kTight] = 0.73;
   // _elMvaIdWP[kEBF][kTight] = 0.57;
   // _elMvaIdWP[kEE ][kTight] = 0.05;
+
+
+  _elMvaIdWP[kEBC][kInSitu] = -0.363;
+  _elMvaIdWP[kEBF][kInSitu] = -0.579;
+  _elMvaIdWP[kEE ][kInSitu] = -0.623;
+
+  _elMvaIdWP[kEBC][kInSituHT] = 0.051;
+  _elMvaIdWP[kEBF][kInSituHT] = -0.261;
+  _elMvaIdWP[kEE ][kInSituHT] = -0.403;
 
   _elMvaIdWP[kEBC][kLoose] = -0.70;
   _elMvaIdWP[kEBF][kLoose] = -0.83;
@@ -175,6 +184,7 @@ SusyModule::defineLeptonWPS() {
   _elMvaIdWP[kEE ][kTight] = 0.17;
 
   //multiIso =======================
+
   _multiIsoWP[kMiniIso][kDenom]      = 0.4 ; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
   _multiIsoWP[kMiniIso][kVLoose]     = 0.25; _multiIsoWP[kPtRatio][kVLoose]     = 0.67; _multiIsoWP[kPtRel][kVLoose]     = 6.0;
   _multiIsoWP[kMiniIso][kLoose]      = 0.20; _multiIsoWP[kPtRatio][kLoose]      = 0.69; _multiIsoWP[kPtRel][kLoose]      = 6.0;
@@ -191,113 +201,166 @@ SusyModule::defineLeptonWPS() {
 // lepton selection
 
 bool
-SusyModule::multiIsoSel(int idx, int wp) const {
-  if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+SusyModule::multiIsoSel(int idx, int wp, string branch) const {
+
+  if(_vc->get(branch + "_miniRelIso"  , idx) < _multiIsoWP[kMiniIso][wp] &&
+    (_vc->get(branch + "_jetPtRatiov2", idx) > _multiIsoWP[kPtRatio][wp] ||
+     _vc->get(branch + "_jetPtRelv2"  , idx) > _multiIsoWP[kPtRel]  [wp] )) return true;
   
   return false;
 }
 
 
 bool
-SusyModule::multiIsoSelCone(int idx, int wp) const {
+SusyModule::multiIsoSelInSitu(int idx, int wp, string branch) const {
 
-  if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-	(conePt(idx, wp)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
-	 _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+  // CH: wasn't my idea...
+  if(_vc->get(branch + "_miniRelIso"  , idx) < _multiIsoWP[kMiniIso][wp] &&
+     _vc->get(branch + "_jetPtRatiov2", idx) > _multiIsoWP[kPtRatio][wp]) return true;
+  
+  return false;
+}
+
+
+bool
+SusyModule::multiIsoSelCone(int idx, int wp, string branch) const {
+
+  if( _vc->get(branch + "_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
+      (conePt(idx, wp, branch)*_vc->get(branch + "_pt",idx) *_vc->get(branch + "_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+       _vc->get(branch + "_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
 
 bool
-SusyModule::invMultiIsoSel(int idx, int wp) const {
+SusyModule::invMultiIsoSel(int idx, int wp, string branch) const {
   
-  if( _vc->get("LepGood_miniRelIso", idx)>_multiIsoWP[kMiniIso][wp]) return false;
-  if( 1./_vc->get("LepGood_jetPtRelv2", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
-  
+  if( _vc->get(branch + "_miniRelIso", idx)>_multiIsoWP[kMiniIso][wp]) return false;
+  if( 1./_vc->get(branch + "_jetPtRelv2", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get(branch + "_miniRelIso", idx)) ) return false;
   return true;
 }
 
 bool 
-SusyModule::elMvaSel(int idx, int wp) const {
+SusyModule::elMvaSel(int idx, int wp, string branch) const {
 
   int etaBin=-1;
 
-  if     (std::abs(_vc->get("LepGood_eta", idx)) < 0.8  ) etaBin=0;
-  else if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479) etaBin=1;
-  else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5  ) etaBin=2;
+  if     (std::abs(_vc->get(branch + "_eta", idx)) < 0.8  ) etaBin=0;
+  else if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) etaBin=1;
+  else if(std::abs(_vc->get(branch + "_eta", idx)) < 2.5  ) etaBin=2;
 
-  if(_vc->get("LepGood_mvaIdSpring15", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
+  if(_vc->get(branch + "_mvaIdSpring15", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
     
   return true;
 }
 
+bool
+SusyModule::inSituFO(int idx, int wp, string branch) const {
+
+  if(_vc->get(branch + "_miniRelIso", idx) > 0.4) return false;
+  if(1 / _vc->get(branch + "_jetPtRatiov2", idx) >= 1 / _multiIsoWP[kPtRatio][wp] + _vc->get(branch + "_miniRelIso", idx)) return false;
+  //if(1 / _vc->get("LepGood_jetPtRatiov2", idx) >= 1 / _multiIsoWP[kPtRatio][wp] + _vc->get("LepGood_miniRelIso", idx) && _vc->get("LepGood_jetPtRelv2", idx) < _multiIsoWP[kPtRel][wp]) return false;
+
+  return true;
+}
 
 
 bool
-SusyModule::muIdSel(const Candidate*c, int idx, int wp, bool chCut) const {
+SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP, string branch) const {
 
   int wpIso = kDenom;
-  if(std::abs(c->eta() ) >  2.4          ) return false;
-  if(         _vc->get("LepGood_mediumMuonId", idx)  < _muIdWP[wp]   ) return false;
-  if( chCut && _vc->get("LepGood_tightCharge" , idx)  <= 1 ) return false;
-  if(         _vc->get("LepGood_sip3d"       , idx)  > _sipWP[wp]    ) return false;
-   if(std::abs(_vc->get("LepGood_dz"          , idx)) > _dzWP[wp]     ) return false;
-  if(std::abs(_vc->get("LepGood_dxy"         , idx)) > _dxyWP[wp]    ) return false;
-  if(!multiIsoSel(idx, wpIso )               ) return false;
 
-  return true;
+  if(std::abs(c->eta())                                >  2.4          ) return false;
+  if(         _vc->get(branch + "_mediumMuonId", idx)  <  _muIdWP[wp]  ) return false;
+  if(chCut && _vc->get(branch + "_tightCharge" , idx)  <= _tChWP[wp]   ) return false;
+  if(std::abs(_vc->get(branch + "_dxy"         , idx)) > _dxyWP[wp]    ) return false;
+  if(std::abs(_vc->get(branch + "_dz"          , idx)) > _dzWP[wp]     ) return false;
+  if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
 
-}
-
-
-bool
-SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut) const {
-
-  int wpIso=kDenom;
-  if(std::abs(c->eta()) > 2.5            ) return false; 
-
-  if(_vc->get("LepGood_convVeto", idx)  != 1             ) return false;
-  if(_vc->get("LepGood_lostHits", idx)  > _cLostHitWP[wp]) return false;
-
-  if(chCut && _vc->get("LepGood_tightCharge", idx)  <= _tChWP[wp]    ) return false;
-
-  if(_vc->get("LepGood_sip3d"      , idx)  > _sipWP[wp]     ) return false;
-  if(std::abs(_vc->get("LepGood_dz", idx)) > _dzWP[wp]      ) return false;
-  if(std::abs(_vc->get("LepGood_dxy", idx)) > _dxyWP[wp]     ) return false;
-  if(!elMvaSel(idx, mvaWp)                                           ) return false;
-  if(!multiIsoSel(idx, wpIso)        ) return false;
-
-  return true;
-}
-
-bool
-SusyModule::elHLTEmulSel(int idx, bool withIso) const {
-
-  if(std::abs(_vc->get("LepGood_eta",idx))<1.479) {
-    if(_vc->get("LepGood_sigmaIEtaIEta",idx) > 0.011 ) return false;
-    if(std::abs(_vc->get("LepGood_dEtaScTrkIn",idx)) > 0.01 ) return false;
-    if(std::abs(_vc->get("LepGood_dPhiScTrkIn",idx)) > 0.04 ) return false;
-    if(_vc->get("LepGood_hadronicOverEm",idx) > 0.08 ) return false;
-    if(std::abs(_vc->get("LepGood_eInvMinusPInv",idx)) > 0.01 ) return false;
+  if(invSIP){
+    if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
   }
   else {
-    if(_vc->get("LepGood_sigmaIEtaIEta",idx) > 0.031 ) return false;
-    if(std::abs(_vc->get("LepGood_dEtaScTrkIn",idx)) > 0.01 ) return false;
-    if(std::abs(_vc->get("LepGood_dPhiScTrkIn",idx)) > 0.08 ) return false;
-    if(_vc->get("LepGood_hadronicOverEm",idx) > 0.08 ) return false;
-    if(std::abs(_vc->get("LepGood_eInvMinusPInv",idx)) > 0.01 ) return false;
+    if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
   }
+
+  return true;
+
+}
+
+bool
+SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, bool invSIP, string branch) const {
+
+  int wpIso=kDenom;
+
+  if(std::abs(c->eta())                               > 2.5            ) return false; 
+  if(         _vc->get(branch + "_convVeto"   , idx)  != 1             ) return false;
+  if(         _vc->get(branch + "_lostHits"   , idx)  > _cLostHitWP[wp]) return false;
+
+  if(chCut && _vc->get(branch + "_tightCharge", idx)  <= _tChWP[wp]    ) return false;
+  if(std::abs(_vc->get(branch + "_dxy"        , idx)) > _dxyWP[wp]     ) return false;
+  if(std::abs(_vc->get(branch + "_dz"         , idx)) > _dzWP[wp]      ) return false;
+  if(!elMvaSel(idx, mvaWp, branch)                                     ) return false;
+  if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
+
+  if(invSIP){
+    if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+  }
+  else {
+    if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+  }
+
+  return true;
+
+}
+
+bool
+SusyModule::elHLTEmulSel(int idx, bool withIso, string branch) const {
+
+  if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
+    if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.011 ) return false;
+    if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
+    if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.04  ) return false;
+    if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
+    if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
+  }
+  else {
+    if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.031 ) return false;
+    if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
+    if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.08  ) return false;
+    if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
+    if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
+  }
+  if(!elMvaSel(idx, kLoose, branch)                                ) return false;
   
   if(withIso) {
-    if(_vc->get("LepGood_ecalPFClusterIso",idx) > 0.45*_vc->get("LepGood_pt",idx) ) return false;
-    if(_vc->get("LepGood_hcalPFClusterIso",idx) > 0.25*_vc->get("LepGood_pt",idx) ) return false;
-    if(_vc->get("LepGood_dr03TkSumPt",idx) > 0.2*_vc->get("LepGood_pt",idx) ) return false;
+    if(!elHLTEmulSelIso(idx, kLooseHT, branch)) return false;
   }
 
   return true;
 }
+
+
+bool
+SusyModule::elHLTEmulSelIso(int idx, int mvaWP, string branch) const {
+
+  if(_vc->get(branch + "_ecalPFClusterIso", idx) > 0.45 * _vc->get(branch + "_pt", idx) ) return false;
+  if(_vc->get(branch + "_hcalPFClusterIso", idx) > 0.25 * _vc->get(branch + "_pt", idx) ) return false;
+  if(_vc->get(branch + "_dr03TkSumPt"     , idx) > 0.2  * _vc->get(branch + "_pt", idx) ) return false;
+  if(!elMvaSel(idx, mvaWP, branch)                                                      ) return false;
+
+  return true;
+}
+
+bool
+SusyModule::invPtRelSel(int idx, int wp, string branch) const {
+
+  if(_vc->get(branch + "_jetPtRelv2", idx) < _multiIsoWP[kPtRel][wp]) return true;
+  return false;
+
+}
+
+
 
 
 //===========================================================
@@ -653,6 +716,13 @@ SusyModule::buildSSPairs(const CandList* leps1, const CandList* leps2,
 }
 
 
+double
+SusyModule::closestJetPt(int idx, string branch) const {
+
+  return _vc->get(branch + "_pt", idx) / _vc->get(branch + "_jetPtRatiov2", idx);
+
+}
+
 const Candidate*
 SusyModule::jetLepAware(const Candidate* lep) {
   
@@ -691,6 +761,15 @@ SusyModule::jetLepAware(const Candidate* lep) {
 
 }
 
+double
+SusyModule::conePt(int idx, int isoWp, string branch) const {
+
+  if(_vc->get(branch + "_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
+    return _vc->get(branch + "_pt", idx)*(1 + std::max((double) 0., _vc->get(branch + "_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
+  }
+  return std::max(_vc->get(branch + "_pt", idx), (double) closestJetPt(idx, branch) * _multiIsoWP[kPtRatio][isoWp] );
+}
+
 float
 SusyModule::pTRatio(const Candidate* lep, const Candidate* jet) {
   return lep->pt()/jet->pt();
@@ -703,20 +782,60 @@ SusyModule::pTRel(const Candidate* lep, const Candidate* jet) {
   return (jet->p4()-lep->p4()).Perp(lep->p4().Vect() );
 }
 
+double
+SusyModule::Mt(Candidate* c1, Candidate* c2, int idx1, int idx2, string branch1, string branch2, int isoWp) const {
 
-float
-SusyModule::closestJetPt(int idx) const {
-  return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatiov2", idx);
+  return rawMt(c1, c2);
+  //return coneMt(idx1, isoWp, c2);
+
+}
+
+double
+SusyModule::rawMt(Candidate* c1, Candidate* c2) const {
+
+  return coneMt(c1, c2, -1, -1);
+
+}
+
+double
+SusyModule::coneMt(Candidate* c1, Candidate* c2, int idx1, int idx2, string branch1, string branch2, int isoWp) const {
+
+  float pt1 = c1 -> pt();
+  float pt2 = c2 -> pt();
+  if(idx1 > -1) pt1 = conePt(idx1, isoWp, branch1);
+  if(idx2 > -1) pt2 = conePt(idx2, isoWp, branch2);
+
+  return sqrt(2 * pt1 * pt2 * (1. - cos(c1 -> phi() - c2 -> phi())));
+  //return sqrt(2 * conePt(idx, isoWp) * met -> pt() * (1. - cos(Tools::AngleSubtraction(_vc->get("LepGood_phi", idx), met -> phi()))));
+
 }
 
 
-float 
-SusyModule::conePt(int idx, int isoWp) const {
-  
-    if(_vc->get("LepGood_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
-      return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
+void 
+SusyModule::awayJets(CandList* leptons, CandList& jets, vector<pair<string, unsigned int> >& jetIdxs, float dR) {
+
+  for(unsigned int il = 0; il < leptons -> size(); ++il) {
+    for(unsigned int ij = 0; ij < jets.size(); ++ij) {
+      float dr = leptons->at(il)->dR( jets[ij] );
+      if(dr < dR){
+        jets   .erase(jets   .begin() + ij);
+        jetIdxs.erase(jetIdxs.begin() + ij);
+      }
     }
-    return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
+  }
+}
+
+void
+SusyModule::cleanLeps(CandList& tightLeps, CandList* vetoLeps) {
+
+  for(CandList::iterator it = tightLeps.begin(); it != tightLeps.end();) {
+    int i = it - tightLeps.begin();
+    if(!passMllMultiVeto( tightLeps[i], vetoLeps, 76, 106, true) ||
+       !passMllMultiVeto( tightLeps[i], vetoLeps,  0,  12, true) ) 
+      it = tightLeps.erase(it);
+    else
+      ++it;
+  }
 }
 
 
@@ -788,14 +907,13 @@ SusyModule::cleanJets(CandList* leptons,
 
   for(unsigned int il=0;il<leptons->size();il++) {
     for(unsigned int ij=0;ij<jets.size();ij++) {
-
       float dR=leptons->at(il)->dR( jets[ij] );
       it = cmap.find(leptons->at(il));
       if(it==cmap.end() ) {
-	cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
+        cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
       }
       else if(dR<it->second.first) {
-	cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
+        cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
       }
     }
   }
@@ -809,6 +927,7 @@ SusyModule::cleanJets(CandList* leptons,
       if(it->second.first > 0.4 ) continue;
       if(it->second.second == jets[ij] ) {pass=false; break;}
     }
+
     if(!pass) { 
       lepJetsIdxs.push_back(tmpIdxs[ij]);
       continue;
@@ -829,14 +948,6 @@ SusyModule::cleanJets(CandList* leptons,
 
 }
 
-void 
-SusyModule::correctFlipRate(float& rate, float eta){
-
-  if( -2.0<eta && eta<-1.5) rate *= 3.6;
-  else                      rate *= 1.15;
-
-}
-
 //LHE weights
 double
 SusyModule::getLHEweight(int LHEsysID){
@@ -850,6 +961,15 @@ SusyModule::getLHEweight(int LHEsysID){
     } 
   }
   return 1.0;
+
+}
+
+
+void
+SusyModule::correctFlipRate(float& rate, float eta){
+
+  if( -2.0 < eta && eta < -1.5) rate *= 3.6;
+  else                          rate *= 1.15;
 
 }
 
@@ -968,7 +1088,6 @@ SusyModule::bTagSF(CandList& jets ,
   return 1.0;
 
 }
-
 
 float
 SusyModule::bTagMediumEfficiency(Candidate* jet, unsigned int flavor){

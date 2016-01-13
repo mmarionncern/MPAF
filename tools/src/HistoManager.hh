@@ -70,7 +70,8 @@ public:
 
   //initilaization
   void configAnalysis(vector<string> datasets);
-  
+  void addDataset(string dsname); 
+ 
   //reset
   void reset();
   void refresh();
