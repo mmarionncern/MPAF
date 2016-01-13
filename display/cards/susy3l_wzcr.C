@@ -18,7 +18,7 @@ void susy3l_wzcr() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs ="ht";    //njets, nbjets, met, ht, wzcr_ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
+    string obs ="njets_wzcr";    //njets, nbjets, met, ht, wzcr_ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio
     string sigs = "none"; 
     bool data = true;
 
@@ -242,7 +242,7 @@ void susy3l_wzcr() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=121.6; //pb-1 19470
+    float lumi=1280.; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
