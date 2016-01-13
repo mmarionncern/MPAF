@@ -293,14 +293,14 @@ SSDL2015::initialize(){
   
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
-   ////addManualSystSource("EWKFR",SystUtils::kNone);
-   //addManualSystSource("Eff",SystUtils::kNone);
-   ////addManualSystSource("Theory",SystUtils::kNone);
-   //addManualSystSource("JES",SystUtils::kNone);
-   //addManualSystSource("BTAG",SystUtils::kNone);
-   //addManualSystSource("BTAGFS",SystUtils::kNone);
-   //addManualSystSource("LepEffFS",SystUtils::kNone);
-   //addManualSystSource("ISR",SystUtils::kNone);
+   //addManualSystSource("EWKFR",SystUtils::kNone);
+   addManualSystSource("Eff",SystUtils::kNone);
+   //addManualSystSource("Theory",SystUtils::kNone);
+   addManualSystSource("JES",SystUtils::kNone);
+   addManualSystSource("BTAG",SystUtils::kNone);
+   addManualSystSource("BTAGFS",SystUtils::kNone);
+   addManualSystSource("LepEffFS",SystUtils::kNone);
+   addManualSystSource("ISR",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -459,9 +459,6 @@ SSDL2015::writeOutput() {
 void
 SSDL2015::run() {
 
-//cout << "-----------------------" << endl;
-//cout << "running " << _vc->get("evt") << endl; 
-
   if(_fastSim && !checkMassBenchmark() ) return;
   
   if(_vc->get("isData") && !checkDoubleCount()) return;
@@ -567,7 +564,6 @@ SSDL2015::advancedSelection(int WF) {
   int offset=0;
   if(WF==kGlobalFake) offset=kBR30L;
   if(WF==kGlobalmId)  offset=kBR30L_Fake;
-
 
   counter("weigthing");
 
@@ -678,35 +674,31 @@ SSDL2015::advancedSelection(int WF) {
   //     && getCurrentWorkflow()!=kBR20H
   //     && getCurrentWorkflow()!=kBR30H
   //     ) return;
-   int run=_vc->get("run");
-   int lumi=_vc->get("lumi");
-   double event=_vc->get("evt");
-   int nLep = _looseLeps.size();//_looseLepsVeto.size();//_vc->get("nLepGood_Mini");
-   // cout<<" <====> "<<_vc->get("nLepGood_Mini")<<"  "<<_looseLepsVeto.size()<<"  "<<_looseLeps.size()<<endl;
-   int id1 = _l1Cand->pdgId();
-   double pt1 = _l1Cand->pt();
-   int id2 = _l2Cand->pdgId();
-   double pt2 = _l2Cand->pt();
-   int njet = _nJets;
-   int nbjet = _nBJets;
-   double met = _met->pt();
-   double HT = _HT;
-   int sr = getCurrentWorkflow()-offset; //((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset):(0));
+  // int run=_vc->get("run");
+  // int lumi=_vc->get("lumi");
+  // double event=_vc->get("evt");
+  // int nLep = _looseLeps.size();//_looseLepsVeto.size();//_vc->get("nLepGood_Mini");
+  // // cout<<" <====> "<<_vc->get("nLepGood_Mini")<<"  "<<_looseLepsVeto.size()<<"  "<<_looseLeps.size()<<endl;
+  // int id1 = _l1Cand->pdgId();
+  // double pt1 = _l1Cand->pt();
+  // int id2 = _l2Cand->pdgId();
+  // double pt2 = _l2Cand->pt();
+  // int njet = _nJets;
+  // int nbjet = _nBJets;
+  // double met = _met->pt();
+  // double HT = _HT;
+  // int sr = ((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset):(0));
 
-   //if(WF == kGlobal && (getCurrentWorkflow() == kBR00H || getCurrentWorkflow() == kBR10H || getCurrentWorkflow() == kBR20H || getCurrentWorkflow()      == kBR30H)){
-   //if(WF == kGlobal && getCurrentWorkflow() == kBR00H){
   // if(getCurrentWorkflow()==kBR00H_Fake || getCurrentWorkflow()==kBR10H_Fake || getCurrentWorkflow()==kBR20H_Fake || getCurrentWorkflow()==kBR30H_Fake) sr=0;
  
-  //if(WF == kGlobal && getCurrentWorkflow() ==  
- //cout << "made it here" << endl; 
-  if(_isFake && sr > 0) {
-   cout << Form("%1d %9d %12.0f\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d\t%2.5f",
-   	       run, lumi, event, nLep,
-   	       id1, pt1, id2, pt2,
-   	       njet, nbjet, met, HT,
-   	       sr, _weight ) << endl;
+  //if(_isFake && sr > 0) {
+  // cout << Form("%1d %9d %12.0f\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d\t%2.5f",
+  // 	       run, lumi, event, nLep,
+  // 	       id1, pt1, id2, pt2,
+  // 	       njet, nbjet, met, HT,
+  // 	       sr, _weight ) << endl;
 
-  }
+  //}
 
   //if(_auxPairs.size()>=1 && offset==kBR30L_Fake) { // && _auxFlags[0]==kIsFake) {
   //if(_auxPairs.size()==1 && _auxFlags[0]==kIsFake) {
@@ -718,7 +710,7 @@ SSDL2015::advancedSelection(int WF) {
   //   float jetPt = _susyMod->closestJetPt(_idxL2); //_vc->get("LepGood_jetRawPt",_idxL2)*_vc->get("LepGood_jetCorrFactor_L1L2L3Res",_idxL2);
   //   float w = _weight;
   //   cout<<Form("%1d\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%5.2f\t%5.5f\t",event,lepPtT, lepPt,conePt, pTrel, jetPt, w)<<_categs[getCurrentWorkflow()-offset-1]<<endl; 
-  // }
+    //}
 
 
 }
@@ -1771,6 +1763,7 @@ SSDL2015::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
     if(_FR.find("FO2")!=string::npos && !_susyMod->elIdSel(c, idx, SusyModule::kTight, elMva )) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
      if(!_susyMod->elHLTEmulSel(idx, hltDLHT ) ) return false; 
+
     if(_FR.find("FO4")!=string::npos && !_susyMod->invMultiIsoSel(idx, SusyModule::kSpecFakeEl) ) return false;
   }
 
