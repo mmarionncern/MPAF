@@ -362,7 +362,7 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
 			upVar!=SystUtils::kDown , upVar!=SystUtils::kUp, yield);
 }
 
-/*
+
 void
 MPAFDisplay::addExternalSystUnc(string dsName, string uncTag, float Up, float Do, string categ, string cname) {
  
@@ -405,7 +405,7 @@ MPAFDisplay::addExternalSystUnc(string dsName, string uncTag, float Up, float Do
   }
   
 }
-*/
+
 
 void
 MPAFDisplay::associateSystUncs() {

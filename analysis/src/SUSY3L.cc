@@ -983,7 +983,7 @@ float SUSY3L::getFR(Candidate* cand, int idx) {
     //flavor dependent multiIso working point
     int wp=std::abs(cand->pdgId())==11?SusyModule::kMedium:SusyModule::kLoose;
 
-    if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (float)ptM);
+    if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (double)ptM);
 
     ptVal=std::max(ptVal, ptM);
   
@@ -1533,6 +1533,12 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
    
     //require certain number of fakable leptons
     if(clist.size()!=3){return vclist;}
+
+    //for separation of closure by flavors
+    //only consider TTF events
+    if(fakableLeps.size()!=1){return vclist;}
+    //only pick one flavor
+    //if(fakableLeps[0]
     
     //pt rank of fake lepton in TTF events
     //cout << "-------------------" << endl;

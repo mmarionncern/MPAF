@@ -56,12 +56,12 @@ void susy3l_datacard() {
   md.addDataCardSample("TTTT", "fake");
   md.addDataCardSample("tZq_ll", "fake");
   
-  md.addDataCardSample("TT_pow","data");
+  //md.addDataCardSample("data","data");
   
-  /*
+  
   //shape uncertainties
-  md.addNuisanceParameter("JES","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
-  md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
+  md.addNuisanceParameter("JES","ttW:ttZ:WZ:ZZ:VVV:rares:T1t412","shape","");
+  /*md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
   md.addNuisanceParameter("tHTE","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
 
   md.addNuisanceParameter("Ewk","fake","shape","");
@@ -229,6 +229,12 @@ void susy3l_datacard() {
      // md.addExternalSystUnc(dss[id],"tHTE",HLTEff[ic], -1*HLTEff[ic], categs[ic], "selected");
     //}
   //}
+  
+  for(size_t ic=0;ic<15;ic++) {
+    for(size_t id=0;id<dss.size();id++) {
+        md.addExternalSystUnc(dss[id],"JES",0.05,-0.05,vcategs[ic],"selected");
+    }
+  }
   
   md.makeMultiDataCard("T1t412", vcategs, "selected", "susy3l_T1t412");
 

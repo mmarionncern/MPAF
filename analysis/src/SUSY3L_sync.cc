@@ -899,7 +899,7 @@ float SUSY3L_sync::getFR(Candidate* cand, int idx) {
     //flavor dependent multiIso working point
     int wp=std::abs(cand->pdgId())==11?SusyModule::kMedium:SusyModule::kLoose;
 
-    if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (float)ptM);
+    if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (double)ptM);
 
     ptVal=std::max(ptVal, ptM);
   
