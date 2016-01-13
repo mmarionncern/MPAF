@@ -187,8 +187,7 @@ protected:
   std::string _cfgName;
  
   // CH: FakeRatio and FRinSitu need dataset access for reweighting...
-  int _inds;
-  int _numDS;
+  unsigned int _numDS;
   std::vector <Dataset*> _datasets;
 
 
@@ -201,6 +200,8 @@ private:
   unsigned int _nEvtMax; 
   unsigned int _nSkip; 
   bool _summary;
+
+  int _inds;
 
   std::map<std::string, std::string> _sampleOption;
   

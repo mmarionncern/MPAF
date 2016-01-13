@@ -439,6 +439,7 @@ string
 Dataset::goodPath(string path){
 
   if(path.find("psi.ch") != (size_t) -1) return "dcap://t3se01.psi.ch:22125/" + path;
+  if(path.find("/eos/")  != (size_t) -1) return "root://eoscms.cern.ch/" + path;
 
   return path;
 
@@ -446,20 +447,34 @@ Dataset::goodPath(string path){
 
 string
 Dataset::goodFilePath(string path, string dir, string fileName){
+  // CH: path is the "dir" variable given in the config file
+  //     dir  is the "dir" attribute given to the dataset (if so), whose name is fileName
 
+  // remove the last slash because it's added in the logic below
   if(dir .length() > 0 && dir .substr(dir .length()-1,1) == "/") dir .erase(dir .length()-1);
   if(path.length() > 0 && path.substr(path.length()-1,1) == "/") path.erase(path.length()-1);
 
   // absolute dir
-  if(dir.substr(0,1) == "/") return goodPath(dir + "/"  + fileName + ".root"); 
+  if(dir.substr(0,1) == "/") 
+    return goodPath(dir + "/"  + fileName + ".root"); 
+
+  // dir on EOS with root://
+  if(dir.find(":") != (size_t) -1 && dir.find("psi.ch") == (size_t) -1) 
+    return dir + "/"  + fileName + ".root";
   
-  // relative dir
-  if(dir != "") path += "/" + dir;
+  // relative dir -> relative to path!
+  if(dir != "") 
+    path += "/" + dir;
+
+  // path on EOS with root://
+  if(path.find(":") != (size_t) -1 && path.find("psi.ch") == (size_t) -1) 
+    return path + "/"  + fileName + ".root";
 
   // absolute path
-  if(path.substr(0,1) == "/") return goodPath(path + "/" + fileName + ".root");
+  if(path.substr(0,1) == "/") 
+    return goodPath(path + "/" + fileName + ".root");
 
-  // relative path
+  // relative path -> relative to MPAF/workdir/data!
   return string(getenv("MPAF")) + "/workdir/data/" + path + "/" + fileName + ".root";
 
 }
