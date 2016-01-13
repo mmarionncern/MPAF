@@ -46,9 +46,9 @@ private:
     void setBaselineRegion();
     void setSignalRegion();
     void setCut(std::string, float, std::string, float = 0);
-    bool hardLegSelection();
+    bool hardLegSelection(int n_hardestLeg = 0, float cut_hardestLeg = -1., int n_hardLeg = 0, float cut_hardLeg = -1.);
     bool checkMultiIso();
-    bool ZEventSelectionLoop(bool onz, bool loose_3rd_lep = false);
+    bool ZEventSelectionLoop(bool onz, bool loose_3rd_lep = false, float mt_cut = -1);
     bool srSelection();
     void fillEventPlots();
     void fillControlPlots();
