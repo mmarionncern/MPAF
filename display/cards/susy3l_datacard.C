@@ -15,7 +15,7 @@ void susy3l_datacard() {
   md.anConf.configureData(false, 0, mcOnly);
   
   //Lumis( or XSections ) pb-1 & KFactors ************************************
-  float lumi=3000; //pb-1 19470
+  float lumi=2200; //pb-1 19470
   float energy=13; //TeV
 
   bool useXS=false;
@@ -33,7 +33,11 @@ void susy3l_datacard() {
 
   //===============================================================
 
-  md.addDataCardSigSample("T1tttt_mGo1200_mChi800","T1t412");
+  md.addDataCardSigSample("T1tttt_mGo1200_mChi800","T1t4_1200");
+  //md.addDataCardSigSample("T1tttt_mGo1500_mChi100","T1t4_1200");
+  //md.addDataCardSigSample("T5ttttDeg_mGo1000_mStop300_mCh285_mChi280","T1t4_1200");
+  //md.addDataCardSigSample("T6ttWW_mSbot600_mCh425_mChi50","T1t4_1200");
+  //md.addDataCardSigSample("T6ttWW_mSbot650_mCh150_mChi50","T1t4_1200");
   
   md.addDataCardSample("TTWToLNu", "ttW");
   md.addDataCardSample("TTZToLLNuNu","ttZ");
@@ -60,7 +64,7 @@ void susy3l_datacard() {
   
   
   //shape uncertainties
-  md.addNuisanceParameter("JES","ttW:ttZ:WZ:ZZ:VVV:rares:T1t412","shape","");
+  md.addNuisanceParameter("JES","ttW:ttZ:WZ:ZZ:VVV:rares:T1t4_1200","shape","");
   /*md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
   md.addNuisanceParameter("tHTE","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
 
@@ -81,7 +85,7 @@ void susy3l_datacard() {
     "SR001","SR002", "SR003", "SR004", "SR005", "SR006", "SR007", "SR008", "SR009", "SR010", "SR011", "SR012", "SR013", "SR014", "SR015"};
 
   //vector<string> dss; 
-  string dss[8]={"ttW","ttZ","WZ","ZZ","VVV","rare","fake","T1t412"};
+  string dss[8]={"ttW","ttZ","WZ","ZZ","VVV","rare","fake","T1t4_1200"};
   
 
   
@@ -119,7 +123,7 @@ void susy3l_datacard() {
   md.addNuisanceParameter("fsHLT","T1ttttBENCH","lnN","1.05");
 */
   md.addNuisanceParameter("fakeUnc","fake","lnN","1.30");
-  md.addNuisanceParameter("sigUnc","T1t412","lnN","1.10");
+  md.addNuisanceParameter("sigUnc","T1t4_1200","lnN","1.10");
   md.addNuisanceParameter("promptUnc","ttW:ttZ:WZ:ZZ:VVV:rare","lnN","1.20:1.20:1.20:1.20:1.20:1.20");
   //===============================================================
 
@@ -231,12 +235,12 @@ void susy3l_datacard() {
   //}
   
   for(size_t ic=0;ic<15;ic++) {
-    for(size_t id=0;id<dss.size();id++) {
+    for(size_t id=0;id<8;id++) {
         md.addExternalSystUnc(dss[id],"JES",0.05,-0.05,vcategs[ic],"selected");
     }
   }
   
-  md.makeMultiDataCard("T1t412", vcategs, "selected", "susy3l_T1t412");
+  md.makeMultiDataCard("T1t4_1200", vcategs, "selected", "T1t4_1200");
 
  
   md.getStatistics();
