@@ -1131,7 +1131,9 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
   ostringstream dataYieldStr; dataYieldStr<<dataYield;
   
   string yieldStr;
+  string sumBkgStr;
   float sumSig;
+  float sumBkg = 0;
   for(unsigned int ids=0;ids<_dsNames.size();ids++) { //0 is MC
     
     if(_dsNames[ids]!=sigName && _dsNames[ids].find("sig")==string::npos && 
@@ -1140,6 +1142,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       ostringstream os;
       float y=((valCentral[_dsNames[ids]]==0)?0.0001:valCentral[_dsNames[ids]]);
       if(y<0) y=0.0001;
+      sumBkg+= y;
       os<<setprecision(4)<< y;
       yieldStr += os.str()+"\t";
       
@@ -1150,6 +1153,9 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
   }
 
   ostringstream os;
+  ostringstream os_bkg;
+  os_bkg<<setprecision(4)<<sumBkg;
+  sumBkgStr = os_bkg.str()+"\t";
   os<<setprecision(4)<<sumSig;
   yieldStr = os.str()+"\t"+yieldStr;
 
@@ -1163,10 +1169,10 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
   card<<"shapes * * "<<cardName+".root"<<" $PROCESS $PROCESS_$SYSTEMATIC"<<endl;
   card<<"---------------------------"<<endl; 
   card<<"bin\t0"<<endl;
-  card<<"observation\t"<<dataYieldStr.str()<<endl;
+  //card<<"observation\t"<<dataYieldStr.str()<<endl;    //if with data
+  card<<"observation\t"<<sumBkgStr<<endl;      //if no data
   card<<"---------------------------"<<endl; 
   card<<"bin\t\t"<<lines[ "bins" ]<<endl;
-  card<<"process\t\t"<<lines[ "procNames" ]<<endl;
   card<<"process\t\t"<<lines[ "procNums" ]<<endl;
   card<<"rate\t\t"<<yieldStr<<endl;
   card<<"---------------------------"<<endl; 
