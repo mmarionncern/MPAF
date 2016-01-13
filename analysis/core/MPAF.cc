@@ -102,12 +102,17 @@ void MPAF::analyze(){
   float timeCPU=0;
   float timeWall=0;
   int nE=0;
-  
+
+  //CH: this line has to be BEFORE the call of defineOutput!
+  //FakeRatio and FRinSitu class needs to know the number of datasets before defining Output
+  _numDS = _datasets.size();
+
+
   // define and book all outputs
   defineOutput();
   //copy the histograms for the different workflows
   addWorkflowHistos();
-  _numDS = _datasets.size();
+
 
   // loop over given samples
   for(unsigned int i=0; i<_numDS; ++i){
@@ -130,7 +135,7 @@ void MPAF::analyze(){
     // loop over entries
     _nEvts[i] = _datasets[i]->getNEvents();
     _nEvtsDs[i] = _nEvts[i];
-    if(_nEvtMax!=(size_t)-1) _nEvts[i] =  min(_nEvtMax+_nSkip,_nEvts[i]);
+    if(_nEvtMax != (size_t)-1) _nEvts[i] =  min(_nEvtMax+_nSkip,_nEvts[i]);
     
     cout<<" Starting processing dataset : "<<_sampleName<<"  (running on "<<_nEvts[i]<<" events)"<<endl;
 

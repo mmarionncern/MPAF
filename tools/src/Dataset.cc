@@ -97,7 +97,8 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
   //======
 	
   //Looking for the tree if not data-driven
-  string tmpPath=isTreeType()?("data/"+path):"root";
+  //string tmpPath=isTreeType()?("data/"+path):"root"; //CH: why? what about absolute paths?
+  string tmpPath=isTreeType()?(path):"root";
   string tmpFName=isTreeType()?(sId.name):objName;
   int nProcEvt = (hname=="")?-1:getNProcEvents(tmpPath, dir, tmpFName, hname);
   double sumProcWgt = (hwgtname=="")?-1:getSumProcWgts(tmpPath, dir, tmpFName, hwgtname);
@@ -145,21 +146,9 @@ Dataset::addFriend(string friendname){
 
 int
 Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
-  string p= string(getenv ("MPAF"))+"/workdir";
-  string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
-  if(dir=="") NameF = p+"/"+path+"/"+fileName+".root";
-  if(path.find("psi.ch")!=(size_t)-1) {
-    if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
-    NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
-  }
-  else if(path.find(":")!=(size_t)-1)  {
-    if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);   
-    NameF=path+"/"+fileName+".root";
-  }
-  if(dir.find("psi.ch")!=(size_t)-1)
-    NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
 
-  cout<<NameF<<endl;
+  string NameF = goodFilePath(path, dir, fileName);
+
   TFile* file = TFile::Open( NameF.c_str() );
   if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hname.c_str() );
@@ -178,20 +167,9 @@ Dataset::getNProcEvents(string path, string dir, string fileName, string hname) 
 
 double
 Dataset::getSumProcWgts(string path, string dir, string fileName, string hwgtname) {
-  string p= string(getenv ("MPAF"))+"/workdir";
-  string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
-  if(path.find("psi.ch")!=(size_t)-1) {
-    if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
-    NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+fileName+".root";
-  }
-  else if(path.find(":")!=(size_t)-1)  {
-    if(path.substr(0,4)=="data") path=path.substr(5,path.size()-5);
-    NameF=path+"/"+fileName+".root";
-  }
-  if(dir.find("psi.ch")!=(size_t)-1)
-    NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
+
+  string NameF = goodFilePath(path, dir, fileName);
   
-  cout<<NameF<<endl;
   TFile* file = TFile::Open( NameF.c_str() );
   if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hwgtname.c_str() );
@@ -297,16 +275,9 @@ Dataset::getSample(string sname) const {
 void 
 Dataset::loadTree(string path, string dir, string sname, string objName) {
   TFile* datafile(nullptr);
-  if(dir=="") dir=path;
-  string p= string(getenv ("MPAF"))+"/workdir";
-  string NameF = p+"/data/"+dir+"/"+sname+".root"; 
-  if(path.find("psi.ch")!=(size_t)-1)
-    NameF = "dcap://t3se01.psi.ch:22125/"+path+"/"+sname+".root";
-  else if(path.find(":")!=(size_t)-1) NameF=path+"/"+sname+".root";
-  if(dir.find("psi.ch")!=(size_t)-1)
-    NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+sname+".root";
 
-  cout<<NameF<<endl;
+  string NameF = goodFilePath(path, dir, sname);
+
   datafile = TFile::Open(NameF.c_str());
   if(datafile==nullptr) { 
     cout<<" No such file "<<sname<<endl; return;
@@ -328,10 +299,7 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
 
     // adding friend-trees
     for (size_t ft=0; ft<_friends.size(); ft++){
-      string NameFr = p+"/data/"+dir+"/"+_friends[ft]+"/evVarFriend_"+sname+".root";
-      if(dir.find("psi.ch")!=(size_t)-1)
-        NameFr="dcap://t3se01.psi.ch:22125/"+dir+"/"+_friends[ft]+"/evVarFriend_"+sname+".root";
-
+      string NameFr = goodFilePath(path, dir, _friends[ft] + "/evVarFriend_" + sname);
       string name = _friends[ft]+" = sf/t";
       _chain->AddFriend((name).c_str(),(NameFr).c_str());
     } 
@@ -351,11 +319,8 @@ void
 Dataset::loadHistos(string path, string dir, string filename, string hname, string optCat) {
   TFile* datafile(nullptr);
   
-  string NameF = path+"/"+dir+"/"+filename+".root"; 
-  if(path.find(":")!=(size_t)-1) NameF=dir+"/"+filename+".root";
-  if(dir.find("psi.ch")!=(size_t)-1)
-    NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+filename+".root";
-  
+
+  string NameF = goodFilePath(path, dir, filename);
   datafile = TFile::Open(NameF.c_str());
 
   if(datafile==nullptr) {cout<<"warning, unable to load histograms"<<endl; return;}
@@ -467,4 +432,49 @@ Dataset::getWeight(string sname) const {
   int is = hasSample(sname);
   if(is==-1) return 0;
   return getWeight(is);
+}
+
+
+string
+Dataset::goodPath(string path){
+
+  if(path.find("psi.ch") != (size_t) -1) return "dcap://t3se01.psi.ch:22125/" + path;
+  if(path.find("/eos/")  != (size_t) -1) return "root://eoscms.cern.ch/" + path;
+
+  return path;
+
+}
+
+string
+Dataset::goodFilePath(string path, string dir, string fileName){
+  // CH: path is the "dir" variable given in the config file
+  //     dir  is the "dir" attribute given to the dataset (if so), whose name is fileName
+
+  // remove the last slash because it's added in the logic below
+  if(dir .length() > 0 && dir .substr(dir .length()-1,1) == "/") dir .erase(dir .length()-1);
+  if(path.length() > 0 && path.substr(path.length()-1,1) == "/") path.erase(path.length()-1);
+
+  // absolute dir
+  if(dir.substr(0,1) == "/") 
+    return goodPath(dir + "/"  + fileName + ".root"); 
+
+  // dir on EOS with root://
+  if(dir.find(":") != (size_t) -1 && dir.find("psi.ch") == (size_t) -1) 
+    return dir + "/"  + fileName + ".root";
+  
+  // relative dir -> relative to path!
+  if(dir != "") 
+    path += "/" + dir;
+
+  // path on EOS with root://
+  if(path.find(":") != (size_t) -1 && path.find("psi.ch") == (size_t) -1) 
+    return path + "/"  + fileName + ".root";
+
+  // absolute path
+  if(path.substr(0,1) == "/") 
+    return goodPath(path + "/" + fileName + ".root");
+
+  // relative path -> relative to MPAF/workdir/data!
+  return string(getenv("MPAF")) + "/workdir/data/" + path + "/" + fileName + ".root";
+
 }

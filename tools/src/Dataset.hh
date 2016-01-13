@@ -103,6 +103,9 @@ public:
 	
   float getWeight(int is) const {return _samples[is].getLumW(); };
   float getWeight(string sname) const;
+
+  string goodPath(string path);
+  string goodFilePath(string path, string dir, string fileName);
 	
   TTree* getTree() {return _chain;};
   int getNEvents() { return _chain->GetEntries(); };

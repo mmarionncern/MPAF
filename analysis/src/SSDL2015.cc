@@ -458,7 +458,7 @@ SSDL2015::writeOutput() {
 
 void
 SSDL2015::run() {
-  
+
   if(_fastSim && !checkMassBenchmark() ) return;
   
   if(_vc->get("isData") && !checkDoubleCount()) return;
@@ -676,7 +676,7 @@ SSDL2015::advancedSelection(int WF) {
   //     ) return;
   // int run=_vc->get("run");
   // int lumi=_vc->get("lumi");
-  // int event=_vc->get("evt");
+  // double event=_vc->get("evt");
   // int nLep = _looseLeps.size();//_looseLepsVeto.size();//_vc->get("nLepGood_Mini");
   // // cout<<" <====> "<<_vc->get("nLepGood_Mini")<<"  "<<_looseLepsVeto.size()<<"  "<<_looseLeps.size()<<endl;
   // int id1 = _l1Cand->pdgId();
@@ -687,15 +687,18 @@ SSDL2015::advancedSelection(int WF) {
   // int nbjet = _nBJets;
   // double met = _met->pt();
   // double HT = _HT;
-  // int sr = ((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset-1):(0));
+  // int sr = ((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset):(0));
 
   // if(getCurrentWorkflow()==kBR00H_Fake || getCurrentWorkflow()==kBR10H_Fake || getCurrentWorkflow()==kBR20H_Fake || getCurrentWorkflow()==kBR30H_Fake) sr=0;
-  
-  // cout << Form("%1d %9d %12d\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d",
+ 
+  //if(_isFake && sr > 0) {
+  // cout << Form("%1d %9d %12.0f\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d\t%2.5f",
   // 	       run, lumi, event, nLep,
   // 	       id1, pt1, id2, pt2,
   // 	       njet, nbjet, met, HT,
-  // 	       sr ) << endl;
+  // 	       sr, _weight ) << endl;
+
+  //}
 
   //if(_auxPairs.size()>=1 && offset==kBR30L_Fake) { // && _auxFlags[0]==kIsFake) {
   //if(_auxPairs.size()==1 && _auxFlags[0]==kIsFake) {
@@ -1529,7 +1532,7 @@ SSDL2015::getFR(Candidate* cand, int idx) {
 
   int wp=std::abs(cand->pdgId())==11?SusyModule::kTight:SusyModule::kMedium;
 
-  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (float)ptM);
+  if(_FR.find("C")!=string::npos) ptVal=std::max(_susyMod->conePt(idx,wp), (double)ptM);
   if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
   ptVal=std::max(ptVal, ptM);
@@ -1760,7 +1763,7 @@ SSDL2015::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass) {
     if(_FR.find("FO2")!=string::npos && !_susyMod->elIdSel(c, idx, SusyModule::kTight, elMva )) return false;
     if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
      if(!_susyMod->elHLTEmulSel(idx, hltDLHT ) ) return false; 
-    
+
     if(_FR.find("FO4")!=string::npos && !_susyMod->invMultiIsoSel(idx, SusyModule::kSpecFakeEl) ) return false;
   }
 

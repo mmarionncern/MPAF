@@ -2,10 +2,13 @@
 #define SusyModule_hh
 
 #include "analysis/core/VarClass.hh"
+#include "analysis/core/MPAF.hh"
 #include "analysis/modules/BTagCalibrationStandalone.hh"
 #include "analysis/tools/Candidate.hh"
 #include "analysis/utils/KineUtils.hh"
 #include "analysis/utils/mt2_bisect.h"
+//#include "analysis/utils/Tools.hh"
+//#include "analysis/utils/Debug.cc"
 
 #include "tools/src/DataBaseManager.hh"
 #include "tools/src/SystUtils.hh"
@@ -37,25 +40,32 @@ public:
   SusyModule(VarClass* vc, DataBaseManager* dbm);
   ~SusyModule();
 
-  
-  bool elMvaSel(int elIdx, int wp) const;
-  bool muIdSel(const Candidate* c, int idx, int wp, bool chCut=true ) const;
-  bool elIdSel(const Candidate* c, int idx, int wp, int mvaWp = kTight, bool chCut=true ) const;
-  bool elHLTEmulSel(int idx, bool withIso) const;
-  bool multiIsoSel(int idx, int wp) const;
-  bool multiIsoSelCone(int idx, int wp) const;
-  bool invMultiIsoSel(int idx, int wp) const;
+  bool elHLTEmulSel(int idx, bool withIso, string branch = "LepGood") const;
+  bool elHLTEmulSelIso(int idx, int mvaWP = kLooseHT, string branch = "LepGood") const;
+  bool elIdSel(const Candidate* c, int idx, int wp, int mvaWp = kTight, bool chCut = true, bool invSIP = false, string branch = "LepGood") const;
+  bool elMvaSel(int elIdx, int wp, string branch = "LepGood") const;
+  bool muIdSel(const Candidate* c, int idx, int wp, bool chCut = true, bool invSIP = false, string branch = "LepGood") const;
+  bool multiIsoSel(int idx, int wp, string branch = "LepGood") const;
+  bool multiIsoSelCone(int idx, int wp, string branch = "LepGood") const;
+  bool multiIsoSelInSitu(int idx, int wp, string branch = "LepGood") const;
+  bool inSituFO(int idx, int wp, string branch = "LepGood") const;
+  bool invMultiIsoSel(int idx, int wp, string branch = "LepGood") const;
+  bool invPtRelSel(int idx, int wp, string branch = "LepGood") const;
+
   bool jetSel(int jetIdx) const;
   float HT(const CandList* jets);
 
+  void awayJets(CandList* leptons, 
+		 CandList& cleanJets, vector<pair<string, unsigned int> >& jetIdxs, float dR = 1.0);
   void cleanJets(CandList* leptons, 
 		 CandList& cleanJets, vector<pair<string, unsigned int> >& jetIdxs,
 		 CandList& cleanBJets, vector<pair<string,unsigned int> >& bJetIdxs,
 		 CandList& lepJets, vector<pair<string,unsigned int> >& lepJetsIdxs,
-		 float thr, float bthr, bool isJESUnc, int dir);
+		 float thr, float bthr, bool isJESUnc = false, int dir = 0);
   void ptJets(CandList allJets, vector<pair<string, unsigned int> > allJetIdxs,
-              CandList& jets, vector<pair<string, unsigned int> >& jetIdxs, float thr);
+              CandList& jets, vector<pair<string, unsigned int> >& jetIdxs, float thr = 40);
 
+  void cleanLeps(CandList& tightLeps, CandList* vetoLeps);
   const Candidate* jetLepAware(const Candidate* lep);
   float pTRatio(const Candidate* lep, const Candidate* jet);
   float pTRel(const Candidate* lep, const Candidate* jet);
@@ -89,10 +99,14 @@ public:
 				bool bypassMV, bool os, float pTthrMu, float pTthrEl,
 				vector<int>& idx1, vector<int>& idx2);
   
-  float closestJetPt(int idx) const;
-  float conePt(int idx, int isoWp = kTight) const; 
+  double closestJetPt(int idx, string branch = "LepGood") const;
+  double conePt(int idx, int isoWp = kTight, string branch = "LepGood") const; 
+  double Mt(Candidate* c1, Candidate* c2, int idx1 = -1, int idx2 = -1, string branch1 = "LepGood", string branch2 = "LepGood", int isoWp = kTight) const;
+  double rawMt(Candidate* c1, Candidate* c2) const;
+  double coneMt(Candidate* c1, Candidate* c2, int idx1 = -1, int idx2 = -1, string branch1 = "LepGood", string branch2 = "LepGood", int isoWp = kTight) const;
 
   void correctFlipRate(float& rate, float eta);
+
 
   double getLHEweight(int LHEsysID);
   void applyHLTSF(const string& hltLine, float& weight);
@@ -107,7 +121,6 @@ public:
 	       int st, bool fastSim=false, int fssf=0);
   float bTagMediumEfficiency(Candidate* jet, unsigned int flavor);
   float bTagMediumScaleFactor(Candidate* jet, unsigned int flavor, int st);
-  //float bTagScaleFactor(unsigned int op, unsigned int mt, int st, unsigned int fl);
   float bTagMediumScaleFactorFastSim(Candidate* jet, unsigned int flavor, int st);
   float bTagPt(float);
 
@@ -125,8 +138,17 @@ public:
 
   void applyISRWeight(unsigned int process, int var, float& weight);
 
+  float bTagSF(string dbKeyEffB, string dbKeyEffL, string dbKeyCsv,
+               CandList& jets , vector<unsigned int>& jetIdx ,
+               CandList& bJets, vector<unsigned int>& bJetIdx, int st);
+  float bTagMediumEfficiency(string dbKeyB, string dbKeyLight, Candidate* jet, int jetIdx, bool isBTagged);
+  float bTagMediumScaleFactor(string dbKey, Candidate* jet, int jetIdx, bool isBTagged, int st);
+  float bTagScaleFactor(string dbKey, unsigned int op, unsigned int mt, int st, unsigned int fl);
+
   enum {kDenom=0,
 	kVLoose,
+	kInSitu,
+	kInSituHT,
 	kLoose,
 	kLooseHT,
 	kMedium,

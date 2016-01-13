@@ -61,6 +61,16 @@ void HistoManager::configAnalysis(vector<string> datasets) {
 }
 
 
+//add dataset
+//____________________________________________________________________________
+void HistoManager::addDataset(string dsname) {
+
+  _dsNames.push_back(dsname);
+  _nds = _dsNames.size();
+
+}
+
+
 //Histogram access and booking
 //____________________________________________________________________________
 void HistoManager::addVariable(string var, int nBin, float min, float max, string Xleg, bool isglb, bool prof, string type) {
