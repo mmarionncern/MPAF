@@ -7,8 +7,8 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="TTJets_Pow_MuEl_NIsoMaps_FR04_IDTrigEmulation_vtx"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="TTJets_Pow_MuEl_NIsoMaps_FR04_IDTrigEmulation_vtx"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="ttbar_closure_withIdEmulation"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="ttbar_closure_withIdEmulation"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = true;
@@ -93,43 +93,43 @@ void susy3l_tt_closure() {
     }
 */
     if(obs == "njets"){
-        md.dp.setObservables("NJetsSR005");
+        md.dp.setObservables("NJets");
         int binning=1;
         double rangeX[2]={0,7};
         //bool logYScale=true;
     }
     if(obs == "nbjets"){
-        md.dp.setObservables("NBJetsSR005");
+        md.dp.setObservables("NBJets");
         int binning=1;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "met"){
-        md.dp.setObservables("METSR005");
+        md.dp.setObservables("MET");
         int binning=50;
         double rangeX[2]={0,500};
         //bool logYScale=true;
     }
     if(obs == "ht"){
-        md.dp.setObservables("HTSR005");
+        md.dp.setObservables("HT");
         int binning=60;
         double rangeX[2]={0,1000};
         //bool logYScale=true;
     }
     if(obs == "pt1"){
-        md.dp.setObservables("pt_1st_leptonSR005");
+        md.dp.setObservables("pt_1st_lepton");
         int binning=10;
         double rangeX[2]={0,200};
         //bool logYScale=true;
     }
     if(obs == "pt2"){
-        md.dp.setObservables("pt_2nd_leptonSR005");
+        md.dp.setObservables("pt_2nd_lepton");
         int binning=10;
         double rangeX[2]={0,150};
         //bool logYScale=true;
     }   
     if(obs == "pt3"){
-        md.dp.setObservables("pt_3rd_leptonSR005");
+        md.dp.setObservables("pt_3rd_leptonSR001");
         int binning=10;
         double rangeX[2]={0,100};
         //bool logYScale=true;

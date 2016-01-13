@@ -404,6 +404,7 @@ void SUSY3L::defineOutput(){
     //auxiliary for fake estimartion
     _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "fake event type"                                   );
     _hm->addVariable("nFO"              ,  7,     0.0,  7.0,    "number of tight plus fakable-not-tight leptons"    );
+    _hm->addVariable("nFakeComb"        ,  5,     0.0,  5.0,    "number of tight-fake-combinations per event"       );
     _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
     
     
@@ -1524,8 +1525,8 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     idxsPtCorr.insert(idxsPtCorr.end(), idxsT.begin(), idxsT.end());
     idxsPtCorr.insert(idxsPtCorr.end(), idxsLPtCorr.begin(), idxsLPtCorr.end());
 
-    vector<int> typeLeps(tightLeps.size(), 1);
-    vector<int> tLepsFake(fakableLepsPtCorr.size(), 0);
+    vector<unsigned int> typeLeps(tightLeps.size(), 1);
+    vector<unsigned int> tLepsFake(fakableLepsPtCorr.size(), 0);
     typeLeps.insert(typeLeps.end(), tLepsFake.begin(), tLepsFake.end() );
 
     bool passZsel=false;
@@ -1534,26 +1535,27 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     if(clist.size()!=3){return vclist;}
     
     //pt rank of fake lepton in TTF events
-    //CandList ptRank;
-    //ptRank = clistPtCorr;
-    //vector<unsigned int> ptRankType;
-    //ptRankType = typeLeps;
-    
     //cout << "-------------------" << endl;
-    //for(int i=0;i<ptRank.size();i++){
-    //    cout << "pt: " << ptRank[i]->pt() << " type: " << ptRankType[i] << endl;
+    //for(int i=0;i<clistPtCorr.size();i++){
+    //    cout << "pt: " << clistPtCorr[i]->pt() << " type: " << typeLeps[i] << endl;
     //}
-    
-    //sortSelectedLeps(ptRank, ptRankType);
-
  
-    //cout << "---" << endl;
-    //for(int i=0;i<ptRank.size();i++){
-    //    cout << "pt: " << ptRank[i]->pt() << " type: " << ptRankType[i] << endl;
-    //}
-
-
-
+    int fakeRank = -1;
+    if(clistPtCorr[2]->pt() <= clistPtCorr[1]->pt() && clistPtCorr[2]->pt() <= clistPtCorr[0]->pt()){
+        fakeRank = 3;
+    }
+    if(clistPtCorr[2]->pt() > clistPtCorr[1]->pt() && clistPtCorr[2]->pt() <= clistPtCorr[0]->pt()){
+        fakeRank = 2;
+    }
+    if(clistPtCorr[2]->pt() <= clistPtCorr[1]->pt() && clistPtCorr[2]->pt() > clistPtCorr[0]->pt()){
+        fakeRank = 2;
+    }
+    
+    if(clistPtCorr[2]->pt() > clistPtCorr[1]->pt() && clistPtCorr[2]->pt() > clistPtCorr[0]->pt()){
+        fakeRank = 1;
+    }
+   
+    
     //low invariant mass veto
     for(size_t il=0;il<clist.size();il++) {
         if(!_susyMod->passMllMultiVeto( clist[il], &clist, 0, 12, true) ) {return vclist;}
@@ -1611,7 +1613,9 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     //lepton candidates
     sortSelectedLeps(clistPtCorr, idxsPtCorr);
-    fill("nFO", clistPtCorr.size(),   _weight);
+    fill("nFO", clist.size(),   _weight);
+    fill("nFakeComb", vclist.size(),    _weight);
+    fill("ptRank", fakeRank,    _weight);
    
     return vclist;
 }
