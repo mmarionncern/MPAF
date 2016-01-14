@@ -66,6 +66,11 @@ void SUSY3L_sync::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");  
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    //tri-lepton trigger
+    _vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
     
     //register HLT trigger bit tree variables 
     registerTriggerVars();
@@ -308,8 +313,8 @@ void SUSY3L_sync::run(){
     counter("denominator");
 
     //event filter
-    if(!passNoiseFilters()) return;
-    counter("JME filters");
+    //if(!passNoiseFilters()) return;
+    //counter("JME filters");
 
     //check HLT trigger decition, only let triggered events pass
     if(!_fastSim) {
@@ -336,12 +341,12 @@ void SUSY3L_sync::run(){
     bool baseSel = multiLepSelection(_onZ);
     
     //blinding of signal regions
-    if(_vc->get("isData") && baseSel && !_isFake) return; 
+    //if(_vc->get("isData") && baseSel && !_isFake) return; 
   
     //select events for WZ control region
-    bool wzSel = wzCRSelection();
-    setWorkflow(kGlobal);
-    if(wzSel){return;}	
+    //bool wzSel = wzCRSelection();
+    //setWorkflow(kGlobal);
+    //if(wzSel){return;}	
   
     if(!baseSel){return;}
 
@@ -1085,8 +1090,9 @@ bool SUSY3L_sync::multiLepSelection(bool onZ){
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
         counter("hard leg selection");
+        _isMultiLep = true;
         //selection of multi lepton events for signal regions
-        
+        /*
         //Z selection
         bool passMass = false;
         bool passMT = false;
@@ -1119,7 +1125,7 @@ bool SUSY3L_sync::multiLepSelection(bool onZ){
             _isMultiLep = true;
             counter("Z veto");
         }
-
+        */
     //lepton candidates
     sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
     
@@ -1148,7 +1154,7 @@ void SUSY3L_sync::advancedSelection(int WF){
     counter("weighting");
 
     //btag -scale factors
-    if(!_vc->get("isData") ) {
+    /*if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
             _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
             _weight *= _btagW;
@@ -1165,15 +1171,15 @@ void SUSY3L_sync::advancedSelection(int WF){
             _weight *= _btagW;
     }
     counter("btag SF");
-
+*/
     //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
+//    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
     //require minimum number of b-tagged jets
-    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
+//    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
     //require minimum hadronic activity (sum of jet pT's)
-    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
+//    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
+//    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
   

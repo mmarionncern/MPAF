@@ -66,6 +66,11 @@ void SUSY3L::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");  
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    //tri-lepton trigger
+    //_vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
     
     //register HLT trigger bit tree variables 
     registerTriggerVars();
@@ -1004,7 +1009,7 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
         return: none
     */
 
-    //baseline region
+    //baseline regioin
     if(var == "NJets") {
         _valCutNJetsBR   = valCut;
         _cTypeNJetsBR    = cType;
@@ -1061,12 +1066,15 @@ bool SUSY3L::multiLepSelection(bool onZ){
     //require lepton which is not gen-matched for closure separated by flavors
     if(_closureByFlavor!=0){
         pass = false;
+        int nFakes = 0;
+        int nPrompt = 0;
         for(int i=0;i<_tightLepsPtCutMllCut.size();i++){
-            if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor) &&  _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) ==0 ){
-                //lepton of required flavor is not gen-matched
-                pass = true;
-            }
+            if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor) &&  _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) ==0 ){nFakes+=1;}
+            else if( _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) !=0 ){nPrompt+=1;}
+            
+            
         }
+        if(nFakes==1 && nPrompt ==2){pass = true;}
     }
 
     //three or more tight leptons
@@ -1109,7 +1117,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
             _isMultiLep = true;
             counter("Z veto");
         }
-
+        
     //lepton candidates
     sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
     
@@ -1545,12 +1553,17 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     if((_exactlyThreeLep && clist.size()!=3)||(!_exactlyThreeLep && clist.size()<3)){return vclist;}
 
     //for separation of closure by flavors
+    bool pass = true;
     if(_closureByFlavor!=0){
+        pass = false;
         //only consider TTF events
-        if(fakableLeps.size()!=1){return vclist;}
-        //only pick one flavor
-        if(std::abs(fakableLeps[0]->pdgId()) != _closureByFlavor){return vclist;}
+        if((fakableLeps.size()!=1) || (tightLeps.size()!=2)){return vclist;}
+        //require one not gen-matched fake of given flavor
+        if((std::abs(fakableLeps[0]->pdgId()) == _closureByFlavor) && (_vc->get("LepGood_mcMatchId" ,idxsL[0]) == 0)  ){pass = true;}
+        if((_vc->get("LepGood_mcMatchId" ,idxsT[0]) == 0) || (_vc->get("LepGood_mcMatchId" ,idxsT[1]) == 0 )){ pass = false;}
     }
+
+    if(!pass){return vclist;}
     
     //low invariant mass veto
     for(size_t il=0;il<clist.size();il++) {
