@@ -88,6 +88,7 @@ private:
     bool _selectTaus;
     bool _onZ;
     bool _doValidationPlots;
+    int _closureByFlavor;
     string _BR;
     string _SR;
     string _FR;

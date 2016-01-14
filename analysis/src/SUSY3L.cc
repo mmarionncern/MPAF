@@ -113,7 +113,8 @@ void SUSY3L::initialize(){
     _vc->registerVar("LepGood_ecalPFClusterIso"        );    
     _vc->registerVar("LepGood_hcalPFClusterIso"        );    
     _vc->registerVar("LepGood_dr03TkSumPt"             );    
-     
+    _vc->registerVar("LepGood_mcMatchId"               );    //MC truth information (1 gen-matched, 0 not)
+    
     //taus
     _vc->registerVar("nTauGood"                        );    //number of taus in event
     _vc->registerVar("TauGood_pdgId"                   );    //identifier for taus (15)
@@ -230,6 +231,7 @@ void SUSY3L::initialize(){
     _categorization = getCfgVarI("categorization", 1);
     _doValidationPlots = getCfgVarI("doValidationPlots", 0);
     _fastSim = getCfgVarI("FastSim", 0);
+    _closureByFlavor = getCfgVarI("closureByFlavor", 0);
 
     //FR databases
     if(_FR=="FO2C") {
@@ -1059,9 +1061,21 @@ bool SUSY3L::multiLepSelection(bool onZ){
 
     _isMultiLep = false;
     _isFake = false;
+    bool pass = true;
+
+    //require lepton which is not gen-matched for closure separated by flavors
+    if(_closureByFlavor!=0){
+        pass = false;
+        for(int i=0;i<_tightLepsPtCutMllCut.size();i++){
+            if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor) &&  _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) ==0 ){
+                //lepton of required flavor is not gen-matched
+                pass = true;
+            }
+        }
+    }
 
     //three or more tight leptons
-    if(_tightLepsPtCutMllCut.size()==3){
+    if(_tightLepsPtCutMllCut.size()==3 && pass){
         counter("lepton multiplicity");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
@@ -1530,37 +1544,18 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     typeLeps.insert(typeLeps.end(), tLepsFake.begin(), tLepsFake.end() );
 
     bool passZsel=false;
+    int fakeRank = -1;
    
     //require certain number of fakable leptons
     if(clist.size()!=3){return vclist;}
 
     //for separation of closure by flavors
-    //only consider TTF events
-    //if(fakableLeps.size()!=1){return vclist;}
-    //only pick one flavor
-    //if(fakableLeps[0]
-    
-    //pt rank of fake lepton in TTF events
-    //cout << "-------------------" << endl;
-    //for(int i=0;i<clistPtCorr.size();i++){
-    //    cout << "pt: " << clistPtCorr[i]->pt() << " type: " << typeLeps[i] << endl;
-    //}
- 
-    int fakeRank = -1;
-    if(clistPtCorr[2]->pt() <= clistPtCorr[1]->pt() && clistPtCorr[2]->pt() <= clistPtCorr[0]->pt()){
-        fakeRank = 3;
+    if(_closureByFlavor!=0){
+        //only consider TTF events
+        if(fakableLeps.size()!=1){return vclist;}
+        //only pick one flavor
+        if(std::abs(fakableLeps[0]->pdgId()) != _closureByFlavor){return vclist;}
     }
-    if(clistPtCorr[2]->pt() > clistPtCorr[1]->pt() && clistPtCorr[2]->pt() <= clistPtCorr[0]->pt()){
-        fakeRank = 2;
-    }
-    if(clistPtCorr[2]->pt() <= clistPtCorr[1]->pt() && clistPtCorr[2]->pt() > clistPtCorr[0]->pt()){
-        fakeRank = 2;
-    }
-    
-    if(clistPtCorr[2]->pt() > clistPtCorr[1]->pt() && clistPtCorr[2]->pt() > clistPtCorr[0]->pt()){
-        fakeRank = 1;
-    }
-   
     
     //low invariant mass veto
     for(size_t il=0;il<clist.size();il++) {
@@ -1609,7 +1604,15 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
                 int cType=typeLeps[i1]+typeLeps[i2]+typeLeps[i3];
                 if(cType==0) combType.push_back(kIsTripleFake);
                 if(cType==1) combType.push_back(kIsDoubleFake);
-                if(cType==2) combType.push_back(kIsSingleFake);
+                if(cType==2){
+                    combType.push_back(kIsSingleFake);
+                    //for studying pt rank of fake lepton in TTF events
+                    if(clistPtCorr[2]->pt() <= clistPtCorr[1]->pt() && clistPtCorr[2]->pt() <= clistPtCorr[0]->pt()){fakeRank = 3;}
+                    else if(clistPtCorr[2]->pt() > clistPtCorr[1]->pt() && clistPtCorr[2]->pt() <= clistPtCorr[0]->pt()){fakeRank = 2;}
+                    else if(clistPtCorr[2]->pt() <= clistPtCorr[1]->pt() && clistPtCorr[2]->pt() > clistPtCorr[0]->pt()){fakeRank = 2;}
+                    else if(clistPtCorr[2]->pt() > clistPtCorr[1]->pt() && clistPtCorr[2]->pt() > clistPtCorr[0]->pt()){fakeRank = 1;}
+                    else{fakeRank = 5;}
+                }
                 if(cType==3) {
                     cout<<"WARNING: a signal event is in the fake background application region! "<<endl;
                 }
