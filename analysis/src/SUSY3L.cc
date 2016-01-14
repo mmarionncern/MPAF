@@ -126,37 +126,44 @@ void SUSY3L::initialize(){
     _vc->registerVar("TauGood_idDecayMode"             );     //
     _vc->registerVar("TauGood_isoCI3hit"               );     //
     
-    //jets
-    _vc->registerVar("nJet"                            );    //number of jets in the event
-    _vc->registerVar("Jet_pt"                          );    //pT of each of the nJet jets
-    _vc->registerVar("Jet_eta"                         );    //eta of each of the nJet jets
-    _vc->registerVar("Jet_phi"                         );    //phi of each of the nJet jets
-    _vc->registerVar("Jet_id"                          );    //jet identifier (>=1: 8TeV loose recommendation)
-    _vc->registerVar("Jet_btagCSV"                     );     //b-tagging quantity (-1 or [0;1]
-    _vc->registerVar("Jet_muEF"                        );     //fraction of muon pt in jet
-    _vc->registerVar("Jet_mass"                        );     //jet mass
-    _vc->registerVar("Jet_rawPt"                       );
-    _vc->registerVar("Jet_mcFlavour"                   );
+    vector<string> extsJEC({"","_jecUp","_jecDown"});
+    for(unsigned int ie=0;ie<extsJEC.size();ie++) {
 
-    //discarded jets (because of leptons cleaning)
-    _vc->registerVar("nDiscJet"                        );
-    _vc->registerVar("DiscJet_id"                      );
-    _vc->registerVar("DiscJet_pt"                      );
-    _vc->registerVar("DiscJet_rawPt"                   );
-    _vc->registerVar("DiscJet_eta"                     );
-    _vc->registerVar("DiscJet_phi"                     );
-    _vc->registerVar("DiscJet_mass"                    );
-    _vc->registerVar("DiscJet_btagCSV"                 );
-    _vc->registerVar("DiscJet_mcFlavour"               );
+      //missing transverse energy
+      _vc->registerVar("met"+extsJEC[ie]+"_pt"                          );     //missing tranvers momentum
+      _vc->registerVar("met"+extsJEC[ie]+"_phi"                         );     //phi of missing transvers momentum
+
+      //jets
+      _vc->registerVar("nJet"+extsJEC[ie]                               );    //number of jets in the event
+      _vc->registerVar("Jet"+extsJEC[ie]+"_pt"                          );    //pT of each of the nJet jets
+      _vc->registerVar("Jet"+extsJEC[ie]+"_eta"                         );    //eta of each of the nJet jets
+      _vc->registerVar("Jet"+extsJEC[ie]+"_phi"                         );    //phi of each of the nJet jets
+      _vc->registerVar("Jet"+extsJEC[ie]+"_id"                          );    //jet identifier (>=1: 8TeV loose recommendation)
+      _vc->registerVar("Jet"+extsJEC[ie]+"_btagCSV"                     );     //b-tagging quantity (-1 or [0;1]
+      _vc->registerVar("Jet"+extsJEC[ie]+"_muEF"                        );     //fraction of muon pt in jet
+      _vc->registerVar("Jet"+extsJEC[ie]+"_mass"                        );     //jet mass
+      _vc->registerVar("Jet"+extsJEC[ie]+"_rawPt"                       );
+      _vc->registerVar("Jet"+extsJEC[ie]+"_mcFlavour"                   );
+
+      //discarded jets (because of leptons cleaning)
+      _vc->registerVar("nDiscJet"+extsJEC[ie]                           );
+      _vc->registerVar("DiscJet"+extsJEC[ie]+"_id"                      );
+      _vc->registerVar("DiscJet"+extsJEC[ie]+"_pt"                      );
+      _vc->registerVar("DiscJet"+extsJEC[ie]+"_rawPt"                   );
+      _vc->registerVar("DiscJet"+extsJEC[ie]+"_eta"                     );
+      _vc->registerVar("DiscJet"+extsJEC[ie]+"_phi"                     );
+      _vc->registerVar("DiscJet"+extsJEC[ie]+"_mass"                    );
+      _vc->registerVar("DiscJet"+extsJEC[ie]+"_btagCSV"                 );
+      _vc->registerVar("DiscJet"+extsJEC[ie]+"_mcFlavour"               );
+
+    }
 
     //forward jets
     _vc->registerVar("nJetFwd"                         );
     _vc->registerVar("JetFwd_pt"                       );
     _vc->registerVar("JetFwd_phi"                      );
 
-    //missing transverse energy
-    _vc->registerVar("met_pt"                          );     //missing tranvers momentum
-    _vc->registerVar("met_phi"                         );     //phi of missing transvers momentum
+
     
     //HLT lines
     _vc->registerVar("HLT_DoubleMu"                    );     //HLT trigger path decition (1 fired, 0 else)
@@ -243,8 +250,8 @@ void SUSY3L::initialize(){
         //_dbm->loadDb("ElIsoMC"   , "file_fo04.root", "FRElPtCorr_qcd_iso");
         //_dbm->loadDb("MuIsoMC"   , "file_fo04.root", "FRMuPtCorr_qcd_iso");
 
-        //_dbm->loadDb("ElNIsoUp"  , "file_fo04.root", "FRElPtCorr_UCSX_HI_non");
-        //_dbm->loadDb("MuNIsoUp"  , "file_fo04.root", "FRMuPtCorr_UCSX_HI_non");
+        _dbm->loadDb("ElNIsoUp"  , "file_fo04.root", "FRElPtCorr_UCSX_HI_non");
+        _dbm->loadDb("MuNIsoUp"  , "file_fo04.root", "FRMuPtCorr_UCSX_HI_non");
         //_dbm->loadDb("ElIsoUp"   , "file_fo04.root", "FRElPtCorr_UCSX_HI_iso");
         //_dbm->loadDb("MuIsoUp"   , "file_fo04.root", "FRMuPtCorr_UCSX_HI_iso");
     
@@ -253,8 +260,8 @@ void SUSY3L::initialize(){
         //_dbm->loadDb("ElIsoMCUp" , "file_fo04.root", "FRElPtCorr_qcd_iso");
         //_dbm->loadDb("MuIsoMCUp" , "file_fo04.root", "FRMuPtCorr_qcd_iso");
     
-        //_dbm->loadDb("ElNIsoDo"  , "file_fo04.root", "FRElPtCorr_UCSX_LO_non");
-        //_dbm->loadDb("MuNIsoDo"  , "file_fo04.root", "FRMuPtCorr_UCSX_LO_non");
+        _dbm->loadDb("ElNIsoDo"  , "file_fo04.root", "FRElPtCorr_UCSX_LO_non");
+        _dbm->loadDb("MuNIsoDo"  , "file_fo04.root", "FRMuPtCorr_UCSX_LO_non");
         //_dbm->loadDb("ElIsoDo"   , "file_fo04.root", "FRElPtCorr_UCSX_LO_iso");
         //_dbm->loadDb("MuIsoDo"   , "file_fo04.root", "FRMuPtCorr_UCSX_LO_iso");
 
@@ -277,8 +284,15 @@ void SUSY3L::initialize(){
     //_dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
     //_dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
 
-
-
+    //addManualSystSource("Eff",SystUtils::kNone); -> ?
+    //addManualSystSource("Theory",SystUtils::kNone);
+    addManualSystSource("JES",SystUtils::kNone);
+    addManualSystSource("BTAG",SystUtils::kNone);
+    addManualSystSource("BTAGFS",SystUtils::kNone);
+    //addManualSystSource("LepEffFS",SystUtils::kNone); --> currently disabled
+    addManualSystSource("ISR",SystUtils::kNone);
+    addManualSystSource("EWKFR",SystUtils::kNone);
+    
 }
 
 
@@ -316,6 +330,29 @@ void SUSY3L::run(){
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
+
+    // HLT and lepton SFs ======================
+    if(!_isData){
+      // trigger * lep1 SF * lep2 SF
+      if(!_fastSim) {
+	// _weight*=_susyMod->GCeventScaleFactor(_l1Cand->pdgId(), _l2Cand->pdgId(),
+	// 				      _l1Cand->pt   (), _l2Cand->pt   (),      
+	// 				      _l1Cand->eta  (), _l2Cand->eta  (), _HT);
+      } else {
+	// _weight*=_susyMod->LTFastSimTriggerEfficiency(_HT, _l1Cand->pt(),
+	// 					      _l1Cand->pdgId(), 
+	// 					      _l2Cand->pt(),
+	// 					      _l2Cand->pdgId()); // trigger
+	// //lep1 SF * lep2 SF
+	// _weight *= _susyMod -> getFastSimLepSF(_l1Cand, _l2Cand, _vc->get("nVert")); 
+	// //uncertainties
+	// if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
+	//   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, 1);
+	// if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
+	//   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
+    
+      }
+    }
 
     //selections for validation plots
     if(_doValidationPlots) {
@@ -686,7 +723,10 @@ void SUSY3L::collectKinematicObjects(){
     _HT=_susyMod->HT( &(_jets) );
  
     //create met candidate for every event
-    _met = Candidate::create(_vc->get("met_pt"), _vc->get("met_phi") );
+    string ext="met";
+    if((isInUncProc() &&  getUncName()=="JES") )
+      ext += ((SystUtils::kUp==getUncDir())?"_jecUp":"_jecDown");
+    _met = Candidate::create(_vc->get(ext+"_pt"), _vc->get(ext+"_phi") );
     _metPt = _met->pt();
 
 }
@@ -973,8 +1013,8 @@ float SUSY3L::getFR(Candidate* cand, int idx) {
     //distinguish data and mc
     //if(_vc->get("isData")!=1) db +="MC";
 
-    //if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
-    //if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
+    if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
+    if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
 
     //get pt and eta of candidate
     float ptVal=cand->pt();
@@ -1146,6 +1186,17 @@ void SUSY3L::advancedSelection(int WF){
             _weight *= _btagW;
     }
     counter("btag SF");
+
+    //ISR variation for fastsim =========================
+    if(_fastSim){
+      if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
+	_susyMod->applyISRWeight(0, 1 , _weight); // up variation
+      }
+      else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
+	_susyMod->applyISRWeight(0, -1, _weight); // down variation
+      }
+    }
+
 
     //require minimum number of jets
     if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
