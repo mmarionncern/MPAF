@@ -1801,7 +1801,7 @@ void SUSY3L_sync::fillHistos(){
 }
 
 //____________________________________________________________________________
-void SUSY3L::fillValidationHistos(string reg){
+void SUSY3L_sync::fillValidationHistos(string reg){
     /*
         fills validation plots
         parameters: selection for validation plots
@@ -1936,7 +1936,7 @@ void SUSY3L_sync::sortSelectedLeps(CandList leps, std::vector<unsigned int> leps
 
 
 //____________________________________________________________________________
-void SUSY3L::registerTriggerVars(){
+void SUSY3L_sync::registerTriggerVars(){
     /*
         register tree variables for trigger bits
         parameters: none
@@ -1949,7 +1949,7 @@ void SUSY3L::registerTriggerVars(){
 
 
 //____________________________________________________________________________
-bool SUSY3L::passHLTbit(){
+bool SUSY3L_sync::passHLTbit(){
     /*
         checks if the event has been triggerd by any of the HLT trigger lines
         parameters: none
@@ -1972,7 +1972,7 @@ bool SUSY3L::passHLTbit(){
 
 
 //____________________________________________________________________________
-void SUSY3L::readCSCevents(){
+void SUSY3L_sync::readCSCevents(){
     /*
         apply CSC event filter
         parameters: none
@@ -1988,7 +1988,7 @@ void SUSY3L::readCSCevents(){
 }
 
 //____________________________________________________________________________
-void SUSY3L::readEESCevents(){
+void SUSY3L_sync::readEESCevents(){
     /*
         apply EESC event filter
         parameters: none
@@ -2005,7 +2005,7 @@ void SUSY3L::readEESCevents(){
 
 
 //____________________________________________________________________________
-void SUSY3L::readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >& evts, vector<string> files){
+void SUSY3L_sync::readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >& evts, vector<string> files){
     /*
         
     */
@@ -2030,7 +2030,7 @@ void SUSY3L::readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long i
 
 
 //____________________________________________________________________________
-bool SUSY3L::passNoiseFilters(){
+bool SUSY3L_sync::passNoiseFilters(){
     /*
         
     */
@@ -2055,7 +2055,7 @@ bool SUSY3L::passNoiseFilters(){
 
 
 //____________________________________________________________________________
-bool SUSY3L::passCSCfilter(){
+bool SUSY3L_sync::passCSCfilter(){
     /*
         
     */
@@ -2077,7 +2077,7 @@ bool SUSY3L::passCSCfilter(){
 
 
 //____________________________________________________________________________
-bool SUSY3L::passEESCfilter(){
+bool SUSY3L_sync::passEESCfilter(){
     /*
         
     */
