@@ -232,6 +232,7 @@ void SUSY3L::initialize(){
     _doValidationPlots = getCfgVarI("doValidationPlots", 0);
     _fastSim = getCfgVarI("FastSim", 0);
     _closureByFlavor = getCfgVarI("closureByFlavor", 0);
+    _exactlyThreeLep = getCfgVarI("exactlyThreeLep", 0);
 
     //FR databases
     if(_FR=="FO2C") {
@@ -636,9 +637,9 @@ void SUSY3L::collectKinematicObjects(){
     for(size_t il=0;il<_looseLepsPtCorrCut.size();il++) {
         if(tightLepton(_looseLepsPtCorrCut[il], _looseLepsPtCorrCutIdx[il], _looseLepsPtCorrCut[il]->pdgId())) continue;
         if(!fakableLepton(_looseLepsPtCorrCut[il], _looseLepsPtCorrCutIdx[il], _looseLepsPtCorrCut[il]->pdgId(),false)) continue; 
-        _fakableNotTightLepsPtCorrCut.push_back(_looseLepsPtCorrCut[il]);
-        _fakableNotTightLepsPtCorrCutIdx.push_back(_looseLepsPtCorrCutIdx[il]);
-    } 
+	    _fakableNotTightLepsPtCorrCut.push_back(_looseLepsPtCorrCut[il]);
+	    _fakableNotTightLepsPtCorrCutIdx.push_back(_looseLepsPtCorrCutIdx[il]);
+    }
 
     //tight lepton
     for(size_t il=0;il<_looseLepsPtCut.size();il++) {
@@ -833,7 +834,6 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
@@ -1005,12 +1005,7 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
     */
 
     //baseline region
-    if(var == "LepMultiplicity") {
-        _valCutLepMultiplicityBR   = valCut;
-        _cTypeLepMultiplicityBR    = cType;
-        _upValCutLepMultiplicityBR = upValCut;
-    }
-    else if(var == "NJets") {
+    if(var == "NJets") {
         _valCutNJetsBR   = valCut;
         _cTypeNJetsBR    = cType;
         _upValCutNJetsBR = upValCut;
@@ -1075,7 +1070,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     }
 
     //three or more tight leptons
-    if(_tightLepsPtCutMllCut.size()==3 && pass){
+    if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3 && pass)){
         counter("lepton multiplicity");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
@@ -1547,7 +1542,7 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     int fakeRank = -1;
    
     //require certain number of fakable leptons
-    if(clist.size()!=3){return vclist;}
+    if((_exactlyThreeLep && clist.size()!=3)||(!_exactlyThreeLep && clist.size()<3)){return vclist;}
 
     //for separation of closure by flavors
     if(_closureByFlavor!=0){

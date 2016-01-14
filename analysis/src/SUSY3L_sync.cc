@@ -55,30 +55,32 @@ void SUSY3L_sync::initialize(){
         return: none
     */
 
-    //triggers to be used
-    //double lepton triggers (isolated)
-    _hltLines.push_back("HLT_DoubleMu");
-    _hltLines.push_back("HLT_DoubleEl");
-    _hltLines.push_back("HLT_MuEG");
-    //double lepton triggers plus HT (non-isolated)
-    _hltLines.push_back("HLT_DoubleMuHT");
-    _hltLines.push_back("HLT_DoubleElHT");
-    //tri-lepton triggers
-//    _hltLines.push_back("HLT_TripleEl");
-//    _hltLines.push_back("HLT_TripleMu");
-//    _hltLines.push_back("HLT_DoubleMuEl");
-//    _hltLines.push_back("HLT_DoubleElMu");
-    //single lepton triggers (not used in RA7 at the moment)
-    //_hltLines.push_back("HLT_SingleMu");
-    //_hltLines.push_back("HLT_SingleEl");
+    //trigger bits (i.e. decitions of each individual HLT line, in contrast to prcessed OR of a set of lines)
+    //non-isolated triggers
+    _vTR_lines.push_back("HLT_BIT_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_DoubleMu8_Mass8_PFHT300_v");
+    //isolated triggers
+    _vTR_lines.push_back("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");  
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");  
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    
+    //register HLT trigger bit tree variables 
+    registerTriggerVars();
 
+    //event filters to remove detector artifacts
+    readCSCevents();
+    readEESCevents();
 
-    // define variables using _vc varibale class
+    //event characteristics
     _vc->registerVar("run"                             );    //run number
     _vc->registerVar("lumi"                            );    //lumi section number
     _vc->registerVar("evt"                             );    //event number
     _vc->registerVar("isData"                          );    //identify data
-    
+   
+    //leptons 
     _vc->registerVar("nLepGood"                        );    //number of leptons in event
     _vc->registerVar("LepGood_pdgId"                   );    //identifier for leptons (11: electron, 13: muon)
     _vc->registerVar("LepGood_pt"                      );    //pT of leptons
@@ -92,7 +94,6 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("LepGood_jetPtRatiov2"            );   //
     _vc->registerVar("LepGood_jetPtRel"                );    //
     _vc->registerVar("LepGood_jetPtRelv2"              );    //
-    
     _vc->registerVar("LepGood_dz"                      );    //difference to reconstructed primary vertex in z direction
     _vc->registerVar("LepGood_dxy"                     );    //difference to reconstructed primary vertex in xy plane
     _vc->registerVar("LepGood_sip3d"                   );    //similar observable as dxy, also vertex cut
@@ -112,7 +113,9 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("LepGood_ecalPFClusterIso"        );    
     _vc->registerVar("LepGood_hcalPFClusterIso"        );    
     _vc->registerVar("LepGood_dr03TkSumPt"             );    
-     
+    _vc->registerVar("LepGood_mcMatchId"               );    //MC truth information (1 gen-matched, 0 not)
+    
+    //taus
     _vc->registerVar("nTauGood"                        );    //number of taus in event
     _vc->registerVar("TauGood_pdgId"                   );    //identifier for taus (15)
     _vc->registerVar("TauGood_pt"                      );    //pT of tau
@@ -124,6 +127,7 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("TauGood_idDecayMode"             );     //
     _vc->registerVar("TauGood_isoCI3hit"               );     //
     
+    //jets
     _vc->registerVar("nJet"                            );    //number of jets in the event
     _vc->registerVar("Jet_pt"                          );    //pT of each of the nJet jets
     _vc->registerVar("Jet_eta"                         );    //eta of each of the nJet jets
@@ -133,7 +137,9 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("Jet_muEF"                        );     //fraction of muon pt in jet
     _vc->registerVar("Jet_mass"                        );     //jet mass
     _vc->registerVar("Jet_rawPt"                       );
+    _vc->registerVar("Jet_mcFlavour"                   );
 
+    //discarded jets (because of leptons cleaning)
     _vc->registerVar("nDiscJet"                        );
     _vc->registerVar("DiscJet_id"                      );
     _vc->registerVar("DiscJet_pt"                      );
@@ -142,13 +148,18 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("DiscJet_phi"                     );
     _vc->registerVar("DiscJet_mass"                    );
     _vc->registerVar("DiscJet_btagCSV"                 );
+    _vc->registerVar("DiscJet_mcFlavour"               );
 
+    //forward jets
     _vc->registerVar("nJetFwd"                         );
     _vc->registerVar("JetFwd_pt"                       );
     _vc->registerVar("JetFwd_phi"                      );
 
+    //missing transverse energy
     _vc->registerVar("met_pt"                          );     //missing tranvers momentum
     _vc->registerVar("met_phi"                         );     //phi of missing transvers momentum
+    
+    //HLT lines
     _vc->registerVar("HLT_DoubleMu"                    );     //HLT trigger path decition (1 fired, 0 else)
     _vc->registerVar("HLT_SingleMu"                    );
     _vc->registerVar("HLT_DoubleEl"                    );
@@ -161,6 +172,24 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("HLT_DoubleMuEl"                  );
     _vc->registerVar("HLT_DoubleElMu"                  );
    
+    //variables for validation plots
+    _vc->registerVar("nLepGood10"                      );    //number of leptons in event with pt>10
+    _vc->registerVar("mZ1"                             );    //
+    _vc->registerVar("minMllAFAS"                      );    
+    _vc->registerVar("htJet40j"                        );
+    _vc->registerVar("nBJetLoose25"                    );
+    _vc->registerVar("nBJetMedium25"                   );
+    _vc->registerVar("nBJetTight40"                    );
+    _vc->registerVar("nJet40"                          );
+ 
+    //event filters 
+    _vc->registerVar("hbheFilterNew25ns"               );
+    _vc->registerVar("Flag_CSCTightHaloFilter"         );
+    _vc->registerVar("Flag_eeBadScFilter"              );   
+    _vc->registerVar("hbheFilterIso"                   );
+    _vc->registerVar("Flag_goodVertices"               );
+ 
+    //weights
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
     //_vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
 
@@ -199,12 +228,16 @@ void SUSY3L_sync::initialize(){
     _selectTaus = getCfgVarI("selectTaus", false);
     _BR = getCfgVarS("baselineRegion", "BR0");
     _FR = getCfgVarS("FR" , "FO2C"); 
-    _categorization = getCfgVarI("categorization", 0);
+    _categorization = getCfgVarI("categorization", 1);
+    _doValidationPlots = getCfgVarI("doValidationPlots", 0);
+    _fastSim = getCfgVarI("FastSim", 0);
+    _closureByFlavor = getCfgVarI("closureByFlavor", 0);
+    _exactlyThreeLep = getCfgVarI("exactlyThreeLep", 0);
 
     //FR databases
     if(_FR=="FO2C") {
-        _dbm->loadDb("ElNIso"    , "file_fo04_noemu.root", "FRElPtCorr_UCSX_non");
-        _dbm->loadDb("MuNIso"    , "file_fo04_noemu.root", "FRMuPtCorr_UCSX_non");
+        _dbm->loadDb("ElNIso"    , "file_fo04.root", "FRElPtCorr_UCSX_non");
+        _dbm->loadDb("MuNIso"    , "file_fo04.root", "FRMuPtCorr_UCSX_non");
         //_dbm->loadDb("ElIso"     , "file_fo04.root", "FRElPtCorr_UCSX_iso");
         //_dbm->loadDb("MuIso"     , "file_fo04.root", "FRMuPtCorr_UCSX_iso");
 
@@ -234,6 +267,20 @@ void SUSY3L_sync::initialize(){
         //_dbm->loadDb("MuIsoMCDo" , "file_fo04.root", "FRMuPtCorr_qcd_iso");
     }
 
+    //load HLT scale factors
+    //_dbm->loadDb("hltSF"      , "hltSF.db");
+
+    //load b-tag scale factors and efficiecnies
+    _dbm->loadDb("BTagSF"     , "BTagSFMedium.db"                                    ); 
+    _dbm->loadDb("BTagEffUSDG", "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_udsg");
+    _dbm->loadDb("BTagEffC"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_c"   );
+    _dbm->loadDb("BTagEffB"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_b"   );
+
+    //load lepton scale factors
+    //_dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
+    //_dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
+
+
 
 }
 
@@ -260,13 +307,28 @@ void SUSY3L_sync::run(){
     // increment event counter, used as denominator for yield calculation
     counter("denominator");
 
+    //event filter
+    if(!passNoiseFilters()) return;
+    counter("JME filters");
+
     //check HLT trigger decition, only let triggered events pass
-    //if(!passMultiLine(true, false)) return;
-    //counter("HLT");
+    if(!_fastSim) {
+        if(!passHLTbit()) return;
+    }
+    counter("HLT");
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
 
+    //selections for validation plots
+    if(_doValidationPlots) {
+        if (ttbarSelection())   fillValidationHistos("ttbar");
+        if (ZlSelection())      fillValidationHistos("Zl");
+        if (WlSelection())      fillValidationHistos("Wl");
+        if (ZMuMuSelection())   fillValidationHistos("ZMuMu");
+        if (ZElElSelection())     fillValidationHistos("ZElEl");
+    }
+    
     setWorkflow(kGlobal);	
     
     //baseline selection
@@ -280,18 +342,17 @@ void SUSY3L_sync::run(){
     bool wzSel = wzCRSelection();
     setWorkflow(kGlobal);
     if(wzSel){return;}	
-    
+  
     if(!baseSel){return;}
- 
+
     //fillSkimTree();
 
     //signal event
     if(!_isFake){
         setWorkflow(kGlobal);
         advancedSelection( kGlobal );
-    
     } 
-   
+    
     //fake background event 
     else{
         //loop over all combinations of tight and fake leptons
@@ -308,7 +369,6 @@ void SUSY3L_sync::run(){
         setWorkflow(kGlobalFake);
         advancedSelection( kGlobalFake );
     }
-
 }
 
 
@@ -344,10 +404,49 @@ void SUSY3L_sync::defineOutput(){
     _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"            );
     _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate pt [GeV]"              );
 
-    //auxiliary plots
+    //auxiliary for fake estimartion
     _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "fake event type"                                   );
     _hm->addVariable("nFO"              ,  7,     0.0,  7.0,    "number of tight plus fakable-not-tight leptons"    );
+    _hm->addVariable("nFakeComb"        ,  5,     0.0,  5.0,    "number of tight-fake-combinations per event"       );
+    _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
+    
+    
+   
+    if(!_doValidationPlots) return; 
+    //additional histograms  
+    vector<string> reg;
+    reg.push_back("ttbar");
+    reg.push_back("ZMuMu");
+    reg.push_back("ZElEl");
+    reg.push_back("Zl");
+    reg.push_back("Wl");
+  
+    for (size_t r=0; r<reg.size(); r++) {
+        // lepton variables
+        _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 1.2, "leading lepton jet p_{T} ratio [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 40., "leading lepton jet p_{T} rel   [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_miniRelIso", 100, 0., 0.4, "leading lepton isolation", false);
+        _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "leading lepton p_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_Eta"       , 100, 0., 2.5, "leading lepton #eta", false);
+        _hm->addVariable(reg[r]+"_lep1_SIP3D"     , 100, 0., 5.0, "leading lepton SIP_{3D}", false);
+        _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "subleading lepton jet p_{T} Ratio [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "subleading lepton jet p_{T} Rel   [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep2_miniRelIso", 100, 0., 0.4, "subleading lepton isolation", false);
+        _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "subleading lepton p_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep2_Eta"       , 100, 0., 2.5, "subleading lepton #eta", false);
+        _hm->addVariable(reg[r]+"_lep2_SIP3D"     , 100, 0., 5.0, "subleading lepton SIP_{3D}", false);
+   
+        // event variables 
+        _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]", false);
+        _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
+        _hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
+        _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
+        _hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
+    }
 
+ 
     
     //additional observables
 /*    _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
@@ -425,7 +524,6 @@ void SUSY3L_sync::collectKinematicObjects(){
     */
   
     // clear object category vectors from previous event
-
     _taus.clear();
     _tauIdx.clear();
     
@@ -543,7 +641,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 	    _fakableNotTightLepsPtCorrCutIdx.push_back(_looseLepsPtCorrCutIdx[il]);
     }
 
-    //tight lepton without Z selection
+    //tight lepton
     for(size_t il=0;il<_looseLepsPtCut.size();il++) {
         if(!tightLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId()))  continue;
         _tightLepsPtCut.push_back(_looseLepsPtCut[il]);
@@ -676,7 +774,6 @@ bool SUSY3L_sync::tightLepton(const Candidate* c, int idx, int pdgId){
 }
 
 
-
 //____________________________________________________________________________
 bool SUSY3L_sync::tauSelection(int tauIdx){
     /*
@@ -747,11 +844,10 @@ void SUSY3L_sync::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        setCut("LepMultiplicity"   ,    3, "="  )  ;     //number of isolated leptons
         _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardestLeptons              = 0           ;     //number of leptons which need to fulfill harder pt cut
+        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
+        _nHardLeptons                 = 1           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
         setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
@@ -919,12 +1015,7 @@ void SUSY3L_sync::setCut(std::string var, float valCut, std::string cType, float
     */
 
     //baseline region
-    if(var == "LepMultiplicity") {
-        _valCutLepMultiplicityBR   = valCut;
-        _cTypeLepMultiplicityBR    = cType;
-        _upValCutLepMultiplicityBR = upValCut;
-    }
-    else if(var == "NJets") {
+    if(var == "NJets") {
         _valCutNJetsBR   = valCut;
         _cTypeNJetsBR    = cType;
         _upValCutNJetsBR = upValCut;
@@ -975,9 +1066,21 @@ bool SUSY3L_sync::multiLepSelection(bool onZ){
 
     _isMultiLep = false;
     _isFake = false;
+    bool pass = true;
+
+    //require lepton which is not gen-matched for closure separated by flavors
+    if(_closureByFlavor!=0){
+        pass = false;
+        for(int i=0;i<_tightLepsPtCutMllCut.size();i++){
+            if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor) &&  _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) ==0 ){
+                //lepton of required flavor is not gen-matched
+                pass = true;
+            }
+        }
+    }
 
     //three or more tight leptons
-    if(_tightLepsPtCutMllCut.size()==3){
+    if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3 && pass)){
         counter("lepton multiplicity");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
@@ -1043,6 +1146,25 @@ void SUSY3L_sync::advancedSelection(int WF){
     if(WF==kGlobalFake) offset=kSR015;
     
     counter("weighting");
+
+    //btag -scale factors
+    if(!_vc->get("isData") ) {
+        if(!isInUncProc())  {
+            _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
+            _weight *= _btagW;
+        }
+        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1, _fastSim); 
+        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1, _fastSim); 
+        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 1); 
+        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, -1); 
+        else //other syst. variations
+            _weight *= _btagW;
+    }
+    counter("btag SF");
 
     //require minimum number of jets
     if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
@@ -1192,6 +1314,165 @@ bool SUSY3L_sync::wzCRSelection(){
 
 
 //____________________________________________________________________________
+bool SUSY3L_sync::ZMuMuSelection(){
+    /*
+        selects Z-> mu mu events for validation plots
+        parameters: none
+        return: true: if event passes selection, false: else
+    */
+
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (!(_vc->get("HLT_SingleMu"))) return false;
+    if (_vc->get("nLepGood") < 2) return false;
+    if (_vc->get("nLepGood10") != 2) return false;
+    if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
+    if (abs(_vc->get("LepGood_pdgId", 0)) != 13) return false;
+    if (_vc->get("mZ1") < 60. || _vc->get("mZ1") > 120.) return false;
+  
+    if (_vc->get("LepGood_charge", 0) < 0) {
+        _idxL1 = 0;
+        _idxL2 = 1;
+    }
+    else if (_vc->get("LepGood_charge", 1) < 0) {
+        _idxL1 = 1;
+        _idxL2 = 0;
+    }
+  
+    if (_vc->get("LepGood_pt", _idxL1) < 20) return false;
+    if (_vc->get("LepGood_relIso03", _idxL1) > 0.2 ) return false;
+    if (abs(_vc->get("LepGood_eta", _idxL1)) > 2.1) return false;
+
+    return true;
+}
+
+//____________________________________________________________________________
+bool SUSY3L_sync::ZElElSelection(){
+    /*
+        selects Z-> el el events for validation plots
+        parameters: none
+        return: true: if event passes selection, false: else
+    */
+
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (!(_vc->get("HLT_SingleEl"))) return false;
+    if (_vc->get("nLepGood") < 2) return false;
+    if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
+    if (abs(_vc->get("LepGood_pdgId", 0)) != 11) return false;
+    if (_vc->get("mZ1") < 60. || _vc->get("mZ1") > 120.) return false;
+  
+    if (_vc->get("LepGood_charge", 0) < 0) {
+        _idxL1 = 0;
+        _idxL2 = 1;
+    }
+    else if (_vc->get("LepGood_charge", 1) < 0) {
+        _idxL1 = 1;
+        _idxL2 = 0;
+    }
+  
+    if (_vc->get("LepGood_pt", _idxL1) < 30) return false;
+    if (_vc->get("LepGood_relIso03", _idxL1) > 0.2 ) return false;
+    if (abs(_vc->get("LepGood_eta", _idxL1)) > 2.1) return false;
+  
+    return true;
+}
+
+
+
+//____________________________________________________________________________
+bool SUSY3L_sync::ttbarSelection(){
+    /*
+        selects ttbar events for validation plots
+        parameters: none
+        return: true: if event passes selection, false: else
+    */
+
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
+    if (_vc->get("nLepGood") < 2) return false;
+    _idxL1 = 0;
+    _idxL2 = 1;
+    if (!(_vc->get("LepGood_pdgId", _idxL1) == -_vc->get("LepGood_pdgId", _idxL2) || abs(_vc->get("LepGood_pdgId", _idxL1)+_vc->get("LepGood_pdgId", _idxL2)) == 2)) return false;
+    if (_vc->get("LepGood_pt", _idxL1) < 25. || _vc->get("LepGood_pt", _idxL2) < 15.) return false;
+    if (_vc->get("minMllAFAS") < 12.) return false;
+    if (_vc->get("nJet40") < 2) return false;
+    if (!(_vc->get("nBJetMedium25") >= 1 || _vc->get("nBJetLoose25") == 2)) return false; 
+    if (abs(_vc->get("mZ1")-91.2) < 10.)  return false;
+  
+    return true;
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L_sync::ZlSelection(){
+    /*
+        selects Z->lepton events for validation plots
+        parameters: none
+        return: true: if event passes selection, false: else
+    */
+
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
+    if (_vc->get("nLepGood10") !=3 ) return false;
+    if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
+    if (abs(_vc->get("mZ1")-91.2) > 15.) return false;
+    Candidate* lep3=Candidate::create(_vc->get("LepGood_pt", 2),
+                    _vc->get("LepGood_eta", 2),
+                    _vc->get("LepGood_phi", 2),
+                    _vc->get("LepGood_pdgId", 2),
+                    _vc->get("LepGood_charge", 2),
+                    0.105);
+    float mT= Candidate::create(lep3, _met)->mass();
+  
+    if (mT > 55.) return false;
+    if (_vc->get("minMllAFAS") < 12.) return false;
+    if (_vc->get("LepGood_pt", 2) > 50.) return false;
+    if (_vc->get("met_pt") > 60.) return false;
+
+    _idxL1 = 0;
+    _idxL2 = 2;
+    
+    return true;
+}
+
+//____________________________________________________________________________
+bool SUSY3L_sync::WlSelection(){
+    /*
+        selects W->lepton events for validation plots
+        parameters: none
+        return: true: if event passes selection, false: else
+    */
+
+    if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
+    if (!(_vc->get("HLT_SingleMu") || _vc->get("HLT_SingleEl"))) return false;
+    if (_vc->get("nLepGood10") != 2) return false;
+    if (_vc->get("LepGood_charge", 0)*_vc->get("LepGood_charge", 1) < 0) return false;
+  
+    _idxL1 = 0;
+    _idxL2 = 1;
+  
+    bool charge= (_vc->get("LepGood_tightCharge",_idxL1) > (abs(_vc->get("LepGood_pdgId",_idxL1))==11)) && (_vc->get("LepGood_tightCharge",_idxL2) > (abs(_vc->get("LepGood_pdgId",_idxL2))==11));
+    if (!charge) return false;
+    Candidate* lep=Candidate::create(_vc->get("LepGood_pt", _idxL1),
+                   _vc->get("LepGood_eta", _idxL1),
+                   _vc->get("LepGood_phi", _idxL1),
+                   _vc->get("LepGood_pdgId", _idxL1),
+                   _vc->get("LepGood_charge", _idxL1),
+                   0.105);
+    float mT= Candidate::create(lep, _met)->mass();
+    if (_vc->get("LepGood_sip3d",_idxL1) > 4) return false;
+    if (_vc->get("LepGood_relIso03",_idxL1) > 0.05) return false;
+    if (_vc->get("LepGood_miniRelIso",_idxL1) > 0.05) return false;
+    if (_vc->get("nBJetMedium25") != 0) return false;
+    if (_vc->get("met_pt") < 30.) return false;
+    if (mT < 40.) return false;
+
+    if ((abs(_vc->get("LepGood_pdgId",_idxL1))==11 && abs(_vc->get("LepGood_pdgId",_idxL2))==11) && (_vc->get("mZ1") > 76. && _vc->get("mZ1") < 106.))  return false;
+  
+    return true;
+}
+
+
+//____________________________________________________________________________
 void SUSY3L_sync::categorize(){
     /*
         switch to correct workflow if event is categorized to respective signal region
@@ -1269,14 +1550,23 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
     idxsPtCorr.insert(idxsPtCorr.end(), idxsT.begin(), idxsT.end());
     idxsPtCorr.insert(idxsPtCorr.end(), idxsLPtCorr.begin(), idxsLPtCorr.end());
 
-    vector<int> typeLeps(tightLeps.size(), 1);
-    vector<int> tLepsFake(fakableLepsPtCorr.size(), 0);
+    vector<unsigned int> typeLeps(tightLeps.size(), 1);
+    vector<unsigned int> tLepsFake(fakableLepsPtCorr.size(), 0);
     typeLeps.insert(typeLeps.end(), tLepsFake.begin(), tLepsFake.end() );
 
     bool passZsel=false;
+    int fakeRank = -1;
    
     //require certain number of fakable leptons
-    if(clist.size()!=3){return vclist;}
+    if((_exactlyThreeLep && clist.size()!=3)||(!_exactlyThreeLep && clist.size()<3)){return vclist;}
+
+    //for separation of closure by flavors
+    if(_closureByFlavor!=0){
+        //only consider TTF events
+        if(fakableLeps.size()!=1){return vclist;}
+        //only pick one flavor
+        if(std::abs(fakableLeps[0]->pdgId()) != _closureByFlavor){return vclist;}
+    }
     
     //low invariant mass veto
     for(size_t il=0;il<clist.size();il++) {
@@ -1325,18 +1615,28 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
                 int cType=typeLeps[i1]+typeLeps[i2]+typeLeps[i3];
                 if(cType==0) combType.push_back(kIsTripleFake);
                 if(cType==1) combType.push_back(kIsDoubleFake);
-                if(cType==2) combType.push_back(kIsSingleFake);
+                if(cType==2){
+                    combType.push_back(kIsSingleFake);
+                    //for studying pt rank of fake lepton in TTF events
+                    if(clistPtCorr[2]->pt() <= clistPtCorr[1]->pt() && clistPtCorr[2]->pt() <= clistPtCorr[0]->pt()){fakeRank = 3;}
+                    else if(clistPtCorr[2]->pt() > clistPtCorr[1]->pt() && clistPtCorr[2]->pt() <= clistPtCorr[0]->pt()){fakeRank = 2;}
+                    else if(clistPtCorr[2]->pt() <= clistPtCorr[1]->pt() && clistPtCorr[2]->pt() > clistPtCorr[0]->pt()){fakeRank = 2;}
+                    else if(clistPtCorr[2]->pt() > clistPtCorr[1]->pt() && clistPtCorr[2]->pt() > clistPtCorr[0]->pt()){fakeRank = 1;}
+                    else{fakeRank = 5;}
+                }
                 if(cType==3) {
-                    cout<<"WARNING:  a signal event is in the fake background application region! "<<endl;
+                    cout<<"WARNING: a signal event is in the fake background application region! "<<endl;
                 }
             } 
         }
     }
 
     //lepton candidates
-    sortSelectedLeps(clist, idxs);
+    sortSelectedLeps(clistPtCorr, idxsPtCorr);
     fill("nFO", clist.size(),   _weight);
-
+    fill("nFakeComb", vclist.size(),    _weight);
+    fill("ptRank", fakeRank,    _weight);
+   
     return vclist;
 }
 
@@ -1500,6 +1800,37 @@ void SUSY3L_sync::fillHistos(){
 
 }
 
+//____________________________________________________________________________
+void SUSY3L::fillValidationHistos(string reg){
+    /*
+        fills validation plots
+        parameters: selection for validation plots
+        return: none
+    */
+
+    fill(reg+"_lep1_jetPtRatio", _vc->get("LepGood_jetPtRatiov2", _idxL1)           , _weight);
+    fill(reg+"_lep1_jetPtRel"  , _vc->get("LepGood_jetPtRelv2", _idxL1)             , _weight);
+    fill(reg+"_lep1_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL1)             , _weight);
+    fill(reg+"_lep1_Pt"        , _vc->get("LepGood_pt", _idxL1)                     , _weight);
+    fill(reg+"_lep1_Eta"       , fabs(_vc->get("LepGood_eta", _idxL1))              , _weight);
+    fill(reg+"_lep1_SIP3D"     , _vc->get("LepGood_sip3d", _idxL1)                  , _weight);
+  
+    fill(reg+"_lep2_jetPtRatio", _vc->get("LepGood_jetPtRatiov2", _idxL2)           , _weight);
+    fill(reg+"_lep2_jetPtRel"  , _vc->get("LepGood_jetPtRelv2", _idxL2)             , _weight);
+    fill(reg+"_lep2_miniRelIso", _vc->get("LepGood_miniRelIso", _idxL2)             , _weight);
+    fill(reg+"_lep2_Pt"        , _vc->get("LepGood_pt", _idxL2)                     , _weight);
+    fill(reg+"_lep2_Eta"       , fabs(_vc->get("LepGood_eta", _idxL2))              , _weight);
+    fill(reg+"_lep2_SIP3D"     , _vc->get("LepGood_sip3d", _idxL2)                  , _weight);
+    
+    fill(reg+"_MET"            , _vc->get("met_pt")                                 , _weight);
+    fill(reg+"_htJet40j"       , _vc->get("htJet40j")                               , _weight);
+    fill(reg+"_mZ1"            , _vc->get("mZ1")                                    , _weight);
+    fill(reg+"_NBJetsLoose25"  , _vc->get("nBJetLoose25")                           , _weight);
+    fill(reg+"_NBJetsMedium25" , _vc->get("nBJetMedium25")                          , _weight);
+    fill(reg+"_NBJetsTight40"  , _vc->get("nBJetTight40")                           , _weight);
+    fill(reg+"_NJets40"        , _vc->get("nJet40")                                 , _weight);
+    
+}  
 
 //____________________________________________________________________________
 float SUSY3L_sync::DeltaPhi(float phi1, float phi2){
@@ -1516,21 +1847,6 @@ float SUSY3L_sync::DeltaPhi(float phi1, float phi2){
         return TMath::Abs(result);
        
        
-}
-
-//____________________________________________________________________________
-float SUSY3L_sync::HT(){
-    /*
-        computes HT for a given list of selected jets
-        parameters: jet_label
-        return: HT
-    */
-
-        float ht = 0;
-        for(int i = 0; i < _nJets; ++i){
-            ht += _jets[i]->pt();
-        }
-        return ht;
 }
 
 //____________________________________________________________________________
@@ -1620,37 +1936,164 @@ void SUSY3L_sync::sortSelectedLeps(CandList leps, std::vector<unsigned int> leps
 
 
 //____________________________________________________________________________
-bool SUSY3L_sync::passHLTLine(string line){
+void SUSY3L::registerTriggerVars(){
     /*
-        checks if the event has been triggerd by a specific HLT trigger line
-        parameters: trigger path
-        return: true (if event has been triggered), false (else)
+        register tree variables for trigger bits
+        parameters: none
+        return: none
     */
 
-    if(_vc->get(line)) return true;
-    else return false;
+    for(unsigned int i=0;i<_vTR_lines.size();++i) 
+        _vc->registerVar(_vTR_lines[i]);
 }
 
 
 //____________________________________________________________________________
-bool SUSY3L_sync::passMultiLine(bool doubleOnly, bool isolatedOnly){
+bool SUSY3L::passHLTbit(){
     /*
         checks if the event has been triggerd by any of the HLT trigger lines
-        parameters: doubleOnly if only dilepton paths should be selected,
-        isolatedOnly if only isolated di-lepton paths should be selected
+        parameters: none
         return: true (if event has been triggered), false (else)
     */
 
-    for(size_t ih=0;ih<_hltLines.size();ih++) {
-        if(isolatedOnly && ih>2) continue;
-        if(doubleOnly && ih>5) continue;
-        if(passHLTLine(_hltLines[ih])) return true;
+    vector<string> lines;
+
+    lines = _vTR_lines;
+
+    for(unsigned int i = 0; i < lines.size(); ++i){
+        if(_vc->get(lines[i]) == 1) {
+            return true;
+        }
     }
 
     return false;
+
 }
 
 
+//____________________________________________________________________________
+void SUSY3L::readCSCevents(){
+    /*
+        apply CSC event filter
+        parameters: none
+        return: true (if event passes filter), false (else)
+    */
+
+    string files[3] = {(string) getenv("MPAF") + "/workdir/database/eventlist_DoubleEG_csc2015.txt"  , \
+                     (string) getenv("MPAF") + "/workdir/database/eventlist_DoubleMuon_csc2015.txt", \
+                     (string) getenv("MPAF") + "/workdir/database/eventlist_MuonEG_csc2015.txt"    };
+    vector<string> f = Tools::toVector(files);
+    readFilteredEvents(_filteredCSCEvents, f);
+
+}
+
+//____________________________________________________________________________
+void SUSY3L::readEESCevents(){
+    /*
+        apply EESC event filter
+        parameters: none
+        return: true (if event passes filter), false (else)
+    */
+
+    string files[3] = {(string) getenv("MPAF") + "/workdir/database/eventlist_DoubleEG_ecalscn1043093.txt"  , \
+                     (string) getenv("MPAF") + "/workdir/database/eventlist_DoubleMuon_ecalscn1043093.txt", \
+                     (string) getenv("MPAF") + "/workdir/database/eventlist_MuonEG_ecalscn1043093.txt"    };
+    vector<string> f = Tools::toVector(files);
+    readFilteredEvents(_filteredEESCEvents, f);
+
+}
 
 
+//____________________________________________________________________________
+void SUSY3L::readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >& evts, vector<string> files){
+    /*
+        
+    */
+
+    for(unsigned int i = 0; i < files.size(); ++i){
+
+        string line;
+        ifstream fs(files[i].c_str());
+        if(!fs.is_open()) continue;
+
+        while(getline(fs, line)){
+      
+        vector<string> splitted = Tools::split(Tools::trim(line, "\n"), ':');
+        std::pair<int, unsigned long int> tmp(atoi(splitted[1].c_str()), strtoul(splitted[2].c_str(), NULL, 0));
+        std::pair<int, std::pair<int, unsigned long int> > tmp2(atoi(splitted[0].c_str()), tmp);
+        evts[ tmp2 ] = 0;
+        }
+        fs.close();
+    }
+
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L::passNoiseFilters(){
+    /*
+        
+    */
+
+    if(!_vc->get("isData")) return true;
+
+    if(_vc->get("hbheFilterNew25ns" ) == 0) return false;
+    if(_vc->get("hbheFilterIso"     ) == 0) return false;
+    if(_vc->get("Flag_eeBadScFilter") == 0) return false;
+    if(_vc->get("Flag_goodVertices" ) == 0) return false;
+    if(_sampleName.find("Run2015C") != std::string::npos){
+        if(_vc -> get("Flag_CSCTightHaloFilter") == 0) return false;
+    }
+    else {
+        if(!passCSCfilter()                          ) return false;
+        if(!passEESCfilter()                         ) return false;
+    }
+
+    return true;
+
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L::passCSCfilter(){
+    /*
+        
+    */
+
+    if(!_vc->get("isData")) return true;
+
+    int run=_vc->get("run");
+    int lumi=_vc->get("lumi");
+    unsigned long int evt=(unsigned long int)_vc->get("evt");
+  
+    std::pair<int, unsigned long int> tmp(lumi, evt);
+    std::pair<int, std::pair<int, unsigned long int> > tmp2(run, tmp);
+
+    if(_filteredCSCEvents.count(tmp2) > 0) return false;
+
+    return true;
+
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L::passEESCfilter(){
+    /*
+        
+    */
+
+    if(!_vc->get("isData")) return true;
+
+    int run=_vc->get("run");
+    int lumi=_vc->get("lumi");
+    unsigned long int evt=(unsigned long int)_vc->get("evt");
+  
+    std::pair<int, unsigned long int> tmp(lumi, evt);
+    std::pair<int, std::pair<int, unsigned long int> > tmp2(run, tmp);
+
+    if(_filteredEESCEvents.count(tmp2) > 0) return false;
+
+    return true;
+
+}
 

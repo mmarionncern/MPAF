@@ -89,6 +89,7 @@ private:
     bool _onZ;
     bool _doValidationPlots;
     int _closureByFlavor;
+    bool _exactlyThreeLep;
     string _BR;
     string _SR;
     string _FR;
