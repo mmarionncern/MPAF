@@ -168,8 +168,6 @@ void SUSY3L::initialize(){
     _vc->registerVar("nJetFwd"                         );
     _vc->registerVar("JetFwd_pt"                       );
     _vc->registerVar("JetFwd_phi"                      );
-
-
     
     //HLT lines
     _vc->registerVar("HLT_DoubleMu"                    );     //HLT trigger path decition (1 fired, 0 else)
@@ -294,12 +292,12 @@ void SUSY3L::initialize(){
 
     //addManualSystSource("Eff",SystUtils::kNone); -> ?
     //addManualSystSource("Theory",SystUtils::kNone);
-    addManualSystSource("JES",SystUtils::kNone);
-    addManualSystSource("BTAG",SystUtils::kNone);
-    addManualSystSource("BTAGFS",SystUtils::kNone);
+//    addManualSystSource("JES",SystUtils::kNone);
+//    addManualSystSource("BTAG",SystUtils::kNone);
+//    addManualSystSource("BTAGFS",SystUtils::kNone);
     //addManualSystSource("LepEffFS",SystUtils::kNone); --> currently disabled
-    addManualSystSource("ISR",SystUtils::kNone);
-    addManualSystSource("EWKFR",SystUtils::kNone);
+//    addManualSystSource("ISR",SystUtils::kNone);
+//    addManualSystSource("EWKFR",SystUtils::kNone);
     
 }
 
@@ -451,8 +449,6 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("nFO"              ,  7,     0.0,  7.0,    "number of tight plus fakable-not-tight leptons"    );
     _hm->addVariable("nFakeComb"        ,  5,     0.0,  5.0,    "number of tight-fake-combinations per event"       );
     _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
-    
-    
    
     if(!_doValidationPlots) return; 
     //additional histograms  
