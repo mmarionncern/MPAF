@@ -1066,15 +1066,13 @@ bool SUSY3L::multiLepSelection(bool onZ){
     //require lepton which is not gen-matched for closure separated by flavors
     if(_closureByFlavor!=0){
         pass = false;
+        bool oneMu = false;
         int nFakes = 0;
-        int nPrompt = 0;
         for(int i=0;i<_tightLepsPtCutMllCut.size();i++){
-            if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor) &&  _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) ==0 ){nFakes+=1;}
-            else if( _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) !=0 ){nPrompt+=1;}
-            
-            
+            if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor)){oneMu=true;}
+            if( _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) == 0 ){nFakes+=1;}
         }
-        if(nFakes==1 && nPrompt ==2){pass = true;}
+        if(nFakes==1 && oneMu){pass = true;}
     }
 
     //three or more tight leptons
@@ -1556,11 +1554,8 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     bool pass = true;
     if(_closureByFlavor!=0){
         pass = false;
-        //only consider TTF events
-        if((fakableLeps.size()!=1) || (tightLeps.size()!=2)){return vclist;}
-        //require one not gen-matched fake of given flavor
-        if((std::abs(fakableLeps[0]->pdgId()) == _closureByFlavor) && (_vc->get("LepGood_mcMatchId" ,idxsL[0]) == 0)  ){pass = true;}
-        if((_vc->get("LepGood_mcMatchId" ,idxsT[0]) == 0) || (_vc->get("LepGood_mcMatchId" ,idxsT[1]) == 0 )){ pass = false;}
+        //only consider TTF events and require fake to be given flavor
+        if((fakableLeps.size()==1) && (tightLeps.size()==2) && (std::abs(fakableLeps[0]->pdgId()) == _closureByFlavor)){pass = true;}
     }
 
     if(!pass){return vclist;}
