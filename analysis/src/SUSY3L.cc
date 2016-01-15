@@ -369,6 +369,11 @@ void SUSY3L::run(){
         if (ZElElSelection())     fillValidationHistos("ZElEl");
     }
     
+    //select events for WZ control region
+    bool wzSel = wzCRSelection();
+    setWorkflow(kGlobal);
+    if(wzSel){return;}	
+
     setWorkflow(kGlobal);	
     
     //baseline selection
@@ -377,11 +382,6 @@ void SUSY3L::run(){
     
     //blinding of signal regions
     if(_vc->get("isData") && baseSel && !_isFake) return; 
-  
-    //select events for WZ control region
-    bool wzSel = wzCRSelection();
-    setWorkflow(kGlobal);
-    if(wzSel){return;}	
   
     if(!baseSel){return;}
 
