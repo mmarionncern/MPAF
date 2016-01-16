@@ -7,8 +7,8 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="3l_test"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3l_test"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="ttbar_closure_El"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="ttbar_closure_El"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = true;
@@ -129,7 +129,7 @@ void susy3l_tt_closure() {
         //bool logYScale=true;
     }   
     if(obs == "pt3"){
-        md.dp.setObservables("pt_3rd_leptonSR001");
+        md.dp.setObservables("pt_3rd_lepton");
         int binning=10;
         double rangeX[2]={0,100};
         //bool logYScale=true;
@@ -212,7 +212,7 @@ void susy3l_tt_closure() {
 //    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "TT"    , kRed+2      );
 //    md.anConf.addSample( "TTTT"                             ,  "TT"    , kRed+2      );
     md.anConf.addSample( "TT_pow"                             ,  "TT"    , kRed-6      );
-    md.anConf.addSample( "_Fake:TT_pow"                             ,  "predicted sig"    , kBlack      );
+    md.anConf.addSample( "Fake:TT_pow"                             ,  "predicted sig"    , kBlack      );
 
     //W+Jets
 //    md.anConf.addSample( "WJetsToLNu"            ,  "WJets"    , kRed-6      );
@@ -223,11 +223,11 @@ void susy3l_tt_closure() {
 
 
     //signal
-    if(sigs=="t"){
-    md.anConf.addSample( "T1tttt_mGo1200_mChi800"                       ,  "T1t412 sig"     , kBlue-3 );
-    md.anConf.addSample( "T1tttt_mGo1500_mChi100"                       ,  "T1t415 sig"     , kBlue-7  );
-    md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"    ,  "T5t410 sig"     , kOrange+10  );
-    }
+    //if(sigs=="t"){
+    //md.anConf.addSample( "T1tttt_mGo1200_mChi800"                       ,  "T1t412 sig"     , kBlue-3 );
+    //md.anConf.addSample( "T1tttt_mGo1500_mChi100"                       ,  "T1t415 sig"     , kBlue-7  );
+    //md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"    ,  "T5t410 sig"     , kOrange+10  );
+    //}
     if(sigs=="q"){
     md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4WZ315 sig"  , kGreen+2  );
     md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4WZ325 sig"  , kMagenta  );

@@ -213,7 +213,7 @@ void SUSY3L::initialize(){
         //signal regions
         "SR001", "SR002", "SR003", "SR004", "SR005", "SR006", "SR007", "SR008", "SR009", "SR010", "SR011", "SR012", "SR013", "SR014", "SR015",
         //application regions
-        "SR001_Fake", "SR002_Fake", "SR003_Fake", "SR004_Fake", "SR005_Fake", "SR006_Fake", "SR007_Fake", "SR008_Fake", "SR009_Fake", "SR010_Fake", "SR011_Fake", "SR012_Fake", "SR013_Fake", "SR014_Fake", "SR015_Fake",
+        "SR001Fake", "SR002Fake", "SR003Fake", "SR004Fake", "SR005Fake", "SR006Fake", "SR007Fake", "SR008Fake", "SR009Fake", "SR010Fake", "SR011Fake", "SR012Fake", "SR013Fake", "SR014Fake", "SR015Fake",
         //other
         "Fake", 
         "WZCR"
@@ -246,35 +246,39 @@ void SUSY3L::initialize(){
 
     //FR databases
     if(_FR=="FO2C") {
-        _dbm->loadDb("ElNIso"    , "file_fo04.root", "FRElPtCorr_UCSX_non");
-        _dbm->loadDb("MuNIso"    , "file_fo04.root", "FRMuPtCorr_UCSX_non");
-        //_dbm->loadDb("ElIso"     , "file_fo04.root", "FRElPtCorr_UCSX_iso");
-        //_dbm->loadDb("MuIso"     , "file_fo04.root", "FRMuPtCorr_UCSX_iso");
+        //old: file_fo04.root
+        //new: 160116_FR_withIdEmu.root
 
-        //_dbm->loadDb("ElNIsoMC"  , "file_fo04.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMC"  , "file_fo04.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMC"   , "file_fo04.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMC"   , "file_fo04.root", "FRMuPtCorr_qcd_iso");
+        _dbm->loadDb("ElNIso"    , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_non");
+        _dbm->loadDb("MuNIso"    , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_non");
+       
+        //_dbm->loadDb("ElIso"     , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_iso");
+        //_dbm->loadDb("MuIso"     , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_iso");
 
-        _dbm->loadDb("ElNIsoUp"  , "file_fo04.root", "FRElPtCorr_UCSX_HI_non");
-        _dbm->loadDb("MuNIsoUp"  , "file_fo04.root", "FRMuPtCorr_UCSX_HI_non");
-        //_dbm->loadDb("ElIsoUp"   , "file_fo04.root", "FRElPtCorr_UCSX_HI_iso");
-        //_dbm->loadDb("MuIsoUp"   , "file_fo04.root", "FRMuPtCorr_UCSX_HI_iso");
+        //_dbm->loadDb("ElNIsoMC"  , "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMC"  , "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMC"   , "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMC"   , "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_iso");
+
+        _dbm->loadDb("ElNIsoUp"  , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_HI_non");
+        _dbm->loadDb("MuNIsoUp"  , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_HI_non");
+        //_dbm->loadDb("ElIsoUp"   , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_HI_iso");
+        //_dbm->loadDb("MuIsoUp"   , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_HI_iso");
     
-        //_dbm->loadDb("ElNIsoMCUp", "file_fo04.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMCUp", "file_fo04.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMCUp" , "file_fo04.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMCUp" , "file_fo04.root", "FRMuPtCorr_qcd_iso");
+        //_dbm->loadDb("ElNIsoMCUp", "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMCUp", "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMCUp" , "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMCUp" , "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_iso");
     
-        _dbm->loadDb("ElNIsoDo"  , "file_fo04.root", "FRElPtCorr_UCSX_LO_non");
-        _dbm->loadDb("MuNIsoDo"  , "file_fo04.root", "FRMuPtCorr_UCSX_LO_non");
-        //_dbm->loadDb("ElIsoDo"   , "file_fo04.root", "FRElPtCorr_UCSX_LO_iso");
-        //_dbm->loadDb("MuIsoDo"   , "file_fo04.root", "FRMuPtCorr_UCSX_LO_iso");
+        _dbm->loadDb("ElNIsoDo"  , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_LO_non");
+        _dbm->loadDb("MuNIsoDo"  , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_LO_non");
+        //_dbm->loadDb("ElIsoDo"   , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_LO_iso");
+        //_dbm->loadDb("MuIsoDo"   , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_LO_iso");
 
-        //_dbm->loadDb("ElNIsoMCDo", "file_fo04.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMCDo", "file_fo04.root", "FRMuPtCorr_qcd_non");
-        //_dbm->loadDb("ElIsoMCDo" , "file_fo04.root", "FRElPtCorr_qcd_iso");
-        //_dbm->loadDb("MuIsoMCDo" , "file_fo04.root", "FRMuPtCorr_qcd_iso");
+        //_dbm->loadDb("ElNIsoMCDo", "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_non");
+        //_dbm->loadDb("MuNIsoMCDo", "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_non");
+        //_dbm->loadDb("ElIsoMCDo" , "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_iso");
+        //_dbm->loadDb("MuIsoMCDo" , "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_iso");
     }
 
     //load HLT scale factors
