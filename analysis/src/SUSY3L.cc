@@ -1116,8 +1116,11 @@ bool SUSY3L::multiLepSelection(bool onZ){
     }
 
     //three or more tight leptons
-    if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3 && pass)){
+    if((_exactlyThreeLep && _tightLepsPtCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCut.size()>=3 && pass)){
         counter("lepton multiplicity");
+        //low invariant mass cut
+        if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()!=3)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()<3)) return false;
+        counter("low mll veto");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
         counter("hard leg selection");

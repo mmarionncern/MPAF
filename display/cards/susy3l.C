@@ -166,17 +166,17 @@ void susy3l() {
     md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );
  
     //fakes
-//    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "fakes"       , 18            );
-//    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "fakes"       , 18            );
     md.anConf.addSample( "TT_pow"                               ,  "fakes"       , 18            );
+    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "fakes"       , 18            );
+    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "fakes"       , 18            );
 //    md.anConf.addSample( "Fake:TT_pow"                             ,  "fakes predicted sig"    , kBlack      );
-//    md.anConf.addSample( "TbarToLeptons_tch"                ,  "fakes"    , kRed+3      );
-//    md.anConf.addSample( "TBar_tWch"                        ,  "fakes"    , kRed+3      );
-//    md.anConf.addSample( "T_tWch"                           ,  "fakes"    , kRed+3      );
- //   md.anConf.addSample( "TToLeptons_sch_amcatnlo"          ,  "fakes"    , kRed+3      );
-//    md.anConf.addSample( "TToLeptons_tch"                   ,  "fakes"    , kRed+3      );
-//    md.anConf.addSample( "TTJets"                           ,  "fakes"    , kRed+2      );
-//    md.anConf.addSample( "WJetsToLNu"                       ,  "fakes"    , kRed-6      );
+    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "fakes"       , 18      );
+    md.anConf.addSample( "TBar_tWch"                            ,  "fakes"       , 18      );
+    md.anConf.addSample( "T_tWch"                               ,  "fakes"       , 18      );
+    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "fakes"       , 18      );
+    md.anConf.addSample( "TToLeptons_tch"                       ,  "fakes"       , 18      );
+//    md.anConf.addSample( "TTJets"                           ,  "fakes"       , 18      );
+    md.anConf.addSample( "WJetsToLNu"                           ,  "fakes"       , 18      );
 
 
     //signal
@@ -193,10 +193,10 @@ void susy3l() {
     md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4WZ325 sig"  , kMagenta  );
     md.anConf.addSample( "T5qqqqWZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4WZ12 sig"   , kRed-6  );
     md.anConf.addSample( "T5qqqqWZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4WZ15 sig"   , kRed+3  );
-    md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4ZZ315 sig"  , kGreen+3  );
-    md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4ZZ325 sig"  , kMagenta+2  );
-    md.anConf.addSample( "T5qqqqZZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4ZZ12 sig"   , kRed-9  );
-    md.anConf.addSample( "T5qqqqZZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4ZZ15 sig"   , kRed+1  );
+    //md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4ZZ315 sig"  , kGreen+3  );
+    //md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4ZZ325 sig"  , kMagenta+2  );
+    //md.anConf.addSample( "T5qqqqZZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4ZZ12 sig"   , kRed-9  );
+    //md.anConf.addSample( "T5qqqqZZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4ZZ15 sig"   , kRed+1  );
     }
     
     //data

@@ -6,8 +6,8 @@ void susy3l_datacard() {
 
   //general parameters ********************* general parameters
   string dir="SUSY3L";
-  string fileName="test"; // not needed for statistics but provides the normalization
-  string fileList="test"; // put command line that gives all files as in a "ls" command
+  string fileName="limits_160118"; // not needed for statistics but provides the normalization
+  string fileList="limits_160118"; // put command line that gives all files as in a "ls" command
 
   bool mcOnly = false;
   
@@ -44,35 +44,48 @@ void susy3l_datacard() {
   //string signal = "T54qWZ_800"; md.addDataCardSigSample("T5qqqqWZ_mGo1500_mCh800_mChi100_lep",        signal);
   //string signal = "T54qWZ_1000"; md.addDataCardSigSample("T5qqqqWZ_mGo1200_mCh1000_mChi800_lep",       signal);
   
-  md.addDataCardSample("GGHZZ4L", "rare");
-  md.addDataCardSample("VHToNonbb", "rare");
-  md.addDataCardSample("ZZTo4L", "rare");
-  md.addDataCardSample("WWZ", "rare");
-  md.addDataCardSample("WZZ","rare");
-  md.addDataCardSample("ZZZ", "rare");
-  md.addDataCardSample("TTTT", "rare");
-  md.addDataCardSample("tZq_ll", "rare");
-  md.addDataCardSample("TTLLJets_m1to10", "rare");
+//  md.addDataCardSample("GGHZZ4L", "rare");
+//  md.addDataCardSample("VHToNonbb", "rare");
+//  md.addDataCardSample("ZZTo4L", "rare");
+//  md.addDataCardSample("WWZ", "rare");
+//  md.addDataCardSample("WZZ","rare");
+//  md.addDataCardSample("ZZZ", "rare");
+//  md.addDataCardSample("TTTT", "rare");
+//  md.addDataCardSample("tZq_ll", "rare");
+//  md.addDataCardSample("TTLLJets_m1to10", "rare");
 
-  md.addDataCardSample("WZTo3LNu","WZ");
+//  md.addDataCardSample("WZTo3LNu","WZ");
 
-  md.addDataCardSample("TGJets", "XG");
-  md.addDataCardSample("TTGJets", "XG");
-  md.addDataCardSample("WGToLNuG", "XG");
-  md.addDataCardSample("ZGTo2LG", "XG");
+//  md.addDataCardSample("TGJets", "XG");
+//  md.addDataCardSample("TTGJets", "XG");
+//  md.addDataCardSample("WGToLNuG", "XG");
+//  md.addDataCardSample("ZGTo2LG", "XG");
   
-  md.addDataCardSample("TTZToLLNuNu","ttZH");
-  md.addDataCardSample("TTHnobb", "ttZH");
+//  md.addDataCardSample("TTZToLLNuNu","ttZH");
+//  md.addDataCardSample("TTHnobb", "ttZH");
   
-  md.addDataCardSample("TTWToLNu", "ttW");
+//  md.addDataCardSample("TTWToLNu", "ttW");
   
   md.addDataCardSample("TT_pow", "fake");
+//  md.addDataCardSample("DYJetsToLL_M50", "fake");
+//  md.addDataCardSample("DYJetsToLL_M10to50", "fake");
+//  md.addDataCardSample("TbarToLeptons_tch", "fake");
+//  md.addDataCardSample("TBar_tWch", "fake");
+//  md.addDataCardSample("TToLeptons_sch_amcatnlo", "fake");
+//  md.addDataCardSample("TToLeptons_tch", "fake");
+//  md.addDataCardSample("T_tWch", "fake");
+//  md.addDataCardSample("WJetsToLNu", "fake");
+ 
+ 
   
   //md.addDataCardSample("data","data");
   
   
   //shape uncertainties
-  md.addNuisanceParameter("JES","rare:WZ:XG:ttZH:ttW:fake:T1t4_1200","shape","");
+  string nuis = "rare:WZ:XG:ttZH:ttW:fake:";
+  nuis += signal;
+  
+  md.addNuisanceParameter("JES",nuis,"shape","");
   /*md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
   md.addNuisanceParameter("tHTE","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
 
@@ -243,7 +256,7 @@ void susy3l_datacard() {
   //}
   
   for(size_t ic=0;ic<15;ic++) {
-    for(size_t id=0;id<8;id++) {
+    for(size_t id=0;id<7;id++) {
         md.addExternalSystUnc(dss[id],"JES",0.05,-0.05,vcategs[ic],"selected");
     }
   }
