@@ -154,8 +154,9 @@ void MPAF::analyze(){
       _au->setCurrentWorkflow(_curWF);
 
       // get tree entry, i.e. load branches
-      //_datasets[i]->getTree()->GetEntry(_ie);
       _vc->setEvent(_ie);
+      if(_skim&&_fullSkim)
+	_datasets[i]->getTree()->GetEntry(_ie);
 
       // get event weight, PU reweight it if needed 
       modifyWeight();
