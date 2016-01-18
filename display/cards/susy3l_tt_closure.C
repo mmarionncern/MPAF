@@ -7,8 +7,8 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="ttbar_closure_El"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="ttbar_closure_El"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="ttbar_closure_MuEl"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="ttbar_closure_MuEl"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = true;
@@ -134,7 +134,12 @@ void susy3l_tt_closure() {
         double rangeX[2]={0,100};
         //bool logYScale=true;
     }
-
+    if(obs == "ftype"){
+        md.dp.setObservables("fake_type");
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
 
 
     //string autoBinFile="susybinninghigh";
@@ -212,7 +217,7 @@ void susy3l_tt_closure() {
 //    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "TT"    , kRed+2      );
 //    md.anConf.addSample( "TTTT"                             ,  "TT"    , kRed+2      );
     md.anConf.addSample( "TT_pow"                             ,  "TT"    , kRed-6      );
-    md.anConf.addSample( "Fake:TT_pow"                             ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "Fake:TT_pow"                             ,  "predicted sig"    , kBlack      );
 
     //W+Jets
 //    md.anConf.addSample( "WJetsToLNu"            ,  "WJets"    , kRed-6      );

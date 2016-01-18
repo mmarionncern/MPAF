@@ -1,6 +1,7 @@
 #!/bin/bash
 
 VAR=("njets" "nbjets" "met" "ht" "pt1" "pt2" "pt3" )
+#VAR=("ftype")
 #VAR=("njets")
 
 

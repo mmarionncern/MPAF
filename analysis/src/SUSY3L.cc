@@ -432,8 +432,8 @@ void SUSY3L::defineOutput(){
     */
     
     //event based observables
-    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_T [GeV]"                      );
-    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_T [GeV]"              );
+    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                      );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_{T} [GeV]"              );
     _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
     _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
 
@@ -446,7 +446,7 @@ void SUSY3L::defineOutput(){
     //on-Z only observables 
     _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                       );
     _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"            );
-    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate pt [GeV]"              );
+    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} [GeV]"              );
 
     //auxiliary for fake estimartion
     _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "fake event type"                                   );
