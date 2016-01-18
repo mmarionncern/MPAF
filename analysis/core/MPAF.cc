@@ -124,7 +124,6 @@ void MPAF::analyze(){
     _isData = _datasets[i]->isPPcolDataset();
   
     _vc->reset();
-    
     _vc->buildTree( _datasets[i]->getTree() , _skim&&_fullSkim );
     _vc->buildFriendTree( _datasets[i]->getTree() , _skim&&_fullSkim );
     
