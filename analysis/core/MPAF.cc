@@ -124,6 +124,7 @@ void MPAF::analyze(){
     _isData = _datasets[i]->isPPcolDataset();
   
     _vc->reset();
+    cout<<_skim<<"  "<<_fullSkim<<endl;
     _vc->buildTree( _datasets[i]->getTree() , _skim&&_fullSkim );
     _vc->buildFriendTree( _datasets[i]->getTree() , _skim&&_fullSkim );
     
@@ -154,8 +155,9 @@ void MPAF::analyze(){
       _au->setCurrentWorkflow(_curWF);
 
       // get tree entry, i.e. load branches
-      //_datasets[i]->getTree()->GetEntry(_ie);
       _vc->setEvent(_ie);
+      if(_skim&&_fullSkim)
+	_datasets[i]->getTree()->GetEntry(_ie);
 
       // get event weight, PU reweight it if needed 
       modifyWeight();
