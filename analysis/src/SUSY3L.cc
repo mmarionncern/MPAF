@@ -363,6 +363,8 @@ void SUSY3L::run(){
     
       }
     }
+    
+    setWorkflow(kGlobal);	
 
     //selections for validation plots
     if(_doValidationPlots) {
@@ -372,12 +374,11 @@ void SUSY3L::run(){
         if (ZMuMuSelection())   fillValidationHistos("ZMuMu");
         if (ZElElSelection())     fillValidationHistos("ZElEl");
     }
-    
+   
     //select events for WZ control region
     bool wzSel = wzCRSelection();
-    setWorkflow(kGlobal);
     if(wzSel){return;}	
-
+    
     setWorkflow(kGlobal);	
     
     //baseline selection
@@ -1102,6 +1103,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
     _isMultiLep = false;
     _isFake = false;
     bool pass = true;
+    bool passLepMult = false;
 
     //require lepton which is not gen-matched for closure separated by flavors
     if(_closureByFlavor!=0){
@@ -1115,11 +1117,15 @@ bool SUSY3L::multiLepSelection(bool onZ){
         if(nFakes==1 && oneMu){pass = true;}
     }
 
-    //three or more tight leptons
-    if((_exactlyThreeLep && _tightLepsPtCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCut.size()>=3 && pass)){
+    //three tight leptons
+    if((_exactlyThreeLep && _tightLepsPtCut.size()==3)||(!_exactlyThreeLep && _tightLepsPtCut.size()>=3)){
         counter("lepton multiplicity");
-        //low invariant mass cut
-        if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()!=3)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()<3)) return false;
+        passLepMult = true;
+    }
+
+    //three or more tight leptons with low mll cut
+    if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3 && pass)){
+        //if(!passLepMult) cout << "WARNING: event failing lepton multiplicity passes lepton multiplicity with low mll cut!" << endl;
         counter("low mll veto");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
@@ -1223,7 +1229,7 @@ void SUSY3L::advancedSelection(int WF){
     //require minimum hadronic activity (sum of jet pT's)
     if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
+    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "met", _upValCutMETBR) ) return;
 
     counter("baseline");
    
@@ -1235,7 +1241,7 @@ void SUSY3L::advancedSelection(int WF){
         int wf = getCurrentWorkflow();
         setWorkflow(wf+offset);
         if(getCurrentWorkflow()==kGlobalFake){cout << "WARNING " << offset <<  endl;}
-        counter("signal region categorization");
+        counter("SR categorization");
         fillHistos();
     }
     

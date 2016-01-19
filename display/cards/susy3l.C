@@ -147,7 +147,6 @@ void susy3l() {
     md.anConf.addSample( "ZZZ"                                  ,  "rare"        , kMagenta-7    );
     md.anConf.addSample( "TTTT"                                 ,  "rare"        , kMagenta-7    );
     md.anConf.addSample( "tZq_ll"                               ,  "rare"        , kMagenta-7    );
-    md.anConf.addSample( "TTLLJets_m1to10"                      ,  "rare"        , kMagenta-7    );
 
     //WZ
     md.anConf.addSample( "WZTo3LNu"                             ,  "WZ"          , kOrange       );
@@ -161,6 +160,7 @@ void susy3l() {
     //TTZ/H
     md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z/H" , kGreen-6      );
     md.anConf.addSample( "TTHnobb"                              ,  "t#bar{t}Z/H" , kGreen-6      );
+    md.anConf.addSample( "TTLLJets_m1to10"                      ,  "t#bar{t}Z/H" , kGreen-6      );
     
     //TTW
     md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );

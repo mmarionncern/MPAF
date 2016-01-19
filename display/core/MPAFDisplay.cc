@@ -1173,6 +1173,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
   card<<"observation\t"<<sumBkgStr<<endl;      //if no data
   card<<"---------------------------"<<endl; 
   card<<"bin\t\t"<<lines[ "bins" ]<<endl;
+  card<<"process\t\t"<<lines[ "procNames" ]<<endl;
   card<<"process\t\t"<<lines[ "procNums" ]<<endl;
   card<<"rate\t\t"<<yieldStr<<endl;
   card<<"---------------------------"<<endl; 
