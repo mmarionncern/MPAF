@@ -346,6 +346,39 @@ void SUSY3L::run(){
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
 
+    counter("weighting");
+
+    //btag -scale factors
+    if(!_vc->get("isData") ) {
+        if(!isInUncProc())  {
+            _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
+            _weight *= _btagW;
+        }
+        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1, _fastSim); 
+        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1, _fastSim); 
+        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 1); 
+        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
+            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, -1); 
+        else //other syst. variations
+            _weight *= _btagW;
+    }
+    counter("btag SF");
+
+    //ISR variation for fastsim =========================
+    if(_fastSim){
+      if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
+	_susyMod->applyISRWeight(0, 1 , _weight); // up variation
+      }
+      else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
+	_susyMod->applyISRWeight(0, -1, _weight); // down variation
+      }
+    }
+
+
+
     // HLT and lepton SFs ======================
     if(!_isData){
       // trigger * lep1 SF * lep2 SF
@@ -1191,39 +1224,7 @@ void SUSY3L::advancedSelection(int WF){
     
     int offset = 0;
     if(WF==kGlobalFake) offset=kSR015;
-    
-    counter("weighting");
-
-    //btag -scale factors
-    if(!_vc->get("isData") ) {
-        if(!isInUncProc())  {
-            _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
-            _weight *= _btagW;
-        }
-        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
-            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1, _fastSim); 
-        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
-            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1, _fastSim); 
-        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
-            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 1); 
-        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
-            _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, -1); 
-        else //other syst. variations
-            _weight *= _btagW;
-    }
-    counter("btag SF");
-
-    //ISR variation for fastsim =========================
-    if(_fastSim){
-      if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
-	_susyMod->applyISRWeight(0, 1 , _weight); // up variation
-      }
-      else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
-	_susyMod->applyISRWeight(0, -1, _weight); // down variation
-      }
-    }
-
-
+   
     //require minimum number of jets
     if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
     //require minimum number of b-tagged jets

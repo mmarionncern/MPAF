@@ -15,7 +15,7 @@ void susy3l_datacard() {
   md.anConf.configureData(false, 0, mcOnly);
   
   //Lumis( or XSections ) pb-1 & KFactors ************************************
-  float lumi=2260; //pb-1 19470
+  float lumi=2200; //pb-1 19470
   float energy=13; //TeV
 
   bool useXS=false;
@@ -35,10 +35,10 @@ void susy3l_datacard() {
 
 
   string signal = "T1t4_1200"; md.addDataCardSigSample("T1tttt_mGo1200_mChi800",                     signal);
-  //string signal = "T1t4_1500"; md.addDataCardSigSample("T1tttt_mGo1500_mChi100",                     signal);
+  string signal = "T1t4_1500"; md.addDataCardSigSample("T1tttt_mGo1500_mChi100",                     signal);
   //string signal = "T54q_deg"; md.addDataCardSigSample("T5ttttDeg_mGo1000_mStop300_mCh285_mChi280",  signal);
-  //string signal = "T6t2W2_600"; md.addDataCardSigSample("T6ttWW_mSbot600_mCh425_mChi50",              signal);
-  //string signal = "T6t2W2_650"; md.addDataCardSigSample("T6ttWW_mSbot650_mCh150_mChi50",              signal);
+  string signal = "T6t2W2_600"; md.addDataCardSigSample("T6ttWW_mSbot600_mCh425_mChi50",              signal);
+  string signal = "T6t2W2_650"; md.addDataCardSigSample("T6ttWW_mSbot650_mCh150_mChi50",              signal);
   //string signal = "T54qWZ_315"; md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep",   signal);
   //string signal = "T54qWZ_325"; md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep",   signal);
   //string signal = "T54qWZ_800"; md.addDataCardSigSample("T5qqqqWZ_mGo1500_mCh800_mChi100_lep",        signal);
@@ -67,8 +67,8 @@ void susy3l_datacard() {
   //md.addDataCardSample("TTWToLNu", "ttW");
   
   //md.addDataCardSample("TT_pow", "fake");
-  md.addDataCardSample("DYJetsToLL_M50", "fake");
-  md.addDataCardSample("DYJetsToLL_M10to50", "fake");
+  //md.addDataCardSample("DYJetsToLL_M50", "fake");
+  //md.addDataCardSample("DYJetsToLL_M10to50", "fake");
   //md.addDataCardSample("TbarToLeptons_tch", "fake");
   //md.addDataCardSample("TBar_tWch", "fake");
   //md.addDataCardSample("TToLeptons_sch_amcatnlo", "fake");
