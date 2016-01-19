@@ -61,6 +61,7 @@ struct SampleId{
   std::string name;
   std::string cr;
   bool dd;
+  bool isData;
   float norm;
 
 };
