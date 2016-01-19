@@ -44,37 +44,37 @@ void susy3l_datacard() {
   //string signal = "T54qWZ_800"; md.addDataCardSigSample("T5qqqqWZ_mGo1500_mCh800_mChi100_lep",        signal);
   //string signal = "T54qWZ_1000"; md.addDataCardSigSample("T5qqqqWZ_mGo1200_mCh1000_mChi800_lep",       signal);
   
-//  md.addDataCardSample("GGHZZ4L", "rare");
-//  md.addDataCardSample("VHToNonbb", "rare");
-//  md.addDataCardSample("ZZTo4L", "rare");
-//  md.addDataCardSample("WWZ", "rare");
-//  md.addDataCardSample("WZZ","rare");
-//  md.addDataCardSample("ZZZ", "rare");
-//  md.addDataCardSample("TTTT", "rare");
-//  md.addDataCardSample("tZq_ll", "rare");
-//  md.addDataCardSample("TTLLJets_m1to10", "rare");
+  md.addDataCardSample("GGHZZ4L", "rare");
+  md.addDataCardSample("VHToNonbb", "rare");
+  md.addDataCardSample("ZZTo4L", "rare");
+  md.addDataCardSample("WWZ", "rare");
+  md.addDataCardSample("WZZ","rare");
+  md.addDataCardSample("ZZZ", "rare");
+  md.addDataCardSample("TTTT", "rare");
+  md.addDataCardSample("tZq_ll", "rare");
+  md.addDataCardSample("TTLLJets_m1to10", "rare");
 
-//  md.addDataCardSample("WZTo3LNu","WZ");
+  md.addDataCardSample("WZTo3LNu","WZ");
 
-//  md.addDataCardSample("TGJets", "XG");
-//  md.addDataCardSample("TTGJets", "XG");
-//  md.addDataCardSample("WGToLNuG", "XG");
-//  md.addDataCardSample("ZGTo2LG", "XG");
+  md.addDataCardSample("TGJets", "XG");
+  md.addDataCardSample("TTGJets", "XG");
+  md.addDataCardSample("WGToLNuG", "XG");
+  md.addDataCardSample("ZGTo2LG", "XG");
   
-//  md.addDataCardSample("TTZToLLNuNu","ttZH");
-//  md.addDataCardSample("TTHnobb", "ttZH");
+  md.addDataCardSample("TTZToLLNuNu","ttZH");
+  md.addDataCardSample("TTHnobb", "ttZH");
   
-//  md.addDataCardSample("TTWToLNu", "ttW");
+  md.addDataCardSample("TTWToLNu", "ttW");
   
   md.addDataCardSample("TT_pow", "fake");
-//  md.addDataCardSample("DYJetsToLL_M50", "fake");
-//  md.addDataCardSample("DYJetsToLL_M10to50", "fake");
-//  md.addDataCardSample("TbarToLeptons_tch", "fake");
-//  md.addDataCardSample("TBar_tWch", "fake");
-//  md.addDataCardSample("TToLeptons_sch_amcatnlo", "fake");
-//  md.addDataCardSample("TToLeptons_tch", "fake");
-//  md.addDataCardSample("T_tWch", "fake");
-//  md.addDataCardSample("WJetsToLNu", "fake");
+  md.addDataCardSample("DYJetsToLL_M50", "fake");
+  md.addDataCardSample("DYJetsToLL_M10to50", "fake");
+  md.addDataCardSample("TbarToLeptons_tch", "fake");
+  md.addDataCardSample("TBar_tWch", "fake");
+  md.addDataCardSample("TToLeptons_sch_amcatnlo", "fake");
+  md.addDataCardSample("TToLeptons_tch", "fake");
+  md.addDataCardSample("T_tWch", "fake");
+  md.addDataCardSample("WJetsToLNu", "fake");
  
  
   
