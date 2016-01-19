@@ -490,16 +490,18 @@ MPAFDisplay::setHistograms() {
     Dataset* ds=anConf.getDataset( _ids );
     string tmpDs= _ids;
     vector<string> obss = ds->getObservables();
-    
+    cout<<_dsNames[ids]<<"   "<<ds->isDataDriven()<<endl;
     for(size_t io=0;io<obss.size();io++) {
       TH1* htmp(0);
       vector<string> samples= ds->getSamples();
       for(size_t is=0;is<samples.size(); is++) {
 	float w = ds->getWeight(is);
-
+	//cout<<w<<"   "<<samples[is]<<"   "<<ds->getSample(samples[is])->isNorm()<<"   "<<anConf.getLumi()<<endl;
 	if(ds->getSample(samples[is])->isNorm()) {
 	  w=ds->getSample(samples[is])->getNorm()/(anConf.getLumi()*ds->getHisto( obss[io], samples[is] )->Integral(0,1000000));
 	} 
+
+	if(ds->isDataDriven()) w/=anConf.getLumi();
 
 	if(is==0) {
 	  htmp = ds->getHisto( obss[io], samples[is] );
