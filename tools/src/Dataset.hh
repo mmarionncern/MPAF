@@ -48,6 +48,8 @@ private:
   // std::map<std::string, std::string> _crSamples;
   // std::map<std::string, bool> _isNormSamples;
 
+  bool _isDataDriven;
+
 public:
 
   enum {
@@ -88,7 +90,7 @@ public:
   bool isTreeType() { return _dsContentType==kTree;};
   bool isHistoType() { return _dsContentType==kHisto;};
 	
-  //bool isDataDriven(){return _isDataDriven;};
+  bool isDataDriven(){return _isDataDriven;};
   bool isFromCS(){return _isFromCS!=0;};
   int csCode(){return _isFromCS;};
 	

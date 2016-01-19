@@ -268,6 +268,7 @@ AnaConfig::parseSampleId(string str) {
   SampleId sId;
   sId.norm = -1;
   sId.dd = false;
+  sId.isData = false;
   sId.cr = "";
   sId.name = "";
 
@@ -285,7 +286,7 @@ AnaConfig::parseSampleId(string str) {
     sId.dd = true;
     tmpStr=tmpStr.substr(5, tmpStr.size()-5);
   }
-
+ 
   //control region =====
   size_t pc=tmpStr.find(":");
   if(pc!=string::npos) {
@@ -313,7 +314,7 @@ AnaConfig::addSample( string str, string sname, int col, float weight, bool load
 
   //parse the sample name
   SampleId sId=parseSampleId(str);
-
+  
   if( sId.cr!="" ) {
     _csData.push_back( pair<string, float>(sId.name,sId.norm) );
   }
@@ -328,8 +329,11 @@ AnaConfig::addSample( string str, string sname, int col, float weight, bool load
     _numDS[ _numDS.size() ] = dsName;
   }
   
+  if(sname=="data" || sname=="Data")
+    sId.isData=true;
+
   if(sname=="data" || sname=="Data" || sId.dd ) {
-    sId.dd=true;
+    // sId.dd=true;
     _datasets[ dsName ]->setUsefulVars(_usefulVars);
     _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
 				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1.*weight, 1., 1., loadH);
@@ -337,6 +341,7 @@ AnaConfig::addSample( string str, string sname, int col, float weight, bool load
  
     return;
   }
+
  
   
   //histogram analysis

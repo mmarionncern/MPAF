@@ -10,6 +10,7 @@ Dataset::Dataset():
 _chain(0)
 {
   _isData = false;
+  _isDataDriven = false;
   config("", 1, kTree );
 }
 
@@ -19,6 +20,7 @@ Dataset::Dataset(string name):
   _chain(0)
 {
   _isData = false;
+  _isDataDriven = false;
   config(name, 1, kTree );
 }
 
@@ -29,6 +31,7 @@ Dataset::Dataset(string name, int color):
 {
 
   _isData = false;
+  _isDataDriven = false;
   config(name, color, kHisto);
 
 }
@@ -40,6 +43,7 @@ void Dataset::config(string name, int color, int content) {
   _name = name;
   _color = color;
   _isGhost = false;
+  _isDataDriven = false;
   _dsContentType = content;
 }
 
@@ -73,7 +77,12 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
   */
 
   _isData = false;
-  if(sId.dd) _isData=true;  //norm corresponds to a datadriven like stuff
+  
+  if(sId.isData)_isData=true;
+  if(sId.dd) {
+    //norm corresponds to a datadriven like stuff
+    _isDataDriven=true;
+  }
 
   //store the control region from which the sampleshould come from, if any
   // _crSamples[ sId.name ] = sId.cr;
@@ -179,7 +188,7 @@ Dataset::getSumProcWgts(string path, string dir, string subdir, string fileName,
     delete htmp;
   }
   else nProc = -1;
-
+ 
   file->Close();
   delete file;
 
