@@ -67,6 +67,9 @@ void SUSY3L::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
     
+    //
+    loadScanHistogram();
+
     //register HLT trigger bit tree variables 
     registerTriggerVars();
 
@@ -80,6 +83,8 @@ void SUSY3L::initialize(){
     _vc->registerVar("evt"                             );    //event number
     _vc->registerVar("isData"                          );    //identify data
    
+    _vc->registerVar("nVert"                           );    //run number
+
     //leptons 
     _vc->registerVar("nLepGood"                        );    //number of leptons in event
     _vc->registerVar("LepGood_pdgId"                   );    //identifier for leptons (11: electron, 13: muon)
@@ -199,6 +204,21 @@ void SUSY3L::initialize(){
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
     _vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
 
+    //scan variables
+    _vc->registerVar("GenSusyMScan1"                );
+    _vc->registerVar("GenSusyMScan2"                );
+
+    //generator informations
+    _vc->registerVar("nGenPart"                     );
+    _vc->registerVar("GenPart_pt"                   );
+    _vc->registerVar("GenPart_eta"                  );
+    _vc->registerVar("GenPart_phi"                  );
+    _vc->registerVar("GenPart_pdgId"                );
+    _vc->registerVar("GenPart_motherId"             );
+    _vc->registerVar("GenPart_mass");
+    _vc->registerVar("GenPart_charge");
+    _vc->registerVar("GenPart_status");
+
     //SusyModule for common inputs and functions with RA5
     _susyMod = new SusyModule(_vc, _dbm);
 
@@ -283,6 +303,9 @@ void SUSY3L::initialize(){
     //load lepton scale factors
     //_dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
     //_dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
+    
+    //=== signal Xsection, easier to normalize from here.
+    _dbm->loadDb("T1ttttXsect", "SignalXsect.db");
 
     //addManualSystSource("Eff",SystUtils::kNone); -> ?
     //addManualSystSource("Theory",SystUtils::kNone);
@@ -306,7 +329,8 @@ void SUSY3L::modifyWeight() {
     
     if (_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
-        _weight *= _vc->get("vtxWeight");
+        //_weight *= _vc->get("vtxWeight");
+	_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
     }
 
 }
@@ -317,6 +341,8 @@ void SUSY3L::run(){
 
     // increment event counter, used as denominator for yield calculation
     counter("denominator");
+
+    if(_fastSim && !checkMassBenchmark()) return;
 
     //event filter
     if(!passNoiseFilters()) return;
@@ -371,14 +397,14 @@ void SUSY3L::run(){
     
     //blinding of signal regions
     if(_vc->get("isData") && baseSel && !_isFake) return; 
-  
+    
     //select events for WZ control region
     bool wzSel = wzCRSelection();
     setWorkflow(kGlobal);
     if(wzSel){return;}	
   
     if(!baseSel){return;}
-
+  
     //fillSkimTree();
 
     //signal event
@@ -389,7 +415,7 @@ void SUSY3L::run(){
     
     //fake background event 
     else{
-        //loop over all combinations of tight and fake leptons
+      //loop over all combinations of tight and fake leptons
         float sumTF = 0;
         for(unsigned int ic=0;ic<_combList.size();ic++) {
             int type = _combType[ic];
@@ -399,8 +425,7 @@ void SUSY3L::run(){
             fill("fake_type" , type       , _weight);
         }
         _weight *= sumTF;
-
-        setWorkflow(kGlobalFake);
+	setWorkflow(kGlobalFake);
         advancedSelection( kGlobalFake );
     }
 }
@@ -444,6 +469,8 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("nFakeComb"        ,  5,     0.0,  5.0,    "number of tight-fake-combinations per event"       );
     _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
     
+    //SR yields
+    _hm->addVariable("SRS",15,1,16,"SR ");
     
    
     if(!_doValidationPlots) return; 
@@ -1208,19 +1235,23 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
-   
     fillHistos();
 
     //categorize events into signal regions
     if(_categorization){
         categorize();
         int wf = getCurrentWorkflow();
+
+	{ //ugly.. store the yields per SR
+	  setWorkflow( ((offset==kSR015)?kGlobalFake:0) );
+	  fill( "SRS", wf , _weight );
+	}
+	
         setWorkflow(wf+offset);
         if(getCurrentWorkflow()==kGlobalFake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
         fillHistos();
     }
-    
     counter("selected");
 
 
@@ -2134,3 +2165,42 @@ bool SUSY3L::passEESCfilter(){
 
 }
 
+
+
+
+bool
+SUSY3L::checkMassBenchmark() {
+
+  float M1=_vc->get("GenSusyMScan1");
+  float M2=_vc->get("GenSusyMScan2");
+
+  ostringstream os,os1;
+  os<<M1;
+  os1<<M2;
+  string s="-"+os.str()+"-"+os1.str()+"-";
+  
+  if(_ie==0) {
+    unsigned int p=_sampleName.find("-");
+    unsigned int p1=_sampleName.find("-",p+1);
+    unsigned int p2=_sampleName.find("-",p1+1);
+    float m1=stof( _sampleName.substr(p+1,p1-p-1) );
+    float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
+    float xb = _hScanWeight->GetXaxis()->FindBin(m1);
+    float yb = _hScanWeight->GetYaxis()->FindBin(m2);
+    float zb = _hScanWeight->GetZaxis()->FindBin(1);
+  
+    _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
+  }
+
+  if(_sampleName.find(s)==string::npos) return false;
+  _weight *= _dbm->getDBValue("T1ttttXsect",M1)/_nProcEvtScan;
+  return true;
+}
+
+
+void
+SUSY3L::loadScanHistogram() {
+  string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScanT1tttt.root";
+  TFile* file=new TFile(mpafenv.c_str(),"read");
+  _hScanWeight=(TH3D*)file->Get("CountSMS");
+}

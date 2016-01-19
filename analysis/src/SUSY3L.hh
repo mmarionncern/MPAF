@@ -79,6 +79,9 @@ private:
     bool passCSCfilter();
     bool passEESCfilter(); 
     
+    void loadScanHistogram();
+    bool checkMassBenchmark();
+
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
     float MT2(Candidate*, Candidate*, Candidate*, double);
@@ -232,6 +235,10 @@ private:
     //for event filter
     map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredCSCEvents;
     map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredEESCEvents;
+
+  //scan =======
+  TH3D* _hScanWeight;
+  int _nProcEvtScan;
 
 };
 
