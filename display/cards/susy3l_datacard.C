@@ -53,7 +53,7 @@ void susy3l_datacard() {
   //md.addDataCardSample("TTTT", "rare");
   //md.addDataCardSample("tZq_ll", "rare");
 
-  md.addDataCardSample("WZTo3LNu","WZ");
+  //md.addDataCardSample("WZTo3LNu","WZ");
 
   //md.addDataCardSample("TGJets", "XG");
   //md.addDataCardSample("TTGJets", "XG");
@@ -67,8 +67,8 @@ void susy3l_datacard() {
   //md.addDataCardSample("TTWToLNu", "ttW");
   
   //md.addDataCardSample("TT_pow", "fake");
-  //md.addDataCardSample("DYJetsToLL_M50", "fake");
-  //md.addDataCardSample("DYJetsToLL_M10to50", "fake");
+  md.addDataCardSample("DYJetsToLL_M50", "fake");
+  md.addDataCardSample("DYJetsToLL_M10to50", "fake");
   //md.addDataCardSample("TbarToLeptons_tch", "fake");
   //md.addDataCardSample("TBar_tWch", "fake");
   //md.addDataCardSample("TToLeptons_sch_amcatnlo", "fake");

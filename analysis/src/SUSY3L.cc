@@ -324,6 +324,11 @@ void SUSY3L::modifyWeight() {
 
 //____________________________________________________________________________
 void SUSY3L::run(){
+    
+    //limit run number to unblineded json
+    if(_vc->get("isData") == 1){
+        if(_vc->get("run")>258750){return;}
+    }
 
     // increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -385,9 +390,6 @@ void SUSY3L::run(){
     setBaselineRegion();
     bool baseSel = multiLepSelection(_onZ);
     
-    //blinding of signal regions
-    if(_vc->get("isData") && baseSel && !_isFake) return; 
-  
     if(!baseSel){return;}
 
     //fillSkimTree();
@@ -1125,7 +1127,7 @@ bool SUSY3L::multiLepSelection(bool onZ){
 
     //three or more tight leptons with low mll cut
     if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3 && pass)){
-        //if(!passLepMult) cout << "WARNING: event failing lepton multiplicity passes lepton multiplicity with low mll cut!" << endl;
+        if(!passLepMult) cout << "WARNING: event failing lepton multiplicity passes lepton multiplicity with low mll cut!" << endl;
         counter("low mll veto");
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
