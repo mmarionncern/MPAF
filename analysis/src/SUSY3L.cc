@@ -87,8 +87,7 @@ void SUSY3L::initialize(){
     _vc->registerVar("lumi"                            );    //lumi section number
     _vc->registerVar("evt"                             );    //event number
     _vc->registerVar("isData"                          );    //identify data
-   
-    _vc->registerVar("nVert"                           );    //run number
+    _vc->registerVar("nVert"                           );    
 
     //leptons 
     _vc->registerVar("nLepGood"                        );    //number of leptons in event
@@ -340,7 +339,7 @@ void SUSY3L::modifyWeight() {
     if (_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
         //_weight *= _vc->get("vtxWeight");
-	_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+	    _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
     }
 
 }
@@ -395,37 +394,35 @@ void SUSY3L::run(){
 
     //ISR variation for fastsim =========================
     if(_fastSim){
-      if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
-	_susyMod->applyISRWeight(0, 1 , _weight); // up variation
-      }
-      else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
-	_susyMod->applyISRWeight(0, -1, _weight); // down variation
-      }
+        if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
+	        _susyMod->applyISRWeight(0, 1 , _weight); // up variation
+        }
+        else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
+	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
+        }
     }
-
-
 
     // HLT and lepton SFs ======================
     if(!_isData){
-      // trigger * lep1 SF * lep2 SF
-      if(!_fastSim) {
-	// _weight*=_susyMod->GCeventScaleFactor(_l1Cand->pdgId(), _l2Cand->pdgId(),
-	// 				      _l1Cand->pt   (), _l2Cand->pt   (),      
-	// 				      _l1Cand->eta  (), _l2Cand->eta  (), _HT);
-      } else {
-	// _weight*=_susyMod->LTFastSimTriggerEfficiency(_HT, _l1Cand->pt(),
-	// 					      _l1Cand->pdgId(), 
-	// 					      _l2Cand->pt(),
-	// 					      _l2Cand->pdgId()); // trigger
-	// //lep1 SF * lep2 SF
-	// _weight *= _susyMod -> getFastSimLepSF(_l1Cand, _l2Cand, _vc->get("nVert")); 
-	// //uncertainties
-	// if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
-	//   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, 1);
-	// if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
-	//   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
-    
-      }
+        // trigger * lep1 SF * lep2 SF
+        if(!_fastSim) {
+	        // _weight*=_susyMod->GCeventScaleFactor(_l1Cand->pdgId(), _l2Cand->pdgId(),
+	        // 				      _l1Cand->pt   (), _l2Cand->pt   (),      
+	        // 				      _l1Cand->eta  (), _l2Cand->eta  (), _HT);
+        } 
+        else {
+	        // _weight*=_susyMod->LTFastSimTriggerEfficiency(_HT, _l1Cand->pt(),
+	        // 					      _l1Cand->pdgId(), 
+	        // 					      _l2Cand->pt(),
+	        // 					      _l2Cand->pdgId()); // trigger
+	        // //lep1 SF * lep2 SF
+	        // _weight *= _susyMod -> getFastSimLepSF(_l1Cand, _l2Cand, _vc->get("nVert")); 
+	        // //uncertainties
+	        // if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
+	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, 1);
+	        // if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
+	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
+        }
     }
     
     setWorkflow(kGlobal);	
@@ -953,7 +950,6 @@ void SUSY3L::setBaselineRegion(){
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,   60, ">=")  ;     //sum of jet pT's
         setCut("MET"                ,   50, ">=")  ;     //missing transverse energy
-        setCut("Mll"                ,   12, ">" )  ;     //invariant mass of ossf lepton pair
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
         _bjetThreshold                = 30.         ;     //bjet threshold
@@ -1133,11 +1129,6 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
         _valCutMETBR   = valCut;
         _cTypeMETBR    = cType;
         _upValCutMETBR = upValCut;
-    }
-    else if(var == "Mll") {
-        _valCutMllBR   = valCut;
-        _cTypeMllBR    = cType;
-        _upValCutMllBR = upValCut;
     }
     else if(var == "MT2") {
         _valCutMT2BR   = valCut;
@@ -2185,41 +2176,42 @@ bool SUSY3L::passEESCfilter(){
 }
 
 
+//____________________________________________________________________________
+bool SUSY3L::checkMassBenchmark(){
 
+    float M1=_vc->get("GenSusyMScan1");
+    float M2=_vc->get("GenSusyMScan2");
 
-bool
-SUSY3L::checkMassBenchmark() {
-
-  float M1=_vc->get("GenSusyMScan1");
-  float M2=_vc->get("GenSusyMScan2");
-
-  ostringstream os,os1;
-  os<<M1;
-  os1<<M2;
-  string s="-"+os.str()+"-"+os1.str()+"-";
+    ostringstream os,os1;
+    os<<M1;
+    os1<<M2;
+    string s="-"+os.str()+"-"+os1.str()+"-";
   
-  if(_ie==0) {
-    unsigned int p=_sampleName.find("-");
-    unsigned int p1=_sampleName.find("-",p+1);
-    unsigned int p2=_sampleName.find("-",p1+1);
-    float m1=stof( _sampleName.substr(p+1,p1-p-1) );
-    float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
-    float xb = _hScanWeight->GetXaxis()->FindBin(m1);
-    float yb = _hScanWeight->GetYaxis()->FindBin(m2);
-    float zb = _hScanWeight->GetZaxis()->FindBin(1);
+    if(_ie==0) {
+        unsigned int p=_sampleName.find("-");
+        unsigned int p1=_sampleName.find("-",p+1);
+        unsigned int p2=_sampleName.find("-",p1+1);
+        float m1=stof( _sampleName.substr(p+1,p1-p-1) );
+        float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
+        float xb = _hScanWeight->GetXaxis()->FindBin(m1);
+        float yb = _hScanWeight->GetYaxis()->FindBin(m2);
+        float zb = _hScanWeight->GetZaxis()->FindBin(1);
   
-    _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
-  }
+        _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
+    }
 
-  if(_sampleName.find(s)==string::npos) return false;
-  _weight *= _dbm->getDBValue("T1ttttXsect",M1)/_nProcEvtScan;
-  return true;
+    if(_sampleName.find(s)==string::npos) return false;
+    _weight *= _dbm->getDBValue("T1ttttXsect",M1)/_nProcEvtScan;
+    return true;
+
 }
 
 
-void
-SUSY3L::loadScanHistogram() {
-  string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScanT1tttt.root";
-  TFile* file=new TFile(mpafenv.c_str(),"read");
-  _hScanWeight=(TH3D*)file->Get("CountSMS");
+//____________________________________________________________________________
+void SUSY3L::loadScanHistogram(){
+    
+    string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScanT1tttt.root";
+    TFile* file=new TFile(mpafenv.c_str(),"read");
+    _hScanWeight=(TH3D*)file->Get("CountSMS");
+
 }
