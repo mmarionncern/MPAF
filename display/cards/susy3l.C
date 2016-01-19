@@ -18,8 +18,8 @@ void susy3l() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    //string obs = "VARIABLE" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
-    string obs = "srs" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
+    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
+    //string obs = "srs" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
     string sigs = "t"; 
     bool data = false;
 
@@ -101,7 +101,7 @@ void susy3l() {
     if(obs == "srs"){
         md.dp.setObservables("SRS");
         int binning=1;
-        double rangeX[2]={0,15};
+        double rangeX[2]={0,16};
         bool logYScale=false;
     }
 
@@ -258,6 +258,6 @@ void susy3l() {
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
-    //gROOT->ProcessLine(".q");
+    gROOT->ProcessLine(".q");
  
 }
