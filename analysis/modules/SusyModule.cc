@@ -916,7 +916,7 @@ SusyModule::cleanJets(CandList* leptons,
 
     for(int ij=0;ij<_vc->get("n"+jType+ext);ij++) {
       if(_vc->get(jType+ext+"_id",ij)<1) continue;
-      if(std::abs(_vc->get(jType+"_eta",ij))>2.4) continue;
+      if(std::abs(_vc->get(jType+"_eta",ij))>2.4) continue; //introduced in RA7 sync round 3
       
       // float scale=0.;
       // if(isJESVar) {

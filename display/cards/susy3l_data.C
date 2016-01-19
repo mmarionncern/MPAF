@@ -18,8 +18,8 @@ void susy3l_data() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
-    //string obs = "njets" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    //string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    string obs = "njets" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
     string sigs = "none"; 
     bool data = true;
 
@@ -166,18 +166,28 @@ void susy3l_data() {
     md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );
  
     //fakes
-    md.anConf.addSample( "TT_pow"                               ,  "fakes"       , 18            );
-    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "fakes"       , 18            );
-    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "fakes"       , 18            );
-//    md.anConf.addSample( "Fake:TT_pow"                             ,  "fakes predicted sig"    , kBlack      );
-    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "fakes"       , 18      );
-    md.anConf.addSample( "TBar_tWch"                            ,  "fakes"       , 18      );
-    md.anConf.addSample( "T_tWch"                               ,  "fakes"       , 18      );
-    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "fakes"       , 18      );
-    md.anConf.addSample( "TToLeptons_tch"                       ,  "fakes"       , 18      );
+    //md.anConf.addSample( "TT_pow"                               ,  "fakes"       , 18            );
+    //md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "fakes"       , 18            );
+    //md.anConf.addSample( "DYJetsToLL_M50"                       ,  "fakes"       , 18            );
+    //md.anConf.addSample( "Fake:TT_pow"                             ,  "fakes"    , 18      );
+    //md.anConf.addSample( "TbarToLeptons_tch"                    ,  "fakes"       , 18      );
+    //md.anConf.addSample( "TBar_tWch"                            ,  "fakes"       , 18      );
+    //md.anConf.addSample( "T_tWch"                               ,  "fakes"       , 18      );
+    //md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "fakes"       , 18      );
+    //md.anConf.addSample( "TToLeptons_tch"                       ,  "fakes"       , 18      );
 //    md.anConf.addSample( "TTJets"                           ,  "fakes"       , 18      );
-    md.anConf.addSample( "WJetsToLNu"                           ,  "fakes"       , 18      );
+    //md.anConf.addSample( "WJetsToLNu"                           ,  "fakes"       , 18      );
 
+    //fakes predicted
+    md.anConf.addSample( "data:Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914"           , "fakes"          , 18    );
+    md.anConf.addSample( "data:Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158"           , "fakes"          , 18    );
+    md.anConf.addSample( "data:Fake:DoubleEG_Run2015D_PromptV4_runs_258159_260627"        , "fakes"          , 18    );
+    md.anConf.addSample( "data:Fake:DoubleMuon_Run2015C_Oct05_runs_254231_254914"         , "fakes"          , 18    );
+    md.anConf.addSample( "data:Fake:DoubleMuon_Run2015D_Oct05_runs_256630_258158"         , "fakes"          , 18    );
+    md.anConf.addSample( "data:Fake:DoubleMuon_Run2015D_PromptV4_runs_258159_260627"      , "fakes"          , 18    );
+    md.anConf.addSample( "data:Fake:MuonEG_Run2015C_Oct05_runs_254231_254914"             , "fakes"          , 18    );
+    md.anConf.addSample( "data:Fake:MuonEG_Run2015D_Oct05_runs_256630_258158"             , "fakes"          , 18    );
+    md.anConf.addSample( "data:Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627"          , "fakes"          , 18    );
 
     //signal
     if(sigs=="t"){
@@ -242,6 +252,6 @@ void susy3l_data() {
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
-    gROOT->ProcessLine(".q");
+   // gROOT->ProcessLine(".q");
  
 }

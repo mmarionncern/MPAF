@@ -7,8 +7,8 @@ void susy3l() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="3l"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3l"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="limits_160119_2"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="limits_160119_2"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = true;
@@ -18,8 +18,8 @@ void susy3l() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
-    //string obs = "njets" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    //string obs = "VARIABLE" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
+    string obs = "srs" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
     string sigs = "t"; 
     bool data = false;
 
@@ -98,7 +98,12 @@ void susy3l() {
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
-
+    if(obs == "srs"){
+        md.dp.setObservables("SRS");
+        int binning=1;
+        double rangeX[2]={0,15};
+        bool logYScale=false;
+    }
 
     //string autoBinFile="susybinninghigh";
     //md.dp.loadAutoBinning(autoBinFile);
@@ -114,7 +119,7 @@ void susy3l() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=2260; //pb-1 19470
+    float lumi=2200; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
@@ -253,6 +258,6 @@ void susy3l() {
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
-    gROOT->ProcessLine(".q");
+    //gROOT->ProcessLine(".q");
  
 }
