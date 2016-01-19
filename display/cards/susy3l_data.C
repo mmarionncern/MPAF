@@ -7,11 +7,11 @@ void susy3l_data() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="3l"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3l"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="limits_160119"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="limits_160119"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
-    bool mcOnly = true;
+    bool mcOnly = false;
   
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
@@ -20,8 +20,8 @@ void susy3l_data() {
  
     string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
     //string obs = "njets" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
-    string sigs = "t"; 
-    bool data = false;
+    string sigs = "none"; 
+    bool data = true;
 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
@@ -114,7 +114,7 @@ void susy3l_data() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=2260; //pb-1 19470
+    float lumi=1285.2; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
@@ -201,26 +201,15 @@ void susy3l_data() {
     
     //data
     if(data){
-    md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_256630_257599"              , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_257600_258158"              , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleEG_Run2015D_v4_runs_258159_258714_excl"         , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleEG_Run2015D_v4_runs_258211_258750"              , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_256630_257599"            , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_257600_258158"            , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015D_v4_runs_258159_258714_excl"       , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015D_v4_runs_258211_258750"            , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015D_v3_runs_256630_257599"                , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015D_v3_runs_257600_258158"                , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015D_v4_runs_258159_258714_excl"           , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015D_v4_runs_258211_258750"                , "data"          , kBlack    );
-    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_257599"        , "data"          , kBlack    );
-    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_257600_258158"        , "data"          , kBlack    );
-    md.anConf.addSample( "SingleElectron_Run2015D_v4_runs_258159_258714_excl"   , "data"          , kBlack    );
-    md.anConf.addSample( "SingleElectron_Run2015D_v4_runs_258211_258750"        , "data"          , kBlack    );
-    md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_256630_257599"            , "data"          , kBlack    );
-    md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_257600_258158"            , "data"          , kBlack    );
-    md.anConf.addSample( "SingleMuon_Run2015D_v4_runs_258159_258714_excl"       , "data"          , kBlack    );
-    md.anConf.addSample( "SingleMuon_Run2015D_v4_runs_258211_258750"            , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2015C_Oct05_runs_254231_254914"           , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2015D_Oct05_runs_256630_258158"           , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2015D_PromptV4_runs_258159_260627"        , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015C_Oct05_runs_254231_254914"         , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015D_Oct05_runs_256630_258158"         , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015D_PromptV4_runs_258159_260627"      , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015C_Oct05_runs_254231_254914"             , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015D_Oct05_runs_256630_258158"             , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015D_PromptV4_runs_258159_260627"          , "data"          , kBlack    );
     }
 
 
