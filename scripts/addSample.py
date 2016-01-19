@@ -7,7 +7,7 @@ def retrieveCategs(inputFile):
 
     categs=[]
     for line in lines:
-        if 'categ' in line and not 'endcateg' in line:
+        if 'categ\t' in line and not 'endcateg' in line:
             categs.append(line[6:])
             #print line[6:]
 
@@ -32,14 +32,14 @@ def retrieveYields(inputFile):
     
     for line in lines:
         
-        if 'categ' in line and not 'endcateg' in line:
+        if 'categ\t' in line and not 'endcateg' in line:
             curCateg=line[6:]
             goodLines[ curCateg ]={}
             if 'global_' not in curCateg: #just for initialization
                 totYield[curCateg]={}
                 totNGen[curCateg]={}
                 totUnc[curCateg]={}
-                #print curCateg+"/"
+                
                 if init:
                     for sample in samples:
                         totYield[curCateg][sample]=0
@@ -48,38 +48,32 @@ def retrieveYields(inputFile):
 
         if 'selected'in line or 'denominator' in line: 
             sample=line.split()[1]
+            
             if not init:
                 samples.append(sample)
-                #print sample, curCateg             
                 totYield[curCateg][sample]=0
                 totNGen[curCateg][sample]=0
                 totUnc[curCateg][sample]=0
 
         if 'selected' in line:
-            #initSel=True
             sample=line.split()[1]
-            #print sample, init
-            #if not init:
-            #    samples.append(sample)
-            #    print sample, curCateg             
-            #    totYield[curCateg][sample]=0
-            #    totNGen[curCateg][sample]=0
-            #    totUnc[curCateg][sample]=0
-
-            if 'global_' in curCateg and 'BR' not in curCateg and 'Fake' not in curCateg and 'mId' not in curCateg:
+            
+            if 'global_' in curCateg and 'BR' not in curCateg and 'Fake' not in curCateg and 'mId' not in curCateg and "WZCR" not in curCateg:
                 goodLines[ curCateg ][sample]=line
                 if 'Unc' not in curCateg:
                     totYield['global'][sample] += float(line.split()[2])
-                    #print curCateg, sample, line, totYield['global'][sample]
                     totNGen['global'][sample]  += float(line.split()[3])
                     totUnc['global'][sample]   += float(line.split()[4])*float(line.split()[4])
                 else:
                     p=curCateg.find('Unc')
                     redCateg='global\t'+curCateg[p:]
-                    #print line, line.split()[2], curCateg, redCateg
                     totYield[redCateg][sample] += float(line.split()[2])
                     totNGen[redCateg][sample]  += float(line.split()[3])
                     totUnc[redCateg][sample]   += float(line.split()[4])*float(line.split()[4])
+
+            elif 'global_' in curCateg:
+                goodLines[ curCateg ][sample]=line
+
 
         if 'endcateg' in line and not init:
             init=True
@@ -87,7 +81,7 @@ def retrieveYields(inputFile):
     for i in totYield.keys():
         for j in totYield[i].keys():
             totUnc[i][sample] = math.sqrt(totUnc[i][sample])
-    #        print i,j,totYield[i][j]
+    
     return goodLines, totYield, totNGen, totUnc
 
 
@@ -175,8 +169,10 @@ def mergeYields(mainFile, addFile,outName):
 
 mergeYields(sys.argv[1], sys.argv[2], sys.argv[3])
 
-#mergeYields("/afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/workdir/stats/SSDL2015/ssdl2fb_Bkg.dat",
-#            "/afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/workdir/stats/SSDL2015/ssdlScan-1000-0-.dat",
+#/shome/mmarionn/MPAF/workdir/stats/SUSY3L/susy3lScanZZZ.dat
+#/shome/mmarionn/MPAF/workdir/stats/SUSY3L/susy3lScanZZTo4L.dat
+#mergeYields("/shome/mmarionn/MPAF/workdir/stats/SUSY3L/susy3lScanZZZ.dat",
+#            "/shome/mmarionn/MPAF/workdir/stats/SUSY3L/susy3lScanDoubleMuon_Run2015D_PromptV4_runs_258159_260627.dat",
 #            "test.txt")
 
 #retrieveYields("/afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/workdir/stats/SSDL2015/ssdlScan-1125-775-.dat")
