@@ -163,24 +163,25 @@ void MPAF::analyze(){
       
       // do something at every entry	
       run();
+
       //alternate workflows for uncertainty sources
-	for(size_t iu=0;iu<_uncSrcs.size();iu++) {
-	  //update the workflow
-	  _curWF = -100;
-	  _weight = _wBack;
-	  _uncId = true;
-	  _unc = _uncSrcs[iu];
-	  _uDir = _uncDirs[iu];
-	  _au->setCurrentWorkflow(_curWF);
-	  _au->setUncSrc(_unc, _uDir );
+      for(size_t iu=0;iu<_uncSrcs.size();iu++) {
+	//update the workflow
+	_curWF = -100;
+	_weight = _wBack;
+	_uncId = true;
+	_unc = _uncSrcs[iu];
+	_uDir = _uncDirs[iu];
+	_au->setCurrentWorkflow(_curWF);
+	_au->setUncSrc(_unc, _uDir );
 	  
-	  modifyWeight();
-	  if(iu==0) _vc->nextEvent();
-	  else _vc->sameEvent();
-	  applySystVar( _vc->_su->getSystInfos(_unc, _uDir) );
-	  run();
-	  _vc->backPortAllVars();
-	}
+	modifyWeight();
+	if(iu==0) _vc->nextEvent();
+	else _vc->sameEvent();
+	applySystVar( _vc->_su->getSystInfos(_unc, _uDir) );
+	run();
+	_vc->backPortAllVars();
+      }
 
       //destroy old Candidate pointers ======
       Candidate::reset();

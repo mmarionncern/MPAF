@@ -81,6 +81,7 @@ SSDL2015::initialize(){
   _vc->registerVar("LepGood_lostHits"             );
   _vc->registerVar("LepGood_mvaSusy"              );
   _vc->registerVar("LepGood_mcMatchId"            );
+  _vc->registerVar("LepGood_mcMatchPdgId"         );
   _vc->registerVar("LepGood_mcMatchAny"           );
   _vc->registerVar("LepGood_sigmaIEtaIEta"        );
   _vc->registerVar("LepGood_dEtaScTrkIn"          );
@@ -293,14 +294,14 @@ SSDL2015::initialize(){
   
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
-   //addManualSystSource("EWKFR",SystUtils::kNone);
-   addManualSystSource("Eff",SystUtils::kNone);
-   //addManualSystSource("Theory",SystUtils::kNone);
-   addManualSystSource("JES",SystUtils::kNone);
-   addManualSystSource("BTAG",SystUtils::kNone);
-   addManualSystSource("BTAGFS",SystUtils::kNone);
-   addManualSystSource("LepEffFS",SystUtils::kNone);
-   addManualSystSource("ISR",SystUtils::kNone);
+   addManualSystSource("EWKFR",SystUtils::kNone);
+   ////addManualSystSource("Eff",SystUtils::kNone);
+   ////addManualSystSource("Theory",SystUtils::kNone);
+   //addManualSystSource("JES",SystUtils::kNone);
+   //addManualSystSource("BTAG",SystUtils::kNone);
+   //addManualSystSource("BTAGFS",SystUtils::kNone);
+   //addManualSystSource("LepEffFS",SystUtils::kNone);
+   //addManualSystSource("ISR",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -461,8 +462,8 @@ SSDL2015::run() {
 
   if(_fastSim && !checkMassBenchmark() ) return;
   
-  if(_vc->get("isData") && !checkDoubleCount()) return;
-  
+  //if(_vc->get("isData") && !checkDoubleCount()) return;
+
   counter("denominator");
   if(!passNoiseFilters()) return;
   counter("JME filters");
@@ -478,7 +479,7 @@ SSDL2015::run() {
   }
   
    bool ssLepSel=ssLeptonSelection();
-   if(_vc->get("isData") && !_isOS && !_isFake) return; //blinding of signal regions
+   //if(_vc->get("isData") && !_isOS && !_isFake) return; //blinding of signal regions
  
   if(!ssLepSel) {
     // failed same-sign lepton selection, fill WZ control region
@@ -635,6 +636,7 @@ SSDL2015::advancedSelection(int WF) {
   counter("std baseline");
   
   fillhistos();//fill histos for kGlobal, kGlobalFake, kGlobalmId
+  if(WF == kGlobal && _nBJets >= 0 && _leppt == "hh") counter("BR 00 HH");
  
   if(_categorization) {
     categorize();
@@ -687,11 +689,12 @@ SSDL2015::advancedSelection(int WF) {
   // int nbjet = _nBJets;
   // double met = _met->pt();
   // double HT = _HT;
-  // int sr = ((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset):(0));
+  // int sr = getCurrentWorkflow()-offset; //((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset):(0));
 
   // if(getCurrentWorkflow()==kBR00H_Fake || getCurrentWorkflow()==kBR10H_Fake || getCurrentWorkflow()==kBR20H_Fake || getCurrentWorkflow()==kBR30H_Fake) sr=0;
  
   //if(_isFake && sr > 0) {
+  //if(WF == kGlobal && sr == 33) {
   // cout << Form("%1d %9d %12.0f\t%2d\t%+2d %5.1f\t%+2d %5.1f\t%d\t%2d\t%5.1f\t%6.1f\t%2d\t%2.5f",
   // 	       run, lumi, event, nLep,
   // 	       id1, pt1, id2, pt2,
@@ -1494,6 +1497,13 @@ SSDL2015::genMatchCateg(const Candidate* cand) {
 bool
 SSDL2015::passGenSelection() {
 
+  if( _sampleName.find("WZTo3LNu")!=(size_t)-1){
+    if(_vc->get("LepGood_mcMatchId", _idxL1) != 0 && _vc->get("LepGood_mcMatchPdgId", _idxL1) == _vc->get("LepGood_pdgId", _idxL1) &&
+       _vc->get("LepGood_mcMatchId", _idxL2) != 0 && _vc->get("LepGood_mcMatchPdgId", _idxL2) == _vc->get("LepGood_pdgId", _idxL2)) return true;
+    else return false;
+  }
+
+
   if( _sampleName.find("DYJets")!=(size_t)-1 || _sampleName.find("TTJets")!=(size_t)-1 ) {
     
     if(_sampleName.find("charge")!=(size_t)-1) {
@@ -1536,7 +1546,11 @@ SSDL2015::getFR(Candidate* cand, int idx) {
   if(_FR.find("J")!=string::npos) ptVal/=_vc->get("LepGood_jetPtRatiov2", idx);
 
   ptVal=std::max(ptVal, ptM);
-  
+
+//DUMP(db);
+//float val = _dbm->getDBValue(db, std::min( ptVal,(float)69.9),std::min(etaVal,(float)((std::abs(cand->pdgId())==11)?2.49:2.39) ) );
+//DUMP(val);
+//return val;
   return _dbm->getDBValue(db, std::min( ptVal,(float)69.9),
 			  std::min(etaVal,(float)((std::abs(cand->pdgId())==11)?2.49:2.39) ) );
 
@@ -2543,7 +2557,8 @@ SSDL2015::checkMassBenchmark() {
   }
 
   if(_sampleName.find(s)==string::npos) return false;
-  _weight *= _dbm->getDBValue("T1ttttXsect",M1)*2110/_nProcEvtScan;
+  _weight *= _dbm->getDBValue("T1ttttXsect",M1)/_nProcEvtScan; // CH: lumi reweighting in display
+  //_weight *= _dbm->getDBValue("T1ttttXsect",M1)*2110/_nProcEvtScan;
   return true;
 }
 
