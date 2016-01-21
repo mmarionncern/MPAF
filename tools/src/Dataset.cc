@@ -271,8 +271,8 @@ Dataset::getSamples() {
   return snames;
 }
 
-const Sample*
-Dataset::getSample(string sname) const {
+Sample*
+Dataset::getSample(string sname) {
   vector<string> snames;
   for(size_t is=0;is<_samples.size();is++) {
     if(sname==_samples[is].getName()) return &(_samples[is]);
@@ -443,6 +443,19 @@ Dataset::getWeight(string sname) const {
   return getWeight(is);
 }
 
+
+void
+Dataset::reweightByLumi(string sname, float lumi){
+
+  Sample* s = getSample(sname);
+  if(s->getReweighted()) return;  
+  float w = getWeight(sname);
+
+  if(!isPPcolDataset()) w *= lumi;
+  if(s->isDD()) w /= lumi;
+  s->setLumW(w);
+  s->setReweighted(true);
+}
 
 string
 Dataset::goodPath(string path){

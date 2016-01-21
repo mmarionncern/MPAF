@@ -22,6 +22,7 @@ Sample::Sample(SampleId sId,
   _eqLumi=eqLumi;
 
   _weight=1.;
+  _reweighted = false;
   
   computeWeight();
 
@@ -42,4 +43,9 @@ Sample::computeWeight() {
   }
   
   _weight =(1./_eqLumi)*_kFactor;
+}
+
+void
+Sample::setReweighted(bool newval){
+  _reweighted = newval;
 }

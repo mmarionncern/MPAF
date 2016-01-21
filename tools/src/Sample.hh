@@ -27,6 +27,7 @@ private:
   float _weight; //weight for 1 pb-1
 
   bool _isNorm;
+  bool _reweighted;
 
   SampleId _sId;
 
@@ -45,6 +46,9 @@ public:
   void setXSect(float XS) { _xSection=XS;};
   void setKFact(float KF) { _kFactor=KF;};
   void setEqLum(float L) { _eqLumi=L;};
+
+  void setLumW(float w) { _weight=w;};
+  void setReweighted(bool newval = true);
   
   //access functions
   
@@ -57,6 +61,7 @@ public:
   float getEqLum() const {return _eqLumi;};
 
   float getLumW() const {return _weight;}; //weight for 1 pb-1
+  bool getReweighted() const {return _reweighted;};
 
   float getNorm() const {return _sId.norm;};
   bool isNorm() const {return _sId.norm!=-1;};

@@ -307,9 +307,14 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
     n=0;
 
     for(size_t ic=0;ic<catMap.size();++ic) {
+<<<<<<< HEAD
       
       dss=anConf.findDSS( catMap[ic].first.sname );
       
+=======
+
+      dss=anConf.findDSS( catMap[ic].first.sname );//, catMap[ic].first.categ );
+>>>>>>> debugging
       int icat=_au->getCategId( catMap[ic].first.categ );
       for(unsigned int i=0;i<dss.size();i++) {
 	string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
@@ -344,7 +349,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 
 
 void
-MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen,
+MPAFDisplay::storeStatNums(Dataset* ds, float yield, float eyield, int gen,
 			   int icat, string cname, string sname, string categ,
 			   string uncTag, int upVar, string ext, bool skipNominal) {
   
@@ -356,9 +361,11 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
     }
   }
 
+
+  //ds->reweightByLumi(sname, anConf.getLumi());
   float w =ds->getWeight(sname);
-  if(!ds->isPPcolDataset()) w *= anConf.getLumi();
-  
+
+  if(!ds->isPPcolDataset()) w *= anConf.getLumi(); 
   if(ds->getSample(sname)->isDD()) w/=anConf.getLumi();
 
   yield *=w;

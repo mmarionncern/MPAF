@@ -106,6 +106,8 @@ public:
   float getWeight(int is) const {return _samples[is].getLumW(); };
   float getWeight(string sname) const;
 
+  void reweightByLumi(string sname, float lumi);
+
   string goodPath(string path);
   string goodFilePath(string path, string dir, string fileName, string subdir = "data");
 	
@@ -121,8 +123,7 @@ public:
   std::vector<std::string> getObservables();
   TH1* getHisto( std::string varName, std::string sName);
 
-
-  const Sample* getSample(string sname) const;
+  Sample* getSample(string sname);
   
 
 private:
