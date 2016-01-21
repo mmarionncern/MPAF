@@ -135,7 +135,8 @@ void SUSY3L::initialize(){
     _vc->registerVar("TauGood_idAntiE"                 );     //tau electron discriminator
     _vc->registerVar("TauGood_idDecayMode"             );     //
     _vc->registerVar("TauGood_isoCI3hit"               );     //
-    
+
+
     vector<string> extsJEC({"","_jecUp","_jecDown"});
     for(unsigned int ie=0;ie<extsJEC.size();ie++) {
 
@@ -268,14 +269,14 @@ void SUSY3L::initialize(){
         //old: file_fo04.root
         //new: 160116_FR_withIdEmu.root
 
-        _dbm->loadDb("ElNIso"    , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_non");
-        _dbm->loadDb("MuNIso"    , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_non");
+        //_dbm->loadDb("ElNIso"    , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_non");
+        //_dbm->loadDb("MuNIso"    , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_non");
        
         //_dbm->loadDb("ElIso"     , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_iso");
         //_dbm->loadDb("MuIso"     , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_iso");
 
-        //_dbm->loadDb("ElNIsoMC"  , "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_non");
-        //_dbm->loadDb("MuNIsoMC"  , "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_non");
+        _dbm->loadDb("ElNIsoMC"  , "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_non");
+        _dbm->loadDb("MuNIsoMC"  , "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_non");
         //_dbm->loadDb("ElIsoMC"   , "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_iso");
         //_dbm->loadDb("MuIsoMC"   , "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_iso");
 
@@ -338,7 +339,7 @@ void SUSY3L::modifyWeight() {
     
     if (_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
-        //_weight *= _vc->get("vtxWeight");
+        //_weight *= _vc->get("vtxWeight"); 
 	    _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
     }
 
@@ -391,7 +392,7 @@ void SUSY3L::run(){
             _weight *= _btagW;
     }
     counter("btag SF");
-
+    
     //ISR variation for fastsim =========================
     if(_fastSim){
         if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
@@ -456,6 +457,7 @@ void SUSY3L::run(){
         advancedSelection( kGlobal );
     } 
     
+
     //fake background event 
     else{
       //loop over all combinations of tight and fake leptons
@@ -512,8 +514,9 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("nFakeComb"        ,  5,     0.0,  5.0,    "number of tight-fake-combinations per event"       );
     _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
     
-    //SR yields
+    //yields
     _hm->addVariable("SRS",15,1,16,"SR ");
+    _hm->addVariable("flavor",5,0,5,"N_{#mu}");
     
     if(!_doValidationPlots) return; 
     //additional histograms  
@@ -751,12 +754,20 @@ void SUSY3L::collectKinematicObjects(){
         _tightLepsPtCutIdx.push_back(_looseLepsPtCutIdx[il]);
     }
 
+    int els = 0;
+    int mus = 0;
+
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
         if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        //count muons and electrons
+        if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
+        if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
         _tightLepsPtCutMllCut.push_back(_tightLepsPtCut[il]);
         _tightLepsPtCutMllCutIdx.push_back(_tightLepsPtCutIdx[il]);
     }
+    _nMus = mus;
+    _nEls = els;
 
     //select taus
     if(_selectTaus == true){ 
@@ -787,6 +798,7 @@ void SUSY3L::collectKinematicObjects(){
 		       _lepJets, _lepJetsIdx, 30, 30, getUncName()=="JES", getUncDir() );
     _nJets = _jets.size();
     _nBJets = _bJets.size();
+    //if(_vc->get("lumi")==1136 && _vc->get("evt")==375924){cout << _nJets << " " << _nBJets << endl;}
     
     //get hadronic activity
     _HT=_susyMod->HT( &(_jets) );
@@ -1078,7 +1090,7 @@ float SUSY3L::getFR(Candidate* cand, int idx) {
     //else db += "NIso";
 
     //distinguish data and mc
-    //if(_vc->get("isData")!=1) db +="MC";
+    if(_vc->get("isData")!=1) db +="MC";
 
     if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
     if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
@@ -1160,19 +1172,31 @@ bool SUSY3L::multiLepSelection(bool onZ){
     bool passLepMult = false;
 
     //require lepton which is not gen-matched for closure separated by flavors
+    //if(_closureByFlavor!=0){
+    //    pass = false;
+    //    bool oneMu = false;
+    //    int nFakes = 0;
+    //    for(int i=0;i<_tightLepsPtCutMllCut.size();i++){
+    //        if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor)){oneMu=true;}
+    //        if( _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) == 0 ){nFakes+=1;}
+    //    }
+    //    if(nFakes==1 && oneMu){pass = true;}
+    //}
+
+    //require exactly 1 lepton which is not gen-matched for closure separated by flavors
     if(_closureByFlavor!=0){
         pass = false;
-        bool oneMu = false;
         int nFakes = 0;
+        int nPrompt = 0;
         for(int i=0;i<_tightLepsPtCutMllCut.size();i++){
-            if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor)){oneMu=true;}
-            if( _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) == 0 ){nFakes+=1;}
+            if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor) &&  _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) ==0 ){nFakes+=1;}
+            else if( _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) !=0 ){nPrompt+=1;}
         }
-        if(nFakes==1 && oneMu){pass = true;}
+        if(nFakes==1 && nPrompt ==2){pass = true;}
     }
 
     //three tight leptons
-    if((_exactlyThreeLep && _tightLepsPtCut.size()==3)||(!_exactlyThreeLep && _tightLepsPtCut.size()>=3)){
+    if((_exactlyThreeLep && _tightLepsPtCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCut.size()>=3 && pass)){
         counter("lepton multiplicity");
         passLepMult = true;
     }
@@ -1223,6 +1247,11 @@ bool SUSY3L::multiLepSelection(bool onZ){
     sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
     
     } 
+
+    if(_isMultiLep){
+        if(_tightLepsPtCutMllCut.size()>3){_flavor = 4;}
+        else{_flavor=_nMus;}
+    }
     
     if(_isMultiLep) return true;
 
@@ -1254,6 +1283,16 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "met", _upValCutMETBR) ) return;
 
     counter("baseline");
+
+    /* 
+    if(WF==kGlobal){
+    //printout for sync     
+    long int run = _vc->get("run");
+    long int lumi = _vc->get("lumi");
+    long int evt = _vc->get("evt");
+    cout << run << " " << lumi << " " << evt << endl;
+    }
+ */
     fillHistos();
 
     //categorize events into signal regions
@@ -1272,7 +1311,6 @@ void SUSY3L::advancedSelection(int WF){
         fillHistos();
     }
     counter("selected");
-
 
 }
 
@@ -1672,6 +1710,15 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     if(!passZsel) return vclist;
 
+    int nEls = 0;
+    int nMus = 0;
+    for(size_t i=0;i<clistPtCorr.size();i++) {
+        if(std::abs(clistPtCorr[i]->pdgId())==13){nMus+=1;}
+        if(std::abs(clistPtCorr[i]->pdgId())==11){nEls+=1;}
+    }
+    if(clistPtCorr.size()>3){_flavor=4;}
+    else{_flavor=nMus;}
+    
     //prepare all the combinations
     CandList tmpList(3,nullptr);
     for(size_t i1=0;i1<clistPtCorr.size();i1++) {
@@ -1875,6 +1922,9 @@ void SUSY3L::fillHistos(){
     fill("MT"       , _MT                   , _weight);
     fill("Zmass"    , _zMass                , _weight);
     fill("Zpt"      , _zPt                  , _weight);
+    
+    
+    fill("flavor"   , _flavor               , _weight);
 
 }
 

@@ -171,6 +171,8 @@ private:
     std::vector<std::pair<std::string, unsigned int> >  _lepJetsIdx;
 
     //length of candiate vectors
+    int _nEls;
+    int _nMus;
     float _nTaus;
     float _nJets;
     float _nBJets;
@@ -209,8 +211,6 @@ private:
     float _MT;
     float _zMass;
     float _zPt;
-    int _nEls;
-    int _nMus;
     int _idxL1;
     int _idxL2;
  
@@ -228,6 +228,7 @@ private:
     bool _categorization;
     bool _isMultiLep = false;
     bool _isFake = false;
+    int _flavor = -1;
 
     //for fake background
     vector<CandList> _combList;

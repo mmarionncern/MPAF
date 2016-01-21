@@ -7,8 +7,8 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="ttbar_closure_MuEl"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="ttbar_closure_MuEl"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l_closure"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l_closure"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = true;
@@ -18,7 +18,8 @@ void susy3l_tt_closure() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    //string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
+    string obs = "flavor";    
     string sigs = "none"; 
     bool data = false;
 
@@ -31,7 +32,7 @@ void susy3l_tt_closure() {
     //double rangeX[2]={0,7};
     int xDiv[3]={8,6,0};
     int yDiv[3]={6,6,0}; //Nlabel /  sous-Div /ssdiv
-    bool logYScale=true;
+    bool logYScale=false;
     bool overFlowBin=true;
     bool underFlowBin=false;
     bool showDMCRatio=true;
@@ -140,6 +141,13 @@ void susy3l_tt_closure() {
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
+    if(obs == "flavor"){
+        md.dp.setObservables("flavor");
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
+
 
 
     //string autoBinFile="susybinninghigh";
@@ -217,7 +225,7 @@ void susy3l_tt_closure() {
 //    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "TT"    , kRed+2      );
 //    md.anConf.addSample( "TTTT"                             ,  "TT"    , kRed+2      );
     md.anConf.addSample( "TT_pow"                             ,  "TT"    , kRed-6      );
-//    md.anConf.addSample( "Fake:TT_pow"                             ,  "predicted sig"    , kBlack      );
+    //md.anConf.addSample( "Fake:TT_pow"                             ,  "predicted"    , kBlack      );
 
     //W+Jets
 //    md.anConf.addSample( "WJetsToLNu"            ,  "WJets"    , kRed-6      );
@@ -298,6 +306,6 @@ void susy3l_tt_closure() {
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
-    gROOT->ProcessLine(".q");
+    //gROOT->ProcessLine(".q");
  
 }
