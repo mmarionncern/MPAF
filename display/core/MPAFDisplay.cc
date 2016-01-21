@@ -1042,7 +1042,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
   map<string,string> lines;
   
   for(size_t ic=0;ic<categs.size();++ic) {
-    
+   
     map<string,string> tmpLines;
    
     shapeM shapes;
