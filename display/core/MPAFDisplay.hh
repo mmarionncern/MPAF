@@ -28,7 +28,8 @@ struct CatId{
   string ext;
   string uncTag;
   int upVar;
-
+  string targetDS;
+  vector<Dataset*> targetDSS;
 };
 
 struct ValId{
@@ -158,6 +159,8 @@ public:
   void makeSingleDataCard(string sigName, string categ, string cname, string cardName);
   void makeMultiDataCard(string sigName, vector<string> categs, 
 			 string cname, string cardname);
+
+  bool checkDSS(CatId id1, CatId id2);
 
   ClassDef(MPAFDisplay,0)
 
