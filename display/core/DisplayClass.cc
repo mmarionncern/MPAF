@@ -743,8 +743,8 @@ DisplayClass::drawDistribution() {
   //and finally signals if some exists ===========
   for(size_t is=0;is<sigs.size();is++){
     if(is%2!=0){_hClones[ sigs[is] ]->SetLineStyle(2);}
-    _hClones[ sigs[is] ]->DrawCopy( opt.c_str() );
-    //_hClones[ sigs[is] ]->DrawCopy( "same points" );
+    //_hClones[ sigs[is] ]->DrawCopy( opt.c_str() );
+    _hClones[ sigs[is] ]->DrawCopy( "same points" );
   }
   //===============================================
 

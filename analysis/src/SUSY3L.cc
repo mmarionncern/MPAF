@@ -87,7 +87,8 @@ void SUSY3L::initialize(){
     _vc->registerVar("lumi"                            );    //lumi section number
     _vc->registerVar("evt"                             );    //event number
     _vc->registerVar("isData"                          );    //identify data
-    _vc->registerVar("nVert"                           );    
+    _vc->registerVar("nVert"                           );    //reco number of vertices
+    _vc->registerVar("nTrueInt"                        );    //true number of vertices
 
     //leptons 
     _vc->registerVar("nLepGood"                        );    //number of leptons in event
@@ -233,7 +234,7 @@ void SUSY3L::initialize(){
         //signal regions
         "SR001", "SR002", "SR003", "SR004", "SR005", "SR006", "SR007", "SR008", "SR009", "SR010", "SR011", "SR012", "SR013", "SR014", "SR015",
         //application regions
-        "SR001Fake", "SR002Fake", "SR003Fake", "SR004Fake", "SR005Fake", "SR006Fake", "SR007Fake", "SR008Fake", "SR009Fake", "SR010Fake", "SR011Fake", "SR012Fake", "SR013Fake", "SR014Fake", "SR015Fake",
+        "SR001_Fake", "SR002_Fake", "SR003_Fake", "SR004_Fake", "SR005_Fake", "SR006_Fake", "SR007_Fake", "SR008_Fake", "SR009_Fake", "SR010_Fake", "SR011_Fake", "SR012_Fake", "SR013_Fake", "SR014_Fake", "SR015_Fake",
         //other
         "Fake", 
         "WZCR"
@@ -263,6 +264,7 @@ void SUSY3L::initialize(){
     _fastSim = getCfgVarI("FastSim", 0);
     _closureByFlavor = getCfgVarI("closureByFlavor", 0);
     _exactlyThreeLep = getCfgVarI("exactlyThreeLep", 0);
+    _debug = getCfgVarI("debug", 0);
 
     //FR databases
     if(_FR=="FO2C") {
@@ -301,6 +303,9 @@ void SUSY3L::initialize(){
         //_dbm->loadDb("MuIsoMCDo" , "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_iso");
     }
 
+    //pile-up weights
+    _dbm->loadDb("puWeights","pileupWeights.root","pileup");
+
     //load HLT scale factors
     //_dbm->loadDb("hltSF"      , "hltSF.db");
 
@@ -337,10 +342,11 @@ void SUSY3L::modifyWeight() {
         return: none
     */ 
     
-    if (_vc->get("isData") != 1){
+    if(_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
         //_weight *= _vc->get("vtxWeight"); 
-	    _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+	    //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+        _weight *= _dbm->getDBValue("puWeights", _vc->get("nTrueInt") );    
     }
 
 }
@@ -372,8 +378,10 @@ void SUSY3L::run(){
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
 
-    counter("weighting");
+    if(_debug){if(_vc->get("lumi")==1116 && _vc->get("evt")==369220 ){cout << "yes" << endl;}}
 
+    counter("weighting");
+/*
     //btag -scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
@@ -425,7 +433,7 @@ void SUSY3L::run(){
 	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
         }
     }
-    
+  */  
     setWorkflow(kGlobal);	
 
     //selections for validation plots
@@ -470,8 +478,9 @@ void SUSY3L::run(){
             fill("fake_type" , type       , _weight);
         }
         _weight *= sumTF;
-	setWorkflow(kGlobalFake);
+	    setWorkflow(kGlobalFake);
         advancedSelection( kGlobalFake );
+    
     }
 }
 
@@ -792,13 +801,11 @@ void SUSY3L::collectKinematicObjects(){
     //number of taus in the event
     _nTaus = _taus.size();
 
-    //TODO: use pt corrected leptons for jet cleaning? 
     //clean jets
     _susyMod->cleanJets( &_fakableLepsPtCut, _jets, _jetsIdx, _bJets, _bJetsIdx,
 		       _lepJets, _lepJetsIdx, 30, 30, getUncName()=="JES", getUncDir() );
     _nJets = _jets.size();
     _nBJets = _bJets.size();
-    //if(_vc->get("lumi")==1136 && _vc->get("evt")==375924){cout << _nJets << " " << _nBJets << endl;}
     
     //get hadronic activity
     _HT=_susyMod->HT( &(_jets) );
@@ -1201,13 +1208,23 @@ bool SUSY3L::multiLepSelection(bool onZ){
         passLepMult = true;
     }
 
+    if(_debug){if(_vc->get("lumi")==1116 && _vc->get("evt")==369220 ){cout << "passing ==3 tight leps" << endl;}}
+    
     //three or more tight leptons with low mll cut
     if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3 && pass)){
         if(!passLepMult) cout << "WARNING: event failing lepton multiplicity passes lepton multiplicity with low mll cut!" << endl;
         counter("low mll veto");
+            if(_debug){if(_vc->get("lumi")==1116 && _vc->get("evt")==369220 ){
+                cout << "passing mll cut" << endl;
+                for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
+                    cout << _tightLepsPtCutMllCut[il]->pt() << endl;
+
+                }
+            }}
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
         counter("hard leg selection");
+            if(_debug){if(_vc->get("lumi")==1116 && _vc->get("evt")==369220 ){cout << "passing hard leg selection" << endl;}}
         //selection of multi lepton events for signal regions
         
         //Z selection
@@ -1280,7 +1297,7 @@ void SUSY3L::advancedSelection(int WF){
     //require minimum hadronic activity (sum of jet pT's)
     if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "met", _upValCutMETBR) ) return;
+    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
 
@@ -1307,7 +1324,7 @@ void SUSY3L::advancedSelection(int WF){
 	
         setWorkflow(wf+offset);
         if(getCurrentWorkflow()==kGlobalFake){cout << "WARNING " << offset <<  endl;}
-        counter("SR categorization");
+        counter("signal region categorization");
         fillHistos();
     }
     counter("selected");
@@ -1787,9 +1804,9 @@ bool SUSY3L::hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, i
     }
     //correct number of leptons of hardLeg requirement with required number of leptons with hardestLeg
     nHardLepCount -= _nHardLeptons;
-
+    
     if(nHardestLepCount >= n_hardestLeg && nHardLepCount >= n_hardLeg) return true;
-
+    
     return false;
 
 }

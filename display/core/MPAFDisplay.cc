@@ -250,8 +250,14 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 
     //Now overwritte when needed and fill the internal DB
     int n=0;
+   // vector<std::pair<CatId, ValId> >::const_iterator it;
+    //for(it=catMap.begin();it!=catMap.end();++it) {
+
+
     vector<std::pair<CatId, ValId> >::const_iterator it;
-    for(it=catMap.begin();it!=catMap.end();++it) {
+    vector<std::pair<CatId, ValId> >::const_iterator itEnd=catMap.end();
+    for(it=catMap.begin();it!=itEnd;++it) {
+
 
       n++;
      

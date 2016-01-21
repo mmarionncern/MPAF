@@ -97,6 +97,7 @@ private:
     string _SR;
     string _FR;
     int _fastSim;
+    bool _debug;
 
 
 private:
@@ -107,8 +108,7 @@ private:
     kSR001, kSR002, kSR003, kSR004, kSR005, kSR006, kSR007, kSR008,
     kSR009, kSR010, kSR011, kSR012, kSR013, kSR014, kSR015,
     
-    kSR001Fake, kSR002Fake, kSR003Fake, kSR004Fake, kSR005Fake, kSR006Fake, kSR007Fake, kSR008Fake,
-    kSR009Fake, kSR010Fake, kSR011Fake, kSR012Fake, kSR013Fake, kSR014Fake, kSR015Fake,
+    kSR001_Fake, kSR002_Fake, kSR003_Fake, kSR004_Fake, kSR005_Fake, kSR006_Fake, kSR007_Fake, kSR008_Fake, kSR009_Fake, kSR010_Fake, kSR011_Fake, kSR012_Fake, kSR013_Fake, kSR014_Fake, kSR015_Fake,
 
     kGlobalFake,
     
