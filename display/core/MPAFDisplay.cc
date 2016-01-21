@@ -213,6 +213,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
         sname = tks[n];
 	size_t pos=categ.rfind("_");
 	string redCateg=categ;
+	
 	if(pos!=string::npos && categ.substr(pos+1, categ.size()-pos-1).find("R")==string::npos) {
 	  ext=categ.substr(pos+1, categ.size()-pos-1);
 	  redCateg=categ.substr(0, categ.size()-ext.size()-1);
@@ -222,9 +223,10 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
         gen = atoi( tks[n+2].c_str() );
         eyield = atof( tks[n+3].c_str() );
 	
-	if(ext!="")
+	if(ext!="") {
 	  extDss=anConf.findDSS( sname, ext );
-	
+	}	
+
 	CatId id;
 	id.categ = categ;
 	id.cname = cname;
@@ -247,57 +249,61 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
     } //end while line
     fDb.close();
 
-
     //Now overwritte when needed and fill the internal DB
     int n=0;
-    vector<std::pair<CatId, ValId> >::const_iterator it;
-    for(it=catMap.begin();it!=catMap.end();++it) {
+    // vector<std::pair<CatId, ValId> >::const_iterator it;
+    // vector<std::pair<CatId, ValId> >::const_iterator itEnd=catMap.end();
+    // for(it=catMap.begin();it!=itEnd;++it) {
 
-      n++;
+    //   n++;
      
-      if(!it->first.useExt) continue;
-     
-      CatId tmpId;
-      tmpId.categ = it->first.redCateg;
-      tmpId.cname = it->first.cname;
-      tmpId.sname = it->first.sname;
-      tmpId.useExt= false;
-      tmpId.redCateg = it->first.redCateg;
-      tmpId.ext = "";
-      tmpId.uncTag = it->first.uncTag;
-      tmpId.upVar = it->first.upVar;
+    //   if(!it->first.useExt) continue;
       
-      bool found=false;
-      for(size_t ii=0;ii<catMap.size();ii++) {
-	if(catMap[ii].first.categ==tmpId.categ && 
-	   catMap[ii].first.cname==tmpId.cname && 
-	   catMap[ii].first.sname==tmpId.sname && 
-	   catMap[ii].first.useExt==false && 
-	   catMap[ii].first.redCateg==tmpId.redCateg && 
-	   catMap[ii].first.ext=="" && 
-	   catMap[ii].first.uncTag==tmpId.uncTag && 
-	   catMap[ii].first.upVar==tmpId.upVar ) {
-	  catMap[ii].second = it->second;
-	  found=true;
-	  break;
-	}
-      }//end catMap
+    //   CatId tmpId;
+    //   tmpId.categ = it->first.redCateg;
+    //   tmpId.cname = it->first.cname;
+    //   tmpId.sname = it->first.sname;
+    //   tmpId.useExt= false;
+    //   tmpId.redCateg = it->first.redCateg;
+    //   tmpId.ext = "";
+    //   tmpId.uncTag = it->first.uncTag;
+    //   tmpId.upVar = it->first.upVar;
       
-      if(!found) {//category missing, need to add it
-	std::pair<CatId, ValId> p(tmpId, it->second);
-	//adding it at the end should work 
-	catMap.push_back(p);
-      }
-    }
-
+    //   bool found=false;
+    //   for(size_t ii=0;ii<catMap.size();ii++) {
+    // 	if(catMap[ii].first.categ==tmpId.categ && 
+    // 	   catMap[ii].first.cname==tmpId.cname && 
+    // 	   catMap[ii].first.sname==tmpId.sname && 
+    // 	   catMap[ii].first.useExt==false && 
+    // 	   catMap[ii].first.redCateg==tmpId.redCateg && 
+    // 	   catMap[ii].first.ext=="" && 
+    // 	   catMap[ii].first.uncTag==tmpId.uncTag && 
+    // 	   catMap[ii].first.upVar==tmpId.upVar ) {
+    // 	  catMap[ii].second = it->second;
+    // 	  found=true;
+    // 	  break;
+    // 	}
+    //   }//end catMap
+      
+    //   if(!found) {//category missing, need to add it
+    // 	std::pair<CatId, ValId> p(tmpId, it->second);
+    // 	//adding it at the end should work 
+    // 	catMap.push_back(p);
+    //   }
+    // }
+    
+   
     //now filling
     n=0;
 
     for(size_t ic=0;ic<catMap.size();++ic) {
       
       dss=anConf.findDSS( catMap[ic].first.sname );
+      
       int icat=_au->getCategId( catMap[ic].first.categ );
       for(unsigned int i=0;i<dss.size();i++) {
+	string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
+	if(catMap[ic].first.ext!=cr) continue;
 	// if(catMap[ic].first.uncTag=="") //dss[i]->getName()=="T1tttt-1125-900")
 	//   cout<<dss[i]->getName()<<"  "<<catMap[ic].first.cname<<"  "<<catMap[ic].first.sname
 	//       <<"  "<<icat<<"  "<<catMap[ic].first.categ<<"  "<<catMap[ic].first.uncTag<<" ---> "<<catMap[ic].second.yield<<endl;
@@ -432,7 +438,7 @@ void
 MPAFDisplay::doPlot() {
   
   setHistograms();
- 
+  
   //See if a fit is needed for the normalization
   //ugly....
   string fitVar=dp.getFitVar();
@@ -480,7 +486,7 @@ MPAFDisplay::setHistograms() {
 
   //loop over the datasets, find the histograms, sum them
   // and store them into the HistoManager
-
+  
   //do not need to reload everything at each iteration, but let's do it for the moment
   //  if(!_recompute) return;
 
