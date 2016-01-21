@@ -333,6 +333,8 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
   float w =ds->getWeight(sname);
   if(!ds->isPPcolDataset()) w *= anConf.getLumi();
   
+  if(ds->getSample(sname)->isDD()) w/=anConf.getLumi();
+
   yield *=w;
   eyield *=w;
  
@@ -1146,7 +1148,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       yieldStr += os.str()+"\t";
       
     } else if(_dsNames[ids]==sigName) {
-      cout<<" --> "<<_dsNames[ids]<<"   "<<valCentral[_dsNames[ids]]<<endl;
+      //cout<<" --> "<<_dsNames[ids]<<"   "<<valCentral[_dsNames[ids]]<<endl;
       sumSig = valCentral[_dsNames[ids]];
     }
   }
