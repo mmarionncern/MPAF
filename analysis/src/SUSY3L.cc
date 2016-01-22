@@ -271,8 +271,8 @@ void SUSY3L::initialize(){
         //old: file_fo04.root
         //new: 160116_FR_withIdEmu.root
 
-        //_dbm->loadDb("ElNIso"    , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_non");
-        //_dbm->loadDb("MuNIso"    , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_non");
+        _dbm->loadDb("ElNIso"    , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_non");
+        _dbm->loadDb("MuNIso"    , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_non");
        
         //_dbm->loadDb("ElIso"     , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_iso");
         //_dbm->loadDb("MuIso"     , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_iso");
@@ -377,8 +377,6 @@ void SUSY3L::run(){
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
-
-    if(_debug){if(_vc->get("lumi")==1116 && _vc->get("evt")==369220 ){cout << "yes" << endl;}}
 
     counter("weighting");
 /*
@@ -1208,23 +1206,13 @@ bool SUSY3L::multiLepSelection(bool onZ){
         passLepMult = true;
     }
 
-    if(_debug){if(_vc->get("lumi")==1116 && _vc->get("evt")==369220 ){cout << "passing ==3 tight leps" << endl;}}
-    
     //three or more tight leptons with low mll cut
     if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3 && pass)){
         if(!passLepMult) cout << "WARNING: event failing lepton multiplicity passes lepton multiplicity with low mll cut!" << endl;
         counter("low mll veto");
-            if(_debug){if(_vc->get("lumi")==1116 && _vc->get("evt")==369220 ){
-                cout << "passing mll cut" << endl;
-                for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
-                    cout << _tightLepsPtCutMllCut[il]->pt() << endl;
-
-                }
-            }}
         //require hard legs
         if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
         counter("hard leg selection");
-            if(_debug){if(_vc->get("lumi")==1116 && _vc->get("evt")==369220 ){cout << "passing hard leg selection" << endl;}}
         //selection of multi lepton events for signal regions
         
         //Z selection
@@ -1698,6 +1686,8 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
         //only consider TTF events and require fake to be given flavor
         if((fakableLeps.size()==1) && (tightLeps.size()==2) && (std::abs(fakableLeps[0]->pdgId()) == _closureByFlavor)){pass = true;}
     }
+    //TODO: just for sync    
+    //if((fakableLeps.size()==1) && (tightLeps.size()==2) && (std::abs(fakableLeps[0]->pdgId()) == _closureByFlavor)){pass = true;}
 
     if(!pass){return vclist;}
     
