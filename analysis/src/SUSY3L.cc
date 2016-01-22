@@ -486,8 +486,8 @@ void SUSY3L::run(){
     }
    
     //select events for WZ control region
-    //bool wzSel = wzCRSelection();
-    //if(wzSel){return;}	
+    bool wzSel = wzCRSelection();
+    if(wzSel){return;}	
     
     setWorkflow(kGlobal);	
     
