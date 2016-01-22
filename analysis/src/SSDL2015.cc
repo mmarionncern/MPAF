@@ -53,7 +53,6 @@ SSDL2015::initialize(){
   _vc->registerVar("HLT_DoubleMuHT"               );
   _vc->registerVar("nVert"                        );
   _vc->registerVar("nTrueInt"                     );
-  _vc->registerVar("nTrueInt"                     );
   _vc->registerVar("nBJetPt40Medium"              );
   _vc->registerVar("puWeight"                     );
   _vc->registerVar("genWeight"                    );
@@ -278,15 +277,15 @@ SSDL2015::initialize(){
   addWorkflow( kWZCR, "WZCR");
 
   //extra input variables
-  _fastSim = getCfgVarI("FastSim", 0);
-  _lepflav = getCfgVarS("LEPFLAV", "all");
-  _leppt   = getCfgVarS("LEPPT"  , "all");
-  _SR      = getCfgVarS("SR"     , "BR02H");
-  _FR      = getCfgVarS("FR"     , "FO2C");
-  _LHESYS = getCfgVarI("LHESYS", 0);
-  _categorization = getCfgVarI("categorization", 1);
-  _mergeSRs = getCfgVarI("mergeSRs",0);
-  _DoValidationPlots = getCfgVarI("ValidationPlots", 0);
+  _fastSim           = getCfgVarI("FastSim"        , 0      );
+  _lepflav           = getCfgVarS("LEPFLAV"        , "all"  );
+  _leppt             = getCfgVarS("LEPPT"          , "all"  );
+  _SR                = getCfgVarS("SR"             , "BR02H");
+  _FR                = getCfgVarS("FR"             , "FO2C" );
+  _LHESYS            = getCfgVarI("LHESYS"         , 0      );
+  _categorization    = getCfgVarI("categorization" , 1      );
+  _mergeSRs          = getCfgVarI("mergeSRs"       , 0      );
+  _DoValidationPlots = getCfgVarI("ValidationPlots", 0      );
 
   //vector<string> jess;
   // jess.push_back("Jet_pt");
@@ -294,7 +293,7 @@ SSDL2015::initialize(){
   
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
-   addManualSystSource("EWKFR",SystUtils::kNone);
+   //addManualSystSource("EWKFR",SystUtils::kNone);
    ////addManualSystSource("Eff",SystUtils::kNone);
    ////addManualSystSource("Theory",SystUtils::kNone);
    //addManualSystSource("JES",SystUtils::kNone);
@@ -357,6 +356,10 @@ SSDL2015::initialize(){
   _dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
   _dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
 
+  //pileup
+   _dbm->loadDb("puWeights","pileupWeights.root","pileup");
+
+
   //=== signal Xsection, easier to normalize from here.
   _dbm->loadDb("T1ttttXsect", "SignalXsect.db");
  
@@ -379,7 +382,8 @@ SSDL2015::modifyWeight() {
     else {_weight *= _susyMod->getLHEweight(_LHESYS);}
     //pileup weights
     //_weight *= _vc->get("vtxWeight");
-    _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+    //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+    _weight *= _dbm->getDBValue("puWeights", _vc->get("nTrueInt") );
   }
 
 }
@@ -459,6 +463,7 @@ SSDL2015::writeOutput() {
 
 void
 SSDL2015::run() {
+
 
   if(_fastSim && !checkMassBenchmark() ) return;
   
@@ -598,9 +603,9 @@ SSDL2015::advancedSelection(int WF) {
     if(!passHLTbit()) return;
   }
   counter("HLT");
-  
+ 
   // HLT AND LEPTON SFs ======================
-  if(!_isData){
+  if(!_vc->get("isData")){
     // trigger * lep1 SF * lep2 SF
     if(!_fastSim) {
       _weight*=_susyMod->GCeventScaleFactor(_l1Cand->pdgId(), _l2Cand->pdgId(),
@@ -621,6 +626,7 @@ SSDL2015::advancedSelection(int WF) {
     
     }
   }
+
   
   //===============================
   _mTmin=min( Candidate::create(_l1Cand, _met)->mass(),
@@ -1547,10 +1553,6 @@ SSDL2015::getFR(Candidate* cand, int idx) {
 
   ptVal=std::max(ptVal, ptM);
 
-//DUMP(db);
-//float val = _dbm->getDBValue(db, std::min( ptVal,(float)69.9),std::min(etaVal,(float)((std::abs(cand->pdgId())==11)?2.49:2.39) ) );
-//DUMP(val);
-//return val;
   return _dbm->getDBValue(db, std::min( ptVal,(float)69.9),
 			  std::min(etaVal,(float)((std::abs(cand->pdgId())==11)?2.49:2.39) ) );
 

@@ -3,7 +3,7 @@
 mainFile=${MPAF}/workdir/stats/SSDL2015/merged_2fb_Bkg.dat
 
 ## first merge backgrounds
-#python ${MPAF}/scripts/scanScripts/mergeBkgs.py ${mainFile} ${MPAF}/workdir/stats/SSDL2015/ssdlBkg_
+python ${MPAF}/scripts/scanScripts/mergeBkgs.py ${mainFile} ${MPAF}/workdir/stats/SSDL2015/ssdlBkg_
 
 ## merge signals and backgrounds
 for i in `ls $MPAF/workdir/stats/SSDL2015/ssdlScan_*.dat`; do

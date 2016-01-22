@@ -18,7 +18,7 @@ void ssdlScan_BENCH() {
   float lumi=2160; //pb-1 19470
   float energy=13; //TeV
 
-  bool useXS=false;
+  bool useXS=true;
 
   md.anConf.loadXSDB("XSectionsSpring15.db");
 
@@ -79,25 +79,25 @@ void ssdlScan_BENCH() {
 
   md.addDataCardSample("mId:DYJetsToLL_M10to50"                                   , "flip"    );
   md.addDataCardSample("mId:DYJetsToLL_M50"                                       , "flip"    );
-  md.addDataCardSample("mId:TTWToLNu"                                             , "flip", -1);
-  md.addDataCardSample("mId:TTZToLLNuNu"                                          , "flip", -1);
-  md.addDataCardSample("mId:TTLLJets_m1to10"                                      , "flip", -1);
-  md.addDataCardSample("mId:TTHnobb"                                              , "flip", -1);
-  md.addDataCardSample("mId:WZTo3LNu"                                             , "flip", -1);
-  md.addDataCardSample("mId:WpWpJJ"                                               , "flip", -1);
-  md.addDataCardSample("mId:TTGJets"                                              , "flip", -1);
-  md.addDataCardSample("mId:TGJets"                                               , "flip", -1);
-  md.addDataCardSample("mId:WGToLNuG"                                             , "flip", -1);
-  md.addDataCardSample("mId:ZGTo2LG"                                              , "flip", -1);
-  md.addDataCardSample("mId:WWDouble"                                             , "flip", -1);
-  md.addDataCardSample("mId:ZZTo4L"                                               , "flip", -1);
-  md.addDataCardSample("mId:tZq_ll"                                               , "flip", -1);
-  md.addDataCardSample("mId:GGHZZ4L"                                              , "flip", -1);
-  md.addDataCardSample("mId:VHToNonbb"                                            , "flip", -1);
-  md.addDataCardSample("mId:WWZ"                                                  , "flip", -1);
-  md.addDataCardSample("mId:ZZZ"                                                  , "flip", -1);
-  md.addDataCardSample("mId:WZZ"                                                  , "flip", -1);
-  md.addDataCardSample("mId:TTTT"                                                 , "flip", -1);
+  //md.addDataCardSample("mId:TTWToLNu"                                             , "flip", -1);
+  //md.addDataCardSample("mId:TTZToLLNuNu"                                          , "flip", -1);
+  //md.addDataCardSample("mId:TTLLJets_m1to10"                                      , "flip", -1);
+  //md.addDataCardSample("mId:TTHnobb"                                              , "flip", -1);
+  //md.addDataCardSample("mId:WZTo3LNu"                                             , "flip", -1);
+  //md.addDataCardSample("mId:WpWpJJ"                                               , "flip", -1);
+  //md.addDataCardSample("mId:TTGJets"                                              , "flip", -1);
+  //md.addDataCardSample("mId:TGJets"                                               , "flip", -1);
+  //md.addDataCardSample("mId:WGToLNuG"                                             , "flip", -1);
+  //md.addDataCardSample("mId:ZGTo2LG"                                              , "flip", -1);
+  //md.addDataCardSample("mId:WWDouble"                                             , "flip", -1);
+  //md.addDataCardSample("mId:ZZTo4L"                                               , "flip", -1);
+  //md.addDataCardSample("mId:tZq_ll"                                               , "flip", -1);
+  //md.addDataCardSample("mId:GGHZZ4L"                                              , "flip", -1);
+  //md.addDataCardSample("mId:VHToNonbb"                                            , "flip", -1);
+  //md.addDataCardSample("mId:WWZ"                                                  , "flip", -1);
+  //md.addDataCardSample("mId:ZZZ"                                                  , "flip", -1);
+  //md.addDataCardSample("mId:WZZ"                                                  , "flip", -1);
+  //md.addDataCardSample("mId:TTTT"                                                 , "flip", -1);
 
   md.addDataCardSample("data:Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914"     , "fake"    );
   md.addDataCardSample("data:Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158"     , "fake"    );
@@ -108,8 +108,8 @@ void ssdlScan_BENCH() {
   md.addDataCardSample("data:Fake:MuonEG_Run2015C_Oct05_runs_254231_254914"       , "fake"    );
   md.addDataCardSample("data:Fake:MuonEG_Run2015D_Oct05_runs_256630_258158"       , "fake"    );
   md.addDataCardSample("data:Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627"    , "fake"    );
-  md.addDataCardSample("Fake:DYJetsToLL_M10to50"                                  , "fake", -1);
-  md.addDataCardSample("Fake:DYJetsToLL_M50"                                      , "fake", -1);
+  //md.addDataCardSample("Fake:DYJetsToLL_M10to50"                                  , "fake", -1);
+  //md.addDataCardSample("Fake:DYJetsToLL_M50"                                      , "fake", -1);
   md.addDataCardSample("Fake:TTWToLNu"                                            , "fake", -1);
   md.addDataCardSample("Fake:TTZToLLNuNu"                                         , "fake", -1);
   md.addDataCardSample("Fake:TTLLJets_m1to10"                                     , "fake", -1);
@@ -136,7 +136,7 @@ void ssdlScan_BENCH() {
   md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:WW:XG:rares:T1tttt_BENCH","shape","");
   md.addNuisanceParameter("tHTE","ttW:ttZH:WZ:WW:XG:rares:T1tttt_BENCH","shape","");
 
-  md.addNuisanceParameter("Ewk","fake","shape","");
+  md.addNuisanceParameter("EWKFR","fake","shape","");
 
   md.addNuisanceParameter("ttWAcc","ttW","shape","");
   md.addNuisanceParameter("ttHZAcc","ttHZ","shape","");

@@ -12,8 +12,14 @@ fi
 #DATASETS=( "DYJetsToLL_M10to50" "DYJetsToLL_M50" )
 #DIRS=( "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-20-14-10-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-20-14-10-00/" )
 
+## resubmit bkg
+#DATASETS=("GGHZZ4L" "TGJets" "TTGJets" "TTHnobb" "TTLLJets_m1to10" "TT_pow" "TTTT" "TTWToLNu" "TTZToLLNuNu" "tZq_ll" "VHToNonbb" "WGToLNuG" "WpWpJJ" "WWDouble" "WWZ" "WZTo3LNu" "WZZ" "ZGTo2LG" "ZZTo4L" "ZZZ" )
+#
+#DIRS=("/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-21-20-23-00/" )
+
+
 ## resubmit DYM50
-#DATASETS=( "DYJetsToLL_M50" )
+#DATASETS=( "DYJetsToLL_M10to50" )
 #DIRS=( "/pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-11-20-14-10-00/" )
 
 ## resubmit data

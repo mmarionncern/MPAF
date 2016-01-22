@@ -325,6 +325,8 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 			catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
 	}
 	else if(catMap[ic].first.ext==cr && cr!="") { // continue;
+//if(dss[i] -> getName() == "fake" && catMap[ic].first.uncTag == "EWKFR")
+//cout << "storing numbers from " << catMap[ic].first.categ << " for " << dss[i] -> getName() << ":" << catMap[ic].first.sname << " -> " << catMap[ic].first.uncTag << " (" << catMap[ic].second.yield << endl;
 	  storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
 			catMap[ic].second.gen, icat,
 			catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
@@ -395,8 +397,6 @@ MPAFDisplay::storeStatNums(Dataset* ds, float yield, float eyield, int gen,
   if(idx==-1) return;
   
   if(uncTag=="") {
-//cout << "storing yields " << yield << " for " << ds->getName() << " (" << ext << ")" << endl;
-//cout << "setting yield " << yield << " for " << cname << endl;
      _au->setEffFromStat(idx,cname,icat,yield,eyield,gen);
   }
   else {
@@ -548,21 +548,21 @@ MPAFDisplay::setHistograms() {
       TH1* htmp(0);
       vector<string> samples= ds->getSamples();
       for(size_t is=0;is<samples.size(); is++) {
-	float w = ds->getWeight(is);
-	
-	if(ds->getSample(samples[is])->isNorm()) {
-	  w=ds->getSample(samples[is])->getNorm()/(anConf.getLumi()*ds->getHisto( obss[io], samples[is] )->Integral(0,1000000));
-	} 
-
-	if(ds->getSample(samples[is])->isDD()) w/=anConf.getLumi();
-
-	if(is==0) {
-	  htmp = ds->getHisto( obss[io], samples[is] );
-	  htmp->Scale( w );
-	}
-	else {
-	  htmp->Add( ds->getHisto( obss[io], samples[is] ), w);
-	}
+        float w = ds->getWeight(is);
+        
+        if(ds->getSample(samples[is])->isNorm()) {
+          w=ds->getSample(samples[is])->getNorm()/(anConf.getLumi()*ds->getHisto( obss[io], samples[is] )->Integral(0,1000000));
+        } 
+        
+        if(ds->getSample(samples[is])->isDD()) w/=anConf.getLumi();
+        
+        if(is==0) {
+          htmp = ds->getHisto( obss[io], samples[is] );
+          htmp->Scale( w );
+        }
+        else {
+          htmp->Add( ds->getHisto( obss[io], samples[is] ), w);
+        }
       } 
 
       _hm->copyHisto( obss[io] , _inds, htmp );
@@ -1098,33 +1098,33 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       for(map<string, vector<float> >::const_iterator it=itM->second.begin();
 	  it!=itM->second.end(); ++it) {
 	
-	if(it->first=="data") continue;
-
-	string name=it->first+"_"+itM->first;
-	
-	TH1F* htmpUp=new TH1F( (name+"Up").c_str(), (name+"Up").c_str(),
-			       categs.size(), 0, categs.size() );
-	TH1F* htmpDown=new TH1F( (name+"Down").c_str(), (name+"Down").c_str(),
-				 categs.size(), 0, categs.size() );
-	
-	hUp[ name ]=htmpUp;
-	hDown[ name ]=htmpDown;
+        if(it->first=="data") continue;
+        
+        string name=it->first+"_"+itM->first;
+        
+        TH1F* htmpUp=new TH1F( (name+"Up").c_str(), (name+"Up").c_str(),
+        		       categs.size(), 0, categs.size() );
+        TH1F* htmpDown=new TH1F( (name+"Down").c_str(), (name+"Down").c_str(),
+        			 categs.size(), 0, categs.size() );
+        
+        hUp[ name ]=htmpUp;
+        hDown[ name ]=htmpDown;
       }
 
       if(ic!=0) continue; //central values, only once
 
       if(itM==shapes.begin()) {
-	for(map<string, vector<float> >::const_iterator it=itM->second.begin();
-	    it!=itM->second.end(); ++it) {
-	  
-	  if(it->first=="data") continue;
-
-	  string dsName=it->first;
-	  TH1F* htmp=new TH1F( dsName.c_str(), dsName.c_str(),
-			       categs.size(), 0, categs.size() );
-	  hCentral[ dsName ]=htmp;
-	  valCentral[ dsName ]=0;
-	}
+        for(map<string, vector<float> >::const_iterator it=itM->second.begin();
+          it!=itM->second.end(); ++it) {
+        
+        if(it->first=="data") continue;
+      
+        string dsName=it->first;
+        TH1F* htmp=new TH1F( dsName.c_str(), dsName.c_str(),
+      		       categs.size(), 0, categs.size() );
+        hCentral[ dsName ]=htmp;
+        valCentral[ dsName ]=0;
+        }
       }//only one central definition
     }
 
@@ -1143,19 +1143,19 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
       // if(_dsNames[id]=="T1tttt_1200_450")
       // 	cout<<" ==== > "<<categs[ic]<<"  "<<uncShapes[ic].begin()->second[ _dsNames[id] ][0]<<"   "<<valCentral[ _dsNames[id] ]<<endl;
       for(size_t iu=0;iu<uncNames.size();iu++) {
-	if(uncShapes[ic].find(uncNames[iu])!=uncShapes[ic].end() && 
-	   uncShapes[ic][ uncNames[iu] ].find(_dsNames[id])!=uncShapes[ic][ uncNames[iu] ].end() ) {
-	  // if("T1tttt_1200_450"==_dsNames[id] && uncNames[iu].find("BTAG")!=string::npos)
-	  //   cout<<_dsNames[id]+"_"+uncNames[iu]<<" --> "
-	  // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
-	  // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
+        if(uncShapes[ic].find(uncNames[iu])!=uncShapes[ic].end() && 
+           uncShapes[ic][ uncNames[iu] ].find(_dsNames[id])!=uncShapes[ic][ uncNames[iu] ].end() ) {
+          // if("T1tttt_1200_450"==_dsNames[id] && uncNames[iu].find("BTAG")!=string::npos)
+          //   cout<<_dsNames[id]+"_"+uncNames[iu]<<" --> "
+          // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
+          // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
 
-	  hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
-	  hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
-	} else { //no uncertainty, central value
-	  hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
-	  hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
-	}
+          hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
+          hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
+        } else { //no uncertainty, central value
+          hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
+          hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
+        }
       }
       
     }

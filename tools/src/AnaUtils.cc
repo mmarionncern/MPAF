@@ -1078,8 +1078,6 @@ AnaUtils::retrieveNumbers(string categ, string cname, int scheme, string opt) {
    
     for(size_t id=0;id<dsNames.size();id++) { //datasets
       int ids = idxs[id];
-      
-cout << dsNames[id] << endl;
 
       //simulation detail
       _itEIMap=_effMap[ ids ][ icat ].find( sel );
@@ -1091,8 +1089,6 @@ cout << dsNames[id] << endl;
 	p.second[ids][4]["tot"] = 0.;
       }
       else {
-
-cout << "not empty" << endl;
 
 	float central;
 	float totUp=0,totDown=0;

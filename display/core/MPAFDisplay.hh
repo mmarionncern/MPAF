@@ -28,8 +28,6 @@ struct CatId{
   string ext;
   string uncTag;
   int upVar;
-  string targetDS;
-  vector<Dataset*> targetDSS;
 };
 
 struct ValId{
