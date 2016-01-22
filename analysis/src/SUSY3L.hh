@@ -39,7 +39,7 @@ private:
     bool fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass);
     bool tightLepton(const Candidate* c, int idx, int pdgId);
     
-    bool multiLepSelection(bool onZ);
+    bool multiLepSelection();
     void advancedSelection(int WF);
     float getTF_SingleFake(int ic);
     float getTF_DoubleFake(int ic);
@@ -89,10 +89,12 @@ private:
     bool _selectMuons;
     bool _selectElectrons;
     bool _selectTaus;
-    bool _onZ;
+    int _onZ; 
+    bool _doPlots;
     bool _doValidationPlots;
     int _closureByFlavor;
     bool _exactlyThreeLep;
+    bool _runSystematics;
     string _BR;
     string _SR;
     string _FR;
@@ -103,12 +105,19 @@ private:
 private:
 
     //counter categories, 0 is ALWAYS global (even if not specified later)
-    enum {kGlobal=0,
+  enum {kGlobal=0,
     
-    kSR001, kSR002, kSR003, kSR004, kSR005, kSR006, kSR007, kSR008,
-    kSR009, kSR010, kSR011, kSR012, kSR013, kSR014, kSR015,
+	kOnZSR001, kOnZSR002, kOnZSR003, kOnZSR004, kOnZSR005, kOnZSR006, kOnZSR007, kOnZSR008,
+	kOnZSR009, kOnZSR010, kOnZSR011, kOnZSR012, kOnZSR013, kOnZSR014, kOnZSR015,
+
+	kOffZSR001, kOffZSR002, kOffZSR003, kOffZSR004, kOffZSR005, kOffZSR006, kOffZSR007, kOffZSR008,
+	kOffZSR009, kOffZSR010, kOffZSR011, kOffZSR012, kOffZSR013, kOffZSR014, kOffZSR015,
     
-    kSR001_Fake, kSR002_Fake, kSR003_Fake, kSR004_Fake, kSR005_Fake, kSR006_Fake, kSR007_Fake, kSR008_Fake, kSR009_Fake, kSR010_Fake, kSR011_Fake, kSR012_Fake, kSR013_Fake, kSR014_Fake, kSR015_Fake,
+	kOnZSR001_Fake, kOnZSR002_Fake, kOnZSR003_Fake, kOnZSR004_Fake, kOnZSR005_Fake, kOnZSR006_Fake, kOnZSR007_Fake, kOnZSR008_Fake,
+	kOnZSR009_Fake, kOnZSR010_Fake, kOnZSR011_Fake, kOnZSR012_Fake, kOnZSR013_Fake, kOnZSR014_Fake, kOnZSR015_Fake,
+	
+	kOffZSR001_Fake, kOffZSR002_Fake, kOffZSR003_Fake, kOffZSR004_Fake, kOffZSR005_Fake, kOffZSR006_Fake, kOffZSR007_Fake, kOffZSR008_Fake,
+	kOffZSR009_Fake, kOffZSR010_Fake, kOffZSR011_Fake, kOffZSR012_Fake, kOffZSR013_Fake, kOffZSR014_Fake, kOffZSR015_Fake,
 
     kGlobalFake,
     
@@ -203,6 +212,8 @@ private:
     Candidate* _l1Cand;
     Candidate* _l2Cand;
     
+  bool _isOnZ;
+
     float _HT;
     float _MT2;
     float _deltaR;
