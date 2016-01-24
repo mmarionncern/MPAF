@@ -1199,8 +1199,8 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
   card<<"shapes * * "<<cardName+".root"<<" $PROCESS $PROCESS_$SYSTEMATIC"<<endl;
   card<<"---------------------------"<<endl; 
   card<<"bin\t0"<<endl;
-  //card<<"observation\t"<<dataYieldStr.str()<<endl;    //if with data
-  card<<"observation\t"<<sumBkgStr<<endl;      //if no data
+  card<<"observation\t"<<dataYieldStr.str()<<endl;    //if with data
+  //card<<"observation\t"<<sumBkgStr<<endl;      //if no data
   card<<"---------------------------"<<endl; 
   card<<"bin\t\t"<<lines[ "bins" ]<<endl;
   card<<"process\t\t"<<lines[ "procNames" ]<<endl;

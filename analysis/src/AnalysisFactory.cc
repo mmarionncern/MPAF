@@ -17,8 +17,8 @@ using namespace std;
 #include "analysis/src/FakeRatioStudy.hh"
 #include "analysis/src/sideband.hh"
 #include "analysis/src/FRinSitu.hh"
-//#include "analysis/src/SSDL2015.hh"
-//#include "analysis/src/UncertaintyTest.hh"
+#include "analysis/src/SSDL2015.hh"
+#include "analysis/src/UncertaintyTest.hh"
 //#include "analysis/src/Comissioning.hh"
 
 MPAF*
@@ -65,14 +65,14 @@ AnalysisFactory::get(const string& analysis, const string& cfg) {
   if(analysis=="FRinSitu") {
     return new FRinSitu(cfg);
   }
-/*  if(analysis=="SSDL2015") {
+  if(analysis=="SSDL2015") {
     return new SSDL2015(cfg);
   }
   if(analysis=="UncertaintyTest") {
     return new UncertaintyTest(cfg);
   }
-  if(analysis=="Comissioning") {
-    return new Comissioning(cfg);
-  }*/
+  //if(analysis=="Comissioning") {
+  //  return new Comissioning(cfg);
+  //}
   return 0;
 }
