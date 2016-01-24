@@ -106,8 +106,8 @@ private:
 
     //counter categories, 0 is ALWAYS global (even if not specified later)
   enum {kGlobal=0,
-    
-	kOnZSR001, kOnZSR002, kOnZSR003, kOnZSR004, kOnZSR005, kOnZSR006, kOnZSR007, kOnZSR008,
+	
+    kOnZSR001, kOnZSR002, kOnZSR003, kOnZSR004, kOnZSR005, kOnZSR006, kOnZSR007, kOnZSR008,
 	kOnZSR009, kOnZSR010, kOnZSR011, kOnZSR012, kOnZSR013, kOnZSR014, kOnZSR015,
 
 	kOffZSR001, kOffZSR002, kOffZSR003, kOffZSR004, kOffZSR005, kOffZSR006, kOffZSR007, kOffZSR008,
@@ -119,7 +119,11 @@ private:
 	kOffZSR001_Fake, kOffZSR002_Fake, kOffZSR003_Fake, kOffZSR004_Fake, kOffZSR005_Fake, kOffZSR006_Fake, kOffZSR007_Fake, kOffZSR008_Fake,
 	kOffZSR009_Fake, kOffZSR010_Fake, kOffZSR011_Fake, kOffZSR012_Fake, kOffZSR013_Fake, kOffZSR014_Fake, kOffZSR015_Fake,
 
-    kGlobalFake,
+    kOnZBaseline, kOffZBaseline,
+
+    kOnZBaseline_Fake, kOffZBaseline_Fake,
+    
+    kGlobal_Fake,
     
     kWZCR
     };

@@ -227,9 +227,10 @@ void SUSY3L::initialize(){
     _susyMod = new SusyModule(_vc, _dbm);
 
     //categories
-    int nCateg=62;
+    int nCateg=66;
     _categs.resize(nCateg);
-    string srs[62]={
+    string srs[66]={
+       
     //signal regions
         "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
 	    "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012", "OnZSR013", "OnZSR014", "OnZSR015",
@@ -237,12 +238,19 @@ void SUSY3L::initialize(){
 	    "OffZSR001", "OffZSR002", "OffZSR003", "OffZSR004", "OffZSR005", "OffZSR006", "OffZSR007", "OffZSR008",
 	    "OffZSR009", "OffZSR010", "OffZSR011", "OffZSR012", "OffZSR013", "OffZSR014", "OffZSR015",
 
-    //application regions
+    //signal application regions
         "OnZSR001_Fake", "OnZSR002_Fake", "OnZSR003_Fake", "OnZSR004_Fake", "OnZSR005_Fake", "OnZSR006_Fake", "OnZSR007_Fake", "OnZSR008_Fake",
 	    "OnZSR009_Fake", "OnZSR010_Fake", "OnZSR011_Fake", "OnZSR012_Fake", "OnZSR013_Fake", "OnZSR014_Fake", "OnZSR015_Fake",
 
 	    "OffZSR001_Fake", "OffZSR002_Fake", "OffZSR003_Fake", "OffZSR004_Fake", "OffZSR005_Fake", "OffZSR006_Fake", "OffZSR007_Fake", "OffZSR008_Fake",
 	    "OffZSR009_Fake", "OffZSR010_Fake", "OffZSR011_Fake", "OffZSR012_Fake", "OffZSR013_Fake", "OffZSR014_Fake", "OffZSR015_Fake",
+ 
+    //baseline regions
+        "OnZBaseline", "OffZBaseline",
+
+    //baseline appliction regions
+        "OnZBaseline_Fake", "OffZBaseline_Fake",
+    
     //other
         "Fake", 
         "WZCR"
@@ -257,7 +265,7 @@ void SUSY3L::initialize(){
     }
 
     //workflows
-    addWorkflow( kGlobalFake, "Fake" );
+    addWorkflow( kGlobal_Fake, "Fake" );
     addWorkflow( kWZCR, "WZCR");        
 
     //config file input variables
@@ -420,7 +428,7 @@ void SUSY3L::run(){
     // if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
     //   _weight *= 1.028284;
 
-/*
+
     //btag-scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
@@ -473,7 +481,7 @@ void SUSY3L::run(){
 	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
         }
     }
-*/    
+    
     setWorkflow(kGlobal);	
 
     //selections for validation plots
@@ -517,8 +525,8 @@ void SUSY3L::run(){
             fill("fake_type" , type       , _weight);
         }
         _weight *= sumTF;
-	    setWorkflow(kGlobalFake);
-        advancedSelection( kGlobalFake );
+	    setWorkflow(kGlobal_Fake);
+        advancedSelection( kGlobal_Fake );
     
     }
 }
@@ -1243,6 +1251,10 @@ bool SUSY3L::multiLepSelection(){
         onZ=(bool)(1-iz);
         //if only on or off Z regions should be considered
         if( (_onZ==0 && onZ) || (_onZ==1 && !onZ) ) continue;
+        
+        if(onZ){setWorkflow(kOnZBaseline);}
+        else{setWorkflow(kOffZBaseline);}
+        counter("baseline denominator");
 
         //three tight leptons
         if((_exactlyThreeLep && _tightLepsPtCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCut.size()>=3 && pass)){
@@ -1305,7 +1317,7 @@ bool SUSY3L::multiLepSelection(){
     
         if(_isMultiLep) return true;
 
-   
+        setWorkflow(kGlobal);
 
         //TODO: make fakes compatible with MT cut in Z selection
         _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableNotTightLepsPtCut, _fakableNotTightLepsPtCutIdx, _fakableNotTightLepsPtCorrCut, _fakableNotTightLepsPtCorrCutIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, onZ, _combIdxs, _combType );
@@ -1326,8 +1338,17 @@ void SUSY3L::advancedSelection(int WF){
     */
     
     int offset = 0;
-    if(WF==kGlobalFake) offset=kOffZSR015;
-    
+    if(WF==kGlobal_Fake) offset=kOffZSR015;
+   
+    if(!_isFake){
+        if(_isOnZ) setWorkflow(kOnZBaseline);
+        else setWorkflow(kOffZBaseline);
+    }    
+    if(_isFake){
+        if(_isOnZ) setWorkflow(kOnZBaseline_Fake);
+        else setWorkflow(kOffZBaseline_Fake);
+    }
+
     //require minimum number of jets
     if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
     //require minimum number of b-tagged jets
@@ -1338,6 +1359,10 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
+
+    setWorkflow(WF);
+    
+    counter("baseline on and off-Z");
 
     //print out event info
     /* 
@@ -1356,11 +1381,11 @@ void SUSY3L::advancedSelection(int WF){
         categorize();
         int wf = getCurrentWorkflow();
 
-        setWorkflow( ((offset==kOffZSR015)?kGlobalFake:0) );
+        setWorkflow( ((offset==kOffZSR015)?kGlobal_Fake:0) );
 	    fill( "SRS", wf , _weight );
 	
         setWorkflow(wf+offset);
-        if(getCurrentWorkflow()==kGlobalFake){cout << "WARNING " << offset <<  endl;}
+        if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
         fillHistos();
     }
