@@ -2312,7 +2312,7 @@ bool SUSY3L_sync::passEESCfilter(){
 
 
 //____________________________________________________________________________
-bool SUSY3L::checkMassBenchmark(){
+bool SUSY3L_sync::checkMassBenchmark(){
 
     float M1=_vc->get("GenSusyMScan1");
     float M2=_vc->get("GenSusyMScan2");
@@ -2343,7 +2343,7 @@ bool SUSY3L::checkMassBenchmark(){
 
 
 //____________________________________________________________________________
-void SUSY3L::loadScanHistogram(){
+void SUSY3L_sync::loadScanHistogram(){
     
     string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScanT1tttt.root";
     TFile* file=new TFile(mpafenv.c_str(),"read");
