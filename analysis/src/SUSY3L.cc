@@ -173,7 +173,7 @@ void SUSY3L::initialize(){
     _vc->registerVar("nJetFwd"                         );
     _vc->registerVar("JetFwd_pt"                       );
     _vc->registerVar("JetFwd_phi"                      );
-    
+
     //HLT lines
     _vc->registerVar("HLT_DoubleMu"                    );     //HLT trigger path decition (1 fired, 0 else)
     _vc->registerVar("HLT_SingleMu"                    );
@@ -209,19 +209,19 @@ void SUSY3L::initialize(){
     _vc->registerVar("vtxWeight"                       );       //number of vertices for pile-up reweighting 
 
     //scan variables
-    _vc->registerVar("GenSusyMScan1"                );
-    _vc->registerVar("GenSusyMScan2"                );
+    _vc->registerVar("GenSusyMScan1"                   );
+    _vc->registerVar("GenSusyMScan2"                   );
 
-    //generator informations
-    _vc->registerVar("nGenPart"                     );
-    _vc->registerVar("GenPart_pt"                   );
-    _vc->registerVar("GenPart_eta"                  );
-    _vc->registerVar("GenPart_phi"                  );
-    _vc->registerVar("GenPart_pdgId"                );
-    _vc->registerVar("GenPart_motherId"             );
-    _vc->registerVar("GenPart_mass");
-    _vc->registerVar("GenPart_charge");
-    _vc->registerVar("GenPart_status");
+    //generator information
+    _vc->registerVar("nGenPart"                        );
+    _vc->registerVar("GenPart_pt"                      );
+    _vc->registerVar("GenPart_eta"                     );
+    _vc->registerVar("GenPart_phi"                     );
+    _vc->registerVar("GenPart_pdgId"                   );
+    _vc->registerVar("GenPart_motherId"                );
+    _vc->registerVar("GenPart_mass"					   );
+    _vc->registerVar("GenPart_charge"				   );
+    _vc->registerVar("GenPart_status"				   );
 
     //SusyModule for common inputs and functions with RA5
     _susyMod = new SusyModule(_vc, _dbm);
@@ -374,7 +374,7 @@ void SUSY3L::run(){
         if(_vc->get("run")>258750){return;}
     }
 
-     //increment event counter, used as denominator for yield calculation
+    //increment event counter, used as denominator for yield calculation
     counter("denominator");
 
     if(_fastSim && !checkMassBenchmark()) return;
@@ -515,7 +515,7 @@ void SUSY3L::run(){
 
     //fake background event 
     else{
-      //loop over all combinations of tight and fake leptons
+		//loop over all combinations of tight and fake leptons
         float sumTF = 0;
         for(unsigned int ic=0;ic<_combList.size();ic++) {
             int type = _combType[ic];
@@ -1171,7 +1171,7 @@ void SUSY3L::setCut(std::string var, float valCut, std::string cType, float upVa
         return: none
     */
 
-    //baseline regioin
+    //baseline region
     if(var == "NJets") {
         _valCutNJetsBR   = valCut;
         _cTypeNJetsBR    = cType;
@@ -1677,7 +1677,7 @@ void SUSY3L::categorize(){
     string categ="";
     for(size_t ic=0;ic< (_categs.size()-2)/2;ic++){
         _SR = _categs[ic];
-	if(testRegion() ) {setWorkflow(ic+offset); return;}
+		if(testRegion() ) {setWorkflow(ic+offset); return;}
     }
     cout << "WARNING Baseline event not categorized. NJets/NBJets/HT/MET " << _nJets << " " << _nBJets << " " << _HT << " " << _metPt << endl;
     setWorkflow(kGlobal);
@@ -1787,7 +1787,7 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
         for(size_t il=0;il<clist.size();il++) {
             if(!_susyMod->passMllMultiVeto( clist[il], &clist, 76, 106, true) ){return vclist;}
         }
-	_isOnZ=false;
+		_isOnZ=false;
         passZsel = true;
     }
 
@@ -1870,9 +1870,9 @@ bool SUSY3L::hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, i
     }
     //correct number of leptons of hardLeg requirement with required number of leptons with hardestLeg
     nHardLepCount -= _nHardLeptons;
-    
+
     if(nHardestLepCount >= n_hardestLeg && nHardLepCount >= n_hardLeg) return true;
-    
+
     return false;
 
 }
