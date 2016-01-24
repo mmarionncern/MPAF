@@ -216,7 +216,7 @@ private:
     Candidate* _l1Cand;
     Candidate* _l2Cand;
     
-  bool _isOnZ;
+  	bool _isOnZ;
 
     float _HT;
     float _MT2;
@@ -254,9 +254,9 @@ private:
     map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredCSCEvents;
     map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int > _filteredEESCEvents;
 
-  //scan =======
-  TH3D* _hScanWeight;
-  int _nProcEvtScan;
+  	//scan
+  	TH3D* _hScanWeight;
+  	int _nProcEvtScan;
 
 };
 
