@@ -428,7 +428,7 @@ void SUSY3L::run(){
     // if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
     //   _weight *= 1.028284;
 
-
+/*
     //btag-scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
@@ -448,7 +448,7 @@ void SUSY3L::run(){
     }
         
     counter("btag SF");
-
+*/
     //ISR variation for fastsim
     if(_fastSim){
         if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
@@ -458,7 +458,7 @@ void SUSY3L::run(){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
     }
-    
+/*    
     //HLT and lepton SFs
     if(!_isData){
         // trigger * lep1 SF * lep2 SF
@@ -481,7 +481,7 @@ void SUSY3L::run(){
 	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
         }
     }
-    
+*/    
     setWorkflow(kGlobal);	
 
     //selections for validation plots
@@ -1383,7 +1383,7 @@ void SUSY3L::advancedSelection(int WF){
 
         setWorkflow( ((offset==kOffZSR015)?kGlobal_Fake:0) );
 	    fill( "SRS", wf , _weight );
-	
+
         setWorkflow(wf+offset);
         if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
