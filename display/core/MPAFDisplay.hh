@@ -93,7 +93,7 @@ private:
   string findDiff(const string& s1, const string& s2,
 		  char delim, size_t& bl, size_t& bh);
   void readStatFile(string filename, int& icat);
-  void storeStatNums(Dataset* ds, float yield, float eyield, int gen,
+  void storeStatNums(const Dataset* ds, float yield, float eyield, int gen,
 		     int icat, string cname, string sname, string categ,
 		     string uncTag, int upVar, string ext, bool skipNominal=false);
     

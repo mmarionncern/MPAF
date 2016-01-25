@@ -236,7 +236,6 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	id.ext = ext;
 	id.uncTag = uncTag;
 	id.upVar = upVar;
-    id.ext = ext;
 	
 	ValId vals;
 	vals.yield = yield;
@@ -310,7 +309,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 
     for(size_t ic=0;ic<catMap.size();++ic) {
       dss=anConf.findDSS( catMap[ic].first.sname );
-      
+
       int icat=_au->getCategId( catMap[ic].first.categ );
       for(unsigned int i=0;i<dss.size();i++) {
 	string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
@@ -1242,54 +1241,3 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
 }
 
 
-//bool
-//MPAFDisplay::checkDSS(CatId id1, CatId id2){
-//
-//  for(unsigned int i = 0; i < id1.targetDSS.size(); ++i)
-//    for(unsigned int j = 0; j < id2.targetDSS.size(); ++j)
-//      if(id1.targetDSS[i]->getName() != id2.targetDSS[j]->getName()) 
-//        return false;
-//
-//  return true;
-//
-//}    
-//
-//
-//bool
-//MPAFDisplay::checkDSS(CatId id1, sting dsName){
-//
-//  for(unsigned int i = 0; i < id1.targetDSS.size(); ++i)
-//      if(id1.targetDSS[i]->getName() == dsName) 
-//        return true;
-//
-//  return false;
-//
-//}    
-//
-//void
-//MPAFDisplay::copyRegion(std::pair<CatId, ValId> tmpId, vector<pair<CatId, ValId> > catMap, string dsName) {
-//
-//
-//  bool found=false;
-//  for(size_t ii=0;ii<catMap.size();ii++) {
-//    if(catMap[ii].first.categ==tmpId.categ && 
-//       catMap[ii].first.cname==tmpId.cname && 
-//       catMap[ii].first.sname==tmpId.sname && 
-//       catMap[ii].first.useExt==false && 
-//       catMap[ii].first.redCateg==tmpId.redCateg && 
-//       catMap[ii].first.ext=="" && 
-//       catMap[ii].first.uncTag==tmpId.uncTag && 
-//       catMap[ii].first.upVar==tmpId.upVar && 
-//       
-//       checkDSS(catMap[ii].first, dsName)){
-//      found=true;
-//      break;
-//    }
-//  }//end catMap
-//
-//  if(!found){
-//    
-//
-//  }
-//
-//}

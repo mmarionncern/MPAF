@@ -271,8 +271,8 @@ Dataset::getSamples() {
   return snames;
 }
 
-Sample*
-Dataset::getSample(string sname) {
+const Sample*
+Dataset::getSample(string sname) const {
   vector<string> snames;
   for(size_t is=0;is<_samples.size();is++) {
     if(sname==_samples[is].getName()) return &(_samples[is]);
