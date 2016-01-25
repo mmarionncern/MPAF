@@ -442,9 +442,9 @@ cout << _vc->get("evt") << endl;
 
 
   // skimming
-  if(!skimSelection()) return;
-  fillSkimTree();
-  return;
+  //if(!skimSelection()) return;
+  //fillSkimTree();
+  //return;
 
 
   // base Selection
@@ -1838,7 +1838,7 @@ void FakeRatio::writeOutput(){
     paramters: none
     return: none
   */
-return;
+
   // decide if we need EWK subtraction or not (if not, jump to divideFRMaps call)
   doEwkSub();
  
@@ -1972,7 +1972,7 @@ bool FakeRatio::denominatorElectronSelection(Candidate* c, int elIdx, string bra
 
   if(!makeCut<float>( c -> pt()                                                                             , 10, ">", "electron pt", 0  , kDenEls)) return false;
   if(!makeCut( _susyMod -> elIdSel     (c, elIdx, _id[kElIdWP], SusyModule::kLoose, (_id[kElChCut]>0), false, branch), "electron id", "=", kDenEls)) return false;
-  //if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch)                                                        , "non-iso emu", "=", kDenEls)) return false;
+  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch)                                                        , "non-iso emu", "=", kDenEls)) return false;
 
   // electron cleaning 
   float dr_cache = 999.;
@@ -2010,7 +2010,7 @@ bool FakeRatio::numeratorElectronSelection(Candidate* c, int elIdx, string branc
   if(!makeCut( _susyMod -> elIdSel     (c, elIdx, _id[kElIdWP ], SusyModule::kLoose, (_id[kElChCut]>0), false, branch), "electron id ", "=", kNumEls)) return false;
   if(!makeCut( _susyMod -> elMvaSel    (elIdx, _id[kElMvaWP], branch)                                                 , "electron mva", "=", kNumEls)) return false;    
   if(!makeCut( _susyMod -> multiIsoSel (elIdx, _id[kElIsoWP], branch)                                                 , "isolation"   , "=", kNumEls)) return false; 
-  //if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch)                                                         , "electron emu", "=", kNumEls)) return false;
+  if(!makeCut( _susyMod -> elHLTEmulSel(elIdx, false, branch)                                                         , "electron emu", "=", kNumEls)) return false;
 
   // electron cleaning 
   float dr_cache = 999.;

@@ -106,8 +106,6 @@ public:
   float getWeight(int is) const {return _samples[is].getLumW(); };
   float getWeight(string sname) const;
 
-  void reweightByLumi(string sname, float lumi);
-
   string goodPath(string path);
   string goodFilePath(string path, string dir, string fileName, string subdir = "data");
 	

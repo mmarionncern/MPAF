@@ -256,8 +256,6 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
     //vector<std::pair<CatId, ValId> >::const_iterator itEnd=catMap.end();
     //for(it=catMap.begin();it!=itEnd;++it) {
 
-    //   //cout << it->first.redCateg << ", " << it->first.cname << ", " << it->first.sname << " (" << it->first.ext << ") " << endl;
-
     //   n++;
     //   dss=anConf.findDSS( catMap[ic].first.sname );
     //   for(unsigned int i=0;i<dss.size();i++) {
@@ -278,8 +276,6 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
     //  
     //   bool found=false;
     //   for(size_t ii=0;ii<catMap.size();ii++) {
-//fo//r(unsigned int dsssiii = 0; dsssiii < catMap[ii].first.targetDSS.size(); ++dsssiii) 
-//  //cout << "catID = " << catMap[ii].first.targetDSS[dsssiii]->getName() << "  .  " << catMap[ii].first.targetDSS[dsssiii] << endl;
     // 	if(catMap[ii].first.categ==tmpId.categ && 
     // 	   catMap[ii].first.cname==tmpId.cname && 
     // 	   catMap[ii].first.sname==tmpId.sname && 
@@ -325,8 +321,6 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 			catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
 	}
 	else if(catMap[ic].first.ext==cr && cr!="") { // continue;
-//if(dss[i] -> getName() == "fake" && catMap[ic].first.uncTag == "EWKFR")
-//cout << "storing numbers from " << catMap[ic].first.categ << " for " << dss[i] -> getName() << ":" << catMap[ic].first.sname << " -> " << catMap[ic].first.uncTag << " (" << catMap[ic].second.yield << endl;
 	  storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
 			catMap[ic].second.gen, icat,
 			catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
@@ -367,7 +361,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 
 
 void
-MPAFDisplay::storeStatNums(Dataset* ds, float yield, float eyield, int gen,
+MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen,
 			   int icat, string cname, string sname, string categ,
 			   string uncTag, int upVar, string ext, bool skipNominal) {
   
@@ -380,11 +374,10 @@ MPAFDisplay::storeStatNums(Dataset* ds, float yield, float eyield, int gen,
   }
 
 
-  ds->reweightByLumi(sname, anConf.getLumi());
   float w =ds->getWeight(sname);
 
-  //if(!ds->isPPcolDataset()) w *= anConf.getLumi(); 
-  //if(ds->getSample(sname)->isDD()) w/=anConf.getLumi();
+  if(!ds->isPPcolDataset()) w *= anConf.getLumi(); 
+  if(ds->getSample(sname)->isDD()) w/=anConf.getLumi();
 
   yield *=w;
   eyield *=w;

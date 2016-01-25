@@ -293,14 +293,14 @@ SSDL2015::initialize(){
   
   _dbm->loadDb("jes","JESUncer25nsV5_MC.db");
 
-   //addManualSystSource("EWKFR",SystUtils::kNone);
-   ////addManualSystSource("Eff",SystUtils::kNone);
-   ////addManualSystSource("Theory",SystUtils::kNone);
-   //addManualSystSource("JES",SystUtils::kNone);
-   //addManualSystSource("BTAG",SystUtils::kNone);
-   //addManualSystSource("BTAGFS",SystUtils::kNone);
-   //addManualSystSource("LepEffFS",SystUtils::kNone);
-   //addManualSystSource("ISR",SystUtils::kNone);
+   addManualSystSource("EWKFR",SystUtils::kNone);
+   //addManualSystSource("Eff",SystUtils::kNone);
+   //addManualSystSource("Theory",SystUtils::kNone);
+   addManualSystSource("JES",SystUtils::kNone);
+   addManualSystSource("BTAG",SystUtils::kNone);
+   addManualSystSource("BTAGFS",SystUtils::kNone);
+   addManualSystSource("LepEffFS",SystUtils::kNone);
+   addManualSystSource("ISR",SystUtils::kNone);
 
   //FR databases
   if(_FR=="FO2C") {
@@ -695,7 +695,7 @@ SSDL2015::advancedSelection(int WF) {
   // int nbjet = _nBJets;
   // double met = _met->pt();
   // double HT = _HT;
-  // int sr = getCurrentWorkflow()-offset; //((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset):(0));
+  // int sr = ((getCurrentWorkflow()<kBR00H_Fake)?(getCurrentWorkflow()-offset):(0));
 
   // if(getCurrentWorkflow()==kBR00H_Fake || getCurrentWorkflow()==kBR10H_Fake || getCurrentWorkflow()==kBR20H_Fake || getCurrentWorkflow()==kBR30H_Fake) sr=0;
  
