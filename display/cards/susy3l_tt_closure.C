@@ -7,23 +7,26 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="ttbar_closure_MuEL_qcd_Powheg_oldPU"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="ttbar_closure_MuEL_qcd_Powheg_oldPU"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="ttbar_closure_MuEl_qcd_Powheg_newPU"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="ttbar_closure_MuEl_qcd_Powheg_newPU"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
-    bool mcOnly = true;
+    bool mcOnly = false;
   
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    //string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    string obs = "njets";    
+   
     string sigs = "none"; 
     bool data = false;
+    bool manual = false;
     string region = "OffZBaseline";
 
+    if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
+    else{string obs = "njets";}
+ 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
     //int binning=1;
@@ -106,7 +109,7 @@ void susy3l_tt_closure() {
         //bool logYScale=true;
     }
     if(obs == "srs"){
-        md.dp.setObservables("SRS" + region);
+        md.dp.setObservables("SRS");
         int binning=1;
         double rangeX[2]={1,16};
         //bool logYScale=true;
@@ -293,6 +296,6 @@ void susy3l_tt_closure() {
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
-    //gROOT->ProcessLine(".q");
+    if(!manual) gROOT->ProcessLine(".q");
  
 }

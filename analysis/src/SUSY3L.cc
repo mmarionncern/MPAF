@@ -357,11 +357,11 @@ void SUSY3L::modifyWeight() {
     
     if(_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
-	    string db="puWeights";
-	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpXS";}
-	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpDown";}
-	    _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
-        //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+	    //string db="puWeights";
+	    //if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpXS";}
+	    //if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpDown";}
+	    //_weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
+        _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
     }
 
 }
@@ -549,7 +549,7 @@ void SUSY3L::defineOutput(){
     */
     
     //SR yields
-    _hm->addVariable("SRS",30,1,31,"SR ");
+    _hm->addVariable("SRS",15,1,16,"SR");
     
     if(!_doPlots) return; 
 
@@ -1359,21 +1359,6 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
-
-    setWorkflow(WF);
-    
-    counter("baseline on and off-Z");
-
-    //print out event info
-    /* 
-    if(WF==kGlobal){
-    //printout for sync     
-    long int run = _vc->get("run");
-    long int lumi = _vc->get("lumi");
-    long int evt = _vc->get("evt");
-    cout << run << " " << lumi << " " << evt << endl;
-    }
-    */
     fillHistos();
 
     setWorkflow(WF);
@@ -1390,16 +1375,27 @@ void SUSY3L::advancedSelection(int WF){
     cout << run << " " << lumi << " " << evt << endl;
     }
     */
+
     fillHistos();
 
     //categorize events into signal regions
     if(_categorization){
         categorize();
+        
         int wf = getCurrentWorkflow();
+        int offset = 0;
+        if(!_isFake){
+            if(_isOnZ){setWorkflow(kOnZBaseline);}
+            else{setWorkflow(kOffZBaseline); offset = kOnZSR015;}
+        }    
+        if(_isFake){
+            if(_isOnZ){setWorkflow(kOnZBaseline_Fake); offset = kOffZSR015;}
+            else{setWorkflow(kOffZBaseline_Fake); offset = kOnZSR015_Fake;}
+        }
 
-        setWorkflow( ((offset==kOffZSR015)?kGlobal_Fake:0) );
-	    fill( "SRS", wf , _weight );
-        setWorkflow(wf+offset);
+        fill( "SRS", wf-offset , _weight );
+        
+        setWorkflow(wf);
         if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
         fillHistos();
@@ -1687,10 +1683,14 @@ void SUSY3L::categorize(){
         parameters: none
         return: none
     */
-  
-    int offset=(_isOnZ)?1:(1+kOnZSR015);
+    int offset = 0;
+    if(!_isFake && _isOnZ) offset =1;
+    else if(!_isFake && !_isOnZ) offset =1+kOnZSR015;
+    else if(_isFake && _isOnZ) offset =1+kOffZSR015;
+    else if(_isFake && !_isOnZ) offset =1+ kOnZSR015_Fake;
+    
     string categ="";
-    for(size_t ic=0;ic< (_categs.size()-2)/2;ic++){
+    for(size_t ic=0;ic< (_categs.size()-6)/2;ic++){
         _SR = _categs[ic];
 		if(testRegion() ) {setWorkflow(ic+offset); return;}
     }
