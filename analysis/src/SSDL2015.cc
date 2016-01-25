@@ -2553,9 +2553,9 @@ SSDL2015::checkMassBenchmark() {
     float zb = _hScanWeight->GetZaxis()->FindBin(1);
   
     _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
-    // cout<<M1<<"/"<<M2<<" -> "<<xb<<"/"<<yb<<"/"<<zb<<" --> "
     // 	<<_hScanWeight->GetBinContent(xb,yb,zb)<<"   "
     // 	<<_dbm->getDBValue("T1tttXsect",M1)<<"  "<<_dbm->getDBValue("T1tttXsect",M1)*2110/_nProcEvtScan<<"  "<<_weight<<endl;
+//cout << "taking from bin " << xb << "." << yb << endl;
   }
 
   if(_sampleName.find(s)==string::npos) return false;
