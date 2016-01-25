@@ -399,8 +399,6 @@ void FakeRatio::loadLeptonId(){
 //____________________________________________________________________________
 void FakeRatio::run(){
 
-cout << _vc->get("evt") << endl;
-
   _TR_lines.clear();
   _exts    .clear();
   _trws    .clear();

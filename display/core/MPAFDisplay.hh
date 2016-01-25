@@ -158,8 +158,6 @@ public:
   void makeMultiDataCard(string sigName, vector<string> categs, 
 			 string cname, string cardname);
 
-  bool checkDSS(CatId id1, CatId id2);
-
   ClassDef(MPAFDisplay,0)
 
 };
