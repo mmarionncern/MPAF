@@ -1359,6 +1359,21 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
+
+    setWorkflow(WF);
+    
+    counter("baseline on and off-Z");
+
+    //print out event info
+    /* 
+    if(WF==kGlobal){
+    //printout for sync     
+    long int run = _vc->get("run");
+    long int lumi = _vc->get("lumi");
+    long int evt = _vc->get("evt");
+    cout << run << " " << lumi << " " << evt << endl;
+    }
+    */
     fillHistos();
 
     setWorkflow(WF);
@@ -1384,7 +1399,6 @@ void SUSY3L::advancedSelection(int WF){
 
         setWorkflow( ((offset==kOffZSR015)?kGlobal_Fake:0) );
 	    fill( "SRS", wf , _weight );
-
         setWorkflow(wf+offset);
         if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
@@ -1691,7 +1705,7 @@ bool SUSY3L::testRegion(){
         categroizes events into signal regions defined in setSignalRegion()
         parameters: none
         return: none
-    */
+*/
 
     bool passSel=true;
 
@@ -1805,7 +1819,7 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     }
     if(clistPtCorr.size()>3){_flavor=4;}
     else{_flavor=_fMus;}
-    
+   
     //prepare all the combinations
     CandList tmpList(3,nullptr);
     for(size_t i1=0;i1<clistPtCorr.size();i1++) {

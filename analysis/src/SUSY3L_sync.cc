@@ -1363,7 +1363,6 @@ void SUSY3L_sync::advancedSelection(int WF){
     setWorkflow(WF);
     
     counter("baseline on and off-Z");
-
     fillHistos();
 
     //categorize events into signal regions
@@ -1373,7 +1372,6 @@ void SUSY3L_sync::advancedSelection(int WF){
 
         setWorkflow( ((offset==kOffZSR015)?kGlobal_Fake:0) );
 	    fill( "SRS", wf , _weight );
-        
         setWorkflow(wf+offset);
         if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
@@ -2180,7 +2178,6 @@ bool SUSY3L_sync::passHLTbit(){
 
 }
 
-
 //____________________________________________________________________________
 void SUSY3L_sync::readCSCevents(){
     /*
@@ -2194,7 +2191,6 @@ void SUSY3L_sync::readCSCevents(){
                      (string) getenv("MPAF") + "/workdir/database/eventlist_MuonEG_csc2015.txt"    };
     vector<string> f = Tools::toVector(files);
     readFilteredEvents(_filteredCSCEvents, f);
-
 }
 
 //____________________________________________________________________________
