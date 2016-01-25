@@ -1750,6 +1750,9 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     bool passZsel=false;
     int fakeRank = -1;
+  
+    //reject signal events (can make it up to here if they don't have other Z state which is tested in this iteration
+    if(tightLeps.size()>=3){return vclist;}
    
     //require certain number of fakable leptons
     if((_exactlyThreeLep && clist.size()!=3)||(!_exactlyThreeLep && clist.size()<3)){return vclist;}
