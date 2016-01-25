@@ -252,7 +252,7 @@ void SUSY3L::initialize(){
         "OnZBaseline_Fake", "OffZBaseline_Fake",
     
     //other
-        "Fake", 
+        "_Fake", 
         "WZCR"
     };
 
@@ -265,7 +265,7 @@ void SUSY3L::initialize(){
     }
 
     //workflows
-    addWorkflow( kGlobal_Fake, "Fake" );
+    addWorkflow( kGlobal_Fake, "_Fake" );
     addWorkflow( kWZCR, "WZCR");        
 
     //config file input variables
@@ -361,6 +361,7 @@ void SUSY3L::modifyWeight() {
 	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpXS";}
 	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpDown";}
 	    _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
+        //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
     }
 
 }
@@ -428,7 +429,7 @@ void SUSY3L::run(){
     // if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
     //   _weight *= 1.028284;
 
-/*
+
     //btag-scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
@@ -448,7 +449,7 @@ void SUSY3L::run(){
     }
         
     counter("btag SF");
-*/
+
     //ISR variation for fastsim
     if(_fastSim){
         if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
@@ -553,21 +554,24 @@ void SUSY3L::defineOutput(){
     if(!_doPlots) return; 
 
     //event based observables
-    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                      );
-    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_{T} [GeV]"              );
-    _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
-    _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
+    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                                           );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_{T} [GeV]"                                   );
+    _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "N_{b-jet}"                                             );
+    _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "N_{jet}"                                               ); 
 
-    //other important observables
-    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} of leading lepton [GeV]"        );
-    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} of 2nd lepton [GeV]"            );
-    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} of 3rd lepton [GeV]"            );
-    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]");
+    //other observables
+    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} leading lepton [GeV]"                );
+    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} sub-leading lepton [GeV]"            );
+    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} 3rd lepton [GeV]"                    );
+    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]"              );
+    _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
+    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
+    _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
 
     //on-Z only observables 
-    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                       );
-    _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"            );
-    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} [GeV]"              );
+    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                               );
+    _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"                    );
+    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} [GeV]"                   );
 
     //auxiliary for fake estimartion
     _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "fake event type"                                   );
@@ -618,10 +622,6 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("3rd_lepton_flavor",  40,      -20,   20.0,    "3rd lepton pdgId"                  );
     _hm->addVariable("3rd_lepton_pt"    ,  200,       0,  200.0,    "3rd lepton pt"                     );
     _hm->addVariable("deltaR_elmu"      ,  500,     0.0,   10.0,    "delta R between el and mu"         );
-    _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "electron multiplicity"             );
-    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "muon multiplicity"                 );
-    _hm->addVariable("tau_multiplicity" ,  10,      0.0,   10.0,    "tau multiplicity"                  );
-    _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "lepton multiplicity"               );
     _hm->addVariable("muon_SIP3d"       ,   50,     0.0,    5.0,    "muon SIP3d"                        );
     _hm->addVariable("muon_dxy"         ,  200,     0.0,    0.2,    "muon dxy [cm]"                     );
     _hm->addVariable("muon_dz"          ,  200,     0.0,    0.2,    "muon dz [cm]"                      );
@@ -1359,6 +1359,7 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
+    fillHistos();
 
     setWorkflow(WF);
     
@@ -1793,14 +1794,14 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     if(!passZsel) return vclist;
 
-    int nEls = 0;
-    int nMus = 0;
+    _fEls = 0;
+    _fMus = 0;
     for(size_t i=0;i<clistPtCorr.size();i++) {
-        if(std::abs(clistPtCorr[i]->pdgId())==13){nMus+=1;}
-        if(std::abs(clistPtCorr[i]->pdgId())==11){nEls+=1;}
+        if(std::abs(clistPtCorr[i]->pdgId())==13){_fMus+=1;}
+        if(std::abs(clistPtCorr[i]->pdgId())==11){_fEls+=1;}
     }
     if(clistPtCorr.size()>3){_flavor=4;}
-    else{_flavor=nMus;}
+    else{_flavor=_fMus;}
     
     //prepare all the combinations
     CandList tmpList(3,nullptr);
@@ -2001,6 +2002,16 @@ void SUSY3L::fillHistos(){
     //other observables
     _lowOSSFMll = lowestOssfMll(_tightLepsPtCutMllCut);
     fill("lowestOssfMll"    , _lowOSSFMll   , _weight);
+    if(!_isFake){
+        fill("mu_multiplicity"  , _nMus         , _weight);
+        fill("el_multiplicity"  , _nEls         , _weight);
+        fill("lep_multiplicity" , _nMus+_nEls   , _weight);
+    }
+    if(_isFake){
+        fill("mu_multiplicity"  , _fMus         , _weight);
+        fill("el_multiplicity"  , _fEls         , _weight);
+        fill("lep_multiplicity" , _fMus+_fEls   , _weight);
+    }
 
     //on-Z observables
     fill("MT"       , _MT                   , _weight);

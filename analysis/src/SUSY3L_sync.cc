@@ -67,10 +67,10 @@ void SUSY3L_sync::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
     //tri-lepton trigger
-    //_vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
     
     loadScanHistogram();
 
@@ -494,8 +494,8 @@ void SUSY3L_sync::run(){
     }
    
     //select events for WZ control region
-    bool wzSel = wzCRSelection();
-    if(wzSel){return;}	
+    //bool wzSel = wzCRSelection();
+    //if(wzSel){return;}	
     
     setWorkflow(kGlobal);	
     
@@ -811,7 +811,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-        if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;   //TODO: uncomment
         //count muons and electrons
         if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
         if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
@@ -1350,13 +1350,13 @@ void SUSY3L_sync::advancedSelection(int WF){
     }
 
     //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
+//    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
     //require minimum number of b-tagged jets
-    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
+//    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
     //require minimum hadronic activity (sum of jet pT's)
-    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
+//    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
+//    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
 
@@ -1364,16 +1364,6 @@ void SUSY3L_sync::advancedSelection(int WF){
     
     counter("baseline on and off-Z");
 
-    //print out event info
-    /* 
-    if(WF==kGlobal){
-    //printout for sync     
-    long int run = _vc->get("run");
-    long int lumi = _vc->get("lumi");
-    long int evt = _vc->get("evt");
-    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
-	}
-	*/
     fillHistos();
 
     //categorize events into signal regions
@@ -1391,6 +1381,14 @@ void SUSY3L_sync::advancedSelection(int WF){
     }
     counter("selected");
 
+    //print out event info
+    if(WF==kGlobal){
+    //printout for sync     
+    long int run = _vc->get("run");
+    long int lumi = _vc->get("lumi");
+    long int evt = _vc->get("evt");
+    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
+	}
 }
 
 //____________________________________________________________________________
