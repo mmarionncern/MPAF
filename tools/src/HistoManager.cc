@@ -429,7 +429,7 @@ void HistoManager::copyHisto(string var, int ds, TH1* htmp ) {
   //uncertainties
   string uVar = var;
   bool isUnc = uVar.find("Unc")!=(size_t)-1;// ds==-10;
-
+  
   //protection against unc. variations in data
   if( isUnc && (_dsNames[ds]=="data" || _dsNames[ds]=="Data") )
     return;

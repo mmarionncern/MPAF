@@ -668,7 +668,7 @@ DisplayClass::drawDistribution() {
     bool f=true;
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
-      cout<<nh<<endl;
+      
       if( !_sSignal && nh.find("sig")!=(size_t)-1) 
         sigs.push_back(i);
       else {
@@ -2467,8 +2467,6 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
 	  _uncNames[iv] = (*itS).first;
 	}
 
-	// if(ib==1)
-	//   cout<<"  "<<(*itS).first<<"  "<<_hMC->GetBinContent(ib)<<"  "<<sU<<"  "<<sD<<" // "<<systU[iv]<<"  "<<systD[iv]<<endl;
       }
       
       if(_uncDet) nu++;

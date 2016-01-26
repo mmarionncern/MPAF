@@ -168,18 +168,15 @@ void MPAF::analyze(){
 	  //update the workflow
 	  _curWF = -100;
 	  _weight = _wBack;
-	  modifyWeight();
-	  if(iu==0) _vc->nextEvent();
-	  else _vc->sameEvent();
 	  _uncId = true;
 	  _unc = _uncSrcs[iu];
 	  _uDir = _uncDirs[iu];
-	  string dir = (_uDir==SystUtils::kUp)?"Up":"Do";
-	  //very ugly...
-	  // _curWF = _au->getUncWorkflow("Unc"+_unc+dir);
-	  //_offsetWF=_au->getUncWorkflow("Unc"+_unc+dir);
 	  _au->setCurrentWorkflow(_curWF);
 	  _au->setUncSrc(_unc, _uDir );
+	  
+	  modifyWeight();
+	  if(iu==0) _vc->nextEvent();
+	  else _vc->sameEvent();
 	  applySystVar( _vc->_su->getSystInfos(_unc, _uDir) );
 	  run();
 	  _vc->backPortAllVars();
@@ -466,13 +463,15 @@ void MPAF::fill(string var, float valx, float weight) {
       }
       
     }
-    else {
-      if(_uDir==SystUtils::kUp)
-	_hm->fill( var, _inds, _unc, valx, weight,"Up");
-      //fillUnc(var,_unc,valx,weight,"Up");
-      if(_uDir==SystUtils::kDown)
-	_hm->fill( var, _inds, _unc, valx, weight,"Do");
-      //fillUnc(var,_unc,valx,weight,"Do");
+    else { //uncertianties
+      string uvar=(_uDir==SystUtils::kUp)?("Up"):("Do");
+      if(_curWF!=-100) { //single workflow
+	_hm->fill( var+_wfNames[_curWF], _inds, _unc, valx, weight,uvar);
+      } else {
+	for(_itWF=_wfNames.begin(); _itWF!=_wfNames.end(); ++_itWF) {
+	  _hm->fill( var+_itWF->second, _inds, _unc, valx, weight,uvar);
+	}
+      }
     }
   }
   else {  //for local HISTOS
