@@ -252,7 +252,7 @@ void SUSY3L_sync::initialize(){
         "OnZBaseline_Fake", "OffZBaseline_Fake",
     
     //other
-        "Fake", 
+        "_Fake", 
         "WZCR"
     };
 
@@ -265,7 +265,7 @@ void SUSY3L_sync::initialize(){
     }
 
     //workflows
-    addWorkflow( kGlobal_Fake, "Fake" );
+    addWorkflow( kGlobal_Fake, "_Fake" );
     addWorkflow( kWZCR, "WZCR");        
 
     //config file input variables
@@ -361,6 +361,7 @@ void SUSY3L_sync::modifyWeight() {
 	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpXS";}
 	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpDown";}
 	    _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
+        //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
     }
 
 }
@@ -373,6 +374,9 @@ void SUSY3L_sync::run(){
     if(_vc->get("isData") == 1){
         if(_vc->get("run")>258750){return;}
     }
+
+    _lumi = 629;
+    _evt = 1126708841;
 
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -391,6 +395,26 @@ void SUSY3L_sync::run(){
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+        cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;
+        cout << "tight leps: " << endl;
+        for(size_t il=0;il<_tightLepsPtCut.size();il++) {
+            cout << "pt: " << _tightLepsPtCut[il]->pt() << "pdgId: " << _tightLepsPtCut[il]->pdgId() << endl;
+        }
+        cout << "fakable leps: " << endl;
+        for(size_t il=0;il<_fakableNotTightLepsPtCut.size();il++) {
+            cout << "pt: " << _fakableNotTightLepsPtCut[il]->pt() << "pdgId: " << _fakableNotTightLepsPtCut[il]->pdgId() << endl;
+        }
+        cout << "loose leps: " << endl;
+        for(size_t il=0;il<_looseLepsPtCut.size();il++) {
+            cout << "pt: " << _looseLepsPtCut[il]->pt() << "pdgId: " << _looseLepsPtCut[il]->pdgId() << endl;
+            cout << "miniIso: " << _vc->get("LepGood_miniRelIso", _looseLepsPtCutIdx[il]) << endl;
+            cout << "ptRatio: " << _vc->get("LepGood_jetPtRatiov2", _looseLepsPtCutIdx[il]) << endl;
+            cout << "ptRel  : " << _vc->get("LepGood_jetPtRelv2", _looseLepsPtCutIdx[il]) << endl;
+        }
+    }
+    }
+
 
     //event reweighting
     //theory uncertainty for ttW and ttZ
@@ -494,8 +518,8 @@ void SUSY3L_sync::run(){
     }
    
     //select events for WZ control region
-    bool wzSel = wzCRSelection();
-    if(wzSel){return;}	
+    //bool wzSel = wzCRSelection();
+    //if(wzSel){return;}	
     
     setWorkflow(kGlobal);	
     
@@ -504,6 +528,10 @@ void SUSY3L_sync::run(){
     bool baseSel = multiLepSelection();
 
     if(!baseSel){return;}
+
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+        cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;}}
+
 
     //fillSkimTree();
 
@@ -548,26 +576,29 @@ void SUSY3L_sync::defineOutput(){
     */
     
     //SR yields
-    _hm->addVariable("SRS",30,1,31,"SR ");
+    _hm->addVariable("SRS",15,1,16,"SR");
     
     if(!_doPlots) return; 
 
     //event based observables
-    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                      );
-    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_{T} [GeV]"              );
-    _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "b-jet multiplicity"             );
-    _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "jet multiplicity"               ); 
+    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                                           );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_{T} [GeV]"                                   );
+    _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "N_{b-jet}"                                             );
+    _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "N_{jet}"                                               ); 
 
-    //other important observables
-    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} of leading lepton [GeV]"        );
-    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} of 2nd lepton [GeV]"            );
-    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} of 3rd lepton [GeV]"            );
-    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]");
+    //other observables
+    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} leading lepton [GeV]"                );
+    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} sub-leading lepton [GeV]"            );
+    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} 3rd lepton [GeV]"                    );
+    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]"              );
+    _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
+    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
+    _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
 
     //on-Z only observables 
-    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                       );
-    _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"            );
-    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} [GeV]"              );
+    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                               );
+    _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"                    );
+    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} [GeV]"                   );
 
     //auxiliary for fake estimartion
     _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "fake event type"                                   );
@@ -618,10 +649,6 @@ void SUSY3L_sync::defineOutput(){
     _hm->addVariable("3rd_lepton_flavor",  40,      -20,   20.0,    "3rd lepton pdgId"                  );
     _hm->addVariable("3rd_lepton_pt"    ,  200,       0,  200.0,    "3rd lepton pt"                     );
     _hm->addVariable("deltaR_elmu"      ,  500,     0.0,   10.0,    "delta R between el and mu"         );
-    _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "electron multiplicity"             );
-    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "muon multiplicity"                 );
-    _hm->addVariable("tau_multiplicity" ,  10,      0.0,   10.0,    "tau multiplicity"                  );
-    _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "lepton multiplicity"               );
     _hm->addVariable("muon_SIP3d"       ,   50,     0.0,    5.0,    "muon SIP3d"                        );
     _hm->addVariable("muon_dxy"         ,  200,     0.0,    0.2,    "muon dxy [cm]"                     );
     _hm->addVariable("muon_dz"          ,  200,     0.0,    0.2,    "muon dz [cm]"                      );
@@ -811,8 +838,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-		//no low mll cut in sync
-        //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;   //TODO: uncomment
         //count muons and electrons
         if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
         if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
@@ -1009,10 +1035,10 @@ void SUSY3L_sync::setBaselineRegion(){
         _nHardLeptons                 = 1           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
-        setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
+        setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
-        setCut("HT"                 ,    0, ">=")  ;     //sum of jet pT's
-        setCut("MET"                ,   40, ">=")  ;     //missing transverse energy
+        setCut("HT"                 ,   60, ">=")  ;     //sum of jet pT's
+        setCut("MET"                ,   50, ">=")  ;     //missing transverse energy
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
         _bjetThreshold                = 30.         ;     //bjet threshold
@@ -1351,15 +1377,16 @@ void SUSY3L_sync::advancedSelection(int WF){
     }
 
     //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
+    //if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
     //require minimum number of b-tagged jets
-    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
+    //if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
     //require minimum hadronic activity (sum of jet pT's)
-    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
+    //if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
+    //if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
+    fillHistos();
 
     setWorkflow(WF);
     
@@ -1372,20 +1399,30 @@ void SUSY3L_sync::advancedSelection(int WF){
     long int run = _vc->get("run");
     long int lumi = _vc->get("lumi");
     long int evt = _vc->get("evt");
-    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << endl;
-	}
-	*/
+    cout << run << " " << lumi << " " << evt << endl;
+    }
+    */
+
     fillHistos();
 
     //categorize events into signal regions
     if(_categorization){
         categorize();
+        
         int wf = getCurrentWorkflow();
+        int offset = 0;
+        if(!_isFake){
+            if(_isOnZ){setWorkflow(kOnZBaseline);}
+            else{setWorkflow(kOffZBaseline); offset = kOnZSR015;}
+        }    
+        if(_isFake){
+            if(_isOnZ){setWorkflow(kOnZBaseline_Fake); offset = kOffZSR015;}
+            else{setWorkflow(kOffZBaseline_Fake); offset = kOnZSR015_Fake;}
+        }
 
-        setWorkflow( ((offset==kOffZSR015)?kGlobal_Fake:0) );
-	    fill( "SRS", wf , _weight );
-	
-        setWorkflow(wf+offset);
+        fill( "SRS", wf-offset , _weight );
+        
+        setWorkflow(wf);
         if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
         fillHistos();
@@ -1673,10 +1710,14 @@ void SUSY3L_sync::categorize(){
         parameters: none
         return: none
     */
-  
-    int offset=(_isOnZ)?1:(1+kOnZSR015);
+    int offset = 0;
+    if(!_isFake && _isOnZ) offset =1;
+    else if(!_isFake && !_isOnZ) offset =1+kOnZSR015;
+    else if(_isFake && _isOnZ) offset =1+kOffZSR015;
+    else if(_isFake && !_isOnZ) offset =1+ kOnZSR015_Fake;
+    
     string categ="";
-    for(size_t ic=0;ic< (_categs.size()-2)/2;ic++){
+    for(size_t ic=0;ic< (_categs.size()-6)/2;ic++){
         _SR = _categs[ic];
 		if(testRegion() ) {setWorkflow(ic+offset); return;}
     }
@@ -1750,6 +1791,9 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
 
     bool passZsel=false;
     int fakeRank = -1;
+  
+    //reject signal events (can make it up to here if they don't have other Z state which is tested in this iteration
+    if(tightLeps.size()>=3){return vclist;}
    
     //require certain number of fakable leptons
     if((_exactlyThreeLep && clist.size()!=3)||(!_exactlyThreeLep && clist.size()<3)){return vclist;}
@@ -1794,15 +1838,15 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
 
     if(!passZsel) return vclist;
 
-    int nEls = 0;
-    int nMus = 0;
+    _fEls = 0;
+    _fMus = 0;
     for(size_t i=0;i<clistPtCorr.size();i++) {
-        if(std::abs(clistPtCorr[i]->pdgId())==13){nMus+=1;}
-        if(std::abs(clistPtCorr[i]->pdgId())==11){nEls+=1;}
+        if(std::abs(clistPtCorr[i]->pdgId())==13){_fMus+=1;}
+        if(std::abs(clistPtCorr[i]->pdgId())==11){_fEls+=1;}
     }
     if(clistPtCorr.size()>3){_flavor=4;}
-    else{_flavor=nMus;}
-    
+    else{_flavor=_fMus;}
+   
     //prepare all the combinations
     CandList tmpList(3,nullptr);
     for(size_t i1=0;i1<clistPtCorr.size();i1++) {
@@ -2002,6 +2046,16 @@ void SUSY3L_sync::fillHistos(){
     //other observables
     _lowOSSFMll = lowestOssfMll(_tightLepsPtCutMllCut);
     fill("lowestOssfMll"    , _lowOSSFMll   , _weight);
+    if(!_isFake){
+        fill("mu_multiplicity"  , _nMus         , _weight);
+        fill("el_multiplicity"  , _nEls         , _weight);
+        fill("lep_multiplicity" , _nMus+_nEls   , _weight);
+    }
+    if(_isFake){
+        fill("mu_multiplicity"  , _fMus         , _weight);
+        fill("el_multiplicity"  , _fEls         , _weight);
+        fill("lep_multiplicity" , _fMus+_fEls   , _weight);
+    }
 
     //on-Z observables
     fill("MT"       , _MT                   , _weight);
@@ -2182,7 +2236,6 @@ bool SUSY3L_sync::passHLTbit(){
     return false;
 
 }
-
 
 //____________________________________________________________________________
 void SUSY3L_sync::readCSCevents(){

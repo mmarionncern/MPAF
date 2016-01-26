@@ -1,54 +1,38 @@
+MPAFDisplay md;
 
-{
-
-
-    if(Recompute) {
-        MPAFDisplay md;
- 
-        bool * rtmp= const_cast<bool*> pr;
-        *rtmp = false;
-
-    }
-    else 
+void susy3l() {
     md.refresh();
+
 
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="template3L"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="template3L"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="limits_160119_2"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="limits_160119_2"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
-    bool mcOnly = false;
+    bool mcOnly = true;
   
     //if(md.isInitStatus()) {
-    md.anConf.configureNames( dir, fileName, fileList );
+    md.anConf.configureNames( dir, fileName, fileList );//, hName );
     md.anConf.configureData(false, 0, mcOnly);
     //}
-  
-    //observables **********************
-    //string obs[6]={"","","","","",""};
-    //md.dp.setObservables("Zmass");
-    //md.dp.setObservables("deltaR_elmu");
-    md.dp.setObservables("BR_NJets");
-    //md.dp.setObservables("BR_NBJets");
-    //md.dp.setObservables("BR_HT");
-    //md.dp.setObservables("BR_MET");
-    //md.dp.setObservables("SR_NJets");
-    //md.dp.setObservables("SR_NBJets");
-    //md.dp.setObservables("SR_HT");
-    //md.dp.setObservables("SR_MET");
-
+ 
+    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
+    //string obs = "srs" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
+    string sigs = "t"; 
+    bool data = false;
 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
-    int binning=1;
+    //int binning=1;
     int addBinBkg=1; //BinB = binning*AddBin
     double rangeY[2]={0,0};
-    double rangeX[2]={0,7};
+    bool logYScale=true;
+    //double rangeX[2]={0,7};
     int xDiv[3]={8,6,0};
     int yDiv[3]={6,6,0}; //Nlabel /  sous-Div /ssdiv
-    bool logYScale=false;
+    bool logYScale=true;
     bool overFlowBin=true;
     bool underFlowBin=false;
     bool showDMCRatio=true;
@@ -66,6 +50,61 @@
     float st=0.039;
     string addText="";
 
+    if(obs == "njets"){
+        md.dp.setObservables("NJets");
+        int binning=1;
+        double rangeX[2]={2,9};
+        //bool logYScale=true;
+    }
+    if(obs == "nbjets"){
+        md.dp.setObservables("NBJets");
+        int binning=1;
+        double rangeX[2]={0,4};
+        //bool logYScale=true;
+    }
+    if(obs == "met"){
+        md.dp.setObservables("MET");
+        int binning=50;
+        double rangeX[2]={0,500};
+        //bool logYScale=true;
+    }
+    if(obs == "ht"){
+        md.dp.setObservables("HT");
+        int binning=60;
+        double rangeX[2]={0,1000};
+        //bool logYScale=true;
+    }
+    if(obs == "pt1"){
+        md.dp.setObservables("pt_1st_lepton");
+        int binning=10;
+        double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "pt2"){
+        md.dp.setObservables("pt_2nd_lepton");
+        int binning=10;
+        double rangeX[2]={0,150};
+        //bool logYScale=true;
+    }   
+    if(obs == "pt3"){
+        md.dp.setObservables("pt_3rd_lepton");
+        int binning=10;
+        double rangeX[2]={0,100};
+        //bool logYScale=true;
+    }
+    if(obs == "ftype"){
+        md.dp.setObservables("fake_type");
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
+    if(obs == "srs"){
+        md.dp.setObservables("SRS");
+        int binning=1;
+        double rangeX[2]={0,16};
+        bool logYScale=false;
+    }
+
     //string autoBinFile="susybinninghigh";
     //md.dp.loadAutoBinning(autoBinFile);
 
@@ -80,103 +119,118 @@
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=10000; //pb-1 19470
+    float lumi=2200; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
 
+    md.anConf.loadXSDB("XSectionsSpring15.db");
+    
     map<string,float> LumisXS;
-
-    //cross sections   
     
-    //Drell-Yan
-    //LumisXS[ "DYJetsToLL_M-50_13TeV-madgraph-pythia8"                       ] = 2829164 / (6024             );
-    LumisXS[ "DYJetsToLL_M50_HT100to200"                ] = 4054159 / ( 194.3   * 1.27  );
-    LumisXS[ "DYJetsToLL_M50_HT200to400"                ] = 4666496 / (  52.24  * 1.27  );
-    LumisXS[ "DYJetsToLL_M50_HT400to600"                ] = 4931372 / (   6.546 * 1.27  );
-    LumisXS[ "DYJetsToLL_M50_HT600toInf"                ] = 4493574 / (   2.179 * 1.27  );
-
-    //Higgs->ZZ
-    LumisXS[ "GGHZZ4L"                                  ] =  204684 / (0.01212192       );  // cross-section: 43.92*2.76E-04
-    LumisXS[ "TTH"                                      ] =  199700 / (1         * 1    );
+    md.anConf.loadKFDB("kFactorsSpring15.db");
     
-    //signal
-    LumisXS[ "SMS_T1tttt_2J_mGl1200_mLSP800"            ] =  100322 / (0.0856418 * 20.  );
-    LumisXS[ "SMS_T1tttt_2J_mGl1500_mLSP100"            ] =  105679 / (0.0141903 * 20.  );
-    LumisXS[ "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"] =   52499 / (0.3254    * 20.  );
-    LumisXS[ "T5ttttDeg_mGo1300_mStop300_mCh285_mChi280"] =       0 / (1         * 1    );
-    
-    LumisXS[ "TBarToLeptons_sch"                        ] =  250000 / (1.34784          );  // 4.16*0.108*3
-    LumisXS[ "TBarToLeptons_tch"                        ] = 1999800 / (26.23428         );  // 80.97*0.108*3
-    LumisXS[ "TBar_tWch"                                ] =  971800 / (35.6             ); 
-    LumisXS[ "TTJets"                                   ] =25446993 / (809.1            );
-    LumisXS[ "TToLeptons_sch"                           ] =  500000 / (2.3328           );  // 7.20*0.108*3
-    LumisXS[ "TToLeptons_tch"                           ] = 3991000 / (44.0802          );  // 136.05*0.108*3
-    LumisXS[ "T_tWch"                                   ] =  986100 / (35.6             );  // 35.6
-   
-    //TTV 
-    LumisXS[ "TTWJets"                                  ] =  246521 / (0.6647           );
-    LumisXS[ "TTZJets"                                  ] =  249275 / (0.8565           );
-      
-    //LumisXS[ "WJetsToLNu_13TeV-madgraph-pythia8-tauola"                    ] = 10017462 / (20508.9        ); 
-    LumisXS[ "WJetsToLNu_HT100to200"                    ] = 5262265  / (1817.0   * 1.23 );
-    LumisXS[ "WJetsToLNu_HT200to400"                    ] = 4936077  / ( 471.6   * 1.23 );
-    LumisXS[ "WJetsToLNu_HT400to600"                    ] = 4640594  / (  55.61  * 1.23 );
-    LumisXS[ "WJetsToLNu_HT600toInf"                    ] = 237484   / (  18.81  * 1.23 );
-
-    //Diboson
-    LumisXS[ "WZJetsTo3LNu"                             ] =   237484 / (2.29            );
-    LumisXS[ "ZZTo4L"                                   ] =  1958600 / (0.3231          );  // cross-section 31.8*(3*0.0336)*(3*0.0336)
-    
-
-
     //via XSect
   
     map<string,float> KFactors;
     // if( md.isInitStatus() )
     md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
 
+    
+    
+    
     //===============================================================
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
+ 
+    //rare
+    md.anConf.addSample( "GGHZZ4L"                              ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "VHToNonbb"                            ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "ZZTo4L"                               ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "WWZ"                                  ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "WZZ"                                  ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "ZZZ"                                  ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "TTTT"                                 ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "tZq_ll"                               ,  "rare"        , kMagenta-7    );
+
+    //WZ
+    md.anConf.addSample( "WZTo3LNu"                             ,  "WZ"          , kOrange       );
+
+    //X+gamma
+    md.anConf.addSample( "TGJets"                               ,  "X+#gamma"    , kViolet+2     );
+    md.anConf.addSample( "TTGJets"                              ,  "X+#gamma"    , kViolet+2     );
+    md.anConf.addSample( "WGToLNuG"                             ,  "X+#gamma"    , kViolet+2     );
+    md.anConf.addSample( "ZGTo2LG"                              ,  "X+#gamma"    , kViolet+2     );
+
+    //TTZ/H
+    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z/H" , kGreen-6      );
+    md.anConf.addSample( "TTHnobb"                              ,  "t#bar{t}Z/H" , kGreen-6      );
+    md.anConf.addSample( "TTLLJets_m1to10"                      ,  "t#bar{t}Z/H" , kGreen-6      );
     
-    md.anConf.addSample( "WZJetsTo3LNu"                     ,  "WZ+ZZ"              , kGreen    );
-    //md.anConf.addSample( "ZZTo4L"                           ,  "WZ+ZZ"              , kGreen    );
+    //TTW
+    md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );
+ 
+    //fakes
+    md.anConf.addSample( "TT_pow"                               ,  "fakes"       , 18            );
+    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "fakes"       , 18            );
+    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "fakes"       , 18            );
+//    md.anConf.addSample( "Fake:TT_pow"                             ,  "fakes predicted sig"    , kBlack      );
+    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "fakes"       , 18      );
+    md.anConf.addSample( "TBar_tWch"                            ,  "fakes"       , 18      );
+    md.anConf.addSample( "T_tWch"                               ,  "fakes"       , 18      );
+    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "fakes"       , 18      );
+    md.anConf.addSample( "TToLeptons_tch"                       ,  "fakes"       , 18      );
+//    md.anConf.addSample( "TTJets"                           ,  "fakes"       , 18      );
+    md.anConf.addSample( "WJetsToLNu"                           ,  "fakes"       , 18      );
 
-    //md.anConf.addSample( "TTZJets"                          ,  "t#bar{t}Z"          , kBlue     );
 
-    //md.anConf.addSample( "TTWJets"                          ,  "t#bar{t}W"          , kYellow   );
-  
-    //md.anConf.addSample( "GGHZZ4L"                          ,  "rare SM"            , kCyan     );
-  
-    //Drell-Yan
-    //md.anConf.addSample( "DYJetsToLL_M-50_13TeV-madgraph-pythia8"                       ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "DYJetsToLL_M50_HT100to200"        ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "DYJetsToLL_M50_HT200to400"        ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "DYJetsToLL_M50_HT400to600"        ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "DYJetsToLL_M50_HT600toInf"        ,  "non-prompt e/#mu"    , kRed      );
-  
-    //t production
-    //md.anConf.addSample( "TBarToLeptons_sch"                ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "TBarToLeptons_tch"                ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "TBar_tWch"                        ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "TTH"                            ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "TTJets"                           ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "TToLeptons_sch"                   ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "TToLeptons_tch"                   ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "T_tWch"                           ,  "non-prompt e/#mu"    , kRed      );
-  
-    //W+Jets
-    //md.anConf.addSample( "WJetsToLNu_HT100to200"            ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "WJetsToLNu_HT200to400"            ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "WJetsToLNu_HT400to600"            ,  "non-prompt e/#mu"    , kRed      );
-    //md.anConf.addSample( "WJetsToLNu_HT600toInf"            ,  "non-prompt e/#mu"    , kRed      );
-  
     //signal
-    //md.anConf.addSample( "SMS_T1tttt_2J_mGl1200_mLSP800"    ,  "T1tttt (800) * 20 sig" , kViolet-3 );
-    //md.anConf.addSample( "SMS_T1tttt_2J_mGl1500_mLSP100"  ,  "T1tttt (100) #cdot 20 sig" , kViolet+3  );
-    //md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"  ,  "T5tttt (1000) #cdot 20 sig" , kOrange-3 );
-    //md.anConf.addSample( "T5ttttDeg_mGo1300_mStop300_mCh285_mChi280"  ,  "T5tttt (1300) #cdot 20 sig" , kOrange+6 );
+    if(sigs=="t"){
+    md.anConf.addSample( "T1tttt_mGo1200_mChi800"                       ,  "T1tttt (1200) x10 sig"     , kBlue-3 );
+    md.anConf.addSample( "T1tttt_mGo1500_mChi100"                       ,  "T1tttt (1500) x10 sig"     , kBlue-3  );
+    md.anConf.addSample( "T6ttWW_mSbot600_mCh425_mChi50"                ,  "T6ttWW (600) x10 sig"     , kMagenta+2 );
+    md.anConf.addSample( "T6ttWW_mSbot650_mCh150_mChi50"                ,  "T6ttWW (650) x10 sig"     , kMagenta+2 );
+    //md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280"    ,  "T5t410 sig"     , kOrange+10  );
+    }
+    
+    if(sigs=="q"){
+    md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4WZ315 sig"  , kGreen+2  );
+    md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4WZ325 sig"  , kMagenta  );
+    md.anConf.addSample( "T5qqqqWZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4WZ12 sig"   , kRed-6  );
+    md.anConf.addSample( "T5qqqqWZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4WZ15 sig"   , kRed+3  );
+    //md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4ZZ315 sig"  , kGreen+3  );
+    //md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4ZZ325 sig"  , kMagenta+2  );
+    //md.anConf.addSample( "T5qqqqZZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4ZZ12 sig"   , kRed-9  );
+    //md.anConf.addSample( "T5qqqqZZ_mGo1500_mCh800_mChi100_dilep"        ,  "T5q4ZZ15 sig"   , kRed+1  );
+    }
+    
+    //data
+    if(data){
+    md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_256630_257599"              , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2015D_v3_runs_257600_258158"              , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2015D_v4_runs_258159_258714_excl"         , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2015D_v4_runs_258211_258750"              , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_256630_257599"            , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015D_v3_runs_257600_258158"            , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015D_v4_runs_258159_258714_excl"       , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2015D_v4_runs_258211_258750"            , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015D_v3_runs_256630_257599"                , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015D_v3_runs_257600_258158"                , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015D_v4_runs_258159_258714_excl"           , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2015D_v4_runs_258211_258750"                , "data"          , kBlack    );
+    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_256630_257599"        , "data"          , kBlack    );
+    md.anConf.addSample( "SingleElectron_Run2015D_v3_runs_257600_258158"        , "data"          , kBlack    );
+    md.anConf.addSample( "SingleElectron_Run2015D_v4_runs_258159_258714_excl"   , "data"          , kBlack    );
+    md.anConf.addSample( "SingleElectron_Run2015D_v4_runs_258211_258750"        , "data"          , kBlack    );
+    md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_256630_257599"            , "data"          , kBlack    );
+    md.anConf.addSample( "SingleMuon_Run2015D_v3_runs_257600_258158"            , "data"          , kBlack    );
+    md.anConf.addSample( "SingleMuon_Run2015D_v4_runs_258159_258714_excl"       , "data"          , kBlack    );
+    md.anConf.addSample( "SingleMuon_Run2015D_v4_runs_258211_258750"            , "data"          , kBlack    );
+    }
+
+
+//    md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280_skim"  ,  "T5tttt (1000) * 20 sig" , kOrange-3 );
+  //md.anConf.addSample( "T5ttttDeg_mGo1300_mStop300_mCh285_mChi280_skim"  ,  "T5tttt (1300) #cdot 20 sig" , kOrange+6 );
     // }
     //===============================================================
 
@@ -197,12 +251,13 @@
 			 yDiv, binning, addBinBkg, overFlowBin,
 			 underFlowBin, showDMCRatio, showGrid, 
 			 stacking, addSystematics, mcStatSyst,
-			 markerSize, lineWidth,summedSignal, 
-			 mcOnly,cmsPrel, uncDet);
+			 markerSize, lineWidth,summedSignal,
+             mcOnly,cmsPrel, uncDet);
     md.prepareDisplay();
     md.doPlot();
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
-
+    gROOT->ProcessLine(".q");
+ 
 }

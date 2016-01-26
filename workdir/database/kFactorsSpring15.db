@@ -30,8 +30,8 @@ T6ttWW_mSbot600_mCh425_mChi50			        1
 T6ttWW_mSbot650_mCh150_mChi50			        1
 T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep    1 
 T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep    1
-T5qqqqWZ_mGo1200_mCh1000_mChi800_dilep      1
-T5qqqqWZ_mGo1500_mCh800_mChi100_dilep       1
+T5qqqqWZ_mGo1200_mCh1000_mChi800_lep      1
+T5qqqqWZ_mGo1500_mCh800_mChi100_lep       1
 T5qqqqZZDeg_mGo1000_mCh315_mChi300_dilep    1
 T5qqqqZZDeg_mGo1000_mCh325_mChi300_dilep    1
 T5qqqqZZ_mGo1200_mCh1000_mChi800_dilep      1
@@ -42,6 +42,7 @@ TT_bx50							1.00
 TTLep_NoPU						1.00
 TTJets							1.00
 TTJets_LO						1.00
+TTJets_DiLepton                 1.00
 TT_pow							1.00
 TT_pow_50ns						1.00
 TTLep_pow						1.00

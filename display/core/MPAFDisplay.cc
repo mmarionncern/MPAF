@@ -1180,6 +1180,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
   }
 
   ostringstream os;
+  ostringstream os_bkg;
   os<<setprecision(4)<<sumSig;
   yieldStr = os.str()+"\t"+yieldStr;
 

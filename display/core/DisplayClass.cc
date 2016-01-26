@@ -668,7 +668,7 @@ DisplayClass::drawDistribution() {
     bool f=true;
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
-      cout<<nh<<endl;
+      
       if( !_sSignal && nh.find("sig")!=(size_t)-1) 
         sigs.push_back(i);
       else {
@@ -741,9 +741,11 @@ DisplayClass::drawDistribution() {
 
  
   //and finally signals if some exists ===========
-  for(size_t is=0;is<sigs.size();is++)
-    _hClones[ sigs[is] ]->DrawCopy( opt.c_str() );
-
+  for(size_t is=0;is<sigs.size();is++){
+    if(is%2!=0){_hClones[ sigs[is] ]->SetLineStyle(2);}
+    //_hClones[ sigs[is] ]->DrawCopy( opt.c_str() );
+    _hClones[ sigs[is] ]->DrawCopy( "same points" );
+  }
   //===============================================
 
   //Information printing
@@ -1322,6 +1324,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     if(_normOpts.find("norm")!=_normOpts.end() || 
        _normOpts.find("uni")!=_normOpts.end() )
       ym = ymin;
+    if(ymin<=0 && _logYScale==true){ymin=0.01;ym=0.01;}  
     _empty->GetYaxis()->SetRangeUser( ym, ymax );
     if(_userYScale)
       _empty->GetYaxis()->SetRangeUser( _ymin, _ymax );
@@ -1492,7 +1495,9 @@ DisplayClass::drawDataMCRatio() {
   emptyHisto->GetYaxis()->SetTitleOffset(0.54);
   emptyHisto->GetXaxis()->SetTickLength(0.09);
   emptyHisto->GetYaxis()->SetTickLength(0.05);
-  
+ 
+  ratio->SetMarkerStyle(20); 
+  ratio->SetMarkerColor(1); 
   ratio->GetYaxis()->SetRangeUser(  0.4, 1.6);
   ratio->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   ratio->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
@@ -2462,8 +2467,6 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
 	  _uncNames[iv] = (*itS).first;
 	}
 
-	// if(ib==1)
-	//   cout<<"  "<<(*itS).first<<"  "<<_hMC->GetBinContent(ib)<<"  "<<sU<<"  "<<sD<<" // "<<systU[iv]<<"  "<<systD[iv]<<endl;
       }
       
       if(_uncDet) nu++;

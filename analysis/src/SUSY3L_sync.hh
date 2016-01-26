@@ -100,7 +100,8 @@ private:
     string _FR;
     int _fastSim;
     bool _debug;
-
+    long int _evt;
+    long int _lumi;
 
 private:
 
@@ -190,6 +191,9 @@ private:
     float _nJets;
     float _nBJets;
     float _nleps;
+    int _fEls;
+    int _fMus;
+    
     std::map<std::string,float*> _val;
 
     //list of object candidates

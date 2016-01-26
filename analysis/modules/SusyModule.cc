@@ -916,6 +916,7 @@ SusyModule::cleanJets(CandList* leptons,
 
     for(int ij=0;ij<_vc->get("n"+jType+ext);ij++) {
       if(_vc->get(jType+ext+"_id",ij)<1) continue;
+      if(std::abs(_vc->get(jType+"_eta",ij))>2.4) continue; //introduced in RA7 sync round 3
       
       // float scale=0.;
       // if(isJESVar) {
@@ -937,6 +938,46 @@ SusyModule::cleanJets(CandList* leptons,
 
   map<Candidate*, std::pair<float,Candidate*> > cmap;
   map<Candidate*, std::pair<float,Candidate*> >::const_iterator it;
+
+/*
+//BEGIN hack to clean all overlapping jets
+  for(unsigned int ij=0;ij<jets.size();ij++) {
+    bool clean = false;
+    for(unsigned int il=0;il<leptons->size();il++) {
+      float dR=leptons->at(il)->dR( jets[ij] );
+      if(dR<0.4){clean=true;}
+
+      }
+    if(clean){continue;}
+    //if(!pass) { 
+    //  lepJetsIdxs.push_back(tmpIdxs[ij]);
+    //  continue;
+    //}
+
+    if(jets[ij]->pt()<bthr) continue;
+    
+    if(jets[ij]->pt()>thr) {
+      cleanJets.push_back(jets[ij] );
+      jetIdxs.push_back(tmpIdxs[ij]);
+    }
+    
+    if(bvals[ij]) continue;
+    
+    cleanBJets.push_back(jets[ij]);
+    bJetIdxs.push_back(tmpIdxs[ij]);
+
+    }
+  
+  
+}
+//END hack
+*/
+
+
+
+
+
+
 
   for(unsigned int il=0;il<leptons->size();il++) {
     for(unsigned int ij=0;ij<jets.size();ij++) {
