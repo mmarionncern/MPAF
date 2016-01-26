@@ -333,22 +333,6 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	}
 	
 	n++;
-=======
-      dss=anConf.findDSS( catMap[ic].first.sname, catMap[ic].first.ext );
-      int icat=_au->getCategId( catMap[ic].first.categ );
-      for(unsigned int i=0;i<dss.size();i++) {
-        string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
-        if(catMap[ic].first.ext!=cr) continue;
-	    //if(catMap[ic].first.uncTag=="") //dss[i]->getName()=="T1tttt-1125-900")
-	      //cout<<dss[i]->getName()<<"  "<<catMap[ic].first.cname<<"  "<<catMap[ic].first.sname
-	      //    <<"  "<<icat<<"  "<<catMap[ic].first.categ<<"  "<<catMap[ic].first.uncTag<<" ---> "<<catMap[ic].second.yield<<endl;
-
-
-        storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
-        	      catMap[ic].second.gen, icat,
-        	      catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
-        	      catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
->>>>>>> debugging
       }
     }
   }

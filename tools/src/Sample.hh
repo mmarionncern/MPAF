@@ -45,8 +45,6 @@ public:
   void setXSect(float XS) { _xSection=XS;};
   void setKFact(float KF) { _kFactor=KF;};
   void setEqLum(float L) { _eqLumi=L;};
-
-  void setLumW(float w) { _weight=w;};
   
   //access functions
   
