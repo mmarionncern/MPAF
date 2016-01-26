@@ -109,7 +109,7 @@ void susy3l_tt_closure() {
         //bool logYScale=true;
     }
     if(obs == "srs"){
-        md.dp.setObservables("SRS");
+        md.dp.setObservables("SRS" + region);
         int binning=1;
         double rangeX[2]={1,16};
         //bool logYScale=true;

@@ -67,10 +67,10 @@ void SUSY3L_sync::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
     //tri-lepton trigger
-    //_vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
     
     loadScanHistogram();
 
@@ -375,6 +375,9 @@ void SUSY3L_sync::run(){
         if(_vc->get("run")>258750){return;}
     }
 
+    _lumi = 629;
+    _evt = 1126708841;
+
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
 
@@ -392,6 +395,26 @@ void SUSY3L_sync::run(){
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+        cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;
+        cout << "tight leps: " << endl;
+        for(size_t il=0;il<_tightLepsPtCut.size();il++) {
+            cout << "pt: " << _tightLepsPtCut[il]->pt() << "pdgId: " << _tightLepsPtCut[il]->pdgId() << endl;
+        }
+        cout << "fakable leps: " << endl;
+        for(size_t il=0;il<_fakableNotTightLepsPtCut.size();il++) {
+            cout << "pt: " << _fakableNotTightLepsPtCut[il]->pt() << "pdgId: " << _fakableNotTightLepsPtCut[il]->pdgId() << endl;
+        }
+        cout << "loose leps: " << endl;
+        for(size_t il=0;il<_looseLepsPtCut.size();il++) {
+            cout << "pt: " << _looseLepsPtCut[il]->pt() << "pdgId: " << _looseLepsPtCut[il]->pdgId() << endl;
+            cout << "miniIso: " << _vc->get("LepGood_miniRelIso", _looseLepsPtCutIdx[il]) << endl;
+            cout << "ptRatio: " << _vc->get("LepGood_jetPtRatiov2", _looseLepsPtCutIdx[il]) << endl;
+            cout << "ptRel  : " << _vc->get("LepGood_jetPtRelv2", _looseLepsPtCutIdx[il]) << endl;
+        }
+    }
+    }
+
 
     //event reweighting
     //theory uncertainty for ttW and ttZ
@@ -495,8 +518,8 @@ void SUSY3L_sync::run(){
     }
    
     //select events for WZ control region
-    bool wzSel = wzCRSelection();
-    if(wzSel){return;}	
+    //bool wzSel = wzCRSelection();
+    //if(wzSel){return;}	
     
     setWorkflow(kGlobal);	
     
@@ -505,6 +528,10 @@ void SUSY3L_sync::run(){
     bool baseSel = multiLepSelection();
 
     if(!baseSel){return;}
+
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+        cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;}}
+
 
     //fillSkimTree();
 
@@ -811,7 +838,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-        if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;   //TODO: uncomment
+        //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;   //TODO: uncomment
         //count muons and electrons
         if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
         if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
@@ -1350,13 +1377,13 @@ void SUSY3L_sync::advancedSelection(int WF){
     }
 
     //require minimum number of jets
-    if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
+    //if(!makeCut<int>( _nJets, _valCutNJetsBR, _cTypeNJetsBR, "jet multiplicity", _upValCutNJetsBR) ) return;
     //require minimum number of b-tagged jets
-    if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
+    //if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
     //require minimum hadronic activity (sum of jet pT's)
-    if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
+    //if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
     //require minimum missing transvers energy (actually missing momentum)
-    if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
+    //if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
     fillHistos();

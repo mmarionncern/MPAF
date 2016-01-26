@@ -429,7 +429,7 @@ void SUSY3L::run(){
     // if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
     //   _weight *= 1.028284;
 
-/*
+
     //btag-scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
@@ -458,7 +458,7 @@ void SUSY3L::run(){
         else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
-    }*/
+    }
 /*    
     //HLT and lepton SFs
     if(!_isData){

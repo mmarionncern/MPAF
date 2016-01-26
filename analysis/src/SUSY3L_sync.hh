@@ -100,7 +100,8 @@ private:
     string _FR;
     int _fastSim;
     bool _debug;
-
+    long int _evt;
+    long int _lumi;
 
 private:
 
