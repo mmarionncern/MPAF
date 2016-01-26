@@ -357,11 +357,11 @@ void SUSY3L::modifyWeight() {
     
     if(_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
-	    //string db="puWeights";
-	    //if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpXS";}
-	    //if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpDown";}
-	    //_weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
-        _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+	    string db="puWeights";
+	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpXS";}
+	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="pileupUpDown";}
+	    _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
+        //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
     }
 
 }
@@ -429,7 +429,7 @@ void SUSY3L::run(){
     // if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
     //   _weight *= 1.028284;
 
-
+/*
     //btag-scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
@@ -458,7 +458,7 @@ void SUSY3L::run(){
         else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
-    }
+    }*/
 /*    
     //HLT and lepton SFs
     if(!_isData){
@@ -1705,7 +1705,7 @@ bool SUSY3L::testRegion(){
         categroizes events into signal regions defined in setSignalRegion()
         parameters: none
         return: none
-*/
+    */
 
     bool passSel=true;
 
@@ -2209,7 +2209,6 @@ bool SUSY3L::passHLTbit(){
     return false;
 
 }
-
 
 //____________________________________________________________________________
 void SUSY3L::readCSCevents(){
