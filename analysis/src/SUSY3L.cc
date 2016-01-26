@@ -1219,7 +1219,8 @@ bool SUSY3L::multiLepSelection(){
     _isMultiLep = false;
     _isFake = false;
     bool pass = true;
-    bool passLepMult = false;
+    bool isFakeOnZ = false;
+    vector<CandList> combListTemp;
 
     //require lepton which is not gen-matched for closure separated by flavors
     //if(_closureByFlavor!=0){
@@ -1245,6 +1246,8 @@ bool SUSY3L::multiLepSelection(){
         if(nFakes==1 && nPrompt ==2){pass = true;}
     }
     
+    counter("baseline denominator");
+    
     bool onZ=false;
     //loop over on and off-Z regions
     for(int iz=0;iz<2;iz++){
@@ -1256,21 +1259,15 @@ bool SUSY3L::multiLepSelection(){
         else{setWorkflow(kOffZBaseline);}
         counter("baseline denominator");
 
-        //three tight leptons
+        //three or more tight leptons
         if((_exactlyThreeLep && _tightLepsPtCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCut.size()>=3 && pass)){
             counter("lepton multiplicity");
-            passLepMult = true;
-        }
-
-        //three or more tight leptons with low mll cut
-        if((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3 && pass)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3 && pass)){
-            if(!passLepMult) cout << "WARNING: event failing lepton multiplicity passes lepton multiplicity with low mll cut!" << endl;
+            if(!((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3))) continue;
             counter("low mll veto");
-            
             //require hard legs
-            if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
+            if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) continue;
             counter("hard leg selection");
-        
+            
             //Z selection
             bool passMass = false;
             bool passMT = false;
@@ -1279,6 +1276,8 @@ bool SUSY3L::multiLepSelection(){
             for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
                 if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){passMass = true;}
             }
+            if(onZ && !passMass) continue;
+
             if(passMass){
                 //compute MT of 3rd lepton with MET
                 _zPair = _susyMod->findZCand( &_tightLepsPtCutMllCut, _ZMassWindow, _M_T_3rdLep_MET_cut);
@@ -1297,37 +1296,43 @@ bool SUSY3L::multiLepSelection(){
             if(onZ && isOnZ){
 	            _isOnZ=true;
                 _isMultiLep = true;
+	            counter("Z selection");
             }
             else if(!onZ && !isOnZ){
 	            _isOnZ=false;
                 _isMultiLep = true;
+	            counter("Z selection");
             }
-        
-    
-        //lepton candidates
-        sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
-    
+            
+            //lepton candidates
+            sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
         } 
 
         if(_isMultiLep){
-	        counter("Z selection");
             if(_tightLepsPtCutMllCut.size()>3){_flavor = 4;}
             else{_flavor=_nMus;}
         }
     
-        if(_isMultiLep) return true;
-
         setWorkflow(kGlobal);
 
         //TODO: make fakes compatible with MT cut in Z selection
         _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableNotTightLepsPtCut, _fakableNotTightLepsPtCutIdx, _fakableNotTightLepsPtCorrCut, _fakableNotTightLepsPtCorrCutIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, onZ, _combIdxs, _combType );
-    
+        //save outcome since we have to run the loop again for the counters
+        if(_combList.size()>0 && onZ){
+            isFakeOnZ = true;
+            combListTemp = _combList;
+        }
         if(_combList.size()>0) _isFake = true;
 
-
-        if(_isFake) return true;
-
     }//end loop over on/off-Z
+
+    //if combinations got overwritten from off-Z, load on-Z data
+    if(isFakeOnZ){
+        _isFake = true;
+        _combList = combListTemp;
+    }
+
+    if(_isMultiLep || _isFake) return true;
 
     return false;
 }
@@ -1355,7 +1360,7 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<int>( _nBJets, _valCutNBJetsBR, _cTypeNBJetsBR, "b-jet multiplicity", _upValCutNBJetsBR) ) return;
     //require minimum hadronic activity (sum of jet pT's)
     if(!makeCut<float>( _HT, _valCutHTBR, _cTypeHTBR, "hadronic activity", _upValCutHTBR) ) return;
-    //require minimum missing transvers energy (actually missing momentum)
+    //require minimum missing transvers energy
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     counter("baseline");
