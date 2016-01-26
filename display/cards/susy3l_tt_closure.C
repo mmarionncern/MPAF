@@ -7,22 +7,26 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="ttbar_closure_El_qcd_MG"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="ttbar_closure_El_qcd_MG"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="ttbar_closure_MuEl_qcd_Powheg_newPU"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="ttbar_closure_MuEl_qcd_Powheg_newPU"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
-    bool mcOnly = true;
+    bool mcOnly = false;
   
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, mt2, pt1, pt2, pt3, mll, muonsip, muoniso, muondz, muondxy, muonptrel, muonptratio, elsip, eliso, eldz, eldxy, elptrel, elptratio, 3rdlepflavor
-    //string obs = "njets";    
+   
     string sigs = "none"; 
     bool data = false;
+    bool manual = false;
+    string region = "OffZBaseline";
 
+    if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
+    else{string obs = "njets";}
+ 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
     //int binning=1;
@@ -49,110 +53,88 @@ void susy3l_tt_closure() {
     float yt=0.48;
     float st=0.039;
     string addText="";
-/*
+
     if(obs == "njets"){
-        md.dp.setObservables("NJets");
-        int binning=1;
-        double rangeX[2]={0,7};
-        //bool logYScale=true;
-    }
-    if(obs == "nbjets"){
-        md.dp.setObservables("NBJets");
-        int binning=1;
-        double rangeX[2]={0,5};
-        //bool logYScale=true;
-    }
-    if(obs == "met"){
-        md.dp.setObservables("MET");
-        int binning=50;
-        double rangeX[2]={0,500};
-        //bool logYScale=true;
-    }
-    if(obs == "ht"){
-        md.dp.setObservables("HT");
-        int binning=60;
-        double rangeX[2]={0,1000};
-        //bool logYScale=true;
-    }
-    if(obs == "pt1"){
-        md.dp.setObservables("pt_1st_lepton");
-        int binning=10;
-        double rangeX[2]={0,200};
-        //bool logYScale=true;
-    }
-    if(obs == "pt2"){
-        md.dp.setObservables("pt_2nd_lepton");
-        int binning=10;
-        double rangeX[2]={0,150};
-        //bool logYScale=true;
-    }   
-    if(obs == "pt3"){
-        md.dp.setObservables("pt_3rd_lepton");
-        int binning=10;
-        double rangeX[2]={0,100};
-        //bool logYScale=true;
-    }
-*/
-    if(obs == "njets"){
-        md.dp.setObservables("NJets");
+        md.dp.setObservables("NJets" + region);
         int binning=1;
         double rangeX[2]={2,10};
         //bool logYScale=true;
     }
     if(obs == "nbjets"){
-        md.dp.setObservables("NBJets");
+        md.dp.setObservables("NBJets" + region);
         int binning=1;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "met"){
-        md.dp.setObservables("MET");
+        md.dp.setObservables("MET" + region);
         int binning=50;
         double rangeX[2]={0,500};
         //bool logYScale=true;
     }
     if(obs == "ht"){
-        md.dp.setObservables("HT");
+        md.dp.setObservables("HT" + region);
         int binning=60;
         double rangeX[2]={0,1000};
         //bool logYScale=true;
     }
     if(obs == "pt1"){
-        md.dp.setObservables("pt_1st_lepton");
+        md.dp.setObservables("pt_1st_lepton" + region);
         int binning=10;
         double rangeX[2]={0,200};
         //bool logYScale=true;
     }
     if(obs == "pt2"){
-        md.dp.setObservables("pt_2nd_lepton");
+        md.dp.setObservables("pt_2nd_lepton" + region);
         int binning=10;
         double rangeX[2]={0,150};
         //bool logYScale=true;
     }   
     if(obs == "pt3"){
-        md.dp.setObservables("pt_3rd_lepton");
+        md.dp.setObservables("pt_3rd_lepton" + region);
         int binning=10;
         double rangeX[2]={0,100};
         //bool logYScale=true;
     }
     if(obs == "ftype"){
-        md.dp.setObservables("fake_type");
+        md.dp.setObservables("fake_type" + region);
         int binning=1;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "flavor"){
-        md.dp.setObservables("flavor");
+        md.dp.setObservables("flavor" + region);
         int binning=1;
         double rangeX[2]={0,4};
         //bool logYScale=true;
     }
     if(obs == "srs"){
-        md.dp.setObservables("SRS");
+        md.dp.setObservables("SRS" + region);
         int binning=1;
         double rangeX[2]={1,16};
         //bool logYScale=true;
     }
+    if(obs == "mu_multi"){
+        md.dp.setObservables("mu_multiplicity" + region);
+        int binning=1;
+        double rangeX[2]={0,6};
+        //bool logYScale=true;
+    }
+    if(obs == "el_multi"){
+        md.dp.setObservables("el_multiplicity" + region);
+        int binning=1;
+        double rangeX[2]={0,6};
+        //bool logYScale=true;
+    }
+    if(obs == "lep_multi"){
+        md.dp.setObservables("lep_multiplicity" + region);
+        int binning=1;
+        double rangeX[2]={0,6};
+        //bool logYScale=true;
+    }
+
+
+
 
 
     //string autoBinFile="susybinninghigh";
@@ -230,7 +212,7 @@ void susy3l_tt_closure() {
 //    md.anConf.addSample( "TTLLJets_m1to10"                  ,  "TT"    , kRed+2      );
 //    md.anConf.addSample( "TTTT"                             ,  "TT"    , kRed+2      );
     md.anConf.addSample( "TT_pow"                             ,  "TT"    , kRed-6      );
-    md.anConf.addSample( "Fake:TT_pow"                        ,  "predicted sig"    , kBlack      );
+    md.anConf.addSample( "_Fake:TT_pow"                        ,  "predicted sig"    , kBlack      );
 //    md.anConf.addSample( "TTJets_DiLepton"                      ,  "TT"    , kRed-6      );
 //    md.anConf.addSample( "Fake:TTJets_DiLepton"                 ,  "predicted sig"    , kBlack      );
 
@@ -314,6 +296,6 @@ void susy3l_tt_closure() {
     //md.doStatisticsPlot();
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
-    gROOT->ProcessLine(".q");
+    if(!manual) gROOT->ProcessLine(".q");
  
 }
