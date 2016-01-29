@@ -22,7 +22,7 @@ void susy3l_tt_closure() {
     string sigs = "none"; 
     bool data = false;
     bool manual = false;
-    string region = "OffZBaseline";
+    string region = "OnZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
     else{string obs = "njets";}
@@ -151,7 +151,7 @@ void susy3l_tt_closure() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=3000; //pb-1 19470
+    float lumi=2260; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=true;

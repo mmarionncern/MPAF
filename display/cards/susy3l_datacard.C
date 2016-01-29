@@ -6,8 +6,8 @@ void susy3l_datacard() {
 
   //general parameters ********************* general parameters
   string dir="SUSY3L";
-  string fileName="limits_160126_OnAndOffZ"; // not needed for statistics but provides the normalization
-  string fileList="limits_160126_OnAndOffZ"; // put command line that gives all files as in a "ls" command
+  string fileName="3l_test"; // not needed for statistics but provides the normalization
+  string fileList="3l_test"; // put command line that gives all files as in a "ls" command
 
   bool mcOnly = false;
   
@@ -34,13 +34,13 @@ void susy3l_datacard() {
   //===============================================================
 
 
-  string signal = "T1t4_1200"; md.addDataCardSigSample("T1tttt_mGo1200_mChi800",                     signal);
+  //string signal = "T1t4_1200"; md.addDataCardSigSample("T1tttt_mGo1200_mChi800",                     signal);
   //string signal = "T1t4_1500"; md.addDataCardSigSample("T1tttt_mGo1500_mChi100",                     signal);
   //string signal = "T54q_deg"; md.addDataCardSigSample("T5ttttDeg_mGo1000_mStop300_mCh285_mChi280",  signal);
   //string signal = "T6t2W2_600"; md.addDataCardSigSample("T6ttWW_mSbot600_mCh425_mChi50",              signal);
   //string signal = "T6t2W2_650"; md.addDataCardSigSample("T6ttWW_mSbot650_mCh150_mChi50",              signal);
   //string signal = "T54qWZ_315"; md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep",   signal);
-  //string signal = "T54qWZ_325"; md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep",   signal);
+  string signal = "T54qWZ_325"; md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep",   signal);
   //string signal = "T54qWZ_800"; md.addDataCardSigSample("T5qqqqWZ_mGo1500_mCh800_mChi100_lep",        signal);
   //string signal = "T54qWZ_1000"; md.addDataCardSigSample("T5qqqqWZ_mGo1200_mCh1000_mChi800_lep",       signal);
   
@@ -268,7 +268,7 @@ void susy3l_datacard() {
   md.makeMultiDataCard(signal, vcategs, "selected", signal);
 
  
-  md.getStatistics("global");
+  md.getStatistics("global_OffZBaseline");
   gROOT->ProcessLine(".q");
 
 }
