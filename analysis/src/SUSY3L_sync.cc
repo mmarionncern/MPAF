@@ -375,8 +375,13 @@ void SUSY3L_sync::run(){
         if(_vc->get("run")>258750){return;}
     }
 
-    _lumi = 629;
-    _evt = 1126708841;
+    _lumi = 48;
+    _evt = 58832648;
+
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+    for(size_t il=0;il<_vc->get("nLepGood");il++) {
+        cout << "pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << endl;
+    }}}
 
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -904,9 +909,13 @@ bool SUSY3L_sync::looseLepton(const Candidate* c, int idx, int pdgId) {
     }
     else {
         if(c->pt() < 7) return false;
+        if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){cout << "passing pt" << endl;}}
         if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
+        if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){cout << "passing elIdSel" << endl;}}
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
+        if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){cout << "passing multiIso " << _vc->get("LepGood_eInvMinusPInv",idx) << endl;}}
         if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
+        if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){cout << "passing Trig emu" << endl;}}
     }
 
     return true;
