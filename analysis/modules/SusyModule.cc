@@ -1137,18 +1137,30 @@ SusyModule::bTagSF(CandList& jets ,
   // put st = -1 / 0 / +1 for down / central / up
   // put fsst = -1 / 0 / +1 for down / central / up for fast-fullSim CF
 
+  long int _evt = 326295;
+  long int _lumi = 986;
+
   float pdata = 1.0;
   float pmc   = 1.0;
 
   for(unsigned int i=0;i<jets.size(); ++i) {
     bool find=false;
     unsigned int  flavor = 2;
-    if(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second) == 5) flavor = 0; // b jet
-    else if(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second) == 4) flavor = 1; // c jet
+    if(std::abs(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second)) == 5) flavor = 0; // b jet
+    else if(std::abs(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second)) == 4) flavor = 1; // c jet
     
     for(unsigned int iv=0;iv<bJets.size();iv++) {
       if(jetIdx[i].first==bJetIdx[iv].first && jetIdx[i].second==bJetIdx[iv].second) { find=true; break;}
     }
+
+    /*if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
+        cout << "jet pt : " << _vc->get("Jet_pt", i) << endl;
+        cout << "jet MC flavor : " << _vc->get("Jet_mcFlavour", i) << endl;
+        cout << "flavor: " << flavor << endl;
+        cout << "find: " << find << endl;
+    }*/
+
+
 
     float fsSF=1.;
     if(fastSim) fsSF=bTagMediumScaleFactorFastSim(jets[i], flavor, fsst);
@@ -1159,11 +1171,27 @@ SusyModule::bTagSF(CandList& jets ,
       pdata*=bTagMediumEfficiency(jets[i], flavor) * 
 	bTagMediumScaleFactor(jets[i], flavor, st)*fsSF;
       pmc*=bTagMediumEfficiency(jets[i], flavor)*fsSF;
+     /*if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
+        cout << "if find" << endl;
+        cout << "eff: " << bTagMediumEfficiency(jets[i], flavor) << endl;
+        cout << "SF: " << bTagMediumScaleFactor(jets[i], flavor, st) << endl;
+    }*/
+
+   
+    
     }
     else {
       pdata*=(1-bTagMediumEfficiency(jets[i], flavor) * 
 	      bTagMediumScaleFactor(jets[i], flavor, st)*fsSF);
       pmc*=(1-bTagMediumEfficiency(jets[i], flavor)*fsSF);
+       /*if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
+        cout << "if !find" << endl;
+        cout << "eff: " << bTagMediumEfficiency(jets[i], flavor) << endl;
+        cout << "SF: " << bTagMediumScaleFactor(jets[i], flavor, st) << endl;
+    }*/
+
+
+  
     }
   }
 
