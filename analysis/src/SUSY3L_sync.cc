@@ -379,6 +379,7 @@ void SUSY3L_sync::run(){
     _evt = 58832648;
 
     if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+    cout << _vc->get("nLepGood") << endl;
     for(size_t il=0;il<_vc->get("nLepGood");il++) {
         cout << "pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << endl;
     }}}
@@ -404,18 +405,20 @@ void SUSY3L_sync::run(){
         cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;
         cout << "tight leps: " << endl;
         for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-            cout << "pt: " << _tightLepsPtCut[il]->pt() << "pdgId: " << _tightLepsPtCut[il]->pdgId() << endl;
+            cout << "pt: " << _tightLepsPtCut[il]->pt() << " pdgId: " << _tightLepsPtCut[il]->pdgId() << endl;
         }
         cout << "fakable leps: " << endl;
         for(size_t il=0;il<_fakableNotTightLepsPtCut.size();il++) {
-            cout << "pt: " << _fakableNotTightLepsPtCut[il]->pt() << "pdgId: " << _fakableNotTightLepsPtCut[il]->pdgId() << endl;
+            cout << "pt: " << _fakableNotTightLepsPtCut[il]->pt() << " pdgId: " << _fakableNotTightLepsPtCut[il]->pdgId() << endl;
         }
         cout << "loose leps: " << endl;
         for(size_t il=0;il<_looseLepsPtCut.size();il++) {
-            cout << "pt: " << _looseLepsPtCut[il]->pt() << "pdgId: " << _looseLepsPtCut[il]->pdgId() << endl;
+            cout << "pt: " << _looseLepsPtCut[il]->pt() << " pdgId: " << _looseLepsPtCut[il]->pdgId() << endl;
             cout << "miniIso: " << _vc->get("LepGood_miniRelIso", _looseLepsPtCutIdx[il]) << endl;
-            cout << "ptRatio: " << _vc->get("LepGood_jetPtRatiov2", _looseLepsPtCutIdx[il]) << endl;
-            cout << "ptRel  : " << _vc->get("LepGood_jetPtRelv2", _looseLepsPtCutIdx[il]) << endl;
+            cout << "ptRatio v2: " << _vc->get("LepGood_jetPtRatiov2", _looseLepsPtCutIdx[il]) << endl;
+            cout << "ptRatio: " << _vc->get("LepGood_jetPtRatio", _looseLepsPtCutIdx[il]) << endl;
+            cout << "ptRel v2: " << _vc->get("LepGood_jetPtRelv2", _looseLepsPtCutIdx[il]) << endl;
+            cout << "ptRel  : " << _vc->get("LepGood_jetPtRel", _looseLepsPtCutIdx[il]) << endl;
         }
     }
     }
