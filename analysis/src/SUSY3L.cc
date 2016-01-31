@@ -308,9 +308,6 @@ void SUSY3L::initialize(){
         _dbm->loadDb("MuNIsoMCDo", "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_non");
     }
 
-    //pile-up weights
-    _dbm->loadDb("puWeights","pileupWeights.root","pileup");
-
     //load HLT scale factors
     //_dbm->loadDb("hltSF"      , "hltSF.db");
 
@@ -393,11 +390,10 @@ void SUSY3L::run(){
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
 
-    
+    //debug output
     _lumi = 986;
     _evt = 326166;
-/*
-    if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
     cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;
         cout << "tight leps: " << endl;
         for(size_t il=0;il<_tightLepsPtCut.size();il++) {
@@ -418,51 +414,50 @@ void SUSY3L::run(){
             cout << "ptRatio v2: " << _vc->get("LepGood_jetPtRatiov2", _looseLepsPtCutIdx[il]) << endl;
             cout << "ptRel v2: " << _vc->get("LepGood_jetPtRelv2", _looseLepsPtCutIdx[il]) << endl;
         }
-    }
-*/    
-    //event reweighting
+    }}
+    
+
+    //event reweighting //////////////////////////////////////////////////////////
+    
     //theory uncertainty for ttW and ttZ
-    // if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kDown==getUncDir() ) {
-    //   if(_sampleName.find("TTW") != string::npos) {
-    // 	bool passSR=false;
-    // 	_SR="SR013";
-    // 	if(testRegion()) passSR=true;
-    // 	_SR="SR015";
-    // 	if(testRegion()) passSR=true;
-	
-    // 	_weight *= 1-sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
-    //   }
-    //   if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
-    // 	_weight *= 1-sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
-    //   }
-    // }
-    // if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kUp==getUncDir() ) {
-    //   if(_sampleName.find("TTW") != string::npos) {
-    // 	bool passSR=false;
-    // 	_SR="SR013";
-    // 	if(testRegion()) passSR=true;
-    // 	_SR="SR015";
-    // 	if(testRegion()) passSR=true;
-	
-    // 	_weight *= 1+sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
-    //   }
-    //   if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
-    // 	_weight *= 1+sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
-    //   }
-    // }
+    if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kDown==getUncDir() ) {
+        if(_sampleName.find("TTW") != string::npos) {
+     	    bool passSR=false;
+     	    _SR="SR013";
+     	    if(testRegion()) passSR=true;
+     	    _SR="SR015";
+     	    if(testRegion()) passSR=true;
+     	    _weight *= 1-sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
+        }
+        if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
+     	    _weight *= 1-sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
+        }
+     }
+     if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kUp==getUncDir() ) {
+        if(_sampleName.find("TTW") != string::npos) {
+     	bool passSR=false;
+     	_SR="SR013";
+     	if(testRegion()) passSR=true;
+     	_SR="SR015";
+     	if(testRegion()) passSR=true;
+     	_weight *= 1+sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
+        }
+        if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
+        _weight *= 1+sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
+        }
+    }   
 
-    // if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kDown==getUncDir() )
-    //   _weight *= 0.971716;
-    // if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
-    //   _weight *= 1.028284;
+    //vary efficiency 
+    if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kDown==getUncDir() )
+        _weight *= 0.971716;
+    if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
+        _weight *= 1.028284;
 
-    long int _evt = 326295;
-    long int _lumi = 986;
-
-    //if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
-    //    cout << _lumi << " " << _evt << endl;
-    //    cout << "weight before: " << _weight << endl;
-    //}
+    //debug output
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
+        cout << _lumi << " " << _evt << endl;
+        cout << "weight before: " << _weight << endl;
+    }}
 
     //btag-scale factors
     if(!_vc->get("isData") ) {
@@ -481,14 +476,13 @@ void SUSY3L::run(){
         else //other syst. variations
 	        _weight *= _btagW;
     }
-        
     counter("btag SF");
 
-    //if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
-    //    cout << _lumi << " " << _evt << endl;
-    //    cout << "weight before: " << _weight << endl;
-    //}
-
+    //debug output
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
+        cout << _lumi << " " << _evt << endl;
+        cout << "weight after: " << _weight << endl;
+    }}
 
     //ISR variation for fastsim
     if(_fastSim){
@@ -522,7 +516,9 @@ void SUSY3L::run(){
 	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
         }
     }
-*/    
+*/  
+    //end event reweighting ////////////////////////////////////////////////////
+  
     setWorkflow(kGlobal);	
 
     //selections for validation plots
@@ -589,7 +585,7 @@ void SUSY3L::defineOutput(){
     */
     
     //SR yields
-    _hm->addVariable("SRS",15,1,16,"SR");
+    _hm->addVariable("SRS"  ,  15,  1,  16, "SR"    );
     
     if(!_doPlots) return; 
 
@@ -662,18 +658,6 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("3rd_lepton_flavor",  40,      -20,   20.0,    "3rd lepton pdgId"                  );
     _hm->addVariable("3rd_lepton_pt"    ,  200,       0,  200.0,    "3rd lepton pt"                     );
     _hm->addVariable("deltaR_elmu"      ,  500,     0.0,   10.0,    "delta R between el and mu"         );
-    _hm->addVariable("muon_SIP3d"       ,   50,     0.0,    5.0,    "muon SIP3d"                        );
-    _hm->addVariable("muon_dxy"         ,  200,     0.0,    0.2,    "muon dxy [cm]"                     );
-    _hm->addVariable("muon_dz"          ,  200,     0.0,    0.2,    "muon dz [cm]"                      );
-    _hm->addVariable("muon_JetPtRatio"  ,   60,     0.0,    2.0,    "muon jet pt ratio [GeV]"           );
-    _hm->addVariable("muon_JetPtRel"    ,   40,     0.0,  100.0,    "muon jet pt rel [GeV]"             );
-    _hm->addVariable("muon_miniRelIso"  ,   40,     0.0,    0.4,    "muon isolation"                    );
-    _hm->addVariable("el_SIP3d"         ,   50,     0.0,    5.0,    "electron SIP3d"                    );
-    _hm->addVariable("el_dxy"           ,  200,     0.0,    0.2,    "electron dxy [cm]"                 );
-    _hm->addVariable("el_dz"            ,  200,     0.0,    0.2,    "electron dz [cm]"                  );
-    _hm->addVariable("el_JetPtRatio"    ,   60,     0.0,    2.0,    "electron jet pt ratio [GeV]"       );
-    _hm->addVariable("el_JetPtRel"      ,   40,     0.0,  100.0,    "electron jet pt rel [GeV]"         );
-    _hm->addVariable("el_miniRelIso"    ,   40,     0.0,    0.4,    "electron isolation"                );
 */
 }
 
@@ -682,9 +666,6 @@ void SUSY3L::defineOutput(){
 void SUSY3L::loadInput(){
     // define function in MPAF for loading histograms, text files, histograms from database 
 }
-
-
-
 
 
 //____________________________________________________________________________
