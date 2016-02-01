@@ -27,6 +27,7 @@ echo "location      : $SIGFILELOC"
 #    rm $MPAF/workdir/stats/${ANTYPE}/*
 #    rm $MPAF/workdir/stats/${ANTYPE}/*
 #fi
+#getMassBenchmarks("$SIGNALSAMPLELIST","mass$SIGNAME.txt")
 
 #step 1
 source SubScanPerFile.sh $TEMPLATEMPAF $ANTYPE "" $SIGNAME $SAMPLELIST
@@ -42,7 +43,7 @@ fi
 if [[ ! -e mass$SIGNAME.txt ]]; then
     root -b -l <<EOF
 .L getMassBenchmarks.C+
-getMassBenchmarks("$SIGNALSAMPLELIST","mass$SIGNAME.txt")
+getMassBenchmarks()
 .q
 EOF
 fi

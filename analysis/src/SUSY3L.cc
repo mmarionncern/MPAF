@@ -368,18 +368,9 @@ void SUSY3L::modifyWeight() {
 void SUSY3L::run(){
     
     //limit run number to unblineded json
-    if(_vc->get("isData") == 1){
-        if(_vc->get("run")>258750){return;}
-    }
-
-	//debug output    
-	_lumi = 48;
-    _evt = 58832648;
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
-    cout << _vc->get("nLepGood") << endl;
-    for(size_t il=0;il<_vc->get("nLepGood");il++) {
-        cout << "pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << endl;
-    }}}
+    //if(_vc->get("isData") == 1){
+    //    if(_vc->get("run")>258750){return;}
+    //}
 
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -398,31 +389,6 @@ void SUSY3L::run(){
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
-
-    //debug output
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
-    cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;
-        cout << "tight leps: " << endl;
-        for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-            cout << "pt: " << _tightLepsPtCut[il]->pt() << " pdgId: " << _tightLepsPtCut[il]->pdgId() << endl;
-        }
-        cout << "fakable leps: " << endl;
-        for(size_t il=0;il<_fakableNotTightLepsPtCut.size();il++) {
-            cout << "pt: " << _fakableNotTightLepsPtCut[il]->pt() << " pdgId: " << _fakableNotTightLepsPtCut[il]->pdgId() << endl;
-        }
-        cout << "fakable leps pt corr: " << endl;
-        for(size_t il=0;il<_fakableNotTightLepsPtCorrCut.size();il++) {
-            cout << "pt: " << _fakableNotTightLepsPtCorrCut[il]->pt() << " pdgId: " << _fakableNotTightLepsPtCorrCut[il]->pdgId() << endl;
-        }
-        cout << "loose leps: " << endl;
-        for(size_t il=0;il<_looseLepsPtCut.size();il++) {
-            cout << "pt: " << _looseLepsPtCut[il]->pt() << " pdgId: " << _looseLepsPtCut[il]->pdgId() << endl;
-            cout << "miniIso: " << _vc->get("LepGood_miniRelIso", _looseLepsPtCutIdx[il]) << endl;
-            cout << "ptRatio v2: " << _vc->get("LepGood_jetPtRatiov2", _looseLepsPtCutIdx[il]) << endl;
-            cout << "ptRel v2: " << _vc->get("LepGood_jetPtRelv2", _looseLepsPtCutIdx[il]) << endl;
-        }
-    }
-    }
 
     //event reweighting //////////////////////////////////////////////////////////
     
@@ -460,12 +426,6 @@ void SUSY3L::run(){
     if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
         _weight *= 1.028284;
 
-    //debug output
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
-        cout << _lumi << " " << _evt << endl;
-        cout << "weight before: " << _weight << endl;
-    }}
-
     //btag-scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
@@ -484,12 +444,6 @@ void SUSY3L::run(){
 	        _weight *= _btagW;
     }
     counter("btag SF");
-
-    //debug output
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
-        cout << _lumi << " " << _evt << endl;
-        cout << "weight after: " << _weight << endl;
-    }}
 
     //ISR variation for fastsim
     if(_fastSim){
@@ -1397,17 +1351,6 @@ void SUSY3L::advancedSelection(int WF){
     setWorkflow(WF);
     
     counter("baseline on and off-Z");
-
-    //print out event info
-   /* 
-    if(WF==kGlobal_Fake){
-    //printout for sync     
-    long int run = _vc->get("run");
-    long int lumi = _vc->get("lumi");
-    long int evt = _vc->get("evt");
-    cout << run << " " << lumi << " " << evt << endl;
-    }
-    */
 
     fillHistos();
 
