@@ -372,6 +372,15 @@ void SUSY3L::run(){
         if(_vc->get("run")>258750){return;}
     }
 
+	//debug output    
+	_lumi = 48;
+    _evt = 58832648;
+    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+    cout << _vc->get("nLepGood") << endl;
+    for(size_t il=0;il<_vc->get("nLepGood");il++) {
+        cout << "pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << endl;
+    }}}
+
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
 
@@ -391,8 +400,6 @@ void SUSY3L::run(){
     collectKinematicObjects();
 
     //debug output
-    _lumi = 986;
-    _evt = 326166;
     if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
     cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;
         cout << "tight leps: " << endl;
@@ -414,8 +421,8 @@ void SUSY3L::run(){
             cout << "ptRatio v2: " << _vc->get("LepGood_jetPtRatiov2", _looseLepsPtCutIdx[il]) << endl;
             cout << "ptRel v2: " << _vc->get("LepGood_jetPtRelv2", _looseLepsPtCutIdx[il]) << endl;
         }
-    }}
-    
+    }
+    }
 
     //event reweighting //////////////////////////////////////////////////////////
     
