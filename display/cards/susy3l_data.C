@@ -21,10 +21,10 @@ void susy3l_data() {
     string sigs = "none"; 
     bool data = true;
     bool manual = true;
-    string region = "OffZBaseline";
+    string region = "OnZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "njets";}
+    else{string obs = "srs";}
  
 
     //Binning & title ************************* Binning & titre
@@ -32,11 +32,10 @@ void susy3l_data() {
     //int binning=1;
     int addBinBkg=1; //BinB = binning*AddBin
     double rangeY[2]={0,0};
-    bool logYScale=true;
+    bool logYScale=false;
     //double rangeX[2]={0,7};
     int xDiv[3]={8,6,0};
     int yDiv[3]={6,6,0}; //Nlabel /  sous-Div /ssdiv
-    bool logYScale=true;
     bool overFlowBin=true;
     bool underFlowBin=false;
     bool showDMCRatio=true;
@@ -78,6 +77,12 @@ void susy3l_data() {
         double rangeX[2]={0,1000};
         bool logYScale=true;
     }
+    if(obs == "mt"){
+        md.dp.setObservables("MT" + region);
+        int binning=10;
+        double rangeX[2]={0,200};
+        bool logYScale=true;
+    }
     if(obs == "pt1"){
         md.dp.setObservables("pt_1st_lepton" + region);
         int binning=10;
@@ -112,7 +117,7 @@ void susy3l_data() {
         md.dp.setObservables("SRS" + region);
         int binning=1;
         double rangeX[2]={1,16};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "mu_multi"){
         md.dp.setObservables("mu_multiplicity" + region);

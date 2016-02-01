@@ -6,8 +6,8 @@ void susy3l_datacard() {
 
   //general parameters ********************* general parameters
   string dir="SUSY3L";
-  string fileName="3l_test"; // not needed for statistics but provides the normalization
-  string fileList="3l_test"; // put command line that gives all files as in a "ls" command
+  string fileName="160201_3l_unblinded"; // not needed for statistics but provides the normalization
+  string fileList="160201_3l_unblinded"; // put command line that gives all files as in a "ls" command
 
   bool mcOnly = false;
   
@@ -15,7 +15,7 @@ void susy3l_datacard() {
   md.anConf.configureData(false, 0, mcOnly);
   
   //Lumis( or XSections ) pb-1 & KFactors ************************************
-  float lumi=2260; //pb-1 19470
+  float lumi=2160; //pb-1 19470
   float energy=13; //TeV
 
   bool useXS=false;
@@ -34,13 +34,13 @@ void susy3l_datacard() {
   //===============================================================
 
 
-  //string signal = "T1t4_1200"; md.addDataCardSigSample("T1tttt_mGo1200_mChi800",                     signal);
+  string signal = "T1t4_1200"; md.addDataCardSigSample("T1tttt_mGo1200_mChi800",                     signal);
   //string signal = "T1t4_1500"; md.addDataCardSigSample("T1tttt_mGo1500_mChi100",                     signal);
   //string signal = "T54q_deg"; md.addDataCardSigSample("T5ttttDeg_mGo1000_mStop300_mCh285_mChi280",  signal);
   //string signal = "T6t2W2_600"; md.addDataCardSigSample("T6ttWW_mSbot600_mCh425_mChi50",              signal);
   //string signal = "T6t2W2_650"; md.addDataCardSigSample("T6ttWW_mSbot650_mCh150_mChi50",              signal);
   //string signal = "T54qWZ_315"; md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep",   signal);
-  string signal = "T54qWZ_325"; md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep",   signal);
+  //string signal = "T54qWZ_325"; md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep",   signal);
   //string signal = "T54qWZ_800"; md.addDataCardSigSample("T5qqqqWZ_mGo1500_mCh800_mChi100_lep",        signal);
   //string signal = "T54qWZ_1000"; md.addDataCardSigSample("T5qqqqWZ_mGo1200_mCh1000_mChi800_lep",       signal);
   
@@ -66,17 +66,45 @@ void susy3l_datacard() {
   
   md.addDataCardSample("TTWToLNu", "ttW");
   
-  md.addDataCardSample("TT_pow", "fake");
-  md.addDataCardSample("DYJetsToLL_M50", "fake");
-  md.addDataCardSample("DYJetsToLL_M10to50", "fake");
-  md.addDataCardSample("TbarToLeptons_tch", "fake");
-  md.addDataCardSample("TBar_tWch", "fake");
-  md.addDataCardSample("TToLeptons_sch_amcatnlo", "fake");
-  md.addDataCardSample("TToLeptons_tch", "fake");
-  md.addDataCardSample("T_tWch", "fake");
-  md.addDataCardSample("WJetsToLNu", "fake");
+  md.addDataCardSample( "data:Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
+  md.addDataCardSample( "data:Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
+  md.addDataCardSample( "data:Fake:DoubleEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
+  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015C_Oct05_runs_254231_254914", "fake"); 
+  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015D_Oct05_runs_256630_258158", "fake"); 
+  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015D_PromptV4_runs_258159_260627","fake");
+  md.addDataCardSample( "data:Fake:MuonEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
+  md.addDataCardSample( "data:Fake:MuonEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
+  md.addDataCardSample( "data:Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
+
+  //md.addDataCardSample("TT_pow", "fake");
+  //md.addDataCardSample("DYJetsToLL_M50", "fake");
+  //md.addDataCardSample("DYJetsToLL_M10to50", "fake");
+  //md.addDataCardSample("TbarToLeptons_tch", "fake");
+  //md.addDataCardSample("TBar_tWch", "fake");
+  //md.addDataCardSample("TToLeptons_sch_amcatnlo", "fake");
+  //md.addDataCardSample("TToLeptons_tch", "fake");
+  //md.addDataCardSample("T_tWch", "fake");
+  //md.addDataCardSample("WJetsToLNu", "fake");
  
- 
+  md.addDataCardSample( "Fake:TGJets", "fake", -1 );
+  md.addDataCardSample( "Fake:TTGJets", "fake", -1 );
+  md.addDataCardSample( "Fake:ZGTo2LG", "fake", -1 );
+  md.addDataCardSample( "Fake:WGToLNuG", "fake", -1 );
+  md.addDataCardSample( "Fake:TTHnobb", "fake", -1 );
+  md.addDataCardSample( "Fake:TTLLJets_m1to10", "fake", -1 );
+  md.addDataCardSample( "Fake:TTZToLLNuNu", "fake", -1 );
+  md.addDataCardSample( "Fake:TTWToLNu", "fake", -1 );
+  md.addDataCardSample( "Fake:WZTo3LNu", "fake", -1 );
+  md.addDataCardSample( "Fake:tZq_ll", "fake", -1 );
+  md.addDataCardSample( "Fake:VHToNonbb", "fake", -1 );
+  md.addDataCardSample( "Fake:GGHZZ4L", "fake", -1 );
+  md.addDataCardSample( "Fake:ZZTo4L", "fake", -1 );
+  md.addDataCardSample( "Fake:WWZ", "fake", -1 );
+  md.addDataCardSample( "Fake:WZZ", "fake", -1 );
+  md.addDataCardSample( "Fake:ZZZ", "fake", -1 );
+  md.addDataCardSample( "Fake:TTTT", "fake", -1 );
+
+
   
   //md.addDataCardSample("data","data");
   
@@ -268,7 +296,7 @@ void susy3l_datacard() {
   md.makeMultiDataCard(signal, vcategs, "selected", signal);
 
  
-  md.getStatistics("global_OffZBaseline");
+  //md.getStatistics("global_OffZBaseline");
   gROOT->ProcessLine(".q");
 
 }

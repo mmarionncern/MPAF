@@ -523,7 +523,7 @@ void SUSY3L::run(){
             if(type==kIsSingleFake){ sumTF += getTF_SingleFake(ic); }
             if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
             if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
-            fill("fake_type" , type       , _weight);
+            //fill("fake_type" , type       , _weight);
         }
         _weight *= sumTF;
 	    setWorkflow(kGlobal_Fake);
@@ -1838,9 +1838,9 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     //lepton candidates
     sortSelectedLeps(clistPtCorr, idxsPtCorr);
-    fill("nFO", clist.size(),   _weight);
-    fill("nFakeComb", vclist.size(),    _weight);
-    fill("ptRank", fakeRank,    _weight);
+    //fill("nFO", clist.size(),   _weight);
+    //fill("nFakeComb", vclist.size(),    _weight);
+    //fill("ptRank", fakeRank,    _weight);
    
     return vclist;
 }
