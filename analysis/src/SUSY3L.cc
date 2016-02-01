@@ -1470,11 +1470,11 @@ bool SUSY3L::wzCRSelection(){
     _zPair = _susyMod->findZCand( &_tightLepsPtCutMllCut, 15, 50);
     if(_zPair[0] == 0 && _zPair[1] == 0) return false;
     counter("MT cut");
-    if(!( _nJets == 1)) return false;
+    if(!( _nJets < 2)) return false;
     counter("jet multiplicity");
     if(!( _nBJets == 0)) return false;
     counter("b-jet multiplicity");
-    if(!(_met->pt() > 30 && _met->pt() < 150)) return false;
+    if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
     counter("MET selection");
     counter("passing WZ selection");
   
