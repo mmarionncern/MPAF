@@ -1,12 +1,12 @@
 MPAFDisplay md;
 
-void SUSY3LSIGNAME_BENCH(){
+void SUSY3L_BENCH(){
   md.refresh();
 
   //general parameters ********************* general parameters
   string dir="SUSY3L";
-  string fileName="mergedFileSIGNAME";
-  string fileList="mergedFileSIGNAMEMASS-"; //susy3lUnc
+  string fileName="merged_2fb";
+  string fileList="merged_2fb_T1tttt-MASS-"; //susy3lUnc
   
   bool mcOnly = false;
   
@@ -31,7 +31,7 @@ void SUSY3LSIGNAME_BENCH(){
  
   //===============================================================
   
-  md.addDataCardSigSample("T1ttttMASS-","T1ttttBENCH");
+  md.addDataCardSigSample("T1tttt-MASS-","T1ttttBENCH");
 
   md.addDataCardSample( "TGJets", "XG"); 
   md.addDataCardSample( "TTGJets", "XG"); 
@@ -142,7 +142,7 @@ void SUSY3LSIGNAME_BENCH(){
 
   md.addNuisanceParameter("JES","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
   md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
-  //md.addNuisanceParameter("PUXS","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
+  md.addNuisanceParameter("PUXS","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
 
   md.addNuisanceParameter("EWKFR","fake","shape","");
 

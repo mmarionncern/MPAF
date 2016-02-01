@@ -18,8 +18,7 @@ void getMassBenchmarks() {
     fileNames.push_back(line);
   }
 
-  //ofstream ofile("massT1ttt.txt", ios::out | ios::trunc);
-  ofstream ofile("massT6ttWW.txt", ios::out | ios::trunc);
+  ofstream ofile("massT1ttt.txt", ios::out | ios::trunc);
   set<string> vals;
 
   for(int i=0;i<fileNames.size();i++) {
