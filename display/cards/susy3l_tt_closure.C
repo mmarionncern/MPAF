@@ -7,8 +7,8 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="ttbar_closure_MuEl_qcd_Powheg_newPU"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="ttbar_closure_MuEl_qcd_Powheg_newPU"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l_closure"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l_closure"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;

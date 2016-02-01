@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#VAR=("njets" "nbjets" "met" "ht" "pt1" "pt2" "pt3" "srs")
+VAR=("njets" "nbjets" "met" "ht" "pt1" "pt2" "pt3" "srs" "flavor") # "el_multi" "mu_multi" "lep_multi")
 #VAR=("ftype")
-VAR=("srs")
+#VAR=("srs")
 
 
 for var in ${VAR[@]}; do

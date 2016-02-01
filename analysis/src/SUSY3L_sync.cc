@@ -568,7 +568,7 @@ void SUSY3L_sync::run(){
             if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
             //fill("fake_type" , type       , _weight);
         }
-        //_weight *= sumTF;
+        _weight *= sumTF;
 	    setWorkflow(kGlobal_Fake);
         advancedSelection( kGlobal_Fake );
     
@@ -1816,8 +1816,8 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
         if((fakableLeps.size()==1) && (tightLeps.size()==2) && (std::abs(fakableLeps[0]->pdgId()) == _closureByFlavor)){pass = true;}
     }
     //enable to limit to TTF events    
-    pass = false;
-    if((fakableLeps.size()==1) && (tightLeps.size()==2)){pass = true;}
+    //pass = false;
+    //if((fakableLeps.size()==1) && (tightLeps.size()==2)){pass = true;}
 
     if(!pass){return vclist;}
     
