@@ -368,17 +368,29 @@ void SUSY3L_sync::modifyWeight() {
 void SUSY3L_sync::run(){
     
     //limit run number to unblineded json
-    if(_vc->get("isData") == 1){
-        if(_vc->get("run")>258750){return;}
-    }
+    //if(_vc->get("isData") == 1){
+    //    if(_vc->get("run")>258750){return;}
+    //}
 
 	//debug output    
-	_lumi = 488;
-    _evt = 161526;
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+	_run = 257751;
+	_lumi = 137;
+    _evt = 204673540;
+    
+    _run2 = 258159;
+	_lumi2 = 170;
+    _evt2 = 217945982;
+  
+  	_run3 = 258702;
+	_lumi3 = 294;
+    _evt3 = 476582910;
+    
+    
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+    cout << _vc->get("run") << " "  << _vc->get("lumi") << " "  << _vc->get("evt") << endl; 
     cout << _vc->get("nLepGood") << endl;
     for(size_t il=0;il<_vc->get("nLepGood");il++) {
-        cout << "pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << endl;
+        cout << "pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << " phi: " << _vc->get("LepGood_phi", il) << endl;
     }}}
 
     //increment event counter, used as denominator for yield calculation
@@ -387,21 +399,33 @@ void SUSY3L_sync::run(){
     if(_fastSim && !checkMassBenchmark()) return;
 
     //event filter
-    //if(!passNoiseFilters()) return;
-    //counter("JME filters");
+    if(!passNoiseFilters()){
+        if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "rejected by JME filter" << endl;}}
+        return;
+    }
+    counter("JME filters");
+    
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+        cout << "passing JEM filter" << endl;
+    }}
 
     //check HLT trigger decition, only let triggered events pass
     if(!_fastSim) {
         if(!passHLTbit()) return;
     }
     counter("HLT");
+ 
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+        cout << "passing trigger" << endl;
+    }}
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
 
     //debug output
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
-    cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << endl;
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+    cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _HT << " " << _met->pt() << endl;
+        cout << "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" << endl;
         cout << "tight leps: " << endl;
         for(size_t il=0;il<_tightLepsPtCut.size();il++) {
             cout << "pt: " << _tightLepsPtCut[il]->pt() << " pdgId: " << _tightLepsPtCut[il]->pdgId() << endl;
@@ -420,6 +444,10 @@ void SUSY3L_sync::run(){
             cout << "miniIso: " << _vc->get("LepGood_miniRelIso", _looseLepsPtCutIdx[il]) << endl;
             cout << "ptRatio v2: " << _vc->get("LepGood_jetPtRatiov2", _looseLepsPtCutIdx[il]) << endl;
             cout << "ptRel v2: " << _vc->get("LepGood_jetPtRelv2", _looseLepsPtCutIdx[il]) << endl;
+        } 
+        cout << "jets: " << endl;
+        for(size_t il=0;il<_jets.size();il++) {
+            cout << "pt: " << _jets[il]->pt() << " " << "eta: " << _jets[il]->eta() << " "<< "phi: " << _jets[il]->phi() << " " << endl;
         }
     }
     }
@@ -460,12 +488,6 @@ void SUSY3L_sync::run(){
     if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
         _weight *= 1.028284;
 
-    //debug output
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
-        cout << _lumi << " " << _evt << endl;
-        cout << "weight before: " << _weight << endl;
-    }}
-
     //btag-scale factors
     if(!_vc->get("isData") ) {
         if(!isInUncProc())  {
@@ -484,12 +506,6 @@ void SUSY3L_sync::run(){
 	        _weight *= _btagW;
     }
     counter("btag SF");
-
-    //debug output
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi")== _lumi){
-        cout << _lumi << " " << _evt << endl;
-        cout << "weight after: " << _weight << endl;
-    }}
 
     //ISR variation for fastsim
     if(_fastSim){
@@ -543,11 +559,19 @@ void SUSY3L_sync::run(){
     
     setWorkflow(kGlobal);	
     
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+        cout << "not in WZ control region" << endl;}}
+
+
     //baseline selection
     setBaselineRegion();
     bool baseSel = multiLepSelection();
 
     if(!baseSel){return;}
+
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+        cout << "passing baseline selection" << endl;}}
+
 
     //fillSkimTree();
 
@@ -905,13 +929,13 @@ bool SUSY3L_sync::looseLepton(const Candidate* c, int idx, int pdgId) {
     }
     else {
         if(c->pt() < 7) return false;
-        if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){cout << "passing pt" << endl;}}
+        if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing pt" << endl;}}
         if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
-        if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){cout << "passing elIdSel" << endl;}}
+        if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing elIdSel" << endl;}}
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
-        if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){cout << "passing multiIso " << _vc->get("LepGood_eInvMinusPInv",idx) << endl;}}
+        if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing multiIso " << _vc->get("LepGood_eInvMinusPInv",idx) << endl;}}
         if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
-        if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){cout << "passing Trig emu" << endl;}}
+        if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing Trig emu" << endl;}}
     }
 
     return true;
@@ -1395,6 +1419,9 @@ void SUSY3L_sync::advancedSelection(int WF){
     //require minimum missing transvers energy
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+        cout << "passing advanced selection" << endl;}}
+
     counter("baseline");
     fillHistos();
 
@@ -1821,14 +1848,14 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
 
     if(!pass){return vclist;}
     
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
         cout << "low invariant mass veto fakes: " << endl;
     }}
     //low invariant mass veto
     for(size_t il=0;il<clist.size();il++) {
         if(!_susyMod->passMllMultiVeto( clist[il], &clist, 0, 12, true) ) {return vclist;}
     }
-    if(_debug){if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
         cout << "Z selection invariant mass fakes: " << endl;
     }}
     
@@ -1903,9 +1930,9 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
 
     //lepton candidates
     sortSelectedLeps(clistPtCorr, idxsPtCorr);
-    //fill("nFO", clist.size(),   _weight);
-    //fill("nFakeComb", vclist.size(),    _weight);
-    //fill("ptRank", fakeRank,    _weight);
+    fill("nFO", clist.size(),   _weight);
+    fill("nFakeComb", vclist.size(),    _weight);
+    fill("ptRank", fakeRank,    _weight);
    
     return vclist;
 }

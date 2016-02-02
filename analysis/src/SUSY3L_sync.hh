@@ -100,8 +100,17 @@ private:
     string _FR;
     int _fastSim;
     bool _debug;
+    long int _run;
     long int _evt;
     long int _lumi;
+    long int _run2;
+    long int _evt2;
+    long int _lumi2;
+    long int _run3;
+    long int _evt3;
+    long int _lumi3;
+
+
 
 
 private:

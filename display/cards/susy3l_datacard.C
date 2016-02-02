@@ -6,8 +6,8 @@ void susy3l_datacard() {
 
   //general parameters ********************* general parameters
   string dir="SUSY3L";
-  string fileName="160201_3l_unblinded"; // not needed for statistics but provides the normalization
-  string fileList="160201_3l_unblinded"; // put command line that gives all files as in a "ls" command
+  string fileName="merged_2fb_Bkg"; // not needed for statistics but provides the normalization
+  string fileList="merged_2fb"; // put command line that gives all files as in a "ls" command
 
   bool mcOnly = false;
   
@@ -15,10 +15,10 @@ void susy3l_datacard() {
   md.anConf.configureData(false, 0, mcOnly);
   
   //Lumis( or XSections ) pb-1 & KFactors ************************************
-  float lumi=2160; //pb-1 19470
+  float lumi=2260; //pb-1 19470
   float energy=13; //TeV
 
-  bool useXS=false;
+  bool useXS=true;
 
   md.anConf.loadXSDB("XSectionsSpring15.db");
 
@@ -296,7 +296,7 @@ void susy3l_datacard() {
   md.makeMultiDataCard(signal, vcategs, "selected", signal);
 
  
-  //md.getStatistics("global_OffZBaseline");
+  md.getStatistics("global_OffZSR001");
   gROOT->ProcessLine(".q");
 
 }
