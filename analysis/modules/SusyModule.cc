@@ -442,8 +442,8 @@ SusyModule::passMllSingleVeto(const Candidate* c1, const Candidate* c2,
 
   if( (c1->pdgId()== -c2->pdgId()) || !ossf) {
     float mll = Candidate::create(c1,c2)->mass();
-    if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
-        cout << "invariant mass: " << mll << endl;}
+    //if(_vc->get("evt") == _evt && _vc->get("lumi") == _lumi){
+      //  cout << "invariant mass: " << mll << endl;}
     if(mll>mllm && mll<mllM) return false; 
   }
   return true;
