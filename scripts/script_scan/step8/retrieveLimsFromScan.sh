@@ -8,9 +8,10 @@ for i in `ls $mydir/*.log`; do
 
 spl=`echo $i | tr '_' ' '`
 
-sig=`echo $spl | awk '{print $3}'`
-m1=`echo $spl | awk '{print $4}'`
-m2=`echo $spl | awk '{print $5}'`
+sig="T1tttt"
+m1=`echo $spl | awk '{print $2}'`
+m1=${m1#T1tttt}
+m2=`echo $spl | awk '{print $3}'`
 m2=${m2%.txt.log}
 
 #echo $m1

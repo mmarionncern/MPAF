@@ -13,3 +13,4 @@ workdir/*
 !workdir/database/
 *dictgen.mk
 *gen.mk
+scripts/script_scan/*

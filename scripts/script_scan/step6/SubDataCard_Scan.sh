@@ -37,5 +37,4 @@ for i in `ls $MPAF/workdir/stats/SUSY3L/3l_scanSig_T1tttt-*-*-.dat`; do
 	sub  susy3l_scanSig_${bench}.C
 	NJ=0
     fi
-   break 
 done

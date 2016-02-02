@@ -158,6 +158,8 @@ public:
   void makeMultiDataCard(string sigName, vector<string> categs, 
 			 string cname, string cardname);
 
+std::string trim(std::string, std::string chr = " ");
+
   ClassDef(MPAFDisplay,0)
 
 };

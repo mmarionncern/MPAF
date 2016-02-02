@@ -1357,6 +1357,16 @@ void SUSY3L::advancedSelection(int WF){
 
     fillHistos();
 
+    //print out event info
+    if(WF==kGlobal){
+    //printout for sync     
+    long int run = _vc->get("run");
+    long int lumi = _vc->get("lumi");
+    long int evt = _vc->get("evt");
+    cout << run << " " << lumi << " " << evt /*<< " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets*/ << endl;
+    }
+    
+
     //categorize events into signal regions
     if(_categorization){
         categorize();

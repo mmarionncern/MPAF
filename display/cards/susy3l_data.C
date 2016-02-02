@@ -24,7 +24,7 @@ void susy3l_data() {
     string region = "OnZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "srs";}
+    else{string obs = "ht";}
  
 
     //Binning & title ************************* Binning & titre

@@ -217,6 +217,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 	if(pos!=string::npos && categ.substr(pos+1, categ.size()-pos-1).find("R")==string::npos) {
 	  ext=categ.substr(pos+1, categ.size()-pos-1);
 	  redCateg=categ.substr(0, categ.size()-ext.size()-1);
+      redCateg=trim(redCateg, "_");
 	}
 	
         yield  = atof( tks[n+1].c_str() );
@@ -361,7 +362,7 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
 
   if(!ds->isPPcolDataset()) w *= anConf.getLumi(); 
   if(ds->getSample(sname)->isDD()) w/=anConf.getLumi();
-cout << sname << ": " << ds->getSample(sname)->isDD() << endl;
+
   yield *=w;
   eyield *=w;
  
@@ -1224,4 +1225,14 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
 
 }
 
+
+//____________________________________________________________________________
+std::string MPAFDisplay::trim(std::string s, std::string chr){
+
+    size_t first = s.find_first_not_of(chr);
+    size_t last  = s.find_last_not_of(chr);
+    if(first == std::string::npos) return "";
+    return s.substr(first, (last-first+1));
+
+}
 
