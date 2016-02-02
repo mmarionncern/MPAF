@@ -1,6 +1,6 @@
 MPAFDisplay md;
 
-void SUSY3L_BENCH(){
+void susy3l_scanSig_BENCH(){
   md.refresh();
 
   //general parameters ********************* general parameters
@@ -14,7 +14,7 @@ void SUSY3L_BENCH(){
   md.anConf.configureData(false, 0, mcOnly);
      
    //Lumis( or XSections ) pb-1 & KFactors ************************************
-  float lumi=2180; //pb-1 19470
+  float lumi=2260; //pb-1 19470
   float energy=13; //TeV
 
   bool useXS=true;
@@ -55,33 +55,33 @@ void SUSY3L_BENCH(){
   md.addDataCardSample( "ZZZ", "rares"); 
   md.addDataCardSample( "TTTT", "rares"); 
 
-  md.addDataCardSample( "data:Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
-  md.addDataCardSample( "data:Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
-  md.addDataCardSample( "data:Fake:DoubleEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
-  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015C_Oct05_runs_254231_254914", "fake"); 
-  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015D_Oct05_runs_256630_258158", "fake"); 
-  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015D_PromptV4_runs_258159_260627","fake");
-  md.addDataCardSample( "data:Fake:MuonEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
-  md.addDataCardSample( "data:Fake:MuonEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
-  md.addDataCardSample( "data:Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
+  md.addDataCardSample( "data:_Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
+  md.addDataCardSample( "data:_Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
+  md.addDataCardSample( "data:_Fake:DoubleEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
+  md.addDataCardSample( "data:_Fake:DoubleMuon_Run2015C_Oct05_runs_254231_254914", "fake"); 
+  md.addDataCardSample( "data:_Fake:DoubleMuon_Run2015D_Oct05_runs_256630_258158", "fake"); 
+  md.addDataCardSample( "data:_Fake:DoubleMuon_Run2015D_PromptV4_runs_258159_260627","fake");
+  md.addDataCardSample( "data:_Fake:MuonEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
+  md.addDataCardSample( "data:_Fake:MuonEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
+  md.addDataCardSample( "data:_Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
 
-  md.addDataCardSample( "Fake:TGJets", "fake", -1 );
-  md.addDataCardSample( "Fake:TTGJets", "fake", -1 );
-  md.addDataCardSample( "Fake:ZGTo2LG", "fake", -1 );
-  md.addDataCardSample( "Fake:WGToLNuG", "fake", -1 );
-  md.addDataCardSample( "Fake:TTHnobb", "fake", -1 );
-  md.addDataCardSample( "Fake:TTLLJets_m1to10", "fake", -1 );
-  md.addDataCardSample( "Fake:TTZToLLNuNu", "fake", -1 );
-  md.addDataCardSample( "Fake:TTWToLNu", "fake", -1 );
-  md.addDataCardSample( "Fake:WZTo3LNu", "fake", -1 );
-  md.addDataCardSample( "Fake:tZq_ll", "fake", -1 );
-  md.addDataCardSample( "Fake:VHToNonbb", "fake", -1 );
-  md.addDataCardSample( "Fake:GGHZZ4L", "fake", -1 );
-  md.addDataCardSample( "Fake:ZZTo4L", "fake", -1 );
-  md.addDataCardSample( "Fake:WWZ", "fake", -1 );
-  md.addDataCardSample( "Fake:WZZ", "fake", -1 );
-  md.addDataCardSample( "Fake:ZZZ", "fake", -1 );
-  md.addDataCardSample( "Fake:TTTT", "fake", -1 );
+  md.addDataCardSample( "_Fake:TGJets", "fake", -1 );
+  md.addDataCardSample( "_Fake:TTGJets", "fake", -1 );
+  md.addDataCardSample( "_Fake:ZGTo2LG", "fake", -1 );
+  md.addDataCardSample( "_Fake:WGToLNuG", "fake", -1 );
+  md.addDataCardSample( "_Fake:TTHnobb", "fake", -1 );
+  md.addDataCardSample( "_Fake:TTLLJets_m1to10", "fake", -1 );
+  md.addDataCardSample( "_Fake:TTZToLLNuNu", "fake", -1 );
+  md.addDataCardSample( "_Fake:TTWToLNu", "fake", -1 );
+  md.addDataCardSample( "_Fake:WZTo3LNu", "fake", -1 );
+  md.addDataCardSample( "_Fake:tZq_ll", "fake", -1 );
+  md.addDataCardSample( "_Fake:VHToNonbb", "fake", -1 );
+  md.addDataCardSample( "_Fake:GGHZZ4L", "fake", -1 );
+  md.addDataCardSample( "_Fake:ZZTo4L", "fake", -1 );
+  md.addDataCardSample( "_Fake:WWZ", "fake", -1 );
+  md.addDataCardSample( "_Fake:WZZ", "fake", -1 );
+  md.addDataCardSample( "_Fake:ZZZ", "fake", -1 );
+  md.addDataCardSample( "_Fake:TTTT", "fake", -1 );
 
   md.addDataCardSample( "TGJets", "pseudodata"); 
   md.addDataCardSample( "TTGJets", "pseudodata"); 
@@ -100,32 +100,32 @@ void SUSY3L_BENCH(){
   md.addDataCardSample( "WZZ", "pseudodata"); 
   md.addDataCardSample( "ZZZ", "pseudodata"); 
   md.addDataCardSample( "TTTT", "pseudodata"); 
-  md.addDataCardSample( "data:Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914", "pseudodata"); 
-  md.addDataCardSample( "data:Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158", "pseudodata"); 
-  md.addDataCardSample( "data:Fake:DoubleEG_Run2015D_PromptV4_runs_258159_260627", "pseudodata"); 
-  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015C_Oct05_runs_254231_254914", "pseudodata"); 
-  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015D_Oct05_runs_256630_258158", "pseudodata"); 
-  md.addDataCardSample( "data:Fake:DoubleMuon_Run2015D_PromptV4_runs_258159_260627","pseudodata");
-  md.addDataCardSample( "data:Fake:MuonEG_Run2015C_Oct05_runs_254231_254914", "pseudodata"); 
-  md.addDataCardSample( "data:Fake:MuonEG_Run2015D_Oct05_runs_256630_258158", "pseudodata"); 
-  md.addDataCardSample( "data:Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627", "pseudodata"); 
-  md.addDataCardSample( "Fake:TGJets", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:TTGJets", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:ZGTo2LG", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:WGToLNuG", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:TTHnobb", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:TTLLJets_m1to10", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:TTZToLLNuNu", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:TTWToLNu", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:WZTo3LNu", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:tZq_ll", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:VHToNonbb", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:GGHZZ4L", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:ZZTo4L", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:WWZ", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:WZZ", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:ZZZ", "pseudodata", -1 );
-  md.addDataCardSample( "Fake:TTTT", "pseudodata", -1 );
+  md.addDataCardSample( "data:_Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914", "pseudodata"); 
+  md.addDataCardSample( "data:_Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158", "pseudodata"); 
+  md.addDataCardSample( "data:_Fake:DoubleEG_Run2015D_PromptV4_runs_258159_260627", "pseudodata"); 
+  md.addDataCardSample( "data:_Fake:DoubleMuon_Run2015C_Oct05_runs_254231_254914", "pseudodata"); 
+  md.addDataCardSample( "data:_Fake:DoubleMuon_Run2015D_Oct05_runs_256630_258158", "pseudodata"); 
+  md.addDataCardSample( "data:_Fake:DoubleMuon_Run2015D_PromptV4_runs_258159_260627","pseudodata");
+  md.addDataCardSample( "data:_Fake:MuonEG_Run2015C_Oct05_runs_254231_254914", "pseudodata"); 
+  md.addDataCardSample( "data:_Fake:MuonEG_Run2015D_Oct05_runs_256630_258158", "pseudodata"); 
+  md.addDataCardSample( "data:_Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627", "pseudodata"); 
+  md.addDataCardSample( "_Fake:TGJets", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:TTGJets", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:ZGTo2LG", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:WGToLNuG", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:TTHnobb", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:TTLLJets_m1to10", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:TTZToLLNuNu", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:TTWToLNu", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:WZTo3LNu", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:tZq_ll", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:VHToNonbb", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:GGHZZ4L", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:ZZTo4L", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:WWZ", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:WZZ", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:ZZZ", "pseudodata", -1 );
+  md.addDataCardSample( "_Fake:TTTT", "pseudodata", -1 );
 
   
   // md.addDataCardSample( "DoubleEG_Run2015C_Oct05_runs_254231_254914", "data"); 
@@ -266,5 +266,5 @@ void SUSY3L_BENCH(){
  
   md.makeMultiDataCard("T1ttttBENCH", vcategs, "selected", "susy3l_T1ttttBENCH");
 
-  gROOT->ProcessLine(".q");
+  gROOT->ProcessLine(".qqqqqqqqqqqqqq");
 }

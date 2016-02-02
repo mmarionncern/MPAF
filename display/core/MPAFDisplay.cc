@@ -361,7 +361,7 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
 
   if(!ds->isPPcolDataset()) w *= anConf.getLumi(); 
   if(ds->getSample(sname)->isDD()) w/=anConf.getLumi();
-
+cout << sname << ": " << ds->getSample(sname)->isDD() << endl;
   yield *=w;
   eyield *=w;
  

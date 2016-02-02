@@ -7,8 +7,8 @@ void susy3l_data() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="160201_3l_unblinded"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="160201_3l_unblinded"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l_unblinded_2260pb"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l_unblinded_2260pb"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -20,7 +20,7 @@ void susy3l_data() {
  
     string sigs = "none"; 
     bool data = true;
-    bool manual = true;
+    bool manual = false;
     string region = "OnZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
@@ -117,7 +117,7 @@ void susy3l_data() {
         md.dp.setObservables("SRS" + region);
         int binning=1;
         double rangeX[2]={1,16};
-        //bool logYScale=true;
+        bool logYScale=false;
     }
     if(obs == "mu_multi"){
         md.dp.setObservables("mu_multiplicity" + region);
@@ -152,7 +152,7 @@ void susy3l_data() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=2180; //pb-1 19470
+    float lumi=2260; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=false;
