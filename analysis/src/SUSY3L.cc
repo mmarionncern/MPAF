@@ -284,6 +284,13 @@ void SUSY3L::initialize(){
     _debug = getCfgVarI("debug", 0);
     _runSystematics = getCfgVarI("runSystematics", 1);
 
+    if(_fastSim) {
+        _susyProcessName = getCfgVarS("susyProcessName", "T6ttWW");
+        //load signal cross section and number of generated events
+         _dbm->loadDb(_susyProcessName+"Xsect", _susyProcessName+"Xsect.db");
+        loadScanHistogram();
+    }
+
     //FR databases
     if(_FR=="FO2C") {
         //old: file_fo04.root
@@ -321,9 +328,6 @@ void SUSY3L::initialize(){
     //_dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
     //_dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
     
-    //load signal cross section
-    _dbm->loadDb("T1ttttXsect", "SignalXsect.db");
-
     //load pile-up weights
     _dbm->loadDb("puWeights","pileupWeights.root","pileup");
     _dbm->loadDb("puWeightsUp","pileupWeights.root","pileupUpXS");
@@ -2341,7 +2345,7 @@ bool SUSY3L::checkMassBenchmark(){
     }
 
     if(_sampleName.find(s)==string::npos) return false;
-    _weight *= _dbm->getDBValue("T1ttttXsect",M1)/_nProcEvtScan;
+    _weight *= _dbm->getDBValue(_susyProcessName+"Xsect",M1)/_nProcEvtScan;
     return true;
 
 }
@@ -2349,9 +2353,9 @@ bool SUSY3L::checkMassBenchmark(){
 
 //____________________________________________________________________________
 void SUSY3L::loadScanHistogram(){
-    
-    string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScanT1tttt.root";
+   
+    string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScan"+_susyProcessName+".root";
     TFile* file=new TFile(mpafenv.c_str(),"read");
     _hScanWeight=(TH3D*)file->Get("CountSMS");
-
+ 
 }

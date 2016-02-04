@@ -95,6 +95,7 @@ private:
     int _closureByFlavor;
     bool _exactlyThreeLep;
     bool _runSystematics;
+    string _susyProcessName;
     string _BR;
     string _SR;
     string _FR;
