@@ -322,7 +322,7 @@ void SUSY3L_sync::initialize(){
     //_dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
     
     //load signal cross section
-    _dbm->loadDb("T1ttttXsect", "SignalXsect.db");
+    //_dbm->loadDb("T1ttttXsect", "SignalXsect.db");
 
     //load pile-up weights
     _dbm->loadDb("puWeights","pileupWeights.root","pileup");
@@ -1431,12 +1431,12 @@ void SUSY3L_sync::advancedSelection(int WF){
 
     //print out event info
     if(!_debug){ 
-    if(WF==kGlobal_Fake){
+    if(WF==kGlobal){
     //printout for sync     
     long int run = _vc->get("run");
     long int lumi = _vc->get("lumi");
     long int evt = _vc->get("evt");
-    cout << run << " " << lumi << " " << evt /*<< " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets*/ << endl;
+    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << endl;
     }}
     
 
