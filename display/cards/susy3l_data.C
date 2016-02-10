@@ -6,12 +6,12 @@ void susy3l_data() {
 
 
     //general parameters ********************* general parameters
-    string dir="SUSY3L_sync";
+    string dir="SUSY3L";
     //string fileName="3l_unblinded_2260pb"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="3l_unblinded_2260pb"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
-    string fileName="data_unblinded"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="data_unblinded"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -24,10 +24,10 @@ void susy3l_data() {
     string sigs = "none"; 
     bool data = true;
     bool manual = true;
-    string region = "";
+    string region = "WZCR";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "nfo";}
+    else{string obs = "mt";}
  
 
     //Binning & title ************************* Binning & titre
@@ -185,7 +185,7 @@ void susy3l_data() {
     //===============================================================
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
-/* 
+ 
     //rare
     md.anConf.addSample( "GGHZZ4L"                              ,  "rare"        , kMagenta-7    );
     md.anConf.addSample( "VHToNonbb"                            ,  "rare"        , kMagenta-7    );
@@ -212,7 +212,7 @@ void susy3l_data() {
     
     //TTW
     md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );
- */
+ 
     //fakes
     //md.anConf.addSample( "TT_pow"                               ,  "fakes"       , 18            );
     //md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "fakes"       , 18            );
