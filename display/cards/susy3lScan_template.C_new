@@ -82,7 +82,7 @@ void susy3l_scanSig_BENCH(){
   md.addDataCardSample( "Fake:WZZ", "fake", -1 );
   md.addDataCardSample( "Fake:ZZZ", "fake", -1 );
   md.addDataCardSample( "Fake:TTTT", "fake", -1 );
-
+/*
   md.addDataCardSample( "TGJets", "pseudodata"); 
   md.addDataCardSample( "TTGJets", "pseudodata"); 
   md.addDataCardSample( "ZGTo2LG", "pseudodata"); 
@@ -126,8 +126,8 @@ void susy3l_scanSig_BENCH(){
   md.addDataCardSample( "Fake:WZZ", "pseudodata", -1 );
   md.addDataCardSample( "Fake:ZZZ", "pseudodata", -1 );
   md.addDataCardSample( "Fake:TTTT", "pseudodata", -1 );
-
-/*  
+*/
+  
   md.addDataCardSample( "DoubleEG_Run2015C_Oct05_runs_254231_254914", "data"); 
   md.addDataCardSample( "DoubleEG_Run2015D_Oct05_runs_256630_258158", "data"); 
   md.addDataCardSample( "DoubleEG_Run2015D_PromptV4_runs_258159_260627", "data"); 
@@ -137,12 +137,12 @@ void susy3l_scanSig_BENCH(){
   md.addDataCardSample( "MuonEG_Run2015C_Oct05_runs_254231_254914", "data"); 
   md.addDataCardSample( "MuonEG_Run2015D_Oct05_runs_256630_258158", "data"); 
   md.addDataCardSample( "MuonEG_Run2015D_PromptV4_runs_258159_260627", "data"); 
-*/
+
   //===============================================================
 
-  md.addNuisanceParameter("JES","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
-  md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
-  //md.addNuisanceParameter("PUXS","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
+  md.addNuisanceParameter("JES","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
+  md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
+  md.addNuisanceParameter("PUXS","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
 
   md.addNuisanceParameter("EWKFR","fake","shape","");
 
@@ -166,7 +166,7 @@ void susy3l_scanSig_BENCH(){
    "OffZSR013", "OffZSR014", "OffZSR015"
  };
 
- string dss[7]={"ttW","ttZH","WZ","WW","XG","rares","T1ttttBENCH"};
+ string dss[7]={"ttW","ttZH","WZ","XG","fake","rares","T1ttttBENCH"};
 
  for(int isr=0;isr<30;isr++) {
     md.addNuisanceParameter("pdfS"+cats[isr],"T1ttttBENCH","shape","");
@@ -180,11 +180,11 @@ void susy3l_scanSig_BENCH(){
 
  //Flat uncertanties =================================
  //lumi
- md.addNuisanceParameter("lumi","ttW:ttZH:WW:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046:1.046:1.046");
+ md.addNuisanceParameter("lumi","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046");
  //experimental uncertainties
- md.addNuisanceParameter("lEff","ttW:ttZH:WW:XG:rares:T1ttttBENCH","lnN","1.04:1.04:1.04:1.04:1.04:1.04");
- md.addNuisanceParameter("tEff","ttW:ttZH:WW:XG:rares:T1ttttBENCH","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
- md.addNuisanceParameter("pileup","ttW:ttZH:WW:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03:1.03:1.03");
+ md.addNuisanceParameter("tEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03");
+ md.addNuisanceParameter("lEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.02:1.02:1.02:1.02:1.02");
+ //md.addNuisanceParameter("pileup","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03");
  //Data-driven methods
  md.addNuisanceParameter("fratio","fake","lnN","1.30");
  //theoretical uncertainties

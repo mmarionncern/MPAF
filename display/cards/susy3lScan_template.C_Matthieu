@@ -14,7 +14,7 @@ void susy3l_scanSig_BENCH(){
   md.anConf.configureData(false, 0, mcOnly);
      
    //Lumis( or XSections ) pb-1 & KFactors ************************************
-  float lumi=2260; //pb-1 19470
+  float lumi=2180; //pb-1 19470
   float energy=13; //TeV
 
   bool useXS=true;
