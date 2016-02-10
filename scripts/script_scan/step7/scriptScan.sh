@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#cd $MPAF/workdir/datacards/
 
 N=0
 for i in `ls *.txt`; do
