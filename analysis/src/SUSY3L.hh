@@ -129,7 +129,7 @@ private:
     
     kGlobal_Fake,
     
-    kWZCR
+    kWZCR, kWZCR_Fake
     };
 
     enum {kIsSingleFake=0,kIsDoubleFake,kIsTripleFake };

@@ -227,9 +227,9 @@ void SUSY3L::initialize(){
     _susyMod = new SusyModule(_vc, _dbm);
 
     //categories
-    int nCateg=66;
+    int nCateg=67;
     _categs.resize(nCateg);
-    string srs[66]={
+    string srs[67]={
        
     //signal regions
         "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
@@ -252,8 +252,8 @@ void SUSY3L::initialize(){
         "OnZBaseline_Fake", "OffZBaseline_Fake",
     
     //other
-        "_Fake", 
-        "WZCR"
+        "Fake", 
+        "WZCR", "WZCR_Fake"
     };
 
     _categs.assign(srs, srs+nCateg);
@@ -265,8 +265,8 @@ void SUSY3L::initialize(){
     }
 
     //workflows
-    addWorkflow( kGlobal_Fake, "_Fake" );
-    addWorkflow( kWZCR, "WZCR");        
+    //addWorkflow( kGlobal_Fake, "_Fake" );
+    //addWorkflow( kWZCR, "WZCR");        
 
     //config file input variables
     _onZ = getCfgVarI("onZ", -1);
@@ -294,8 +294,6 @@ void SUSY3L::initialize(){
 
     //FR databases
     if(_FR=="FO2C") {
-        //old: file_fo04.root
-        //new: 160116_FR_withIdEmu.root
 
         _dbm->loadDb("ElNIso"    , "160116_FR_withIdEmu.root", "FRElPtCorr_UCSX_non");
         _dbm->loadDb("MuNIso"    , "160116_FR_withIdEmu.root", "FRMuPtCorr_UCSX_non");
@@ -621,15 +619,7 @@ void SUSY3L::defineOutput(){
         _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
         _hm->addVariable(reg[r]+"_NJets40"        ,   8,-0.5, 7.5, "N_{jets} (p_{T} > 40 GeV)", false);
     }
-
  
-    
-    //additional observables
-/*    _hm->addVariable("MT2"              ,  400,     0.0,  400.0,    "MT2 [GeV]"                         );
-    _hm->addVariable("3rd_lepton_flavor",  40,      -20,   20.0,    "3rd lepton pdgId"                  );
-    _hm->addVariable("3rd_lepton_pt"    ,  200,       0,  200.0,    "3rd lepton pt"                     );
-    _hm->addVariable("deltaR_elmu"      ,  500,     0.0,   10.0,    "delta R between el and mu"         );
-*/
 }
 
 
