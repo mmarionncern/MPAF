@@ -93,6 +93,7 @@ private:
     bool _doPlots;
     bool _doValidationPlots;
     int _closureByFlavor;
+    int _closure;
     bool _exactlyThreeLep;
     bool _runSystematics;
     string _susyProcessName;

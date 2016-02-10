@@ -280,6 +280,7 @@ void SUSY3L::initialize(){
     _doValidationPlots = getCfgVarI("doValidationPlots", 0);
     _fastSim = getCfgVarI("FastSim", 0);
     _closureByFlavor = getCfgVarI("closureByFlavor", 0);
+    _closure = getCfgVarI("closure", 0);
     _exactlyThreeLep = getCfgVarI("exactlyThreeLep", 0);
     _debug = getCfgVarI("debug", 0);
     _runSystematics = getCfgVarI("runSystematics", 1);
@@ -359,11 +360,13 @@ void SUSY3L::modifyWeight() {
     
     if(_vc->get("isData") != 1){
         _weight *= _vc->get("genWeight");
-	    string db="puWeights";
-	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsUp";}
-	    if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
-	    _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
-        //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+	    if(!_closure){
+            string db="puWeights";
+	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsUp";}
+	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
+	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
+            //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+        }
     }
 
 }
@@ -434,7 +437,7 @@ void SUSY3L::run(){
     */
 
     //btag-scale factors
-    if(!_vc->get("isData") ) {
+    if(!_vc->get("isData") && !_closure ) {
         if(!isInUncProc())  {
 	        _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
 	        _weight *= _btagW;
@@ -527,7 +530,7 @@ void SUSY3L::run(){
             if(type==kIsSingleFake){ sumTF += getTF_SingleFake(ic); }
             if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
             if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
-            //fill("fake_type" , type       , _weight);
+            if(_doPlots) fill("fake_type" , type+1       , _weight);
         }
         _weight *= sumTF;
 	    setWorkflow(kGlobal_Fake);
@@ -578,7 +581,7 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} [GeV]"                   );
 
     //auxiliary for fake estimartion
-    _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "fake event type"                                   );
+    _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "N_{fakeable-not-tight leptons}"                    );
     _hm->addVariable("nFO"              ,  7,     0.0,  7.0,    "number of tight plus fakable-not-tight leptons"    );
     _hm->addVariable("nFakeComb"        ,  5,     0.0,  5.0,    "number of tight-fake-combinations per event"       );
     _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
@@ -1842,10 +1845,12 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
 
     //lepton candidates
     sortSelectedLeps(clistPtCorr, idxsPtCorr);
-    //fill("nFO", clist.size(),   _weight);
-    //fill("nFakeComb", vclist.size(),    _weight);
-    //fill("ptRank", fakeRank,    _weight);
-   
+    if(_doPlots){
+        fill("nFO", clist.size(),   _weight);
+        fill("nFakeComb", vclist.size(),    _weight);
+        fill("ptRank", fakeRank,    _weight);
+    }
+
     return vclist;
 }
 
@@ -2353,9 +2358,10 @@ bool SUSY3L::checkMassBenchmark(){
 
 //____________________________________________________________________________
 void SUSY3L::loadScanHistogram(){
-   
-    string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScan"+_susyProcessName+".root";
-    TFile* file=new TFile(mpafenv.c_str(),"read");
-    _hScanWeight=(TH3D*)file->Get("CountSMS");
- 
+  
+    if(_fastSim){ 
+        string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScan"+_susyProcessName+".root";
+        TFile* file=new TFile(mpafenv.c_str(),"read");
+        _hScanWeight=(TH3D*)file->Get("CountSMS");
+    }
 }
