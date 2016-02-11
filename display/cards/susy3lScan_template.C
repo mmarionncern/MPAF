@@ -149,6 +149,7 @@ void susy3l_scanSig_BENCH(){
 
     md.addNuisanceParameter("ttWAcc","ttW","shape","");
     md.addNuisanceParameter("ttZHAcc","ttZH","shape","");
+    //md.addNuisanceParameter("wzTh","WZ","shape",""); //TODO: to be added
 
     md.addNuisanceParameter("BTAGFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
@@ -172,7 +173,7 @@ void susy3l_scanSig_BENCH(){
     //experimental uncertainties
     md.addNuisanceParameter("HLTEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03");
     md.addNuisanceParameter("fastSimHLT","T1ttttBENCH","lnN","1.05");
-    md.addNuisanceParameter("LepEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.035:1.035:1.035:1.035:1.035");
+    md.addNuisanceParameter("LepEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.035:1.035:1.035:1.035:1.035"); //2% per lepton
  
     //Data-driven methods
     md.addNuisanceParameter("fakeExtrapol","fake","lnN","1.30");
@@ -234,6 +235,10 @@ void susy3l_scanSig_BENCH(){
     };
 
     string dss[7]={"ttW","ttZH","WZ","XG","fake","rares","T1ttttBENCH"};
+
+
+
+    //TODO: section under construction
 
     for(int isr=0;isr<30;isr++) {
         //theoretical uncertainty fastSim signal pdf
