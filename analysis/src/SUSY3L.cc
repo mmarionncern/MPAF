@@ -356,7 +356,7 @@ void SUSY3L::initialize(){
         addManualSystSource("BTAG",SystUtils::kNone);
         addManualSystSource("JES",SystUtils::kNone);
         addManualSystSource("BTAGFS",SystUtils::kNone);
-        //addManualSystSource("LepEffFS",SystUtils::kNone); --> currently disabled
+        addManualSystSource("LepEffFS",SystUtils::kNone);
         addManualSystSource("ISR",SystUtils::kNone);
         addManualSystSource("EWKFR",SystUtils::kNone);
         addManualSystSource("PUXS",SystUtils::kNone);
@@ -479,30 +479,18 @@ void SUSY3L::run(){
         if(!_fastSim) {
 	        _weight*=_susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
         }
-        //fastSim scale factors, currently flat uncertainty added in display card, TODO: change to flavor and pt dependet shape uncertainty
+        //fastSim scale factors and flavor and pt dependent shape uncertainty
         else{
             _weight*=_susyMod->applyFastSimLepSfRA7(_tightLepsPtCutMllCut, _vc->get("nTrueInt"));
+            // //uncertainties
+	        if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
+	            _weight *= _susyMod->getVarWeightFastSimLepSFRA7(_tightLepsPtCutMllCut, 1);
+	        if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
+	          _weight *= _susyMod->getVarWeightFastSimLepSFRA7(_tightLepsPtCutMllCut, -1);
         }
     } 
-    
     counter("lepton SF");
-    /*
-        //fastSim lepton scale factors and variations for uncertainty 
-        else {
-	        // _weight*=_susyMod->LTFastSimTriggerEfficiency(_HT, _l1Cand->pt(),
-	        // 					      _l1Cand->pdgId(), 
-	        // 					      _l2Cand->pt(),
-	        // 					      _l2Cand->pdgId()); // trigger
-	        // //lep1 SF * lep2 SF
-	        // _weight *= _susyMod -> getFastSimLepSF(_l1Cand, _l2Cand, _vc->get("nVert")); 
-	        // //uncertainties
-	        // if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
-	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, 1);
-	        // if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
-	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
-        }
-    }
-  */
+
     //end event reweighting ////////////////////////////////////////////////////
   
     setWorkflow(kGlobal);	

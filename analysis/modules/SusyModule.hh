@@ -134,6 +134,7 @@ public:
   double LTFastSimTriggerEfficiency(double HT, double l1_Pt, int l1_pdgId, double l2_Pt, int l2_pdgId);
 
   float getVarWeightFastSimLepSF(const Candidate* l1, const Candidate* l2, int dir);
+  float getVarWeightFastSimLepSFRA7(const CandList& cands, int dir);
 
   float getPuWeight(unsigned int nvtx);
 

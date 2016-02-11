@@ -2336,6 +2336,29 @@ SusyModule::getVarWeightFastSimLepSF(const Candidate* l1,
 
 }
 
+float
+SusyModule::getVarWeightFastSimLepSFRA7(const CandList& cands, int dir) {
+
+    float totUnc = 1.;
+    for(int il = 0;il<cands.size();il++){
+        const Candidate* cand = cands[il];
+        float unc = 1.;
+        if(std::abs(cand->pdgId())==11) {
+            if(cand->pt()<20) unc+=0.10*dir;
+            else if(cand->pt()<30) unc+=0.08*dir;
+            else unc+=0.05*dir;
+        }
+        if(std::abs(cand->pdgId())==13) {
+            if(cand->pt()<20) unc+=0.03*dir;
+            else if(cand->pt()<30) unc+=0.01*dir;
+            else unc+=0.01*dir;
+        }
+        totUnc *= unc;
+    }
+    return totUnc;
+}
+
+
 float 
 SusyModule::getPuWeight(unsigned int nvtx) {
   if(nvtx>_puWeights.size()-1) return 1;
