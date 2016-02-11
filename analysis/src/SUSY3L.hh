@@ -46,8 +46,8 @@ private:
     float getTF_TripleFake(int ic);
     bool wzCRSelection();
     bool wzCRFakeSelection();
-    bool fakeCRSelection();
-    bool fakeCRFakeSelection();
+    void fakeCRSelection();
+    void fakeCRFakeSelection();
     bool ZMuMuSelection();
     bool ttbarSelection();
     bool ZElElSelection();

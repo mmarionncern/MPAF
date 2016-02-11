@@ -472,7 +472,7 @@ void SUSY3L::run(){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
     }
-    
+   /* 
     //lepton scale factors
     if(!_isData){
         fullSim scale factors, flat uncertainty added in display card
@@ -490,7 +490,7 @@ void SUSY3L::run(){
         }
     } 
     counter("lepton SF");
-
+*/
     //end event reweighting ////////////////////////////////////////////////////
   
     setWorkflow(kGlobal);	
@@ -511,8 +511,8 @@ void SUSY3L::run(){
     setWorkflow(kGlobal);	
    
     //select events for fake control region in data
-    bool fakeCRSel = fakeCRSelection();
-    bool fakeCRFakeSel = fakeCRFakeSelection();
+    fakeCRSelection();
+    fakeCRFakeSelection();
     setWorkflow(kGlobal);	
     
     //baseline selection
@@ -1556,7 +1556,7 @@ bool SUSY3L::wzCRFakeSelection(){
 
 
 //____________________________________________________________________________
-bool SUSY3L::fakeCRSelection(){
+void SUSY3L::fakeCRSelection(){
     /*
         selects events for the fake control region to control the fake rate method
         parameters: none
@@ -1565,22 +1565,22 @@ bool SUSY3L::fakeCRSelection(){
     
     setWorkflow(kFakeCR);
     
-    if(!(_tightLepsPtCutMllCut.size()==3)) return false;
+    if(!(_tightLepsPtCutMllCut.size()==3)) return;
     counter("lepton multiplicity");
     //require hard legs
-    if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
+    if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return;
     counter("hard leg selection");
     //off-Z selection
     for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
-        if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){return false;}
+        if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){return;}
     }
     counter("Z selection");
 
-    if(!( _nJets >= 1 || _nJets <= 2)) return false;
+    if(!( _nJets >= 1 || _nJets <= 2)) return;
     counter("jet multiplicity");
-    if(!( _nBJets >= 1)) return false;
+    if(!( _nBJets >= 1)) return;
     counter("b-jet multiplicity");
-    if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
+    if(!(_met->pt() > 30 && _met->pt() < 100)) return;
     counter("MET selection");
     counter("passing WZ selection");
   
@@ -1590,12 +1590,11 @@ bool SUSY3L::fakeCRSelection(){
     fillHistos(false);
     setWorkflow(kGlobal); 
    
-    return true; 
 }
 
 
 //____________________________________________________________________________
-bool SUSY3L::fakeCRFakeSelection(){
+void SUSY3L::fakeCRFakeSelection(){
     /*
         selects events for the fake control application region to control the fake rate method
         parameters: none
@@ -1604,18 +1603,18 @@ bool SUSY3L::fakeCRFakeSelection(){
     
     setWorkflow(kFakeCR_Fake);
     
-    if(!(_tightLepsPtCutMllCut.size() + _fakableNotTightLepsPtCut.size() == 3)) return false;
+    if(!(_tightLepsPtCutMllCut.size() + _fakableNotTightLepsPtCut.size() == 3)) return;
     counter("lepton multiplicity");
  
     //build fakable-not-tight - tight combinations for application region for WZ control region
     _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableNotTightLepsPtCut, _fakableNotTightLepsPtCutIdx, _fakableNotTightLepsPtCorrCut, _fakableNotTightLepsPtCorrCutIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, false, -1, true, _combIdxs, _combType );
     
     //cuts on event variables 
-    if(!( _nJets >= 1 || _nJets <= 2)) return false;
+    if(!( _nJets >= 1 || _nJets <= 2)) return;
     counter("jet multiplicity");
-    if(!( _nBJets >= 1)) return false;
+    if(!( _nBJets >= 1)) return;
     counter("b-jet multiplicity");
-    if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
+    if(!(_met->pt() > 30 && _met->pt() < 100)) return;
     counter("MET selection");
     counter("passing WZ selection");
  
@@ -1638,12 +1637,14 @@ bool SUSY3L::fakeCRFakeSelection(){
         if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
         if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
     }
+    float restoreWeight = _weight;
     _weight *= sumTF;
        
     fillHistos(false);
+    _weight = restoreWeight;
+
     setWorkflow(kGlobal); 
    
-    return true; 
 }
 //____________________________________________________________________________
 bool SUSY3L::ZMuMuSelection(){
