@@ -46,6 +46,8 @@ private:
     float getTF_TripleFake(int ic);
     bool wzCRSelection();
     bool wzCRFakeSelection();
+    bool fakeCRSelection();
+    bool fakeCRFakeSelection();
     bool ZMuMuSelection();
     bool ttbarSelection();
     bool ZElElSelection();
@@ -130,7 +132,10 @@ private:
     
     kGlobal_Fake,
     
-    kWZCR, kWZCR_Fake
+    kWZCR, kWZCR_Fake,
+
+    kFakeCR, kFakeCR_Fake
+
     };
 
     enum {kIsSingleFake=0,kIsDoubleFake,kIsTripleFake };

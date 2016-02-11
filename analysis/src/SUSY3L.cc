@@ -227,9 +227,9 @@ void SUSY3L::initialize(){
     _susyMod = new SusyModule(_vc, _dbm);
 
     //categories
-    int nCateg=67;
+    int nCateg=69;
     _categs.resize(nCateg);
-    string srs[67]={
+    string srs[69]={
        
     //signal regions
         "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
@@ -251,9 +251,15 @@ void SUSY3L::initialize(){
     //baseline appliction regions
         "OnZBaseline_Fake", "OffZBaseline_Fake",
     
-    //other
+    //global fake
         "Fake", 
-        "WZCR", "WZCR_Fake"
+
+    //WZ control region
+        "WZCR", "WZCR_Fake",
+
+    //fake control region
+        "FakeCR", "FakeCR_Fake"
+
     };
 
     _categs.assign(srs, srs+nCateg);
@@ -499,13 +505,16 @@ void SUSY3L::run(){
     bool wzSel = wzCRSelection();
     bool wzFakeSel = wzCRFakeSelection();
     if(wzSel||wzFakeSel){return;}	
-    
+    setWorkflow(kGlobal);	
+   
+    //select events for fake control region in data
+    bool fakeCRSel = fakeCRSelection();
+    bool fakeCRFakeSel = fakeCRFakeSelection();
     setWorkflow(kGlobal);	
     
     //baseline selection
     setBaselineRegion();
     bool baseSel = multiLepSelection();
-
     if(!baseSel){return;}
 
     //fillSkimTree();
@@ -1543,6 +1552,97 @@ bool SUSY3L::wzCRFakeSelection(){
     return true; 
 }
 
+
+//____________________________________________________________________________
+bool SUSY3L::fakeCRSelection(){
+    /*
+        selects events for the fake control region to control the fake rate method
+        parameters: none
+        return: true: if event passes selection, false: else
+    */
+    
+    setWorkflow(kFakeCR);
+    
+    if(!(_tightLepsPtCutMllCut.size()==3)) return false;
+    counter("lepton multiplicity");
+    //require hard legs
+    if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
+    counter("hard leg selection");
+    //off-Z selection
+    for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
+        if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){return false;}
+    }
+    counter("Z selection");
+
+    if(!( _nJets >= 1 || _nJets <= 2)) return false;
+    counter("jet multiplicity");
+    if(!( _nBJets >= 1)) return false;
+    counter("b-jet multiplicity");
+    if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
+    counter("MET selection");
+    counter("passing WZ selection");
+  
+    //get and sort lepton candidates 
+    sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
+   
+    fillHistos(false);
+    setWorkflow(kGlobal); 
+   
+    return true; 
+}
+
+
+//____________________________________________________________________________
+bool SUSY3L::fakeCRFakeSelection(){
+    /*
+        selects events for the fake control application region to control the fake rate method
+        parameters: none
+        return: true: if event passes selection, false: else
+    */
+    
+    setWorkflow(kFakeCR_Fake);
+    
+    if(!(_tightLepsPtCutMllCut.size() + _fakableNotTightLepsPtCut.size() == 3)) return false;
+    counter("lepton multiplicity");
+ 
+    //build fakable-not-tight - tight combinations for application region for WZ control region
+    _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableNotTightLepsPtCut, _fakableNotTightLepsPtCutIdx, _fakableNotTightLepsPtCorrCut, _fakableNotTightLepsPtCorrCutIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, false, -1, true, _combIdxs, _combType );
+    
+    //cuts on event variables 
+    if(!( _nJets >= 1 || _nJets <= 2)) return false;
+    counter("jet multiplicity");
+    if(!( _nBJets >= 1)) return false;
+    counter("b-jet multiplicity");
+    if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
+    counter("MET selection");
+    counter("passing WZ selection");
+ 
+    //get and sort lepton candidates 
+    CandList clist;
+    clist.insert(clist.end(), _tightLepsPtCutMllCut.begin(), _tightLepsPtCutMllCut.end() );
+    clist.insert(clist.end(), _fakableNotTightLepsPtCut.begin(), _fakableNotTightLepsPtCut.end() );
+
+    vector<unsigned int> idxs;
+    idxs.insert(idxs.end(), _tightLepsPtCutMllCutIdx.begin(), _tightLepsPtCutMllCutIdx.end());
+    idxs.insert(idxs.end(), _fakableNotTightLepsPtCutIdx.begin(), _fakableNotTightLepsPtCutIdx.end());
+
+    sortSelectedLeps(clist, idxs);
+    
+    //event weighting with transfer factor
+    float sumTF = 0;
+    for(unsigned int ic=0;ic<_combList.size();ic++) {
+        int type = _combType[ic];
+        if(type==kIsSingleFake){ sumTF += getTF_SingleFake(ic); }
+        if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
+        if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
+    }
+    _weight *= sumTF;
+       
+    fillHistos(false);
+    setWorkflow(kGlobal); 
+   
+    return true; 
+}
 //____________________________________________________________________________
 bool SUSY3L::ZMuMuSelection(){
     /*
