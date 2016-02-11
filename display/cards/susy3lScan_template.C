@@ -150,7 +150,7 @@ void susy3l_scanSig_BENCH(){
   md.addNuisanceParameter("ttZHAcc","ttZH","shape","");
 
   md.addNuisanceParameter("BTAGFS","T1ttttBENCH","shape","");
-  //md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
+  md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
   md.addNuisanceParameter("ISR","T1ttttBENCH","shape","");
 
   //md.addNuisanceParameter("QCDScale","T1ttttBENCH","shape","");
