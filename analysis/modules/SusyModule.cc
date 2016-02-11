@@ -1145,6 +1145,71 @@ SusyModule::getFastSimLepSF(Candidate* lep1, Candidate* lep2, int nVert){
 }
 
 float
+SusyModule::applyLepSfRA7(const CandList& cands){
+
+    if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+    float sf = 1.;
+    float maxPt = 119.9;
+    float maxEta = 2.39;
+    const Candidate* cand;
+    for(int il=0; il<cands.size();il++){
+        cand = cands[il];
+        int flavor = cand->pdgId();
+        if(std::abs(flavor)==11){
+            sf *= _dbm->getDBValue("FullSimElIDandIP", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+            sf *= _dbm->getDBValue("FullSimElISO", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+        }
+        else if(std::abs(flavor) == 13){
+            sf *= _dbm->getDBValue("FullSimMuID", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+            sf *= _dbm->getDBValue("FullSimMuIP2D", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+            sf *= _dbm->getDBValue("FullSimMuIP3D", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+            sf *= _dbm->getDBValue("FullSimMuISO", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+        }
+        
+        if(sf==0){cout << "Warning! lepton scale factor is 0, check pt and eta for db lookup" << endl;
+            cout << "flavor: " << cand->pdgId() << endl;
+            cout << "pt: " << cand->pt() << endl;
+            cout << "eta: " << cand->eta() << endl;
+            cout << "SF: " << sf << endl;}
+    }
+    return sf;
+
+}
+
+float 
+SusyModule::applyFastSimLepSfRA7(const CandList& cands, int pileup){
+
+    if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+    float sf = 1.;
+    float maxPt = 119.9;
+    float maxEta = 2.39;
+    int maxPU = 39;
+    const Candidate* cand;
+    for(int il=0; il<cands.size();il++){
+        cand = cands[il];
+        int flavor = cand->pdgId();
+        if(std::abs(flavor)==11){
+            sf *= _dbm->getDBValue("FastSimElIDandIP", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta), std::min(pileup, maxPU));
+            sf *= _dbm->getDBValue("FastSimElISO", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta), std::min(pileup, maxPU));
+        }
+        else if(std::abs(flavor) == 13){
+            sf *= _dbm->getDBValue("FastSimMuID", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta), std::min(pileup, maxPU));
+            sf *= _dbm->getDBValue("FastSimMuIP2D", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta), std::min(pileup, maxPU));
+            sf *= _dbm->getDBValue("FastSimMuIP3D", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta), std::min(pileup, maxPU));
+            sf *= _dbm->getDBValue("FastSimMuISO", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta), std::min(pileup, maxPU));
+        }
+        if(sf==0){cout << "Warning! fastSim lepton scale factor is 0, check pt, eta and pile-up for db lookup" << endl;
+            cout << "flavor: " << cand->pdgId() << endl;
+            cout << "pt: " << cand->pt() << endl;
+            cout << "eta: " << cand->eta() << endl;
+            cout << "pileup: " << pileup << endl;
+            cout << "SF: " << sf << endl;}
+    }
+    return sf;
+
+}
+
+float
 SusyModule::bTagSF(CandList& jets , 
 		   vector<pair<string, unsigned int> >& jetIdx,
                    CandList& bJets, 

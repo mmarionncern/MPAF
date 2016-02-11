@@ -114,7 +114,8 @@ public:
   void applyLepSF(const CandList& cands, float& weight);
   void applySingleLepSF(const Candidate* cand, float& weight);
   float getFastSimLepSF(Candidate* lep1, Candidate* lep2, int nVert);
-
+  float applyLepSfRA7(const CandList& cands);
+  float applyFastSimLepSfRA7(const CandList& cands, int pileup);
   CandList findZCand(const CandList* leps, float window, float MTcut);
   float bTagSF(CandList& jets , vector<pair<string, unsigned int> >& jetIdx ,
                CandList& bJets, vector<pair<string, unsigned int> >& bJetIdx,

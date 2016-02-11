@@ -325,9 +325,25 @@ void SUSY3L::initialize(){
     _dbm->loadDb("BTagEffC"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_c"   );
     _dbm->loadDb("BTagEffB"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_b"   );
 
+
     //load lepton scale factors
-    //_dbm->loadDb("FastSimElSF", "sf_el_tight_IDEmu_ISOEMu_ra5.root", "histo3D");
-    //_dbm->loadDb("FastSimMuSF", "sf_mu_mediumID_multi.root"        , "histo3D");
+    //fullSim muons
+    _dbm->loadDb("FullSimMuID", "lepSF_RA7/fullSim/muons/TnP_MuonID_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root", "pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass" );
+    _dbm->loadDb("FullSimMuIP2D", "lepSF_RA7/fullSim/muons/TnP_MuonID_NUM_TightIP2D_DENOM_LooseID_VAR_map_pt_eta.root", "pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass" );
+    _dbm->loadDb("FullSimMuIP3D", "lepSF_RA7/fullSim/muons/TnP_MuonID_NUM_TightIP3D_DENOM_LooseID_VAR_map_pt_eta.root", "pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass" );
+    _dbm->loadDb("FullSimMuISO", "lepSF_RA7/fullSim/muons/TnP_MuonID_NUM_MultiIsoMedium_DENOM_MediumID_VAR_map_pt_eta.root", "pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_Medium_pass_&_tag_IsoMu20_pass" );
+    //fullSim electrons
+    _dbm->loadDb("FullSimElIDandIP", "lepSF_RA7/fullSim/electrons/kinematicBinSFele.root", "MVATight_and_IDEmu_and_TightIP2D_and_TightIP3D" );
+    _dbm->loadDb("FullSimElISO", "lepSF_RA7/fullSim/electrons/kinematicBinSFele.root", "MultiIsoTight_vs_AbsEta" );
+    //fastSim muons
+    _dbm->loadDb("FastSimMuID", "lepSF_RA7/fastSim/muons/sf_mu_mediumID.root", "histo2D" );
+    _dbm->loadDb("FastSimMuIP2D", "lepSF_RA7/fastSim/muons/sf_mu_tightIP2D.root", "histo2D" );
+    _dbm->loadDb("FastSimMuIP3D", "lepSF_RA7/fastSim/muons/sf_mu_tightIP3D.root", "histo2D" );
+    _dbm->loadDb("FastSimMuISO", "lepSF_RA7/fastSim/muons/sf_mu_multi.root", "histo2D" );
+    //fastSim electrons
+    _dbm->loadDb("FastSimElIDandIP", "lepSF_RA7/fastSim/electrons/sf_el_tight2d3dIDEmu.root", "histo2D" );
+    _dbm->loadDb("FastSimElISO", "lepSF_RA7/fastSim/electrons/sf_el_multi.root", "histo2D" );
+   
     
     //load pile-up weights
     _dbm->loadDb("puWeights","pileupWeights.root","pileup");
@@ -344,7 +360,7 @@ void SUSY3L::initialize(){
         addManualSystSource("ISR",SystUtils::kNone);
         addManualSystSource("EWKFR",SystUtils::kNone);
         addManualSystSource("PUXS",SystUtils::kNone);
-        addManualSystSource("Theory",SystUtils::kNone);
+        //addManualSystSource("Theory",SystUtils::kNone);   -> accounted for in display card
     }
 
 }
@@ -389,8 +405,8 @@ void SUSY3L::run(){
     if(!passNoiseFilters()) return;
     counter("JME filters");
 
-    //check HLT trigger decition, only let triggered events pass
-    if(!_fastSim) {
+    //check HLT trigger decition, only let triggered events pass (no HLT info in fast sim)
+    if(!_fastSim){
         if(!passHLTbit()) return;
     }
     counter("HLT");
@@ -400,7 +416,7 @@ void SUSY3L::run(){
 
     //event reweighting //////////////////////////////////////////////////////////
     
-    //theory uncertainty for ttW and ttZ
+    //theory uncertainty for ttW and ttZ (currently not used but covered in display card)
     if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kDown==getUncDir() ) {
         if(_sampleName.find("TTW") != string::npos) {
      	    bool passSR=false;
@@ -427,14 +443,6 @@ void SUSY3L::run(){
         _weight *= 1+sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
         }
     }   
-
-    /*
-    //vary efficiency 
-    if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kDown==getUncDir() )
-        _weight *= 0.971716;
-    if((isInUncProc() &&  getUncName()=="Eff") && SystUtils::kUp==getUncDir() )
-        _weight *= 1.028284;
-    */
 
     //btag-scale factors
     if(!_vc->get("isData") && !_closure ) {
@@ -464,15 +472,22 @@ void SUSY3L::run(){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
     }
-/*    
-    //HLT and lepton SFs
+    
+    //lepton scale factors
     if(!_isData){
-        // trigger * lep1 SF * lep2 SF
+        //fullSim scale factors, flat uncertainty added in display card
         if(!_fastSim) {
-	        // _weight*=_susyMod->GCeventScaleFactor(_l1Cand->pdgId(), _l2Cand->pdgId(),
-	        // 				      _l1Cand->pt   (), _l2Cand->pt   (),      
-	        // 				      _l1Cand->eta  (), _l2Cand->eta  (), _HT);
-        } 
+	        _weight*=_susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
+        }
+        //fastSim scale factors, currently flat uncertainty added in display card, TODO: change to flavor and pt dependet shape uncertainty
+        else{
+            _weight*=_susyMod->applyFastSimLepSfRA7(_tightLepsPtCutMllCut, _vc->get("nTrueInt"));
+        }
+    } 
+    
+    counter("lepton SF");
+    /*
+        //fastSim lepton scale factors and variations for uncertainty 
         else {
 	        // _weight*=_susyMod->LTFastSimTriggerEfficiency(_HT, _l1Cand->pt(),
 	        // 					      _l1Cand->pdgId(), 
@@ -487,7 +502,7 @@ void SUSY3L::run(){
 	        //   _weight *= _susyMod->getVarWeightFastSimLepSF(_l1Cand, _l2Cand, -1);
         }
     }
-*/  
+  */
     //end event reweighting ////////////////////////////////////////////////////
   
     setWorkflow(kGlobal);	
@@ -1303,7 +1318,6 @@ bool SUSY3L::multiLepSelection(){
     
         setWorkflow(kGlobal);
 
-        //TODO: make fakes compatible with MT cut in Z selection
         _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableNotTightLepsPtCut, _fakableNotTightLepsPtCutIdx, _fakableNotTightLepsPtCorrCut, _fakableNotTightLepsPtCorrCutIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, onZ, _M_T_3rdLep_MET_cut, _exactlyThreeLep, _combIdxs, _combType );
         //save outcome since we have to run the loop again for the counters
         if(_combList.size()>0 && onZ){

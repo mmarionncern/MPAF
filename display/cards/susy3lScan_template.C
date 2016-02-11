@@ -82,7 +82,7 @@ void susy3l_scanSig_BENCH(){
   md.addDataCardSample( "Fake:WZZ", "fake", -1 );
   md.addDataCardSample( "Fake:ZZZ", "fake", -1 );
   md.addDataCardSample( "Fake:TTTT", "fake", -1 );
-
+/*
   md.addDataCardSample( "TGJets", "pseudodata"); 
   md.addDataCardSample( "TTGJets", "pseudodata"); 
   md.addDataCardSample( "ZGTo2LG", "pseudodata"); 
@@ -126,8 +126,8 @@ void susy3l_scanSig_BENCH(){
   md.addDataCardSample( "Fake:WZZ", "pseudodata", -1 );
   md.addDataCardSample( "Fake:ZZZ", "pseudodata", -1 );
   md.addDataCardSample( "Fake:TTTT", "pseudodata", -1 );
-
-/*  
+*/
+  
   md.addDataCardSample( "DoubleEG_Run2015C_Oct05_runs_254231_254914", "data"); 
   md.addDataCardSample( "DoubleEG_Run2015D_Oct05_runs_256630_258158", "data"); 
   md.addDataCardSample( "DoubleEG_Run2015D_PromptV4_runs_258159_260627", "data"); 
@@ -137,12 +137,12 @@ void susy3l_scanSig_BENCH(){
   md.addDataCardSample( "MuonEG_Run2015C_Oct05_runs_254231_254914", "data"); 
   md.addDataCardSample( "MuonEG_Run2015D_Oct05_runs_256630_258158", "data"); 
   md.addDataCardSample( "MuonEG_Run2015D_PromptV4_runs_258159_260627", "data"); 
-*/
+
   //===============================================================
 
-  md.addNuisanceParameter("JES","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
-  md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
-  //md.addNuisanceParameter("PUXS","ttW:ttZH:WZ:WW:XG:rares:T1ttttBENCH","shape","");
+  md.addNuisanceParameter("JES","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
+  md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
+  md.addNuisanceParameter("PUXS","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
 
   md.addNuisanceParameter("EWKFR","fake","shape","");
 
@@ -166,7 +166,7 @@ void susy3l_scanSig_BENCH(){
    "OffZSR013", "OffZSR014", "OffZSR015"
  };
 
- string dss[7]={"ttW","ttZH","WZ","WW","XG","rares","T1ttttBENCH"};
+ string dss[7]={"ttW","ttZH","WZ","XG","fake","rares","T1ttttBENCH"};
 
  for(int isr=0;isr<30;isr++) {
     md.addNuisanceParameter("pdfS"+cats[isr],"T1ttttBENCH","shape","");
@@ -180,24 +180,24 @@ void susy3l_scanSig_BENCH(){
 
  //Flat uncertanties =================================
  //lumi
- md.addNuisanceParameter("lumi","ttW:ttZH:WW:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046:1.046:1.046");
+ md.addNuisanceParameter("lumi","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046");
  //experimental uncertainties
- md.addNuisanceParameter("lEff","ttW:ttZH:WW:XG:rares:T1ttttBENCH","lnN","1.04:1.04:1.04:1.04:1.04:1.04");
- md.addNuisanceParameter("tEff","ttW:ttZH:WW:XG:rares:T1ttttBENCH","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
- md.addNuisanceParameter("pileup","ttW:ttZH:WW:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03:1.03:1.03");
+ md.addNuisanceParameter("HLTEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03");
+ md.addNuisanceParameter("fastSimHLT","T1ttttBENCH","lnN","1.05");
+ md.addNuisanceParameter("LepEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.035:1.035:1.035:1.035:1.035");
+ 
  //Data-driven methods
- md.addNuisanceParameter("fratio","fake","lnN","1.30");
+ md.addNuisanceParameter("fakeExtrapol","fake","lnN","1.30");
+ md.addNuisanceParameter("wzExtrapol","WZ","lnN","1.15");
+ 
  //theoretical uncertainties
- md.addNuisanceParameter("wzTh","WZ","lnN","1.30");
- md.addNuisanceParameter("WWTh","ttW","lnN","1.50");
- md.addNuisanceParameter("TGTh","XG","lnN","1.50");
+ md.addNuisanceParameter("XGTh","XG","lnN","1.50");
  md.addNuisanceParameter("rareTh","rares","lnN","1.50");
   
- md.addNuisanceParameter("ttWPdf","ttW","lnN","1.04");
- md.addNuisanceParameter("ttZHPdf","ttZH","lnN","1.04");
- md.addNuisanceParameter("ttWXs","ttW","lnN","1.13");
- md.addNuisanceParameter("ttZHXs","ttZH","lnN","1.11");
- md.addNuisanceParameter("fsHLT","T1ttttBENCH","lnN","1.05");
+ md.addNuisanceParameter("ttWPdf","ttW","lnN","1.02");
+ md.addNuisanceParameter("ttZHPdf","ttZH","lnN","1.03");
+ md.addNuisanceParameter("ttWXs","ttW","lnN","1.11");
+ md.addNuisanceParameter("ttZHXs","ttZH","lnN","1.13");
 
 
   //*********************************************************************²
@@ -236,9 +236,9 @@ void susy3l_scanSig_BENCH(){
   };
   
   float AccTTZH[30]={
-    0.03, 0.03, 0.03, 0.03, 0.03, 
-    0.03, 0.03, 0.03, 0.03, 0.03, 
-    0.03, 0.03, 0.03, 0.03, 0.03, 
+    0.03, 0.03, 0.05, 0.05, 0.03, 
+    0.03, 0.05, 0.05, 0.03, 0.03, 
+    0.05, 0.05, 0.05, 0.05, 0.05, 
 
     0.05, 0.05, 0.08, 0.08, 0.05, 
     0.05, 0.08, 0.08, 0.05, 0.05, 
@@ -247,21 +247,21 @@ void susy3l_scanSig_BENCH(){
 
 
 
- for(size_t ic=0;ic<30;ic++) {
-     for(int isr=0;isr<30;isr++) {
-       if(categs[ic].substr(7, categs[ic].size()-7)==cats[isr])
-	 md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0.1, -0.1, categs[ic], "selected");
-       else
-	 md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0., 0., categs[ic], "selected");
-     }
-     //md.addExternalSystUnc("T1ttttBENCH","QCDScale",hQCDUp->GetBinContent(ic+1), hQCDDown->GetBinContent(ic+1), categs[ic], "selected");
+    for(size_t ic=0;ic<30;ic++) {
+        for(int isr=0;isr<30;isr++) {
+            if(categs[ic].substr(7, categs[ic].size()-7)==cats[isr])
+	            md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0.1, -0.1, categs[ic], "selected");
+            else
+	            md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0., 0., categs[ic], "selected");
+        }
+        //md.addExternalSystUnc("T1ttttBENCH","QCDScale",hQCDUp->GetBinContent(ic+1), hQCDDown->GetBinContent(ic+1), categs[ic], "selected");
 
-     md.addExternalSystUnc("ttW","ttWAcc",AccTTW[ic], -1*AccTTW[ic], categs[ic], "selected");
-    md.addExternalSystUnc("ttZH","ttZHAcc",AccTTZH[ic], -1*AccTTZH[ic], categs[ic], "selected");
-    // for(size_t id=0;id<7;id++) {
-    //   md.addExternalSystUnc(dss[id],"tHTE",HLTEff[ic], -1*HLTEff[ic], categs[ic], "selected");
-    //}
-  }
+        md.addExternalSystUnc("ttW","ttWAcc",AccTTW[ic], -1*AccTTW[ic], categs[ic], "selected");
+        md.addExternalSystUnc("ttZH","ttZHAcc",AccTTZH[ic], -1*AccTTZH[ic], categs[ic], "selected");
+        //for(size_t id=0;id<7;id++) {
+            //md.addExternalSystUnc(dss[id],"tHTE",HLTEff[ic], -1*HLTEff[ic], categs[ic], "selected");
+        //}
+    }
 
  
   md.makeMultiDataCard("T1ttttBENCH", vcategs, "selected", "susy3l_T1ttttBENCH");
