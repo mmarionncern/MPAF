@@ -23,11 +23,11 @@ void susy3l_data() {
  
     string sigs = "none"; 
     bool data = true;
-    bool manual = true;
-    string region = "OnZBaseline";
+    bool manual = false;
+    string region = "FakeCR";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "srs";}
+    else{string obs = "nbjets";}
  
 
     //Binning & title ************************* Binning & titre
@@ -60,61 +60,61 @@ void susy3l_data() {
         md.dp.setObservables("NJets" + region);
         int binning=1;
         double rangeX[2]={2,10};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "nbjets"){
         md.dp.setObservables("NBJets" + region);
         int binning=1;
         double rangeX[2]={0,5};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "met"){
         md.dp.setObservables("MET" + region);
         int binning=50;
         double rangeX[2]={0,500};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "ht"){
         md.dp.setObservables("HT" + region);
         int binning=60;
         double rangeX[2]={0,1000};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "mt"){
         md.dp.setObservables("MT" + region);
         int binning=10;
         double rangeX[2]={0,200};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "pt1"){
         md.dp.setObservables("pt_1st_lepton" + region);
         int binning=10;
         double rangeX[2]={0,200};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "pt2"){
         md.dp.setObservables("pt_2nd_lepton" + region);
         int binning=10;
         double rangeX[2]={0,150};
-        bool logYScale=true;
+        //bool logYScale=true;
     }   
     if(obs == "pt3"){
         md.dp.setObservables("pt_3rd_lepton" + region);
         int binning=10;
         double rangeX[2]={0,100};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "ftype"){
         md.dp.setObservables("fake_type" + region);
         int binning=1;
         double rangeX[2]={0,5};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "flavor"){
         md.dp.setObservables("flavor" + region);
         int binning=1;
         double rangeX[2]={0,4};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "srs"){
         md.dp.setObservables("SRS" + region);
@@ -126,25 +126,25 @@ void susy3l_data() {
         md.dp.setObservables("mu_multiplicity" + region);
         int binning=1;
         double rangeX[2]={0,6};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "el_multi"){
         md.dp.setObservables("el_multiplicity" + region);
         int binning=1;
         double rangeX[2]={0,6};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "lep_multi"){
         md.dp.setObservables("lep_multiplicity" + region);
         int binning=1;
         double rangeX[2]={0,6};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "nfo"){
         md.dp.setObservables("nFO" + region);
         int binning=1;
         double rangeX[2]={0,6};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
 
 

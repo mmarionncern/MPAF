@@ -233,6 +233,16 @@ void susy3l_scanSig_BENCH(){
         0.05, 0.08, 0.08, 0.05, 0.05, 
         0.08, 0.08, 0.08, 0.08, 0.08
     };
+  
+    float ExtrapolWZ[30]={
+        0.10, 0.10, 0.20, 0.20, 0.10, 
+        0.10, 0.20, 0.20, 0.10, 0.10, 
+        0.20, 0.20, 0.30, 0.20, 0.20, 
+
+        0.10, 0.10, 0.20, 0.20, 0.10, 
+        0.10, 0.20, 0.20, 0.10, 0.10, 
+        0.20, 0.20, 0.30, 0.20, 0.20, 
+    };
 
     string dss[7]={"ttW","ttZH","WZ","XG","fake","rares","T1ttttBENCH"};
 
@@ -263,6 +273,7 @@ void susy3l_scanSig_BENCH(){
 
         md.addExternalSystUnc("ttW","ttWAcc",AccTTW[ic], -1*AccTTW[ic], categs[ic], "selected");
         md.addExternalSystUnc("ttZH","ttZHAcc",AccTTZH[ic], -1*AccTTZH[ic], categs[ic], "selected");
+        md.addExternalSystUnc("WZ","WZTh",ExtrapolWZ[ic], -1*ExtrapolWZ[ic], categs[ic], "selected");
         //for(size_t id=0;id<7;id++) {
             //md.addExternalSystUnc(dss[id],"tHTE",HLTEff[ic], -1*HLTEff[ic], categs[ic], "selected");
         //}

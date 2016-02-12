@@ -472,10 +472,10 @@ void SUSY3L::run(){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
     }
-   /* 
+    
     //lepton scale factors
     if(!_isData){
-        fullSim scale factors, flat uncertainty added in display card
+        //fullSim scale factors, flat uncertainty added in display card
         if(!_fastSim) {
 	        _weight*=_susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
         }
@@ -490,7 +490,7 @@ void SUSY3L::run(){
         }
     } 
     counter("lepton SF");
-*/
+
     //end event reweighting ////////////////////////////////////////////////////
   
     setWorkflow(kGlobal);	
