@@ -1576,7 +1576,7 @@ void SUSY3L::fakeCRSelection(){
     }
     counter("Z selection");
 
-    if(!( _nJets >= 1 || _nJets <= 2)) return;
+    if(!( _nJets >= 1 && _nJets <= 2)) return;
     counter("jet multiplicity");
     if(!( _nBJets >= 1)) return;
     counter("b-jet multiplicity");
@@ -1610,7 +1610,7 @@ void SUSY3L::fakeCRFakeSelection(){
     _combList = build3LCombFake(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx, _fakableNotTightLepsPtCut, _fakableNotTightLepsPtCutIdx, _fakableNotTightLepsPtCorrCut, _fakableNotTightLepsPtCorrCutIdx, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs, false, -1, true, _combIdxs, _combType );
     
     //cuts on event variables 
-    if(!( _nJets >= 1 || _nJets <= 2)) return;
+    if(!( _nJets >= 1 && _nJets <= 2)) return;
     counter("jet multiplicity");
     if(!( _nBJets >= 1)) return;
     counter("b-jet multiplicity");
