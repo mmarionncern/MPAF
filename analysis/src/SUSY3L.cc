@@ -581,7 +581,16 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
     _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
-
+    _hm->addVariable("lep1_SIP3D"       , 100,      0.,     5.0,    "leading lepton SIP_{3D}"                   );
+    _hm->addVariable("lep1_dxy"         , 200,      -0.03, 0.03,    "leading lepton d_{xy} [cm]"                );
+    _hm->addVariable("lep1_dz"          , 200,      -0.05, 0.05,    "leading lepton d_{z} [cm]"                 );
+    _hm->addVariable("lep2_SIP3D"       , 100,      0.,     5.0,    "sub-leading lepton SIP_{3D}"                   );
+    _hm->addVariable("lep2_dxy"         , 200,      -0.03, 0.03,    "sub-leading lepton d_{xy} [cm]"                );
+    _hm->addVariable("lep2_dz"          , 200,      -0.05, 0.05,    "sub-leading lepton d_{z} [cm]"                 );
+    _hm->addVariable("lep3_SIP3D"       , 100,      0.,     5.0,    "3rd lepton SIP_{3D}"                   );
+    _hm->addVariable("lep3_dxy"         , 200,      -0.03, 0.03,    "3rd lepton d_{xy} [cm]"                );
+    _hm->addVariable("lep3_dz"          , 200,      -0.05, 0.05,    "3rd lepton d_{z} [cm]"                 );
+   
     //on-Z only observables 
     _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                               );
     _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"                    );
@@ -612,13 +621,17 @@ void SUSY3L::defineOutput(){
         _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "leading lepton p_{T} [GeV]", false);
         _hm->addVariable(reg[r]+"_lep1_Eta"       , 100, 0., 2.5, "leading lepton #eta", false);
         _hm->addVariable(reg[r]+"_lep1_SIP3D"     , 100, 0., 5.0, "leading lepton SIP_{3D}", false);
+        _hm->addVariable(reg[r]+"_lep1_dxy"       , 200, -0.2, 0.2, "leading lepton d_{xy} [cm]", false);
+        _hm->addVariable(reg[r]+"_lep1_dz"        , 200, -0.2, 0.2, "leading lepton d_{z} [cm]", false);
         _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "subleading lepton jet p_{T} Ratio [GeV]", false);
         _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "subleading lepton jet p_{T} Rel   [GeV]", false);
         _hm->addVariable(reg[r]+"_lep2_miniRelIso", 100, 0., 0.4, "subleading lepton isolation", false);
         _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "subleading lepton p_{T} [GeV]", false);
         _hm->addVariable(reg[r]+"_lep2_Eta"       , 100, 0., 2.5, "subleading lepton #eta", false);
         _hm->addVariable(reg[r]+"_lep2_SIP3D"     , 100, 0., 5.0, "subleading lepton SIP_{3D}", false);
-   
+        _hm->addVariable(reg[r]+"_lep2_dxy"       , 200, -0.2, 0.2, "subleading lepton d_{xy} [cm]", false);
+        _hm->addVariable(reg[r]+"_lep2_dz"        , 200, -0.2, 0.2, "subleading lepton d_{z} [cm]", false);
+  
         // event variables 
         _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
         _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]", false);
@@ -2156,6 +2169,16 @@ void SUSY3L::fillHistos(bool additionalPlots){
     fill("pt_1st_lepton" , _leps[0]->pt()   , _weight);
     fill("pt_2nd_lepton" , _leps[1]->pt()   , _weight);
     fill("pt_3rd_lepton" , _leps[2]->pt()   , _weight);
+
+    fill("lep1_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[0])   , _weight);
+    fill("lep1_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[0])   , _weight);
+    fill("lep1_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[0])   , _weight);
+    fill("lep2_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[1])   , _weight);
+    fill("lep2_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[1])   , _weight);
+    fill("lep2_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[1])   , _weight);
+    fill("lep3_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[2])   , _weight);
+    fill("lep3_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[2])   , _weight);
+    fill("lep3_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[2])   , _weight);
  
     //on-Z observables
     fill("MT"       , _MT                   , _weight);
@@ -2197,6 +2220,8 @@ void SUSY3L::fillValidationHistos(string reg){
     fill(reg+"_lep1_Pt"        , _vc->get("LepGood_pt", _idxL1)                     , _weight);
     fill(reg+"_lep1_Eta"       , fabs(_vc->get("LepGood_eta", _idxL1))              , _weight);
     fill(reg+"_lep1_SIP3D"     , _vc->get("LepGood_sip3d", _idxL1)                  , _weight);
+    fill(reg+"_lep1_dxy"       , _vc->get("LepGood_dxy", _idxL1)                    , _weight);
+    fill(reg+"_lep1_dz"        , _vc->get("LepGood_dz", _idxL1)                     , _weight);
   
     fill(reg+"_lep2_jetPtRatio", _vc->get("LepGood_jetPtRatiov2", _idxL2)           , _weight);
     fill(reg+"_lep2_jetPtRel"  , _vc->get("LepGood_jetPtRelv2", _idxL2)             , _weight);
@@ -2204,6 +2229,8 @@ void SUSY3L::fillValidationHistos(string reg){
     fill(reg+"_lep2_Pt"        , _vc->get("LepGood_pt", _idxL2)                     , _weight);
     fill(reg+"_lep2_Eta"       , fabs(_vc->get("LepGood_eta", _idxL2))              , _weight);
     fill(reg+"_lep2_SIP3D"     , _vc->get("LepGood_sip3d", _idxL2)                  , _weight);
+    fill(reg+"_lep2_dxy"       , _vc->get("LepGood_dxy", _idxL2)                    , _weight);
+    fill(reg+"_lep2_dz"        , _vc->get("LepGood_dz", _idxL2)                     , _weight);
     
     fill(reg+"_MET"            , _vc->get("met_pt")                                 , _weight);
     fill(reg+"_htJet40j"       , _vc->get("htJet40j")                               , _weight);

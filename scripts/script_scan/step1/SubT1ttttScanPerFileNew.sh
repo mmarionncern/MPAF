@@ -33,5 +33,6 @@ while read fileLine; do
 	N=`echo $N + 1 | bc`
     break
 
-#done < fileNamesV1          #for T1tttt
-done < fileNamesT6ttWW      #for T6ttWW
+#CHANGE depending on scan
+done < fileNamesV1          #for T1tttt
+#done < fileNamesT6ttWW      #for T6ttWW
