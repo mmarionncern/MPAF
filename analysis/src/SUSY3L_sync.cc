@@ -67,10 +67,10 @@ void SUSY3L_sync::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
     //tri-lepton trigger
-    //_vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
-    //_vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
     
     loadScanHistogram();
 
@@ -373,17 +373,17 @@ void SUSY3L_sync::run(){
     //}
 
 	//debug output    
-	_run = 257751;
-	_lumi = 137;
-    _evt = 204673540;
+	_run = 254914;
+	_lumi = 49;
+    _evt = 51353613;
     
-    _run2 = 258159;
-	_lumi2 = 170;
-    _evt2 = 217945982;
+    _run2 = 1;
+	_lumi2 = 1;
+    _evt2 = 1;
   
-  	_run3 = 258702;
-	_lumi3 = 294;
-    _evt3 = 476582910;
+  	_run3 = 1;
+	_lumi3 = 1;
+    _evt3 = 1;
     
     
     if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){

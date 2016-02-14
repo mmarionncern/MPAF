@@ -1218,8 +1218,8 @@ SusyModule::bTagSF(CandList& jets ,
   // put st = -1 / 0 / +1 for down / central / up
   // put fsst = -1 / 0 / +1 for down / central / up for fast-fullSim CF
 
-  long int _evt = 326295;
-  long int _lumi = 986;
+  //long int _evt = 326295;
+  //long int _lumi = 986;
 
   float pdata = 1.0;
   float pmc   = 1.0;

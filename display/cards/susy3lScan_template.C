@@ -38,9 +38,9 @@ void susy3l_scanSig_BENCH(){
     md.addDataCardSample( "ZGTo2LG", "XG"); 
     md.addDataCardSample( "WGToLNuG", "XG"); 
 
-    md.addDataCardSample( "TTHnobb", "ttZH"); 
-    md.addDataCardSample( "TTLLJets_m1to10", "ttZH"); 
-    md.addDataCardSample( "TTZToLLNuNu", "ttZH"); 
+    md.addDataCardSample( "TTHnobb", "ttH"); 
+    md.addDataCardSample( "TTLLJets_m1to10", "ttZlowM"); 
+    md.addDataCardSample( "TTZToLLNuNu", "ttZ"); 
 
     md.addDataCardSample( "TTWToLNu", "ttW", 1); 
    
@@ -141,20 +141,21 @@ void susy3l_scanSig_BENCH(){
     //===============================================================
     //UNCERTANITIES
 
-    md.addNuisanceParameter("JES","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
-    md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
-    md.addNuisanceParameter("PUXS","ttW:ttZH:WZ:XG:rares:T1ttttBENCH","shape","");
-
+    md.addNuisanceParameter("JES","ttW:ttZ:ttZlowM:ttH:WZ:XG:rares:T1ttttBENCH","shape","");
+    md.addNuisanceParameter("BTAG","ttW:ttZ:ttZlowM:ttH:WZ:XG:rares:T1ttttBENCH","shape","");
+    md.addNuisanceParameter("PUXS","ttW:ttZ:ttZlowM:ttH:WZ:XG:rares:T1ttttBENCH","shape","");
     md.addNuisanceParameter("EWKFR","fake","shape","");
 
-    md.addNuisanceParameter("ttWAcc","ttW","shape","");
-    md.addNuisanceParameter("ttZHAcc","ttZH","shape","");
-    //md.addNuisanceParameter("wzTh","WZ","shape",""); //TODO: to be added
-
+    //fastSim related uncertainties
     md.addNuisanceParameter("BTAGFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("ISR","T1ttttBENCH","shape","");
 
+    //md.addNuisanceParameter("ttWAcc","ttW","shape","");
+    //md.addNuisanceParameter("ttZAcc","ttZ","shape","");
+    //md.addNuisanceParameter("ttZlowMAcc","ttZlowM","shape","");
+    //md.addNuisanceParameter("ttHAcc","ttH","shape","");
+    //md.addNuisanceParameter("wzTh","WZ","shape",""); //TODO: to be added
     //md.addNuisanceParameter("QCDScale","T1ttttBENCH","shape","");
 
     string cats[30]={
@@ -169,24 +170,31 @@ void susy3l_scanSig_BENCH(){
   
     //Flat uncertanties =================================
     //lumi
-    md.addNuisanceParameter("lumi","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046");
+    md.addNuisanceParameter("lumi","ttW:ttZ:ttZlowM:ttH:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046:1.046:1.046");
     //experimental uncertainties
-    md.addNuisanceParameter("HLTEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03");
+    md.addNuisanceParameter("HLTEff","ttW:ttZ:ttZlowM:ttH:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03:1.03:1.03");
     md.addNuisanceParameter("fastSimHLT","T1ttttBENCH","lnN","1.05");
-    md.addNuisanceParameter("LepEff","ttW:ttZH:XG:rares:T1ttttBENCH","lnN","1.035:1.035:1.035:1.035:1.035"); //2% per lepton
+    md.addNuisanceParameter("LepEff","ttW:ttZ:ttZlowM:ttH:XG:rares:T1ttttBENCH","lnN","1.035:1.035:1.035:1.035:1.035:1.035:1.035"); //2% per lepton
  
     //Data-driven methods
     md.addNuisanceParameter("fakeExtrapol","fake","lnN","1.30");
     md.addNuisanceParameter("wzExtrapol","WZ","lnN","1.15");
  
     //theoretical uncertainties
+    
+    //rare processes
     md.addNuisanceParameter("XGTh","XG","lnN","1.50");
     md.addNuisanceParameter("rareTh","rares","lnN","1.50");
   
+    //pdf uncertainty
     md.addNuisanceParameter("ttWPdf","ttW","lnN","1.02");
-    md.addNuisanceParameter("ttZHPdf","ttZH","lnN","1.03");
+    md.addNuisanceParameter("ttZPdf","ttZ:ttZlowM","lnN","1.03:1.06");
+    md.addNuisanceParameter("ttHPdf","ttH","lnN","1.035");
+
+    //x-section uncertainty
     md.addNuisanceParameter("ttWXs","ttW","lnN","1.11");
-    md.addNuisanceParameter("ttZHXs","ttZH","lnN","1.13");
+    md.addNuisanceParameter("ttZXs","ttZ:ttZlowM","lnN","1.13:1.33");
+    md.addNuisanceParameter("ttHXs","ttH","lnN","1.09");
 
 
     //*********************************************************************²
@@ -196,7 +204,6 @@ void susy3l_scanSig_BENCH(){
    
     md.prepareDisplay();
 
-    int ncategs=30;
     string categs[30]={
         "global_OnZSR001", "global_OnZSR002", "global_OnZSR003", "global_OnZSR004",
         "global_OnZSR005", "global_OnZSR006", "global_OnZSR007", "global_OnZSR008",
@@ -224,7 +231,7 @@ void susy3l_scanSig_BENCH(){
         0.18, 0.18, 0.18, 0.18, 0.18
     };
   
-    float AccTTZH[30]={
+    float AccTTZ[30]={
         0.03, 0.03, 0.05, 0.05, 0.03, 
         0.03, 0.05, 0.05, 0.03, 0.03, 
         0.05, 0.05, 0.05, 0.05, 0.05, 
@@ -233,7 +240,27 @@ void susy3l_scanSig_BENCH(){
         0.05, 0.08, 0.08, 0.05, 0.05, 
         0.08, 0.08, 0.08, 0.08, 0.08
     };
-  
+    
+    float AccTTZlowM[30]={
+        0.03, 0.03, 0.05, 0.05, 0.03, 
+        0.03, 0.05, 0.05, 0.03, 0.03, 
+        0.05, 0.05, 0.05, 0.05, 0.05, 
+
+        0.05, 0.05, 0.08, 0.08, 0.05, 
+        0.05, 0.08, 0.08, 0.05, 0.05, 
+        0.08, 0.08, 0.08, 0.08, 0.08
+    }; 
+
+    float AccTTH[30]={
+        0.05, 0.05, 0.08, 0.08, 0.05, 
+        0.05, 0.08, 0.08, 0.05, 0.05, 
+        0.08, 0.08, 0.08, 0.08, 0.08, 
+
+        0.03, 0.03, 0.05, 0.05, 0.03, 
+        0.03, 0.05, 0.05, 0.03, 0.03, 
+        0.05, 0.05, 0.05, 0.05, 0.05
+    };
+
     float ExtrapolWZ[30]={
         0.10, 0.10, 0.20, 0.20, 0.10, 
         0.10, 0.20, 0.20, 0.10, 0.10, 
@@ -244,41 +271,46 @@ void susy3l_scanSig_BENCH(){
         0.20, 0.20, 0.30, 0.20, 0.20, 
     };
 
-    string dss[7]={"ttW","ttZH","WZ","XG","fake","rares","T1ttttBENCH"};
+    string dss[9]={"ttW","ttZ","ttZlowM","ttH","WZ","XG","fake","rares","T1ttttBENCH"};
 
-
-
-    //TODO: section under construction
-
+    //statistical uncertainties for all processes
     for(int isr=0;isr<30;isr++) {
-        //theoretical uncertainty fastSim signal pdf
-        //md.addNuisanceParameter("pdfS"+cats[isr],"T1ttttBENCH","shape","");
-        //statistical uncertainty fakes TODO: why here AND in loop below?
-        md.addNuisanceParameter("fake"+cats[isr]+"stat","fake","shape","");
-        for(size_t id=0;id<7;id++) {
-            //statistical uncertainties for all precesses
+        for(size_t id=0;id<9;id++) {
             md.addNuisanceParameter(dss[id]+cats[isr]+"stat",dss[id],"shape","");
         }
     }
 
-
+    //Q2 background acceptance uncertainties 
     for(size_t ic=0;ic<30;ic++) {
-        for(int isr=0;isr<30;isr++) {
-            if(categs[ic].substr(7, categs[ic].size()-7)==cats[isr])
-	            md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0.1, -0.1, categs[ic], "selected");
-            else
-	            md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0., 0., categs[ic], "selected");
-        }
-        //md.addExternalSystUnc("T1ttttBENCH","QCDScale",hQCDUp->GetBinContent(ic+1), hQCDDown->GetBinContent(ic+1), categs[ic], "selected");
+        md.addExternalSystUnc("ttW"     ,"ttWAcc"       ,AccTTW[ic]     , -1*AccTTW[ic]     , categs[ic], "selected");
+        md.addExternalSystUnc("ttZ"     ,"ttZAcc"       ,AccTTZ[ic]     , -1*AccTTZ[ic]     , categs[ic], "selected");
+        md.addExternalSystUnc("ttZlowM" ,"ttZlowMAcc"   ,AccTTZlowM[ic] , -1*AccTTZlowM[ic] , categs[ic], "selected");
+        md.addExternalSystUnc("ttH"     ,"ttHAcc"       ,AccTTH[ic]     , -1*AccTTH[ic]     , categs[ic], "selected");
+        md.addExternalSystUnc("WZ"      ,"WZTh"         ,ExtrapolWZ[ic] , -1*ExtrapolWZ[ic] , categs[ic], "selected");
+ 
+     //TODO: section under construction
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        md.addExternalSystUnc("ttW","ttWAcc",AccTTW[ic], -1*AccTTW[ic], categs[ic], "selected");
-        md.addExternalSystUnc("ttZH","ttZHAcc",AccTTZH[ic], -1*AccTTZH[ic], categs[ic], "selected");
-        md.addExternalSystUnc("WZ","WZTh",ExtrapolWZ[ic], -1*ExtrapolWZ[ic], categs[ic], "selected");
-        //for(size_t id=0;id<7;id++) {
+
+        //for(int isr=0;isr<30;isr++) {
+        //    if(categs[ic].substr(9, categs[ic].size()-9)==cats[isr])
+	    //        md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0.1, -0.1, categs[ic], "selected");
+        //    else
+	    //        md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0., 0., categs[ic], "selected");
+        //}
+       
+        //for(size_t id=0;id<9;id++) {
             //md.addExternalSystUnc(dss[id],"tHTE",HLTEff[ic], -1*HLTEff[ic], categs[ic], "selected");
         //}
+        //md.addExternalSystUnc("T1ttttBENCH","QCDScale",hQCDUp->GetBinContent(ic+1), hQCDDown->GetBinContent(ic+1), categs[ic], "selected");
     }
 
+    //TODO:theoretical uncertainty fastSim signal pdf
+    //for(int isr=0;isr<30;isr++) {
+        //md.addNuisanceParameter("pdfS"+cats[isr],"T1ttttBENCH","shape","");
+    //}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
     md.makeMultiDataCard("T1ttttBENCH", vcategs, "selected", "susy3l_T1ttttBENCH");
 

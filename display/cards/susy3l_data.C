@@ -24,7 +24,7 @@ void susy3l_data() {
     string sigs = "none"; 
     bool data = true;
     bool manual = false;
-    string region = "FakeCR";
+    string region = "WZCR";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
     else{string obs = "nbjets";}
