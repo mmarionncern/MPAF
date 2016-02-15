@@ -291,6 +291,7 @@ void SUSY3L::initialize(){
         _susyProcessName = getCfgVarS("susyProcessName", "T6ttWW");
         //load signal cross section and number of generated events
          _dbm->loadDb(_susyProcessName+"Xsect", _susyProcessName+"Xsect.db");
+         _dbm->loadDb(_susyProcessName+"Xsect_variation", _susyProcessName+"Xsect_variation.db");
         loadScanHistogram();
     }
 
@@ -360,6 +361,7 @@ void SUSY3L::initialize(){
         addManualSystSource("ISR",SystUtils::kNone);
         addManualSystSource("EWKFR",SystUtils::kNone);
         addManualSystSource("PUXS",SystUtils::kNone);
+        addManualSystSource("XSFS",SystUtils::kNone);
         //addManualSystSource("Theory",SystUtils::kNone);   -> accounted for in display card
     }
 
@@ -2532,7 +2534,22 @@ bool SUSY3L::checkMassBenchmark(){
     }
 
     if(_sampleName.find(s)==string::npos) return false;
-    _weight *= _dbm->getDBValue(_susyProcessName+"Xsect",M1)/_nProcEvtScan;
+    cout << _dbm->getDBValue(_susyProcessName+"Xsect",M1) << endl;
+    
+	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kUp==getUncDir() ){
+        //fastSim x-section up variation
+        float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) + _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
+        _weight *= XS/_nProcEvtScan;
+    }
+  	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kUp==getUncDir() ){
+        //fastSim x-section down variation
+        float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) - _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
+        _weight *= XS/_nProcEvtScan;
+    }
+    else
+        _weight *= _dbm->getDBValue(_susyProcessName+"Xsect",M1)/_nProcEvtScan;
+    
+    
     return true;
 
 }
