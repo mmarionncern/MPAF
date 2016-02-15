@@ -42,7 +42,7 @@ void susy3l_scanSig_BENCH(){
     md.addDataCardSample( "TTLLJets_m1to10", "ttZlowM"); 
     md.addDataCardSample( "TTZToLLNuNu", "ttZ"); 
 
-    md.addDataCardSample( "TTWToLNu", "ttW", 1); 
+    md.addDataCardSample( "TTWToLNu", "ttW"); 
    
     md.addDataCardSample( "WZTo3LNu", "WZ"); 
     
@@ -150,13 +150,14 @@ void susy3l_scanSig_BENCH(){
     md.addNuisanceParameter("BTAGFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("ISR","T1ttttBENCH","shape","");
+    md.addNuisanceParameter("XSFS","T1ttttBENCH","shape","");
 
-    //md.addNuisanceParameter("ttWAcc","ttW","shape","");
-    //md.addNuisanceParameter("ttZAcc","ttZ","shape","");
-    //md.addNuisanceParameter("ttZlowMAcc","ttZlowM","shape","");
-    //md.addNuisanceParameter("ttHAcc","ttH","shape","");
-    //md.addNuisanceParameter("wzTh","WZ","shape",""); //TODO: to be added
-    //md.addNuisanceParameter("QCDScale","T1ttttBENCH","shape","");
+    md.addNuisanceParameter("ttWAcc","ttW","shape","");
+    md.addNuisanceParameter("ttZAcc","ttZ","shape","");
+    md.addNuisanceParameter("ttZlowMAcc","ttZlowM","shape","");
+    md.addNuisanceParameter("ttHAcc","ttH","shape","");
+    md.addNuisanceParameter("wzTh","WZ","shape","");
+    md.addNuisanceParameter("QCDScale","T1ttttBENCH","shape","");
 
     string cats[30]={
         "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006",
@@ -287,31 +288,8 @@ void susy3l_scanSig_BENCH(){
         md.addExternalSystUnc("ttZlowM" ,"ttZlowMAcc"   ,AccTTZlowM[ic] , -1*AccTTZlowM[ic] , categs[ic], "selected");
         md.addExternalSystUnc("ttH"     ,"ttHAcc"       ,AccTTH[ic]     , -1*AccTTH[ic]     , categs[ic], "selected");
         md.addExternalSystUnc("WZ"      ,"WZTh"         ,ExtrapolWZ[ic] , -1*ExtrapolWZ[ic] , categs[ic], "selected");
- 
-     //TODO: section under construction
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-        //for(int isr=0;isr<30;isr++) {
-        //    if(categs[ic].substr(9, categs[ic].size()-9)==cats[isr])
-	    //        md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0.1, -0.1, categs[ic], "selected");
-        //    else
-	    //        md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0., 0., categs[ic], "selected");
-        //}
-       
-        //for(size_t id=0;id<9;id++) {
-            //md.addExternalSystUnc(dss[id],"tHTE",HLTEff[ic], -1*HLTEff[ic], categs[ic], "selected");
-        //}
-        //md.addExternalSystUnc("T1ttttBENCH","QCDScale",hQCDUp->GetBinContent(ic+1), hQCDDown->GetBinContent(ic+1), categs[ic], "selected");
-    }
-
-    //TODO:theoretical uncertainty fastSim signal pdf
-    //for(int isr=0;isr<30;isr++) {
-        //md.addNuisanceParameter("pdfS"+cats[isr],"T1ttttBENCH","shape","");
-    //}
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
- 
     md.makeMultiDataCard("T1ttttBENCH", vcategs, "selected", "susy3l_T1ttttBENCH");
 
     gROOT->ProcessLine(".qqqqqqqqqqqqqq");
