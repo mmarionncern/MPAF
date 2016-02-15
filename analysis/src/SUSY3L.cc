@@ -223,6 +223,11 @@ void SUSY3L::initialize(){
     _vc->registerVar("GenPart_charge"				   );
     _vc->registerVar("GenPart_status"				   );
 
+    //LHE gen level weights                                                                                                                                                       
+    _vc->registerVar("nLHEweight"                      );
+    _vc->registerVar("LHEweight_id"                    );
+    _vc->registerVar("LHEweight_wgt"                   );
+
     //SusyModule for common inputs and functions with RA5
     _susyMod = new SusyModule(_vc, _dbm);
 
@@ -286,6 +291,7 @@ void SUSY3L::initialize(){
     _exactlyThreeLep = getCfgVarI("exactlyThreeLep", 0);
     _debug = getCfgVarI("debug", 0);
     _runSystematics = getCfgVarI("runSystematics", 1);
+    _LHESYS = getCfgVarI("LHESYS", 0);
 
     if(_fastSim) {
         _susyProcessName = getCfgVarS("susyProcessName", "T6ttWW");
@@ -316,9 +322,6 @@ void SUSY3L::initialize(){
         _dbm->loadDb("ElNIsoMCDo", "160116_FR_withIdEmu.root", "FRElPtCorr_qcd_non");
         _dbm->loadDb("MuNIsoMCDo", "160116_FR_withIdEmu.root", "FRMuPtCorr_qcd_non");
     }
-
-    //load HLT scale factors
-    //_dbm->loadDb("hltSF"      , "hltSF.db");
 
     //load b-tag scale factors and efficiecnies
     _dbm->loadDb("BTagSF"     , "BTagSFMedium.db"                                    ); 
@@ -356,13 +359,15 @@ void SUSY3L::initialize(){
     if(_runSystematics){
         addManualSystSource("BTAG",SystUtils::kNone);
         addManualSystSource("JES",SystUtils::kNone);
-        addManualSystSource("BTAGFS",SystUtils::kNone);
-        addManualSystSource("LepEffFS",SystUtils::kNone);
-        addManualSystSource("ISR",SystUtils::kNone);
         addManualSystSource("EWKFR",SystUtils::kNone);
         addManualSystSource("PUXS",SystUtils::kNone);
-        addManualSystSource("XSFS",SystUtils::kNone);
         //addManualSystSource("Theory",SystUtils::kNone);   -> accounted for in display card
+        //fastSim only
+        addManualSystSource("ISR",SystUtils::kNone);
+        addManualSystSource("LepEffFS",SystUtils::kNone);
+        addManualSystSource("BTAGFS",SystUtils::kNone);
+        addManualSystSource("XSFS",SystUtils::kNone);
+        addManualSystSource("ACCFS",SystUtils::kNone);
     }
 
 }
@@ -377,10 +382,16 @@ void SUSY3L::modifyWeight() {
     */ 
     
     if(_vc->get("isData") != 1){
-        _weight *= _vc->get("genWeight");
-	    if(!_closure){
+        //generator weights                                                                                                                                                        
+        if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kUp==getUncDir() ){_LHESYS = 1009;}
+	    if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kDown==getUncDir() ){_LHESYS = 1005;}
+        if (_LHESYS == 0) {_weight *= _vc->get("genWeight");}
+        else {_weight *= _susyMod->getLHEweight(_LHESYS);}
+
+	    //pile-up weights
+        if(!_closure){
             string db="puWeights";
-	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsUp";}
+	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
 	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
 	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
             //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
@@ -2541,7 +2552,7 @@ bool SUSY3L::checkMassBenchmark(){
         float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) + _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
         _weight *= XS/_nProcEvtScan;
     }
-  	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kUp==getUncDir() ){
+  	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kDown==getUncDir() ){
         //fastSim x-section down variation
         float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) - _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
         _weight *= XS/_nProcEvtScan;

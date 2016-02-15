@@ -99,6 +99,7 @@ private:
     int _closure;
     bool _exactlyThreeLep;
     bool _runSystematics;
+    int _LHESYS;
     string _susyProcessName;
     string _BR;
     string _SR;
