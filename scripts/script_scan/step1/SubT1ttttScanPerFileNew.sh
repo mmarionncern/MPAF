@@ -31,7 +31,7 @@ while read fileLine; do
 	qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/SUSY3L/3l_scanSig_${file}.out -e $MPAF/workdir/logs/SUSY3L/3l_scanSig_${file}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
 
 	N=`echo $N + 1 | bc`
-    break
+    #break
 
 #CHANGE depending on scan
 done < fileNamesV1          #for T1tttt

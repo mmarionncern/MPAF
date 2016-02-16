@@ -391,7 +391,7 @@ void SUSY3L::modifyWeight() {
 	    //pile-up weights
         if(!_closure){
             string db="puWeights";
-	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
+	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsUp";}
 	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
 	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
             //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
@@ -487,7 +487,7 @@ void SUSY3L::run(){
     }
     
     //lepton scale factors
-    if(!_isData){
+/*    if(!_isData){
         //fullSim scale factors, flat uncertainty added in display card
         if(!_fastSim) {
 	        _weight*=_susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
@@ -503,7 +503,7 @@ void SUSY3L::run(){
         }
     } 
     counter("lepton SF");
-
+*/
     //end event reweighting ////////////////////////////////////////////////////
   
     setWorkflow(kGlobal);	
