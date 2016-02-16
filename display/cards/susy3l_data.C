@@ -10,8 +10,8 @@ void susy3l_data() {
     //string fileName="3l_unblinded_2260pb"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="3l_unblinded_2260pb"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
-    string fileName="3l"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3l"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="merged_2fb"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -23,11 +23,11 @@ void susy3l_data() {
  
     string sigs = "none"; 
     bool data = true;
-    bool manual = false;
-    string region = "WZCR";
+    bool manual = true;
+    string region = "";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "nbjets";}
+    else{string obs = "lep1dxy";}
  
 
     //Binning & title ************************* Binning & titre
@@ -146,6 +146,13 @@ void susy3l_data() {
         double rangeX[2]={0,6};
         //bool logYScale=true;
     }
+    if(obs == "lep1dxy"){
+        md.dp.setObservables("lep1_dxy" + region);
+        int binning=0;
+        double rangeX[2]={-0.03,0.03};
+        //bool logYScale=true;
+    }
+
 
 
     //string autoBinFile="susybinninghigh";
