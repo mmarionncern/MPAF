@@ -14,3 +14,5 @@ workdir/*
 *dictgen.mk
 *gen.mk
 display/cards/tmpFilesShape/
+scripts/script_scan/step10/
+scripts/script_scan/step8/
