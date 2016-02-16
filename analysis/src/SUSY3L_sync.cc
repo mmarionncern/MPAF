@@ -368,9 +368,9 @@ void SUSY3L_sync::modifyWeight() {
 void SUSY3L_sync::run(){
     
     //limit run number to unblineded json
-    //if(_vc->get("isData") == 1){
-    //    if(_vc->get("run")>258750){return;}
-    //}
+    if(_vc->get("isData") == 1){
+        if(_vc->get("run")>258750){return;}
+    }
 
 	//debug output    
 	_run = 254914;
@@ -570,7 +570,7 @@ void SUSY3L_sync::run(){
     if(!baseSel){return;}
 
     if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
-        cout << "passing baseline selection" << endl;}}
+        cout << "passing baseline selection " <<  _isFake << endl;}}
 
 
     //fillSkimTree();
@@ -863,7 +863,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-        if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
         //count muons and electrons
         if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
         if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
@@ -1063,11 +1063,11 @@ void SUSY3L_sync::setBaselineRegion(){
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 1           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
-        setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
+        setCut("NJets"              ,    0, ">=" )  ;     //number of jets in event
         setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
-        setCut("HT"                 ,   60, ">=")  ;     //sum of jet pT's
-        setCut("MET"                ,   50, ">=")  ;     //missing transverse energy
+        setCut("HT"                 ,    0, ">=")  ;     //sum of jet pT's
+        setCut("MET"                ,    0, ">=")  ;     //missing transverse energy
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
         _bjetThreshold                = 30.         ;     //bjet threshold
@@ -1428,6 +1428,9 @@ void SUSY3L_sync::advancedSelection(int WF){
     setWorkflow(WF);
     
     counter("baseline on and off-Z");
+
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+        cout << "WF: " << WF << endl;}}
 
     //print out event info
     if(!_debug){ 
