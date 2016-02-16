@@ -22,7 +22,7 @@ void susy3l_tt_closure() {
     string sigs = "none"; 
     bool data = false;
     bool manual = true;
-    string region = "OnZSR015";
+    string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
     else{string obs = "njets";}
@@ -182,40 +182,41 @@ void susy3l_tt_closure() {
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
     //single top
-    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "single top"    , kRed+2      );
-    md.anConf.addSample( "TBar_tWch"                            ,  "single top"    , kRed+2      );
-    md.anConf.addSample( "T_tWch"                               ,  "single top"    , kRed+2      );
-    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "single top"    , kRed+2      );
-    md.anConf.addSample( "TToLeptons_tch"                       ,  "single top"    , kRed+2      );
+//    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "single top"    , kRed+2      );
+//    md.anConf.addSample( "TBar_tWch"                            ,  "single top"    , kRed+2      );
+//    md.anConf.addSample( "T_tWch"                               ,  "single top"    , kRed+2      );
+//    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "single top"    , kRed+2      );
+//    md.anConf.addSample( "TToLeptons_tch"                       ,  "single top"    , kRed+2      );
   
   //W+Jets
-    md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kRed+1      );
+//    md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kRed+1      );
     
 
     //Drell-Yan
-    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "DY"    , kRed-4     );
-    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "DY"    , kRed-4     );
+//    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "DY"    , kRed-4     );
+//    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "DY"    , kRed-4     );
 
 
     //ttbar
     md.anConf.addSample( "TT_pow"                             ,  "t#bar{t}"    , kRed-6      );
+    md.anConf.addSample( "TTJets_DiLepton"                    ,  "pseudodata"  , kBlack      );
 
     //md.anConf.addSample( "TTJets_DiLepton"                      ,  "TT"    , kRed-6      );
     //md.anConf.addSample( "_Fake:TTJets_DiLepton"                 ,  "predicted sig"    , kBlack      );
 
 
-    md.anConf.addSample( "_Fake:TbarToLeptons_tch"               ,  "predicted sig"    , kBlack      );
-    md.anConf.addSample( "_Fake:TBar_tWch"                       ,  "predicted sig"    , kBlack      );
-    md.anConf.addSample( "_Fake:T_tWch"                          ,  "predicted sig"    , kBlack      );
-    md.anConf.addSample( "_Fake:TToLeptons_sch_amcatnlo"         ,  "predicted sig"    , kBlack      );
-    md.anConf.addSample( "_Fake:TToLeptons_tch"                  ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TbarToLeptons_tch"               ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TBar_tWch"                       ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:T_tWch"                          ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TToLeptons_sch_amcatnlo"         ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TToLeptons_tch"                  ,  "predicted sig"    , kBlack      );
 
-    md.anConf.addSample( "_Fake:WJetsToLNu"                      ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:WJetsToLNu"                      ,  "predicted sig"    , kBlack      );
 
-    md.anConf.addSample( "_Fake:DYJetsToLL_M10to50"              ,  "predicted sig"    , kBlack      );
-    md.anConf.addSample( "_Fake:DYJetsToLL_M50"                  ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:DYJetsToLL_M10to50"              ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:DYJetsToLL_M50"                  ,  "predicted sig"    , kBlack      );
 
-    md.anConf.addSample( "_Fake:TT_pow"                        ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TT_pow"                        ,  "pseudodata" );
 
 
     // }
