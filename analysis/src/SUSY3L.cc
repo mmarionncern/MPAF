@@ -430,7 +430,7 @@ void SUSY3L::run(){
     //event reweighting //////////////////////////////////////////////////////////
     
     //theory uncertainty for ttW and ttZ (currently not used but covered in display card)
-    if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kDown==getUncDir() ) {
+/*    if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kDown==getUncDir() ) {
         if(_sampleName.find("TTW") != string::npos) {
      	    bool passSR=false;
      	    _SR="SR013";
@@ -455,7 +455,7 @@ void SUSY3L::run(){
         if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
         _weight *= 1+sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
         }
-    }   
+    }*/   
 
     //btag-scale factors
     if(!_vc->get("isData") && !_closure ) {
@@ -487,7 +487,7 @@ void SUSY3L::run(){
     }
     
     //lepton scale factors
-/*    if(!_isData){
+    if(!_isData){
         //fullSim scale factors, flat uncertainty added in display card
         if(!_fastSim) {
 	        _weight*=_susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
@@ -503,7 +503,7 @@ void SUSY3L::run(){
         }
     } 
     counter("lepton SF");
-*/
+
     //end event reweighting ////////////////////////////////////////////////////
   
     setWorkflow(kGlobal);	
