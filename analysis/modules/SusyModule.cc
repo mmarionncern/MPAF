@@ -2358,6 +2358,42 @@ SusyModule::getVarWeightFastSimLepSFRA7(const CandList& cands, int dir) {
     return totUnc;
 }
 
+float
+SusyModule::getWeightFastSimHltSFRA7(const CandList& cands, float HT) {
+
+    int nEl = 0;
+    bool lowPtEl = false;
+    for(int il = 0;il<cands.size();il++){
+        const Candidate* cand = cands[il];
+        if(std::abs(cand->pdgId())==11){
+            nEl +=1;
+            if(cand->pt()<15. && HT < 400) lowPtEl = true;
+        }
+    }
+    if(nEl>=3) return 0.97;
+    else if(lowPtEl) return 0.93;
+    else return 1.;
+
+}
+
+
+float
+SusyModule::getVarWeightFastSimHltSFRA7(const CandList& cands, float HT, int dir) {
+
+    int nEl = 0;
+    bool lowPtEl = false;
+    for(int il = 0;il<cands.size();il++){
+        const Candidate* cand = cands[il];
+        if(std::abs(cand->pdgId())==11){
+            nEl +=1;
+            if(cand->pt()<15. && HT < 400) lowPtEl = true;
+        }
+    }
+    if(nEl>=3) return 1+dir*0.05;
+    else if(lowPtEl) return 1+dir*0.05;
+    else return 1+dir*0.03;
+
+}
 
 float 
 SusyModule::getPuWeight(unsigned int nvtx) {

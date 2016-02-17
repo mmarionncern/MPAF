@@ -136,6 +136,9 @@ public:
   float getVarWeightFastSimLepSF(const Candidate* l1, const Candidate* l2, int dir);
   float getVarWeightFastSimLepSFRA7(const CandList& cands, int dir);
 
+  float getWeightFastSimHltSFRA7(const CandList& cands, float HT);
+  float getVarWeightFastSimHltSFRA7(const CandList& cands, float HT, int dir);
+  
   float getPuWeight(unsigned int nvtx);
 
   void applyISRWeight(unsigned int process, int var, float& weight);

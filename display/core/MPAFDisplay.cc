@@ -1133,7 +1133,7 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
                   uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] = 2.34;}
               if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
                   uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0;}
-              }
+          }
           hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
           hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
         } 

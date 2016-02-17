@@ -72,7 +72,7 @@ void SUSY3L::initialize(){
     //_vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
     //_vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
     
-    loadScanHistogram();
+    //loadScanHistogram();
 
     //register HLT trigger bit tree variables 
     registerTriggerVars();
@@ -291,16 +291,16 @@ void SUSY3L::initialize(){
     _exactlyThreeLep = getCfgVarI("exactlyThreeLep", 0);
     _debug = getCfgVarI("debug", 0);
     _runSystematics = getCfgVarI("runSystematics", 1);
+    _susyProcessName = getCfgVarS("susyProcessName", "T1tttt");
     _LHESYS = getCfgVarI("LHESYS", 0);
 
     if(_fastSim) {
-        _susyProcessName = getCfgVarS("susyProcessName", "T6ttWW");
         //load signal cross section and number of generated events
-         _dbm->loadDb(_susyProcessName+"Xsect", _susyProcessName+"Xsect.db");
-         _dbm->loadDb(_susyProcessName+"Xsect_variation", _susyProcessName+"Xsect_variation.db");
+        _dbm->loadDb(_susyProcessName+"Xsect", _susyProcessName+"Xsect.db");
+        _dbm->loadDb(_susyProcessName+"Xsect_variation", _susyProcessName+"Xsect_variation.db");
         loadScanHistogram();
     }
-
+    
     //FR databases
     if(_FR=="FO2C") {
 
@@ -365,9 +365,10 @@ void SUSY3L::initialize(){
         //fastSim only
         addManualSystSource("ISR",SystUtils::kNone);
         addManualSystSource("LepEffFS",SystUtils::kNone);
+        addManualSystSource("HLTFS",SystUtils::kNone);
         addManualSystSource("BTAGFS",SystUtils::kNone);
         addManualSystSource("XSFS",SystUtils::kNone);
-        addManualSystSource("ACCFS",SystUtils::kNone);
+        //addManualSystSource("ACCFS",SystUtils::kNone);
     }
 
 }
@@ -503,6 +504,19 @@ void SUSY3L::run(){
         }
     } 
     counter("lepton SF");
+
+    //HLT scale factors
+    if(!_isData && _fastSim){
+        //fastSim scale factors and flavor and pt dependent shape uncertainty
+        _weight*=_susyMod->getWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT);
+        // //uncertainties
+	    if((isInUncProc() &&  getUncName()=="HLTFS") && SystUtils::kUp==getUncDir() )
+	        _weight *= _susyMod->getVarWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT, 1);
+	    if((isInUncProc() &&  getUncName()=="HLTFS") && SystUtils::kDown==getUncDir() )
+	        _weight *= _susyMod->getVarWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT, -1);
+    } 
+    counter("HLT SF");
+
 
     //end event reweighting ////////////////////////////////////////////////////
   
@@ -2545,21 +2559,18 @@ bool SUSY3L::checkMassBenchmark(){
     }
 
     if(_sampleName.find(s)==string::npos) return false;
-    cout << _dbm->getDBValue(_susyProcessName+"Xsect",M1) << endl;
-    
+ 
+    float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1);
 	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kUp==getUncDir() ){
         //fastSim x-section up variation
-        float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) + _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
-        _weight *= XS/_nProcEvtScan;
+        XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) + _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
     }
   	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kDown==getUncDir() ){
         //fastSim x-section down variation
-        float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) - _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
-        _weight *= XS/_nProcEvtScan;
+        XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) - _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
     }
-    else
-        _weight *= _dbm->getDBValue(_susyProcessName+"Xsect",M1)/_nProcEvtScan;
-    
+
+    _weight *= XS/_nProcEvtScan;
     
     return true;
 
