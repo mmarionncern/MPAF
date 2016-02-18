@@ -609,14 +609,14 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
     _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
     _hm->addVariable("lep1_SIP3D"       , 100,      0.,     5.0,    "leading lepton SIP_{3D}"                   );
-    _hm->addVariable("lep1_dxy"         , 200,      -0.03, 0.03,    "leading lepton d_{xy} [cm]"                );
-    _hm->addVariable("lep1_dz"          , 200,      -0.05, 0.05,    "leading lepton d_{z} [cm]"                 );
+    _hm->addVariable("lep1_dxy"         , 300,      0.,   300.0,    "leading lepton |d_{xy}| [#mum]"                );
+    _hm->addVariable("lep1_dz"          , 500,      0.,   500.0,    "leading lepton |d_{z}| [#mum]"                 );
     _hm->addVariable("lep2_SIP3D"       , 100,      0.,     5.0,    "sub-leading lepton SIP_{3D}"                   );
-    _hm->addVariable("lep2_dxy"         , 200,      -0.03, 0.03,    "sub-leading lepton d_{xy} [cm]"                );
-    _hm->addVariable("lep2_dz"          , 200,      -0.05, 0.05,    "sub-leading lepton d_{z} [cm]"                 );
+    _hm->addVariable("lep2_dxy"         , 300,      0.,   300.0,    "sub-leading lepton |d_{xy}| [#mum]"                );
+    _hm->addVariable("lep2_dz"          , 500,      0.,   500.0,    "sub-leading lepton |d_{z}| [#mum]"                 );
     _hm->addVariable("lep3_SIP3D"       , 100,      0.,     5.0,    "3rd lepton SIP_{3D}"                   );
-    _hm->addVariable("lep3_dxy"         , 200,      -0.03, 0.03,    "3rd lepton d_{xy} [cm]"                );
-    _hm->addVariable("lep3_dz"          , 200,      -0.05, 0.05,    "3rd lepton d_{z} [cm]"                 );
+    _hm->addVariable("lep3_dxy"         , 300,      0.,   300.0,    "3rd lepton |d_{xy}| [#mum]"                );
+    _hm->addVariable("lep3_dz"          , 500,      0.,   500.0,    "3rd lepton |d_{z}| [#mum]"                 );
    
     //on-Z only observables 
     _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                               );
@@ -2197,15 +2197,15 @@ void SUSY3L::fillHistos(bool additionalPlots){
     fill("pt_2nd_lepton" , _leps[1]->pt()   , _weight);
     fill("pt_3rd_lepton" , _leps[2]->pt()   , _weight);
 
-    fill("lep1_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[0])   , _weight);
-    fill("lep1_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[0])   , _weight);
-    fill("lep1_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[0])   , _weight);
-    fill("lep2_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[1])   , _weight);
-    fill("lep2_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[1])   , _weight);
-    fill("lep2_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[1])   , _weight);
-    fill("lep3_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[2])   , _weight);
-    fill("lep3_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[2])   , _weight);
-    fill("lep3_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[2])   , _weight);
+    fill("lep1_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[0])                  , _weight);
+    fill("lep1_dxy"   , std::abs(_vc->get("LepGood_dxy"  , _lepsIdx[0])*10000)  , _weight);
+    fill("lep1_dz"    , std::abs(_vc->get("LepGood_dz"   , _lepsIdx[0])*10000)  , _weight);
+    fill("lep2_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[1])                  , _weight);
+    fill("lep2_dxy"   , std::abs(_vc->get("LepGood_dxy"  , _lepsIdx[1])*10000)  , _weight);
+    fill("lep2_dz"    , std::abs(_vc->get("LepGood_dz"   , _lepsIdx[1])*10000)  , _weight);
+    fill("lep3_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[2])                  , _weight);
+    fill("lep3_dxy"   , std::abs(_vc->get("LepGood_dxy"  , _lepsIdx[2])*10000)  , _weight);
+    fill("lep3_dz"    , std::abs(_vc->get("LepGood_dz"   , _lepsIdx[2])*10000)  , _weight);
  
     //on-Z observables
     fill("MT"       , _MT                   , _weight);
