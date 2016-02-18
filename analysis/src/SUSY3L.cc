@@ -488,7 +488,7 @@ void SUSY3L::run(){
     }
     
     //lepton scale factors
-    if(!_isData){
+    if(!_vc->get("isData")){
         //fullSim scale factors, flat uncertainty added in display card
         if(!_fastSim) {
 	        _weight*=_susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
@@ -506,7 +506,7 @@ void SUSY3L::run(){
     counter("lepton SF");
 
     //HLT scale factors
-    if(!_isData && _fastSim){
+    if(!_vc->get("isData") && _fastSim){
         //fastSim scale factors and flavor and pt dependent shape uncertainty
         _weight*=_susyMod->getWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT);
         // //uncertainties
