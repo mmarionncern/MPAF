@@ -1128,12 +1128,12 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
           // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
 
           //special treatment of application regions with 0 yields -> set statistical uncertainty up variation to 2.34 events
-          if(_dsNames[id]=="fake" && uncNames[iu].find("fake")!= std::string::npos ){
-              if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
-                  uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] = 2.34;}
-              if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
-                  uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0;}
-          }
+          //if(_dsNames[id]=="fake" && uncNames[iu].find("fake")!= std::string::npos ){
+          //    if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
+          //        uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] = 2.34;}
+          //    if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
+          //        uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0;}
+          //}
           hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
           hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
         } 
