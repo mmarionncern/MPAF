@@ -149,8 +149,9 @@ void susy3l_scanSig_BENCH(){
     //fastSim related uncertainties
     md.addNuisanceParameter("BTAGFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
+	md.addNuisanceParameter("HLTFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("ISR","T1ttttBENCH","shape","");
-    md.addNuisanceParameter("XSFS","T1ttttBENCH","shape","");
+    //md.addNuisanceParameter("XSFS","T1ttttBENCH","shape","");
 
     md.addNuisanceParameter("ttWAcc","ttW","shape","");
     md.addNuisanceParameter("ttZAcc","ttZH","shape","");
@@ -173,12 +174,11 @@ void susy3l_scanSig_BENCH(){
     md.addNuisanceParameter("lumi","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046:1.046");
     //experimental uncertainties
     md.addNuisanceParameter("HLTEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03:1.03");
-    md.addNuisanceParameter("fastSimHLT","T1ttttBENCH","lnN","1.05");
-    md.addNuisanceParameter("LepEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.035:1.035:1.035:1.035:1.035:1.035"); //2% per lepton
+    md.addNuisanceParameter("LepEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.06:1.06:1.06:1.06:1.06:1.06"); //2% per lepton
  
     //Data-driven methods
     md.addNuisanceParameter("fakeExtrapol","fake","lnN","1.30");
-    md.addNuisanceParameter("wzExtrapol","WZ","lnN","1.15");
+    md.addNuisanceParameter("wzNorm","WZ","lnN","1.15");
  
     //theoretical uncertainties
     
@@ -271,6 +271,7 @@ void susy3l_scanSig_BENCH(){
         0.20, 0.20, 0.30, 0.20, 0.20, 
     };
 
+	//datasets
     string dss[8]={"ttW","ttZH","ttZlowM","WZ","XG","fake","rares","T1ttttBENCH"};
 
     //statistical uncertainties for all processes
@@ -286,8 +287,8 @@ void susy3l_scanSig_BENCH(){
         md.addExternalSystUnc("ttZH"    ,"ttZAcc"       ,AccTTZ[ic]     , -1*AccTTZ[ic]     , categs[ic], "selected");
         md.addExternalSystUnc("ttZlowM" ,"ttZlowMAcc"   ,AccTTZlowM[ic] , -1*AccTTZlowM[ic] , categs[ic], "selected");
         //md.addExternalSystUnc("ttH"     ,"ttHAcc"       ,AccTTH[ic]     , -1*AccTTH[ic]     , categs[ic], "selected");
-        md.addExternalSystUnc("WZ"      ,"WZTh"         ,ExtrapolWZ[ic] , -1*ExtrapolWZ[ic] , categs[ic], "selected");
-
+        md.addExternalSystUnc("WZ"      ,"wzTh"         ,ExtrapolWZ[ic] , -1*ExtrapolWZ[ic] , categs[ic], "selected");
+    }
 
     md.makeMultiDataCard("T1ttttBENCH", vcategs, "selected", "susy3l_T1ttttBENCH");
 
