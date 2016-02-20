@@ -368,7 +368,7 @@ void SUSY3L::initialize(){
         addManualSystSource("HLTFS",SystUtils::kNone);
         addManualSystSource("BTAGFS",SystUtils::kNone);
         addManualSystSource("XSFS",SystUtils::kNone);
-        //addManualSystSource("ACCFS",SystUtils::kNone);
+        addManualSystSource("ACCFS",SystUtils::kNone);
     }
 
 }
@@ -383,11 +383,24 @@ void SUSY3L::modifyWeight() {
     */ 
     
     if(_vc->get("isData") != 1){
-        //generator weights                                                                                                                                                        
-        if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kUp==getUncDir() ){_LHESYS = 1009;}
-	    if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kDown==getUncDir() ){_LHESYS = 1005;}
-        if (_LHESYS == 0) {_weight *= _vc->get("genWeight");}
-        else {_weight *= _susyMod->getLHEweight(_LHESYS);}
+        //generator weights
+        int LHESYS = _LHESYS;
+        float Xfactor = 1;
+        if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kUp==getUncDir() ){
+            LHESYS = 1009;
+            Xfactor = getFastSimXFactor(1);
+            }
+	    if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kDown==getUncDir() ){
+            LHESYS = 1005;
+            Xfactor = getFastSimXFactor(-1);
+        }
+        if (LHESYS == 0) {
+            _weight *= _vc->get("genWeight");
+            }
+        else {
+            _weight *= _susyMod->getLHEweight(LHESYS);
+            _weight *= Xfactor;
+        }
 
 	    //pile-up weights
         if(!_closure){
@@ -608,15 +621,15 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
     _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
-    _hm->addVariable("lep1_SIP3D"       , 100,      0.,     5.0,    "leading lepton SIP_{3D}"                   );
-    _hm->addVariable("lep1_dxy"         , 300,      0.,   300.0,    "leading lepton |d_{xy}| [#mum]"                );
-    _hm->addVariable("lep1_dz"          , 500,      0.,   500.0,    "leading lepton |d_{z}| [#mum]"                 );
-    _hm->addVariable("lep2_SIP3D"       , 100,      0.,     5.0,    "sub-leading lepton SIP_{3D}"                   );
-    _hm->addVariable("lep2_dxy"         , 300,      0.,   300.0,    "sub-leading lepton |d_{xy}| [#mum]"                );
-    _hm->addVariable("lep2_dz"          , 500,      0.,   500.0,    "sub-leading lepton |d_{z}| [#mum]"                 );
-    _hm->addVariable("lep3_SIP3D"       , 100,      0.,     5.0,    "3rd lepton SIP_{3D}"                   );
-    _hm->addVariable("lep3_dxy"         , 300,      0.,   300.0,    "3rd lepton |d_{xy}| [#mum]"                );
-    _hm->addVariable("lep3_dz"          , 500,      0.,   500.0,    "3rd lepton |d_{z}| [#mum]"                 );
+    _hm->addVariable("lep1_SIP3D"       , 100,       0.,    5.0,    "leading lepton SIP_{3D}"                   );
+    _hm->addVariable("lep1_dxy"         , 400,    -200.,  200.0,    "leading lepton d_{xy} [#mum]"              );
+    _hm->addVariable("lep1_dz"          , 800,    -400.,  400.0,    "leading lepton d_{z} [#mum]"               );
+    _hm->addVariable("lep2_SIP3D"       , 100,       0.,    5.0,    "sub-leading lepton SIP_{3D}"               );
+    _hm->addVariable("lep2_dxy"         , 400,    -200.,  200.0,    "sub-leading lepton d_{xy} [#mum]"          );
+    _hm->addVariable("lep2_dz"          , 800,    -400.,  400.0,    "sub-leading lepton d_{z} [#mum]"           );
+    _hm->addVariable("lep3_SIP3D"       , 100,       0.,    5.0,    "3rd lepton SIP_{3D}"                       );
+    _hm->addVariable("lep3_dxy"         , 400,    -200.,  200.0,    "3rd lepton d_{xy} [#mum]"                  );
+    _hm->addVariable("lep3_dz"          , 800,    -400.,  400.0,    "3rd lepton d_{z} [#mum]"                   );
    
     //on-Z only observables 
     _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                               );
@@ -2198,14 +2211,14 @@ void SUSY3L::fillHistos(bool additionalPlots){
     fill("pt_3rd_lepton" , _leps[2]->pt()   , _weight);
 
     fill("lep1_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[0])                  , _weight);
-    fill("lep1_dxy"   , std::abs(_vc->get("LepGood_dxy"  , _lepsIdx[0])*10000)  , _weight);
-    fill("lep1_dz"    , std::abs(_vc->get("LepGood_dz"   , _lepsIdx[0])*10000)  , _weight);
+    fill("lep1_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[0])*10000            , _weight);
+    fill("lep1_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[0])*10000            , _weight);
     fill("lep2_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[1])                  , _weight);
-    fill("lep2_dxy"   , std::abs(_vc->get("LepGood_dxy"  , _lepsIdx[1])*10000)  , _weight);
-    fill("lep2_dz"    , std::abs(_vc->get("LepGood_dz"   , _lepsIdx[1])*10000)  , _weight);
+    fill("lep2_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[1])*10000            , _weight);
+    fill("lep2_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[1])*10000            , _weight);
     fill("lep3_SIP3D" , _vc->get("LepGood_sip3d", _lepsIdx[2])                  , _weight);
-    fill("lep3_dxy"   , std::abs(_vc->get("LepGood_dxy"  , _lepsIdx[2])*10000)  , _weight);
-    fill("lep3_dz"    , std::abs(_vc->get("LepGood_dz"   , _lepsIdx[2])*10000)  , _weight);
+    fill("lep3_dxy"   , _vc->get("LepGood_dxy"  , _lepsIdx[2])*10000            , _weight);
+    fill("lep3_dz"    , _vc->get("LepGood_dz"   , _lepsIdx[2])*10000             , _weight);
  
     //on-Z observables
     fill("MT"       , _MT                   , _weight);
@@ -2585,4 +2598,22 @@ void SUSY3L::loadScanHistogram(){
         TFile* file=new TFile(mpafenv.c_str(),"read");
         _hScanWeight=(TH3D*)file->Get("CountSMS");
     }
+}
+
+
+//____________________________________________________________________________
+float SUSY3L::getFastSimXFactor(float dir){
+
+    if(std::abs(dir)!=1){cout << "Warning: wrong parameter for getFastSimXFactor, returning 1" << endl;}
+
+    if(_susyProcessName == "T1tttt"){
+        if(dir == 1) return 1.34;
+        else return 0.7277;
+    }
+
+    else{
+        cout << "Warning: could not find X factors for susy model " << _susyProcessName << endl;
+        return 1;
+    }
+
 }

@@ -84,6 +84,7 @@ private:
     
     void loadScanHistogram();
     bool checkMassBenchmark();
+    float getFastSimXFactor(float dir);
 
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
