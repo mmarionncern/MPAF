@@ -10,8 +10,8 @@ void susy3l_data() {
     //string fileName="3l_unblinded_2260pb"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="3l_unblinded_2260pb"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
-    string fileName="merged_2fb"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l_test"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l_test"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -24,10 +24,10 @@ void susy3l_data() {
     string sigs = "none"; 
     bool data = true;
     bool manual = true;
-    string region = "";
+    string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "lep1dxy";}
+    else{string obs = "lep1dz";}
  
 
     //Binning & title ************************* Binning & titre
@@ -148,11 +148,58 @@ void susy3l_data() {
     }
     if(obs == "lep1dxy"){
         md.dp.setObservables("lep1_dxy" + region);
-        int binning=0;
-        double rangeX[2]={-0.03,0.03};
+        int binning=10;
+        double rangeX[2]={0,200};
         //bool logYScale=true;
     }
-
+    if(obs == "lep1dz"){
+        md.dp.setObservables("lep1_dz" + region);
+        int binning=10;
+        double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "lep1sip"){
+        md.dp.setObservables("lep1_SIP3D" + region);
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
+    if(obs == "lep2dxy"){
+        md.dp.setObservables("lep2_dxy" + region);
+        int binning=10;
+        double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "lep2dz"){
+        md.dp.setObservables("lep2_dz" + region);
+        int binning=10;
+        double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "lep2sip"){
+        md.dp.setObservables("lep2_SIP3D" + region);
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
+    if(obs == "lep3dxy"){
+        md.dp.setObservables("lep3_dxy" + region);
+        int binning=10;
+        double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "lep3dz"){
+        md.dp.setObservables("lep3_dz" + region);
+        int binning=10;
+        double rangeX[2]={0,200};
+        //bool logYScale=true;
+    }
+    if(obs == "lep3sip"){
+        md.dp.setObservables("lep3_SIP3D" + region);
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
 
 
     //string autoBinFile="susybinninghigh";
@@ -219,7 +266,7 @@ void susy3l_data() {
     
     //TTW
     md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );
- 
+
     //fakes
     //md.anConf.addSample( "TT_pow"                               ,  "fakes"       , 18            );
     //md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "fakes"       , 18            );
@@ -230,7 +277,7 @@ void susy3l_data() {
     //md.anConf.addSample( "T_tWch"                               ,  "fakes"       , 18      );
     //md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "fakes"       , 18      );
     //md.anConf.addSample( "TToLeptons_tch"                       ,  "fakes"       , 18      );
-//    md.anConf.addSample( "TTJets"                           ,  "fakes"       , 18      );
+    //md.anConf.addSample( "TTJets"                           ,  "fakes"       , 18      );
     //md.anConf.addSample( "WJetsToLNu"                           ,  "fakes"       , 18      );
 
     //fakes predicted
