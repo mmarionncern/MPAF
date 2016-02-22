@@ -151,7 +151,8 @@ void susy3l_scanSig_BENCH(){
     md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
 	md.addNuisanceParameter("HLTFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("ISR","T1ttttBENCH","shape","");
-    //md.addNuisanceParameter("XSFS","T1ttttBENCH","shape","");
+    md.addNuisanceParameter("XSFS","T1ttttBENCH","shape","");
+	md.addNuisanceParameter("ACCFS","T1ttttBENCH","shape","");
 
     md.addNuisanceParameter("ttWAcc","ttW","shape","");
     md.addNuisanceParameter("ttZAcc","ttZH","shape","");

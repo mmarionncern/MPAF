@@ -10,8 +10,8 @@ void susy3l_data() {
     //string fileName="3l_unblinded_2260pb"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="3l_unblinded_2260pb"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
-    string fileName="3l_test"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3l_test"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="160220_3l"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="160220_3l"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = false;
@@ -23,11 +23,11 @@ void susy3l_data() {
  
     string sigs = "none"; 
     bool data = true;
-    bool manual = true;
-    string region = "OffZBaseline";
+    bool manual = false;
+    string region = "OnZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "lep1dz";}
+    else{string obs = "lep3sip";}
  
 
     //Binning & title ************************* Binning & titre
@@ -35,7 +35,7 @@ void susy3l_data() {
     //int binning=1;
     int addBinBkg=1; //BinB = binning*AddBin
     double rangeY[2]={0,0};
-    bool logYScale=false;
+    bool logYScale=true;
     //double rangeX[2]={0,7};
     int xDiv[3]={8,6,0};
     int yDiv[3]={6,6,0}; //Nlabel /  sous-Div /ssdiv
@@ -148,55 +148,55 @@ void susy3l_data() {
     }
     if(obs == "lep1dxy"){
         md.dp.setObservables("lep1_dxy" + region);
-        int binning=10;
-        double rangeX[2]={0,200};
+        int binning=20;
+        double rangeX[2]={-150,150};
         //bool logYScale=true;
     }
     if(obs == "lep1dz"){
         md.dp.setObservables("lep1_dz" + region);
-        int binning=10;
-        double rangeX[2]={0,200};
+        int binning=20;
+        double rangeX[2]={-200,200};
         //bool logYScale=true;
     }
     if(obs == "lep1sip"){
         md.dp.setObservables("lep1_SIP3D" + region);
-        int binning=1;
+        int binning=20;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "lep2dxy"){
         md.dp.setObservables("lep2_dxy" + region);
-        int binning=10;
-        double rangeX[2]={0,200};
+        int binning=20;
+        double rangeX[2]={-150,150};
         //bool logYScale=true;
     }
     if(obs == "lep2dz"){
         md.dp.setObservables("lep2_dz" + region);
-        int binning=10;
-        double rangeX[2]={0,200};
+        int binning=20;
+        double rangeX[2]={-200,200};
         //bool logYScale=true;
     }
     if(obs == "lep2sip"){
         md.dp.setObservables("lep2_SIP3D" + region);
-        int binning=1;
+        int binning=20;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "lep3dxy"){
         md.dp.setObservables("lep3_dxy" + region);
-        int binning=10;
-        double rangeX[2]={0,200};
+        int binning=20;
+        double rangeX[2]={-150,150};
         //bool logYScale=true;
     }
     if(obs == "lep3dz"){
         md.dp.setObservables("lep3_dz" + region);
-        int binning=10;
-        double rangeX[2]={0,200};
+        int binning=20;
+        double rangeX[2]={-200,200};
         //bool logYScale=true;
     }
     if(obs == "lep3sip"){
         md.dp.setObservables("lep3_SIP3D" + region);
-        int binning=1;
+        int binning=20;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
