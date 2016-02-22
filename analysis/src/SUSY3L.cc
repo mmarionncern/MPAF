@@ -72,8 +72,6 @@ void SUSY3L::initialize(){
     //_vTR_lines.push_back("HLT_BIT_HLT_DiMu9_Ele9_CaloIdL_TrackIdL_v");
     //_vTR_lines.push_back("HLT_BIT_HLT_TripleMu_12_10_5_v");
     
-    //loadScanHistogram();
-
     //register HLT trigger bit tree variables 
     registerTriggerVars();
 
@@ -2556,12 +2554,27 @@ bool SUSY3L::checkMassBenchmark(){
     ostringstream os,os1;
     os<<M1;
     os1<<M2;
-    string s="-"+os.str()+"-"+os1.str()+"-";
-  
-    if(_ie==0) {
+    string s;
+    if(_susyProcessName == "T1tttt") s="-"+os.str()+"-"+os1.str()+"-";
+    if(_susyProcessName == "T6ttWW") s="_"+os.str()+"_"+os1.str();
+    
+    if(_ie==0 && _susyProcessName == "T1tttt") {
         unsigned int p=_sampleName.find("-");
         unsigned int p1=_sampleName.find("-",p+1);
         unsigned int p2=_sampleName.find("-",p1+1);
+        float m1=stof( _sampleName.substr(p+1,p1-p-1) );
+        float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
+        float xb = _hScanWeight->GetXaxis()->FindBin(m1);
+        float yb = _hScanWeight->GetYaxis()->FindBin(m2);
+        float zb = _hScanWeight->GetZaxis()->FindBin(1);
+  
+        _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
+    }
+ 
+    if(_ie==0 && _susyProcessName == "T6ttWW") {
+        unsigned int p=_sampleName.find("_");
+        unsigned int p1=_sampleName.find("_",p+1);
+        unsigned int p2=_sampleName.size();
         float m1=stof( _sampleName.substr(p+1,p1-p-1) );
         float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
         float xb = _hScanWeight->GetXaxis()->FindBin(m1);
@@ -2610,7 +2623,10 @@ float SUSY3L::getFastSimXFactor(float dir){
         if(dir == 1) return 1.34;
         else return 0.7277;
     }
-
+    if(_susyProcessName == "T6ttWW"){
+        if(dir == 1) return 1.333;
+        else return 0.7312;
+    }
     else{
         cout << "Warning: could not find X factors for susy model " << _susyProcessName << endl;
         return 1;
