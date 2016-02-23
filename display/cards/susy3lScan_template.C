@@ -148,11 +148,9 @@ void susy3l_scanSig_BENCH(){
 
     //fastSim related uncertainties
     md.addNuisanceParameter("BTAGFS","T1ttttBENCH","shape","");
-    md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
-	md.addNuisanceParameter("HLTFS","T1ttttBENCH","shape","");
+    //md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
     md.addNuisanceParameter("ISR","T1ttttBENCH","shape","");
-    md.addNuisanceParameter("XSFS","T1ttttBENCH","shape","");
-	md.addNuisanceParameter("ACCFS","T1ttttBENCH","shape","");
+    //md.addNuisanceParameter("XSFS","T1ttttBENCH","shape","");
 
     md.addNuisanceParameter("ttWAcc","ttW","shape","");
     md.addNuisanceParameter("ttZAcc","ttZH","shape","");
@@ -174,8 +172,9 @@ void susy3l_scanSig_BENCH(){
     //lumi
     md.addNuisanceParameter("lumi","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046:1.046");
     //experimental uncertainties
-    md.addNuisanceParameter("HLTEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.03:1.03:1.03:1.03:1.03:1.03");
-    md.addNuisanceParameter("LepEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.06:1.06:1.06:1.06:1.06:1.06"); //2% per lepton
+    md.addNuisanceParameter("HLTEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.04:1.04:1.04:1.04:1.04:1.04");
+    md.addNuisanceParameter("fastSimHLT","T1ttttBENCH","lnN","1.05");
+    md.addNuisanceParameter("LepEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
  
     //Data-driven methods
     md.addNuisanceParameter("fakeExtrapol","fake","lnN","1.30");
