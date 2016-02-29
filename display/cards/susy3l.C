@@ -7,8 +7,8 @@ void susy3l() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="160208_3l"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="160208_3l"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="160223_3l_simOnly"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="160223_3l_simOnly"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = true;
@@ -18,11 +18,11 @@ void susy3l() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    string obs = "VARIABLE" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
-    //string obs = "srs" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
-    string sigs = "q"; 
+    //string obs = "VARIABLE" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
+    string obs = "impact" ;    //njets, nbjets, met, ht, pt1, pt2, pt3, srs
+    string sigs = "non"; 
     bool data = false;
-    string region = "OnZBaseline";
+    string region = "OffZBaseline";
 
 
     //Binning & title ************************* Binning & titre
@@ -106,6 +106,13 @@ void susy3l() {
         double rangeX[2]={0,16};
         bool logYScale=false;
     }
+    if(obs == "impact"){
+        md.dp.setObservables("OBS");
+        int binning=1;
+        double rangeX[2]={-0.05,0.05};
+        //bool logYScale=false;
+    }
+
 
     //string autoBinFile="susybinninghigh";
     //md.dp.loadAutoBinning(autoBinFile);
@@ -173,7 +180,7 @@ void susy3l() {
     md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );
  
     //fakes
-//    md.anConf.addSample( "Fake:TT_pow"                             ,  "fakes predicted sig"    , kBlack      );
+    //md.anConf.addSample( "TT_pow"                               ,  "non-prompt"    , 18      );
     md.anConf.addSample( "WJetsToLNu"                           ,  "non-prompt"       , 18     );
     
     md.anConf.addSample( "TbarToLeptons_tch"                    ,  "non-prompt"       , 18      );

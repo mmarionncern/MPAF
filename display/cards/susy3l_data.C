@@ -24,7 +24,7 @@ void susy3l_data() {
     string sigs = "none"; 
     bool data = true;
     bool manual = false;
-    string region = "OnZBaseline";
+    string region = "FakeCR";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
     else{string obs = "lep3sip";}
@@ -59,32 +59,35 @@ void susy3l_data() {
     if(obs == "njets"){
         md.dp.setObservables("NJets" + region);
         int binning=1;
-        double rangeX[2]={2,10};
+        if(region=="WZCR" || region == "FakeCR"){double rangeX[2]={0,4};bool logYScale=false;}
+        else{double rangeX[2]={2,10};}
         //bool logYScale=true;
     }
     if(obs == "nbjets"){
         md.dp.setObservables("NBJets" + region);
         int binning=1;
-        double rangeX[2]={0,5};
+        if(region=="WZCR" || region == "FakeCR"){double rangeX[2]={0,5};bool logYScale=false;}
+        else{double rangeX[2]={0,5};}
         //bool logYScale=true;
     }
     if(obs == "met"){
         md.dp.setObservables("MET" + region);
-        int binning=50;
-        double rangeX[2]={0,500};
+        if(region=="WZCR" || region == "FakeCR"){int binning=10; double rangeX[2]={0,120};bool logYScale=false;}
+        else{int binning=50; double rangeX[2]={0,500};}
         //bool logYScale=true;
     }
     if(obs == "ht"){
         md.dp.setObservables("HT" + region);
-        int binning=60;
-        double rangeX[2]={0,1000};
+        if(region=="WZCR"){int binning=50; double rangeX[2]={0,200};bool logYScale=false;}
+        else if(region=="FakeCR"){int binning=50; double rangeX[2]={0,400};bool logYScale=false;}
+        else{int binning=60; double rangeX[2]={0,1000};}
         //bool logYScale=true;
     }
-    if(obs == "mt"){
+    if(obs == "mt" && region == "WZCR"){
         md.dp.setObservables("MT" + region);
         int binning=10;
         double rangeX[2]={0,200};
-        //bool logYScale=true;
+        bool logYScale=false;
     }
     if(obs == "pt1"){
         md.dp.setObservables("pt_1st_lepton" + region);

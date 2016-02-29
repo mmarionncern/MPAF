@@ -4,9 +4,12 @@ void susy3l_scanSig_BENCH(){
     md.refresh();
 
     //general parameters ********************* general parameters
+    string sig="T6ttWWBENCH";
+
     string dir="SUSY3L";
     string fileName="merged_2fb";
-    string fileList="merged_2fb_T1tttt-MASS-"; //susy3lUnc
+    if(sig=="T1ttttBENCH") string fileList="merged_2fb_T1tttt-MASS-"; //susy3lUnc
+    if(sig=="T6ttWWBENCH") string fileList="merged_2fb_T6ttWWMASS"; //susy3lUnc
   
     bool mcOnly = false;
   
@@ -31,7 +34,8 @@ void susy3l_scanSig_BENCH(){
  
     //===============================================================
   
-    md.addDataCardSigSample("T1tttt-MASS-","T1ttttBENCH");
+    if(sig=="T1ttttBENCH") md.addDataCardSigSample("T1tttt-MASS-",sig);
+    if(sig=="T6ttWWBENCH") md.addDataCardSigSample("T6ttWWMASS",sig);
 
     md.addDataCardSample( "TGJets", "XG"); 
     md.addDataCardSample( "TTGJets", "XG"); 
@@ -141,16 +145,18 @@ void susy3l_scanSig_BENCH(){
     //===============================================================
     //UNCERTANITIES
 
-    md.addNuisanceParameter("JES","ttW:ttZH:ttZlowM:WZ:XG:rares:T1ttttBENCH","shape","");
-    md.addNuisanceParameter("BTAG","ttW:ttZH:ttZlowM:WZ:XG:rares:T1ttttBENCH","shape","");
-    md.addNuisanceParameter("PUXS","ttW:ttZH:ttZlowM:WZ:XG:rares:T1ttttBENCH","shape","");
+    md.addNuisanceParameter("JES","ttW:ttZH:ttZlowM:WZ:XG:rares:"+sig,"shape","");
+    md.addNuisanceParameter("BTAG","ttW:ttZH:ttZlowM:WZ:XG:rares:"+sig,"shape","");
+    md.addNuisanceParameter("PUXS","ttW:ttZH:ttZlowM:WZ:XG:rares:"+sig,"shape","");
     md.addNuisanceParameter("EWKFR","fake","shape","");
 
     //fastSim related uncertainties
-    md.addNuisanceParameter("BTAGFS","T1ttttBENCH","shape","");
-    //md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
-    md.addNuisanceParameter("ISR","T1ttttBENCH","shape","");
-    //md.addNuisanceParameter("XSFS","T1ttttBENCH","shape","");
+    md.addNuisanceParameter("BTAGFS",sig,"shape","");
+    md.addNuisanceParameter("LepEffFS",sig,"shape","");
+	md.addNuisanceParameter("HLTFS",sig,"shape","");
+    md.addNuisanceParameter("ISR",sig,"shape","");
+    md.addNuisanceParameter("XSFS",sig,"shape","");
+	md.addNuisanceParameter("ACCFS",sig,"shape","");
 
     md.addNuisanceParameter("ttWAcc","ttW","shape","");
     md.addNuisanceParameter("ttZAcc","ttZH","shape","");
@@ -170,11 +176,10 @@ void susy3l_scanSig_BENCH(){
   
     //Flat uncertanties =================================
     //lumi
-    md.addNuisanceParameter("lumi","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046:1.046");
+    md.addNuisanceParameter("lumi","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.046:1.046:1.046:1.046:1.046:1.046");
     //experimental uncertainties
-    md.addNuisanceParameter("HLTEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.04:1.04:1.04:1.04:1.04:1.04");
-    md.addNuisanceParameter("fastSimHLT","T1ttttBENCH","lnN","1.05");
-    md.addNuisanceParameter("LepEff","ttW:ttZH:ttZlowM:XG:rares:T1ttttBENCH","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
+    md.addNuisanceParameter("HLTEff","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.03:1.03:1.03:1.03:1.03:1.03");
+    md.addNuisanceParameter("LepEff","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.06:1.06:1.06:1.06:1.06:1.06"); //2% per lepton
  
     //Data-driven methods
     md.addNuisanceParameter("fakeExtrapol","fake","lnN","1.30");
@@ -272,7 +277,7 @@ void susy3l_scanSig_BENCH(){
     };
 
 	//datasets
-    string dss[8]={"ttW","ttZH","ttZlowM","WZ","XG","fake","rares","T1ttttBENCH"};
+    string dss[8]={"ttW","ttZH","ttZlowM","WZ","XG","fake","rares",sig};
 
     //statistical uncertainties for all processes
     for(int isr=0;isr<30;isr++) {
@@ -290,7 +295,7 @@ void susy3l_scanSig_BENCH(){
         md.addExternalSystUnc("WZ"      ,"wzTh"         ,ExtrapolWZ[ic] , -1*ExtrapolWZ[ic] , categs[ic], "selected");
     }
 
-    md.makeMultiDataCard("T1ttttBENCH", vcategs, "selected", "susy3l_T1ttttBENCH");
+    md.makeMultiDataCard(sig, vcategs, "selected", "susy3l_"+sig);
 
     gROOT->ProcessLine(".qqqqqqqqqqqqqq");
 }
