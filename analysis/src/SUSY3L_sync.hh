@@ -45,6 +45,9 @@ private:
     float getTF_DoubleFake(int ic);
     float getTF_TripleFake(int ic);
     bool wzCRSelection();
+    bool wzCRFakeSelection();
+    void fakeCRSelection();
+    void fakeCRFakeSelection();
     bool ZMuMuSelection();
     bool ttbarSelection();
     bool ZElElSelection();
@@ -55,7 +58,7 @@ private:
     vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
 		const CandList fakableLeps, vector<unsigned int> idxsL, const CandList fakableLepsPtCorr,
 		vector<unsigned int> idxsLPtCorr, int nHardestLepton, float pt_cut_hardest_legs, 
-        int nHardLeptons, float pt_cut_hard_legs, bool onZ,
+        int nHardLeptons, float pt_cut_hard_legs, bool onZ, float MT, bool exactlyThreeLep,
         vector< vector<int> >& combIdxs, vector<int>& combType ); 
     void setBaselineRegion();
     void setSignalRegion();
@@ -63,7 +66,7 @@ private:
     float getFR(Candidate* cand, int idx);
     void setCut(std::string, float, std::string, float = 0);
     bool hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg);
-    void fillHistos();
+    void fillHistos(bool);
     void fillValidationHistos(string reg);
     float getMT2();
     void sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx);
@@ -81,6 +84,7 @@ private:
     
     void loadScanHistogram();
     bool checkMassBenchmark();
+    float getFastSimXFactor(float dir);
 
     float M_T(float, float, float, float);
     float DeltaPhi(float, float);
@@ -93,8 +97,11 @@ private:
     bool _doPlots;
     bool _doValidationPlots;
     int _closureByFlavor;
+    int _closure;
     bool _exactlyThreeLep;
     bool _runSystematics;
+    int _LHESYS;
+    string _susyProcessName;
     string _BR;
     string _SR;
     string _FR;
@@ -136,7 +143,10 @@ private:
     
     kGlobal_Fake,
     
-    kWZCR
+    kWZCR, kWZCR_Fake,
+
+    kFakeCR, kFakeCR_Fake
+
     };
 
     enum {kIsSingleFake=0,kIsDoubleFake,kIsTripleFake };
@@ -242,6 +252,7 @@ private:
     float _zPt;
     int _idxL1;
     int _idxL2;
+    int _idxL3;
  
     float _btagW;
   
