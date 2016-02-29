@@ -911,6 +911,7 @@ AnaUtils::printTables(string categ) {
         else {
           if(_itEIMap->second.sumw>0.000001 ) {
             cout<<_itEIMap->second.sumw;
+            //cout<<_itEIMap->second.NTot;
             cout<<" $\\pm$ "<<sqrt(_itEIMap->second.sumw2);
           }
           else

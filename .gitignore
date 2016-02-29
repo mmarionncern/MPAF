@@ -16,5 +16,4 @@ workdir/*
 display/cards/tmpFilesShape/
 scripts/script_scan/step8/scans/*
 scripts/script_scan/step11/PlotsSMS/scans/*
-scripts/script_scan/step11/PlotsSMS/python/*
 scripts/script_scan/step10/xcheckPlots/*.[png,eps,pdf]
