@@ -1228,7 +1228,8 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
 
 
   if(_hMC)
-    _hMC->SetTitle( _xtitle.c_str() );
+    //_hMC->SetTitle( _xtitle.c_str() );
+    _hMC->SetTitle( "" );   //Jan: remove mini axis title floating somewhere in ratio plot
 
   //Y axis ===================================
   
@@ -1480,9 +1481,9 @@ DisplayClass::drawDataMCRatio() {
     }
   }//addsyst  
 
-  emptyHisto->GetYaxis()->SetRangeUser( 0.4, 1.6);
+  emptyHisto->GetYaxis()->SetRangeUser( 0.1, 1.9);
   emptyHisto->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
-  emptyHisto->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
+  emptyHisto->GetYaxis()->SetNdivisions(4,_Ydiv[1],_Ydiv[2]);
   emptyHisto->GetXaxis()->SetTitle( (_xtitle+" ").c_str() );
   emptyHisto->GetYaxis()->SetTitle( "Data/MC" );
   emptyHisto->GetXaxis()->SetTitleSize(0.20);
@@ -1498,9 +1499,9 @@ DisplayClass::drawDataMCRatio() {
  
   ratio->SetMarkerStyle(20); 
   ratio->SetMarkerColor(1); 
-  ratio->GetYaxis()->SetRangeUser(  0.4, 1.6);
+  ratio->GetYaxis()->SetRangeUser(  0.1, 1.9);
   ratio->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
-  ratio->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
+  ratio->GetYaxis()->SetNdivisions(4,_Ydiv[1],_Ydiv[2]);
   ratio->GetXaxis()->SetTitle( (_xtitle+"_").c_str() );
   ratio->GetYaxis()->SetTitle( "Data/MC" );
   ratio->GetXaxis()->SetTitleSize(0.20);
