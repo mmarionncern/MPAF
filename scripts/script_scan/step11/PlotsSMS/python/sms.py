@@ -6,6 +6,7 @@ class sms():
         if modelname.find("T1tttt") != -1: self.T1tttt()
         if modelname.find("T1bbbb") != -1: self.T1bbbb()
         if modelname.find("T1qqqq") != -1: self.T1qqqq()
+        if modelname.find("T6ttWW") != -1: self.T6ttWW()
 
 
     def T1tttt(self):
@@ -74,3 +75,31 @@ class sms():
         self.diagY = array('d',[0, 20000])
         # turn off diagonal lines
         self.diagOn = False
+
+
+    def T6ttWW(self):
+        # model name
+        self.modelname = "T6ttWW"
+        # decay chain
+        self.label= "pp #rightarrow #tilde{b}#tilde{b}, #tilde{b}#rightarrow t#tilde{#chi}^{#pm}, #tilde{#chi}^{#pm}#rightarrow W^{#pm}#tilde{#chi}^{0}_{1} ";
+        # scan range to plot
+        self.Xmin = 300
+        self.Xmax = 950
+        self.Ymin = 75
+        self.Ymax = 1200
+        self.Zmin = 0.001
+        self.Zmax = 2
+        # produce sparticle
+        self.sParticle = "m_{#tilde{b}} [GeV]"
+        # LSP
+        self.LSP = "m_{#tilde{#chi}^{#pm}} [GeV]"
+        # diagonal position: mLSP = mgluino - 2mtop 
+        mT = 175
+        self.diagX = array('d',[0,20000])
+        self.diagY = array('d',[-mT, 20000-mT])        
+        # turn off diagonal lines
+        self.diagOn = False
+        
+
+
+

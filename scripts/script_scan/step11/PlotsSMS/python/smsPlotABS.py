@@ -99,7 +99,7 @@ class smsPlotABS(object):
         textCMS.Draw()
         self.c.textCMS = textCMS
         # MODEL LABEL
-        textModelLabel= rt.TLatex(0.15,0.90,"%s  NLO+NLL exclusion" %self.model.label)
+        textModelLabel= rt.TLatex(0.15,0.90,"%s  NLO+NLL excl." %self.model.label)
         textModelLabel.SetNDC()
         textModelLabel.SetTextAlign(13)
         textModelLabel.SetTextFont(42)

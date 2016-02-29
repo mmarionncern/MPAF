@@ -15,13 +15,21 @@ if len(argv)<2:
 
 INPUT = argv[1]
 
-models   = ["T1bbbb", "T1tttt","T1qqqq","T2qq","T2bb","T2tt"]
+models   = ["T1bbbb", "T1tttt","T6ttWW","T1qqqq","T2qq","T2bb","T2tt"]
 model = "mymodel"
 for m in models:
     if m in INPUT:
         model = m
 
-xsfile = "/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVgluglu.root" if "T1" in model else "theXSfile.root"
+if "T1" in model:
+    xsfile = "/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVgluglu.root"
+    print 'using T1tttt x-section file'
+elif "T6" in model:
+    xsfile = "/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVsbottomsbottom.root"
+    print 'using T6ttWW x-section file'
+else:
+    xsfile = "theXSfile.root"
+
 f_xs = ROOT.TFile(xsfile)
 h_xs = f_xs.Get("xs")
 
@@ -211,7 +219,7 @@ for lim in limits:
     
 print "smoothing..."
 for lim in limits:
-    nSmooth = 2 if model!="T1tttt" else 3  # more aggresive smoothing for t1tttt since it's full of holes
+    nSmooth = 1# if model!="T1tttt" else 3  # more aggresive smoothing for t1tttt since it's full of holes
     graphs1[lim] = extractSmoothedContour(h_lims_mu[lim], nSmooth)
     graphs1[lim].SetName( graphs1[lim].GetName().replace("_mu","") ) 
     graphs1[lim].Write()
@@ -224,8 +232,12 @@ if( not os.path.isdir(plotsDir) ):
     os.system("mkdir "+plotsDir)
 for lim in limits:
     ROOT.gStyle.SetNumberContours( 100 )
-    h_lims_yn0[lim].GetXaxis().SetRangeUser(600,2000)
-    h_lims_yn0[lim].GetYaxis().SetRangeUser(0  ,1500)
+    if "T1" in model:
+        h_lims_yn0[lim].GetXaxis().SetRangeUser(600,2000)
+        h_lims_yn0[lim].GetYaxis().SetRangeUser(0  ,1500)
+    if "T6" in model:
+        h_lims_yn0[lim].GetXaxis().SetRangeUser(200,1000)
+        h_lims_yn0[lim].GetYaxis().SetRangeUser(0  ,1200)
     h_lims_yn0[lim].Draw("colz")
     graphs0[lim].SetLineWidth(2)
     graphs0[lim].Draw("same")
