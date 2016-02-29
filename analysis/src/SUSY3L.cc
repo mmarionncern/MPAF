@@ -1707,19 +1707,20 @@ bool SUSY3L::ZMuMuSelection(){
 
     if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_SingleMu"))) return false;
-    if (_vc->get("nLepGood") < 2) return false;
-    if (_vc->get("nLepGood10") != 2) return false;
-    if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
-    if (abs(_vc->get("LepGood_pdgId", 0)) != 13) return false;
+    if (_tightLepsPtCutMllCut.size() < 2) return false;
+    _idxL1 = _tightLepsPtCutMllCutIdx[0];
+    _idxL2 = _tightLepsPtCutMllCutIdx[1];
+    if (!(_vc->get("LepGood_pdgId", _idxL1) == -_vc->get("LepGood_pdgId", _idxL2))) return false;
+    if (abs(_vc->get("LepGood_pdgId", _idxL1)) != 13) return false;
     if (_vc->get("mZ1") < 60. || _vc->get("mZ1") > 120.) return false;
   
-    if (_vc->get("LepGood_charge", 0) < 0) {
-        _idxL1 = 0;
-        _idxL2 = 1;
+    if (_vc->get("LepGood_charge", _idxL1) < 0) {
+        _idxL1 = _tightLepsPtCutMllCutIdx[0];
+        _idxL2 = _tightLepsPtCutMllCutIdx[1];
     }
-    else if (_vc->get("LepGood_charge", 1) < 0) {
-        _idxL1 = 1;
-        _idxL2 = 0;
+    else if (_vc->get("LepGood_charge", _idxL2) < 0) {
+        _idxL1 = _tightLepsPtCutMllCutIdx[1];
+        _idxL2 = _tightLepsPtCutMllCutIdx[0];
     }
   
     if (_vc->get("LepGood_pt", _idxL1) < 20) return false;
@@ -1739,18 +1740,20 @@ bool SUSY3L::ZElElSelection(){
 
     if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_SingleEl"))) return false;
-    if (_vc->get("nLepGood") < 2) return false;
-    if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
-    if (abs(_vc->get("LepGood_pdgId", 0)) != 11) return false;
+    if (_tightLepsPtCutMllCut.size() < 2) return false;
+    _idxL1 = _tightLepsPtCutMllCutIdx[0];
+    _idxL2 = _tightLepsPtCutMllCutIdx[1];
+    if (!(_vc->get("LepGood_pdgId", _idxL1) == -_vc->get("LepGood_pdgId", _idxL2))) return false;
+    if (abs(_vc->get("LepGood_pdgId", _idxL1)) != 11) return false;
     if (_vc->get("mZ1") < 60. || _vc->get("mZ1") > 120.) return false;
   
-    if (_vc->get("LepGood_charge", 0) < 0) {
-        _idxL1 = 0;
-        _idxL2 = 1;
+    if (_vc->get("LepGood_charge", _idxL1) < 0) {
+        _idxL1 = _tightLepsPtCutMllCutIdx[0];
+        _idxL2 = _tightLepsPtCutMllCutIdx[1];
     }
-    else if (_vc->get("LepGood_charge", 1) < 0) {
-        _idxL1 = 1;
-        _idxL2 = 0;
+    else if (_vc->get("LepGood_charge", _idxL2) < 0) {
+        _idxL1 = _tightLepsPtCutMllCutIdx[1];
+        _idxL2 = _tightLepsPtCutMllCutIdx[0];
     }
   
     if (_vc->get("LepGood_pt", _idxL1) < 30) return false;
@@ -1772,9 +1775,9 @@ bool SUSY3L::ttbarSelection(){
 
     if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
-    if (_vc->get("nLepGood") < 2) return false;
-    _idxL1 = 0;
-    _idxL2 = 1;
+    if (_tightLepsPtCutMllCut.size() < 2) return false;
+    _idxL1 = _tightLepsPtCutMllCutIdx[0];
+    _idxL2 = _tightLepsPtCutMllCutIdx[1];
     if (!(_vc->get("LepGood_pdgId", _idxL1) == -_vc->get("LepGood_pdgId", _idxL2) || abs(_vc->get("LepGood_pdgId", _idxL1)+_vc->get("LepGood_pdgId", _idxL2)) == 2)) return false;
     if (_vc->get("LepGood_pt", _idxL1) < 25. || _vc->get("LepGood_pt", _idxL2) < 15.) return false;
     if (_vc->get("minMllAFAS") < 12.) return false;
@@ -1796,24 +1799,26 @@ bool SUSY3L::ZlSelection(){
 
     if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_DoubleMu") || _vc->get("HLT_DoubleEl") || _vc->get("HLT_MuEG"))) return false;
-    if (_vc->get("nLepGood10") !=3 ) return false;
-    if (!(_vc->get("LepGood_pdgId", 0) == -_vc->get("LepGood_pdgId", 1))) return false;
+    if (_tightLepsPtCutMllCut.size() !=3 ) return false;
+    _idxL1 = _tightLepsPtCutMllCutIdx[0];
+    _idxL2 = _tightLepsPtCutMllCutIdx[1];
+    _idxL3 = _tightLepsPtCutMllCutIdx[2];
+    if (!(_vc->get("LepGood_pdgId", _idxL1) == -_vc->get("LepGood_pdgId", _idxL2))) return false;
     if (abs(_vc->get("mZ1")-91.2) > 15.) return false;
-    Candidate* lep3=Candidate::create(_vc->get("LepGood_pt", 2),
-                    _vc->get("LepGood_eta", 2),
-                    _vc->get("LepGood_phi", 2),
-                    _vc->get("LepGood_pdgId", 2),
-                    _vc->get("LepGood_charge", 2),
+    Candidate* lep3=Candidate::create(_vc->get("LepGood_pt", _idxL3),
+                    _vc->get("LepGood_eta", _idxL3),
+                    _vc->get("LepGood_phi", _idxL3),
+                    _vc->get("LepGood_pdgId", _idxL3),
+                    _vc->get("LepGood_charge", _idxL3),
                     0.105);
     float mT= Candidate::create(lep3, _met)->mass();
   
     if (mT > 55.) return false;
     if (_vc->get("minMllAFAS") < 12.) return false;
-    if (_vc->get("LepGood_pt", 2) > 50.) return false;
+    if (_vc->get("LepGood_pt", _idxL3) > 50.) return false;
     if (_vc->get("met_pt") > 60.) return false;
 
-    _idxL1 = 0;
-    _idxL2 = 2;
+    _idxL2 = _idxL3;
     
     return true;
 }
@@ -1828,12 +1833,10 @@ bool SUSY3L::WlSelection(){
 
     if (_vc->get("hbheFilterNew25ns")==0 || _vc->get("Flag_CSCTightHaloFilter")==0 || _vc->get("Flag_eeBadScFilter")==0) return false;   
     if (!(_vc->get("HLT_SingleMu") || _vc->get("HLT_SingleEl"))) return false;
-    if (_vc->get("nLepGood10") != 2) return false;
-    if (_vc->get("LepGood_charge", 0)*_vc->get("LepGood_charge", 1) < 0) return false;
-  
-    _idxL1 = 0;
-    _idxL2 = 1;
-  
+    if (_tightLepsPtCutMllCut.size() != 2) return false;
+    _idxL1 = _tightLepsPtCutMllCutIdx[0];
+    _idxL2 = _tightLepsPtCutMllCutIdx[1];
+    if (_vc->get("LepGood_charge", _idxL1)*_vc->get("LepGood_charge", _idxL2) < 0) return false;
     bool charge= (_vc->get("LepGood_tightCharge",_idxL1) > (abs(_vc->get("LepGood_pdgId",_idxL1))==11)) && (_vc->get("LepGood_tightCharge",_idxL2) > (abs(_vc->get("LepGood_pdgId",_idxL2))==11));
     if (!charge) return false;
     Candidate* lep=Candidate::create(_vc->get("LepGood_pt", _idxL1),

@@ -243,6 +243,7 @@ private:
     float _zPt;
     int _idxL1;
     int _idxL2;
+    int _idxL3;
  
     float _btagW;
   
