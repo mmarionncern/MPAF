@@ -2,6 +2,8 @@
 */*.[a,o,pdf,png,pyc,root,so,swo,swp]
 */*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
 */*/*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
+*/*/*/*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
+*/*/*/*/*/*.[a,o,pdf,png,pyc,root,so,swo,swp]
 */*/*_dict_*
 analysis/bin/analysis
 analysis/lib
