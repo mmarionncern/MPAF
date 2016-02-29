@@ -6,7 +6,7 @@ import ROOT
 
 
 #xsFile = open("SUSYCrossSections13TeVgluglu.txt")
-xsFile = open("SUSYCrossSections13TeVsbottomsbottom.txt")
+xsFile = open("SUSYCrossSections13TeVsquarksquark.txt")
 lines = [x.strip('\n') for x in xsFile if "GeV" in x]
 
 h_xs = ROOT.TH1F("xs","", 561, 197.5, 3002.5)

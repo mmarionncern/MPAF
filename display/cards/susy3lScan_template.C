@@ -164,7 +164,8 @@ void susy3l_scanSig_BENCH(){
     //md.addNuisanceParameter("ttHAcc","ttH","shape","");
     md.addNuisanceParameter("wzTh","WZ","shape","");
 
-    string cats[30]={
+    const int nBins = 30;
+    string cats[nBins]={
         "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006",
         "OnZSR007", "OnZSR008", "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012",
         "OnZSR013", "OnZSR014", "OnZSR015",
@@ -209,7 +210,7 @@ void susy3l_scanSig_BENCH(){
    
     md.prepareDisplay();
 
-    string categs[30]={
+    string categs[nBins]={
         "global_OnZSR001", "global_OnZSR002", "global_OnZSR003", "global_OnZSR004",
         "global_OnZSR005", "global_OnZSR006", "global_OnZSR007", "global_OnZSR008",
         "global_OnZSR009", "global_OnZSR010", "global_OnZSR011", "global_OnZSR012",
@@ -221,9 +222,10 @@ void susy3l_scanSig_BENCH(){
         "global_OffZSR013", "global_OffZSR014", "global_OffZSR015"
     };
     vector<string> vcategs;
-    for(int i=0;i<30;i++) {
+    for(int i=0;i<nBins;i++) {
         vcategs.push_back( categs[i] );
     }
+    //vcategs.push_back( categs[15] );
 
     //external uncertainties ===================================
     float AccTTW[30]={
@@ -280,14 +282,14 @@ void susy3l_scanSig_BENCH(){
     string dss[8]={"ttW","ttZH","ttZlowM","WZ","XG","fake","rares",sig};
 
     //statistical uncertainties for all processes
-    for(int isr=0;isr<30;isr++) {
+    for(int isr=0;isr<nBins;isr++) {
         for(size_t id=0;id<8;id++) {
             md.addNuisanceParameter(dss[id]+cats[isr]+"stat",dss[id],"shape","");
         }
     }
 
     //Q2 background acceptance uncertainties 
-    for(size_t ic=0;ic<30;ic++) {
+    for(size_t ic=0;ic<nBins;ic++) {
         md.addExternalSystUnc("ttW"     ,"ttWAcc"       ,AccTTW[ic]     , -1*AccTTW[ic]     , categs[ic], "selected");
         md.addExternalSystUnc("ttZH"    ,"ttZAcc"       ,AccTTZ[ic]     , -1*AccTTZ[ic]     , categs[ic], "selected");
         md.addExternalSystUnc("ttZlowM" ,"ttZlowMAcc"   ,AccTTZlowM[ic] , -1*AccTTZlowM[ic] , categs[ic], "selected");
