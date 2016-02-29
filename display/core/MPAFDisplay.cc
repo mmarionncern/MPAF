@@ -1127,7 +1127,11 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
           // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
           // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
 
-          //special treatment of application regions with 0 yields -> set statistical uncertainty up variation to 2.34 events
+          if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
+            uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0.00001;}
+          if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
+            uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0.00001;}
+          //special treatment of application regions with 0 yields -> set statistical uncertainty up variation to 0.35
           if(_dsNames[id]=="fake" && uncNames[iu].find("fake")!= std::string::npos ){
               if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
                   uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] = 0.35;}
