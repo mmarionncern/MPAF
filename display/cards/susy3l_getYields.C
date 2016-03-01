@@ -1,13 +1,16 @@
 MPAFDisplay md;
 
-void susy3l_getYields(){
+void susy3l_getYields2(){
     md.refresh();
 
     //general parameters ********************* general parameters
-    string dir="SUSY3L";
-    string fileName="160223_3l_simOnly"; // not needed for statistics but provides the normalization
-    string fileList="160223_3l_simOnly"; // put command line that gives all files as in a "ls" command
+    string sig="T6ttWWBENCH";
 
+    string dir="SUSY3L";
+    string fileName="merged_2fb";
+    if(sig=="T1ttttBENCH") string fileList="merged_2fb_T1tttt-MASS-"; //susy3lUnc
+    if(sig=="T6ttWWBENCH") string fileList="merged_2fb_T6ttWW_325_125"; //susy3lUnc
+  
     bool mcOnly = false;
   
     md.anConf.configureNames( dir, fileName, fileList );
@@ -30,48 +33,33 @@ void susy3l_getYields(){
     md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
  
     //===============================================================
- 
-    //string signal = "SIGSAMPLE";
-    //string signal = "T1t4_1200";
-    //if(signal == "T1t4_1200"      ) md.addDataCardSigSample("T1tttt_mGo1200_mChi800",                     signal);
-    //if(signal == "T1t4_1500"      ) md.addDataCardSigSample("T1tttt_mGo1500_mChi100",                     signal);
-    //if(signal == "T54q_deg"       ) md.addDataCardSigSample("T5ttttDeg_mGo1000_mStop300_mCh285_mChi280",  signal);
-    //if(signal == "T6t2W2_600"     ) md.addDataCardSigSample("T6ttWW_mSbot600_mCh425_mChi50",              signal);
-    //if(signal == "T6t2W2_650"     ) md.addDataCardSigSample("T6ttWW_mSbot650_mCh150_mChi50",              signal);
-    //if(signal == "T54qWZ_315"     ) md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep",   signal);
-    //if(signal == "T54qWZ_325"     ) md.addDataCardSigSample("T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep",   signal);
-    //if(signal == "T54qWZ_800"     ) md.addDataCardSigSample("T5qqqqWZ_mGo1500_mCh800_mChi100_lep",        signal);
-    //if(signal == "T54qWZ_1000"    ) md.addDataCardSigSample("T5qqqqWZ_mGo1200_mCh1000_mChi800_lep",       signal);
+  
+    if(sig=="T1ttttBENCH") md.addDataCardSigSample("T1tttt-MASS-",sig);
+    if(sig=="T6ttWWBENCH") md.addDataCardSigSample("T6ttWW_325_125",sig);
 
-/*    md.addDataCardSample( "TGJets", "TGJets"); 
-    md.addDataCardSample( "TTGJets", "TTGJets"); 
-    md.addDataCardSample( "ZGTo2LG", "ZGTo2LG"); 
-    md.addDataCardSample( "WGToLNuG", "WGToLNuG"); 
-    md.addDataCardSample( "TTHnobb", "TTHnobb"); 
-    md.addDataCardSample( "TTLLJets_m1to10", "TTLLJets_m1to10"); 
-    md.addDataCardSample( "TTZToLLNuNu", "TTZToLLNuNu"); 
-    md.addDataCardSample( "TTWToLNu", "TTWToLNu"); 
-    md.addDataCardSample( "WZTo3LNu", "WZTo3LNu"); 
-    md.addDataCardSample( "tZq_ll", "tZq_ll"); 
-    md.addDataCardSample( "VHToNonbb", "VHToNonbb"); 
-    md.addDataCardSample( "GGHZZ4L", "GGHZZ4L"); 
-    md.addDataCardSample( "ZZTo4L", "ZZTo4L"); 
-    md.addDataCardSample( "WWZ", "WWZ"); 
-    md.addDataCardSample( "WZZ", "WZZ"); 
-    md.addDataCardSample( "ZZZ", "ZZZ"); 
-    md.addDataCardSample( "TTTT", "TTTT"); 
-*/
-    md.addDataCardSample( "data:DYJetsToLL_M50", "DYJetsToLL_M50"); 
-    md.addDataCardSample( "data:DYJetsToLL_M10to50", "DYJetsToLL_M10to50"); 
-    md.addDataCardSample( "data:TbarToLeptons_tch", "TbarToLeptons_tch"); 
-    md.addDataCardSample( "data:TBar_tWch", "TBar_tWch"); 
-    md.addDataCardSample( "data:TT_pow", "TT_pow"); 
-    md.addDataCardSample( "data:TToLeptons_sch_amcatnlo", "TToLeptons_sch_amcatnlo"); 
-    md.addDataCardSample( "data:T_tWch", "T_tWch"); 
-    md.addDataCardSample( "data:TToLeptons_tch", "TToLeptons_tch"); 
-    md.addDataCardSample( "data:WJetsToLNu", "WJetsToLNu"); 
+    md.addDataCardSample( "TGJets", "XG"); 
+    md.addDataCardSample( "TTGJets", "XG"); 
+    md.addDataCardSample( "ZGTo2LG", "XG"); 
+    md.addDataCardSample( "WGToLNuG", "XG"); 
+
+    md.addDataCardSample( "TTHnobb", "ttZH"); 
+    md.addDataCardSample( "TTLLJets_m1to10", "ttZlowM"); 
+    md.addDataCardSample( "TTZToLLNuNu", "ttZH"); 
+
+    md.addDataCardSample( "TTWToLNu", "ttW"); 
+   
+    md.addDataCardSample( "WZTo3LNu", "WZ"); 
     
-/*    md.addDataCardSample( "data:Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
+    md.addDataCardSample( "tZq_ll", "rares"); 
+    md.addDataCardSample( "VHToNonbb", "rares"); 
+    md.addDataCardSample( "GGHZZ4L", "rares"); 
+    md.addDataCardSample( "ZZTo4L", "rares"); 
+    md.addDataCardSample( "WWZ", "rares"); 
+    md.addDataCardSample( "WZZ", "rares"); 
+    md.addDataCardSample( "ZZZ", "rares"); 
+    md.addDataCardSample( "TTTT", "rares"); 
+
+    md.addDataCardSample( "data:Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
     md.addDataCardSample( "data:Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
     md.addDataCardSample( "data:Fake:DoubleEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
     md.addDataCardSample( "data:Fake:DoubleMuon_Run2015C_Oct05_runs_254231_254914", "fake"); 
@@ -80,8 +68,7 @@ void susy3l_getYields(){
     md.addDataCardSample( "data:Fake:MuonEG_Run2015C_Oct05_runs_254231_254914", "fake"); 
     md.addDataCardSample( "data:Fake:MuonEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
     md.addDataCardSample( "data:Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
-*/
-/*
+
     md.addDataCardSample( "Fake:TGJets", "fake", -1 );
     md.addDataCardSample( "Fake:TTGJets", "fake", -1 );
     md.addDataCardSample( "Fake:ZGTo2LG", "fake", -1 );
@@ -98,8 +85,8 @@ void susy3l_getYields(){
     md.addDataCardSample( "Fake:WWZ", "fake", -1 );
     md.addDataCardSample( "Fake:WZZ", "fake", -1 );
     md.addDataCardSample( "Fake:ZZZ", "fake", -1 );
-    md.addDataCardSample( "Fake:TTTT", "fake", -1 );*/
-    /*
+    md.addDataCardSample( "Fake:TTTT", "fake", -1 );
+/*
     md.addDataCardSample( "TGJets", "pseudodata"); 
     md.addDataCardSample( "TTGJets", "pseudodata"); 
     md.addDataCardSample( "ZGTo2LG", "pseudodata"); 
@@ -143,8 +130,8 @@ void susy3l_getYields(){
     md.addDataCardSample( "Fake:WZZ", "pseudodata", -1 );
     md.addDataCardSample( "Fake:ZZZ", "pseudodata", -1 );
     md.addDataCardSample( "Fake:TTTT", "pseudodata", -1 );
-    */
- /* 
+*/
+  
     md.addDataCardSample( "DoubleEG_Run2015C_Oct05_runs_254231_254914", "data"); 
     md.addDataCardSample( "DoubleEG_Run2015D_Oct05_runs_256630_258158", "data"); 
     md.addDataCardSample( "DoubleEG_Run2015D_PromptV4_runs_258159_260627", "data"); 
@@ -156,24 +143,29 @@ void susy3l_getYields(){
     md.addDataCardSample( "MuonEG_Run2015D_PromptV4_runs_258159_260627", "data"); 
 
     //===============================================================
+    //UNCERTANITIES
 
-    md.addNuisanceParameter("JES","ttW:ttZH:WZ:XG:rares:" + signal,"shape","");
-    md.addNuisanceParameter("BTAG","ttW:ttZH:WZ:XG:rares:" + signal,"shape","");
-    md.addNuisanceParameter("PUXS","ttW:ttZH:WZ:XG:rares:" + signal,"shape","");
-
+    md.addNuisanceParameter("JES","ttW:ttZH:ttZlowM:WZ:XG:rares:"+sig,"shape","");
+    md.addNuisanceParameter("BTAG","ttW:ttZH:ttZlowM:WZ:XG:rares:"+sig,"shape","");
+    md.addNuisanceParameter("PUXS","ttW:ttZH:ttZlowM:WZ:XG:rares:"+sig,"shape","");
     md.addNuisanceParameter("EWKFR","fake","shape","");
 
+    //fastSim related uncertainties
+    md.addNuisanceParameter("BTAGFS",sig,"shape","");
+    md.addNuisanceParameter("LepEffFS",sig,"shape","");
+	md.addNuisanceParameter("HLTFS",sig,"shape","");
+    md.addNuisanceParameter("ISR",sig,"shape","");
+    md.addNuisanceParameter("XSFS",sig,"shape","");
+	md.addNuisanceParameter("ACCFS",sig,"shape","");
+
     md.addNuisanceParameter("ttWAcc","ttW","shape","");
-    md.addNuisanceParameter("ttZHAcc","ttZH","shape","");
-*/
-    //md.addNuisanceParameter("BTAGFS",signal,"shape",""); //no fastSim uncert. for fullSim
-    //md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
-    //md.addNuisanceParameter("ISR",signal,"shape",""); //no fastSim uncert. for fullSim
+    md.addNuisanceParameter("ttZAcc","ttZH","shape","");
+    md.addNuisanceParameter("ttZlowMAcc","ttZlowM","shape","");
+    //md.addNuisanceParameter("ttHAcc","ttH","shape","");
+    md.addNuisanceParameter("wzTh","WZ","shape","");
 
-    //md.addNuisanceParameter("QCDScale","T1ttttBENCH","shape","");
-
-
-    string cats[30]={
+    const int nBins = 30;
+    string cats[nBins]={
         "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006",
         "OnZSR007", "OnZSR008", "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012",
         "OnZSR013", "OnZSR014", "OnZSR015",
@@ -182,39 +174,34 @@ void susy3l_getYields(){
         "OffZSR007", "OffZSR008", "OffZSR009", "OffZSR010", "OffZSR011", "OffZSR012",
         "OffZSR013", "OffZSR014", "OffZSR015"
     };
-/*
-    string dss[7]={"ttW","ttZH","WZ","XG","fake","rares",signal};
-
-    for(int isr=0;isr<30;isr++) {
-        md.addNuisanceParameter("pdfS"+cats[isr],signal,"shape","");
-        md.addNuisanceParameter("fake"+cats[isr]+"stat","fake","shape","");
-        for(size_t id=0;id<7;id++) {
-            md.addNuisanceParameter(dss[id]+cats[isr]+"stat",dss[id],"shape","");
-        }
-    }   
-
-
+  
     //Flat uncertanties =================================
     //lumi
-    md.addNuisanceParameter("lumi","ttW:ttZH:XG:rares:" + signal,"lnN","1.046:1.046:1.046:1.046:1.046");
+    md.addNuisanceParameter("lumi","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.046:1.046:1.046:1.046:1.046:1.046");
     //experimental uncertainties
-    md.addNuisanceParameter("tEff","ttW:ttZH:XG:rares:" + signal,"lnN","1.03:1.03:1.03:1.03:1.03");
-    md.addNuisanceParameter("lEff","ttW:ttZH:XG:rares:" + signal,"lnN","1.02:1.02:1.02:1.02:1.02");
-    //md.addNuisanceParameter("pileup","ttW:ttZH:XG:rares:" + signal,"lnN","1.03:1.03:1.03:1.03:1.03");
+    md.addNuisanceParameter("HLTEff","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.03:1.03:1.03:1.03:1.03:1.03");
+    md.addNuisanceParameter("LepEff","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.06:1.06:1.06:1.06:1.06:1.06"); //2% per lepton
+ 
     //Data-driven methods
-    md.addNuisanceParameter("fratio","fake","lnN","1.30");
+    md.addNuisanceParameter("fakeExtrapol","fake","lnN","1.30");
+    md.addNuisanceParameter("wzNorm","WZ","lnN","1.15");
+ 
     //theoretical uncertainties
-    md.addNuisanceParameter("wzTh","WZ","lnN","1.30");
-    md.addNuisanceParameter("WWTh","ttW","lnN","1.50");
-    md.addNuisanceParameter("TGTh","XG","lnN","1.50");
+    
+    //rare processes
+    md.addNuisanceParameter("XGTh","XG","lnN","1.50");
     md.addNuisanceParameter("rareTh","rares","lnN","1.50");
   
-    md.addNuisanceParameter("ttWPdf","ttW","lnN","1.04");
-    md.addNuisanceParameter("ttZHPdf","ttZH","lnN","1.04");
-    md.addNuisanceParameter("ttWXs","ttW","lnN","1.13");
-    md.addNuisanceParameter("ttZHXs","ttZH","lnN","1.11");
-    //md.addNuisanceParameter("fsHLT",signal,"lnN","1.05"); no fastSim uncert. for fullSim
-*/
+    //pdf uncertainty
+    md.addNuisanceParameter("ttWPdf","ttW","lnN","1.02");
+    md.addNuisanceParameter("ttZPdf","ttZH:ttZlowM","lnN","1.03:1.06");
+    //md.addNuisanceParameter("ttHPdf","ttH","lnN","1.035");
+
+    //x-section uncertainty
+    md.addNuisanceParameter("ttWXs","ttW","lnN","1.11");
+    md.addNuisanceParameter("ttZXs","ttZH:ttZlowM","lnN","1.13:1.33");
+    //md.addNuisanceParameter("ttHXs","ttH","lnN","1.09");
+
 
     //*********************************************************************²
 
@@ -223,8 +210,7 @@ void susy3l_getYields(){
    
     md.prepareDisplay();
 
-    int ncategs=30;
-    string categs[30]={
+    string categs[nBins]={
         "global_OnZSR001", "global_OnZSR002", "global_OnZSR003", "global_OnZSR004",
         "global_OnZSR005", "global_OnZSR006", "global_OnZSR007", "global_OnZSR008",
         "global_OnZSR009", "global_OnZSR010", "global_OnZSR011", "global_OnZSR012",
@@ -236,10 +222,11 @@ void susy3l_getYields(){
         "global_OffZSR013", "global_OffZSR014", "global_OffZSR015"
     };
     vector<string> vcategs;
-    for(int i=0;i<30;i++) {
+    for(int i=0;i<nBins;i++) {
         vcategs.push_back( categs[i] );
     }
-/*
+    //vcategs.push_back( categs[15] );
+
     //external uncertainties ===================================
     float AccTTW[30]={
         0.05, 0.05, 0.18, 0.18, 0.05, 
@@ -251,35 +238,81 @@ void susy3l_getYields(){
         0.18, 0.18, 0.18, 0.18, 0.18
     };
   
-    float AccTTZH[30]={
-        0.03, 0.03, 0.03, 0.03, 0.03, 
-        0.03, 0.03, 0.03, 0.03, 0.03, 
-        0.03, 0.03, 0.03, 0.03, 0.03, 
+    float AccTTZ[30]={
+        0.03, 0.03, 0.05, 0.05, 0.03, 
+        0.03, 0.05, 0.05, 0.03, 0.03, 
+        0.05, 0.05, 0.05, 0.05, 0.05, 
 
         0.05, 0.05, 0.08, 0.08, 0.05, 
         0.05, 0.08, 0.08, 0.05, 0.05, 
         0.08, 0.08, 0.08, 0.08, 0.08
     };
+    
+    float AccTTZlowM[30]={
+        0.03, 0.03, 0.05, 0.05, 0.03, 
+        0.03, 0.05, 0.05, 0.03, 0.03, 
+        0.05, 0.05, 0.05, 0.05, 0.05, 
 
+        0.05, 0.05, 0.08, 0.08, 0.05, 
+        0.05, 0.08, 0.08, 0.05, 0.05, 
+        0.08, 0.08, 0.08, 0.08, 0.08
+    }; 
 
+    float AccTTH[30]={
+        0.05, 0.05, 0.08, 0.08, 0.05, 
+        0.05, 0.08, 0.08, 0.05, 0.05, 
+        0.08, 0.08, 0.08, 0.08, 0.08, 
 
-    for(size_t ic=0;ic<30;ic++) {
-        for(int isr=0;isr<30;isr++) {
-            if(categs[ic].substr(7, categs[ic].size()-7)==cats[isr])
-	            md.addExternalSystUnc(signal,"pdfS"+cats[isr],0.1, -0.1, categs[ic], "selected");
-            else
-	            md.addExternalSystUnc(signal,"pdfS"+cats[isr],0., 0., categs[ic], "selected");
+        0.03, 0.03, 0.05, 0.05, 0.03, 
+        0.03, 0.05, 0.05, 0.03, 0.03, 
+        0.05, 0.05, 0.05, 0.05, 0.05
+    };
+
+    float ExtrapolWZ[30]={
+        0.10, 0.10, 0.20, 0.20, 0.10, 
+        0.10, 0.20, 0.20, 0.10, 0.10, 
+        0.20, 0.20, 0.30, 0.20, 0.20, 
+
+        0.10, 0.10, 0.20, 0.20, 0.10, 
+        0.10, 0.20, 0.20, 0.10, 0.10, 
+        0.20, 0.20, 0.30, 0.20, 0.20, 
+    };
+
+	//datasets
+    string dss[8]={"ttW","ttZH","ttZlowM","WZ","XG","fake","rares",sig};
+
+    //statistical uncertainties for all processes
+    for(int isr=0;isr<nBins;isr++) {
+        for(size_t id=0;id<8;id++) {
+            md.addNuisanceParameter(dss[id]+cats[isr]+"stat",dss[id],"shape","");
         }
-        //md.addExternalSystUnc(signal,"QCDScale",hQCDUp->GetBinContent(ic+1), hQCDDown->GetBinContent(ic+1), categs[ic], "selected");
-
-        md.addExternalSystUnc("ttW","ttWAcc",AccTTW[ic], -1*AccTTW[ic], categs[ic], "selected");
-        md.addExternalSystUnc("ttZH","ttZHAcc",AccTTZH[ic], -1*AccTTZH[ic], categs[ic], "selected");
-        //for(size_t id=0;id<7;id++) {
-            //md.addExternalSystUnc(dss[id],"tHTE",HLTEff[ic], -1*HLTEff[ic], categs[ic], "selected");
-        //}
     }
-  */  
-    //md.makeMultiDataCard("bla", vcategs, "selected", "bla");
+
+    //Q2 background acceptance uncertainties 
+    for(size_t ic=0;ic<nBins;ic++) {
+        md.addExternalSystUnc("ttW"     ,"ttWAcc"       ,AccTTW[ic]     , -1*AccTTW[ic]     , categs[ic], "selected");
+        md.addExternalSystUnc("ttZH"    ,"ttZAcc"       ,AccTTZ[ic]     , -1*AccTTZ[ic]     , categs[ic], "selected");
+        md.addExternalSystUnc("ttZlowM" ,"ttZlowMAcc"   ,AccTTZlowM[ic] , -1*AccTTZlowM[ic] , categs[ic], "selected");
+        //md.addExternalSystUnc("ttH"     ,"ttHAcc"       ,AccTTH[ic]     , -1*AccTTH[ic]     , categs[ic], "selected");
+        md.addExternalSystUnc("WZ"      ,"wzTh"         ,ExtrapolWZ[ic] , -1*ExtrapolWZ[ic] , categs[ic], "selected");
+    }
+
+    //md.makeMultiDataCard(sig, vcategs, "selected", "susy3l_"+sig);
+    md.getStatistics("global_OffZSR001");
+    md.getStatistics("global_OffZSR002");
+    md.getStatistics("global_OffZSR003");
+    md.getStatistics("global_OffZSR004");
+    md.getStatistics("global_OffZSR005");
+    md.getStatistics("global_OffZSR006");
+    md.getStatistics("global_OffZSR007");
+    md.getStatistics("global_OffZSR008");
+    md.getStatistics("global_OffZSR009");
+    md.getStatistics("global_OffZSR010");
+    md.getStatistics("global_OffZSR011");
+    md.getStatistics("global_OffZSR012");
+    md.getStatistics("global_OffZSR013");
+    md.getStatistics("global_OffZSR014");
     md.getStatistics("global_OffZSR015");
-    gROOT->ProcessLine(".q");
+
+    gROOT->ProcessLine(".qqqqqqqqqqqqqq");
 }
