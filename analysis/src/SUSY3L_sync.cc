@@ -422,9 +422,9 @@ void SUSY3L_sync::run(){
     }
 
 	//debug output    
-	_run = 254914;
-	_lumi = 49;
-    _evt = 51353613;
+	_run = 1;
+	_lumi = 594;
+    _evt = 196489;
     
     _run2 = 1;
 	_lumi2 = 1;
@@ -532,7 +532,7 @@ void SUSY3L_sync::run(){
     }*/   
 
     //btag-scale factors
-    if(!_vc->get("isData") && !_closure ) {
+/*    if(!_vc->get("isData") && !_closure ) {
         if(!isInUncProc())  {
 	        _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
 	        _weight *= _btagW;
@@ -589,7 +589,7 @@ void SUSY3L_sync::run(){
 	        _weight *= _susyMod->getVarWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT, -1);
     } 
     counter("HLT SF");
-
+*/
 
     //end event reweighting ////////////////////////////////////////////////////
   
@@ -671,13 +671,13 @@ void SUSY3L_sync::defineOutput(){
     */
     
     //SR yields
-    _hm->addVariable("SRS"  ,  15,  1,  16, "SR"    );
+    _hm->addVariable("SRS"  ,  15,  1,  16, "signal region"    );
     
     if(!_doPlots) return; 
 
     //event based observables
     _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                                           );
-    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_{T} [GeV]"                                   );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "E^{miss}_{T} [GeV]"                                    );
     _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "N_{b-jet}"                                             );
     _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "N_{jet}"                                               ); 
 
@@ -1498,7 +1498,7 @@ void SUSY3L_sync::advancedSelection(int WF){
     long int run = _vc->get("run");
     long int lumi = _vc->get("lumi");
     long int evt = _vc->get("evt");
-    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " " << _weight << endl;
+    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " " << _weight << " " << _isOnZ << endl;
     }}
     
 

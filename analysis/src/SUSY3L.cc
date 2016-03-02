@@ -601,13 +601,13 @@ void SUSY3L::defineOutput(){
     */
     
     //SR yields
-    _hm->addVariable("SRS"  ,  15,  1,  16, "SR"    );
+    _hm->addVariable("SRS"  ,  15,  1,  16, "signal region"    );
     
     if(!_doPlots) return; 
 
     //event based observables
     _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                                           );
-    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_{T} [GeV]"                                   );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "E^{miss}_{T} [GeV]"                                    );
     _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "N_{b-jet}"                                             );
     _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "N_{jet}"                                               ); 
 
