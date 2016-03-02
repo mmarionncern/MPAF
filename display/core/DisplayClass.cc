@@ -1486,6 +1486,7 @@ DisplayClass::drawDataMCRatio() {
   emptyHisto->GetYaxis()->SetNdivisions(4,_Ydiv[1],_Ydiv[2]);
   emptyHisto->GetXaxis()->SetTitle( (_xtitle+" ").c_str() );
   emptyHisto->GetYaxis()->SetTitle( "Data/MC" );
+  if(_closure) emptyHisto->GetYaxis()->SetTitle( "pred/obs" );
   emptyHisto->GetXaxis()->SetTitleSize(0.20);
   emptyHisto->GetXaxis()->SetTitleOffset(0.80);
   emptyHisto->GetXaxis()->SetLabelOffset(0.007);
@@ -1504,6 +1505,7 @@ DisplayClass::drawDataMCRatio() {
   ratio->GetYaxis()->SetNdivisions(4,_Ydiv[1],_Ydiv[2]);
   ratio->GetXaxis()->SetTitle( (_xtitle+"_").c_str() );
   ratio->GetYaxis()->SetTitle( "Data/MC" );
+  if(_closure) ratio->GetYaxis()->SetTitle( "pred/obs" );
   ratio->GetXaxis()->SetTitleSize(0.20);
   ratio->GetXaxis()->SetTitleOffset(0.83);
   ratio->GetXaxis()->SetLabelSize(0.165);
@@ -2223,7 +2225,7 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
 			       bool ShowDMCRatio, bool ShowGrid, bool staking,
 			       bool AddSystematics, bool mcStatSyst,
 			       float MarkerSize, float LineWidth, bool sSignal,
-			       bool mcOnly, bool cmsPrel, bool uncDet ) {
+			       bool mcOnly, bool cmsPrel, bool uncDet, bool closure ) {
 
   _ytitle = YTitle;
   _ymin = rangeY[0];
@@ -2265,6 +2267,7 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
   _prel = cmsPrel;
 
   _uncDet = uncDet;
+  _closure = closure;
 }
 
 
@@ -2955,7 +2958,8 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
   if(_normOpts.find("norm")!=_normOpts.end()) legOpt="l";
 	
   if(!_mcOnly)
-    _leg->AddEntry(_gData,"data", legOpt.c_str() );
+    if(_closure) _leg->AddEntry(_gData,"predicted", legOpt.c_str() );
+    else _leg->AddEntry(_gData,"data", legOpt.c_str() );
 
   if( _is1D) {
     for(size_t i=0;i<_nhmc;i++) {

@@ -160,6 +160,7 @@ private:
   bool _mcOnly;
   bool _dOnly;
   bool _lockData;
+  bool _closure;
 
   //uncertainties
   bool _uncDet;
@@ -198,7 +199,7 @@ public:
 			bool AddSystematics, bool mcStatSyst,
 			float MarkerSize, float LineWidth,
 			bool sSignal, bool mcOnly,
-			bool cmsPrel, bool uncDet=false); //,bool switchRMS, string errorOpt
+			bool cmsPrel, bool uncDet=false, bool closure=false); //,bool switchRMS, string errorOpt
 
   void setObservables(string v1, string v2="", string v3="",
 		      string v4="", string v5="", string v6="");
