@@ -15,6 +15,8 @@ void susy3l_data() {
     string hName="";
 
     bool mcOnly = false;
+    bool closure = false;
+    bool fixLeg = true;
   
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
@@ -24,10 +26,10 @@ void susy3l_data() {
     string sigs = "none"; 
     bool data = true;
     bool manual = false;
-    string region = "FakeCR";
+    string region = "REGION";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "lep3sip";}
+    else{string obs = "ht";}
  
 
     //Binning & title ************************* Binning & titre
@@ -80,7 +82,7 @@ void susy3l_data() {
         md.dp.setObservables("HT" + region);
         if(region=="WZCR"){int binning=50; double rangeX[2]={0,200};bool logYScale=false;}
         else if(region=="FakeCR"){int binning=50; double rangeX[2]={0,400};bool logYScale=false;}
-        else{int binning=60; double rangeX[2]={0,1000};}
+        else{int binning=60; double rangeX[2]={0,960};}
         //bool logYScale=true;
     }
     if(obs == "mt" && region == "WZCR"){
@@ -91,19 +93,22 @@ void susy3l_data() {
     }
     if(obs == "pt1"){
         md.dp.setObservables("pt_1st_lepton" + region);
-        int binning=10;
+        if(region=="WZCR"){int binning=10;}
+        else int binning=20;
         double rangeX[2]={0,200};
         //bool logYScale=true;
     }
     if(obs == "pt2"){
         md.dp.setObservables("pt_2nd_lepton" + region);
-        int binning=10;
+        if(region=="WZCR"){int binning=10;}
+        else int binning=20;
         double rangeX[2]={0,150};
         //bool logYScale=true;
     }   
     if(obs == "pt3"){
         md.dp.setObservables("pt_3rd_lepton" + region);
-        int binning=10;
+        if(region=="WZCR"){int binning=10;}
+        else int binning=20;
         double rangeX[2]={0,100};
         //bool logYScale=true;
     }
@@ -351,7 +356,7 @@ void susy3l_data() {
 			 underFlowBin, showDMCRatio, showGrid, 
 			 stacking, addSystematics, mcStatSyst,
 			 markerSize, lineWidth,summedSignal,
-             mcOnly,cmsPrel, uncDet);
+             mcOnly,cmsPrel, uncDet, closure, fixLeg);
     md.prepareDisplay();
     md.doPlot();
     // md.doStatisticsPlot();

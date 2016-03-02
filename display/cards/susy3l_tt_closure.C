@@ -12,6 +12,8 @@ void susy3l_tt_closure() {
     string hName="";
 
     bool mcOnly = false;
+    bool closure = false;
+    bool fixLeg = true;
   
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
@@ -32,11 +34,10 @@ void susy3l_tt_closure() {
     //int binning=1;
     int addBinBkg=1; //BinB = binning*AddBin
     double rangeY[2]={0,0};
-    bool logYScale=true;
+    bool logYScale=false;
     //double rangeX[2]={0,7};
     int xDiv[3]={8,6,0};
     int yDiv[3]={6,6,0}; //Nlabel /  sous-Div /ssdiv
-    bool logYScale=false;
     bool overFlowBin=true;
     bool underFlowBin=false;
     bool showDMCRatio=true;
@@ -199,9 +200,9 @@ void susy3l_tt_closure() {
 
     //ttbar
     md.anConf.addSample( "TT_pow"                             ,  "t#bar{t}"    , kRed-6      );
-    md.anConf.addSample( "TTJets_DiLepton"                    ,  "pseudodata"  , kBlack      );
+    md.anConf.addSample( "_Fake:TT_pow"                        ,  "pseudodata"  , kBlack   , 2260   );
 
-    //md.anConf.addSample( "TTJets_DiLepton"                      ,  "TT"    , kRed-6      );
+//    md.anConf.addSample( "TTJets_DiLepton"                      ,  "TT"    , kRed-6      );
     //md.anConf.addSample( "_Fake:TTJets_DiLepton"                 ,  "predicted sig"    , kBlack      );
 
 
@@ -240,7 +241,7 @@ void susy3l_tt_closure() {
 			 underFlowBin, showDMCRatio, showGrid, 
 			 stacking, addSystematics, mcStatSyst,
 			 markerSize, lineWidth,summedSignal,
-             mcOnly,cmsPrel, uncDet);
+             mcOnly,cmsPrel, uncDet, closure, fixLeg);
     md.prepareDisplay();
     md.doPlot();
     //md.doStatisticsPlot();
