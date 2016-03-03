@@ -49,6 +49,7 @@ private:
 
   TCanvas* _c;
   TLegend* _leg;
+  TLegend* _leg2;
   vector<vector<TPad*> > _pads;
 
 
@@ -160,7 +161,10 @@ private:
   bool _mcOnly;
   bool _dOnly;
   bool _lockData;
+  
+  //other flags
   bool _closure;
+  bool _fixLeg;
 
   //uncertainties
   bool _uncDet;
@@ -199,7 +203,7 @@ public:
 			bool AddSystematics, bool mcStatSyst,
 			float MarkerSize, float LineWidth,
 			bool sSignal, bool mcOnly,
-			bool cmsPrel, bool uncDet=false, bool closure=false); //,bool switchRMS, string errorOpt
+			bool cmsPrel, bool uncDet=false, bool closure=false, bool fixLeg=false); //,bool switchRMS, string errorOpt
 
   void setObservables(string v1, string v2="", string v3="",
 		      string v4="", string v5="", string v6="");

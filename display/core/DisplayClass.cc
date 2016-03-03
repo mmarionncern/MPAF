@@ -577,6 +577,7 @@ DisplayClass::plotDistribution(const string& htype, const string& type,
     if(_leg) {
       TLegend* tmpleg=(TLegend*)_leg->Clone();
       tmpleg->Draw("same");
+      if(_fixLeg) _leg2->Draw("same");
     } 
   }
 
@@ -743,8 +744,7 @@ DisplayClass::drawDistribution() {
   //and finally signals if some exists ===========
   for(size_t is=0;is<sigs.size();is++){
     if(is%2!=0){_hClones[ sigs[is] ]->SetLineStyle(2);}
-    //_hClones[ sigs[is] ]->DrawCopy( opt.c_str() );
-    _hClones[ sigs[is] ]->DrawCopy( "same points" );
+    _hClones[ sigs[is] ]->DrawCopy( opt.c_str() );
   }
   //===============================================
 
@@ -2225,7 +2225,7 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
 			       bool ShowDMCRatio, bool ShowGrid, bool staking,
 			       bool AddSystematics, bool mcStatSyst,
 			       float MarkerSize, float LineWidth, bool sSignal,
-			       bool mcOnly, bool cmsPrel, bool uncDet, bool closure ) {
+			       bool mcOnly, bool cmsPrel, bool uncDet, bool closure, bool fixLeg ) {
 
   _ytitle = YTitle;
   _ymin = rangeY[0];
@@ -2268,6 +2268,7 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
 
   _uncDet = uncDet;
   _closure = closure;
+  _fixLeg = fixLeg;
 }
 
 
@@ -2943,29 +2944,95 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
   }
 
   getLegendCoordinate(_hMC,xd,yd,xu,yu,f,iobs);
-  _leg = new TLegend(xd,yd,xu,yu);
+
+  //count legend entries 
+  int nEntries = 0;
+  int countEntries = 0;
+  if(!_mcOnly) nEntries +=1;
+  if(_is1D) nEntries += _nhmc;
+  if(_addSyst && !_is2D) nEntries +=1;
+
+  int diff = 0;
+  if(nEntries%2!=0){diff = 1;}
+
+  int entries1 = 0;
+  int entries2 = 0;
+  if(nEntries<4){entries1=nEntries;}
+  else{
+      entries2=nEntries/2;
+      if(diff==0){
+          entries1=nEntries/2;
+      }
+      else{
+          entries1=nEntries/2+1;
+      }
+  }
+
+  float height = 0.056;
+  float xmarg = 0.25;
+  if(_mcOnly && !_closure){xmarg = 0.22;}
+  if(nEntries > 8){height = 0.04;}
+  if(nEntries < 7){height = 0.07;}
+
+  float xdfix = xmarg;
+  float yufix = 0.90;
+  float ydfix = yufix-(entries1*height);
+  float xufix = xdfix+0.20;
+
+  float xdfix2 = xufix+0.02;
+  float yufix2 = 0.90;
+  float ydfix2 = yufix2-(entries2*height);
+  float xufix2 = xdfix2+0.20;
+
+  if(_fixLeg){_leg = new TLegend(xdfix,ydfix,xufix,yufix);}
+  else _leg = new TLegend(xd,yd,xu,yu);
+  
   _leg->SetName("legend");
   
+  if(_fixLeg) f=1.;
+  if(_fixLeg && nEntries > 8) f=0.9;
+
   _leg->SetTextSize(0.039*f);
   _leg->SetShadowColor(0);
-  _leg->SetLineColor(1);
   _leg->SetFillColor(0);
-	
+  if(_fixLeg){ 
+    _leg->SetLineColor(0);
+    _leg->SetFillStyle(0);
+    _leg->SetBorderSize(0);
+  }
+
+  _leg2 = new TLegend(xdfix2,ydfix2,xufix2,yufix2);
+  _leg2->SetName("legend");
+  
+  _leg2->SetTextSize(0.039*f);
+  _leg2->SetShadowColor(0);
+  _leg2->SetLineColor(0);
+  _leg2->SetFillColor(0);
+  _leg2->SetFillStyle(0);
+  _leg2->SetBorderSize(0);
+  	
   map<string,size_t> sigs;
 
 
   string legOpt="pl";
   if(_normOpts.find("norm")!=_normOpts.end()) legOpt="l";
 	
-  if(!_mcOnly)
+  if(!_mcOnly){
     if(_closure) _leg->AddEntry(_gData,"predicted", legOpt.c_str() );
     else _leg->AddEntry(_gData,"data", legOpt.c_str() );
+    countEntries +=1;
+  }
 
   if( _is1D) {
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
       if( nh.find("sig")==(size_t)-1) {
-        _leg->AddEntry(_hClones[i],_names[_nhmc-i-1].c_str(),"f");
+        if(_fixLeg){
+            if(countEntries < (nEntries+1)/2 || nEntries < 4) _leg->AddEntry(_hClones[i],_names[_nhmc-i-1].c_str(),"f");
+            else _leg2->AddEntry(_hClones[i],_names[_nhmc-i-1].c_str(),"f");
+        }
+        else _leg->AddEntry(_hClones[i],_names[_nhmc-i-1].c_str(),"f");
+        countEntries +=1;
       }
       else {
         string na = _names[_nhmc-i-1];
@@ -2977,12 +3044,21 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
   }
 
   if(_addSyst && !_is2D) {
-    _leg->AddEntry(_mcUncert[0]->Clone(),"uncertainties","f");
+    if(_fixLeg){
+      if(countEntries < (nEntries+1)/2 || nEntries < 4) _leg->AddEntry(_mcUncert[0]->Clone(),"uncertainties","f");
+      else _leg2->AddEntry(_mcUncert[0]->Clone(),"uncertainties","f");
+    }
+    else _leg->AddEntry(_mcUncert[0]->Clone(),"uncertainties","f");
+    countEntries +=1;
   }
 
-  for(map<string,size_t>::const_iterator it=sigs.begin();
-      it!=sigs.end();it++) {
-    _leg->AddEntry(_hClones[it->second],it->first.c_str(),_sSignal?"f":"l");
+  for(map<string,size_t>::const_iterator it=sigs.begin();it!=sigs.end();it++) {
+    if(_fixLeg){
+      if(countEntries < (nEntries+1)/2 || nEntries < 4) _leg->AddEntry(_hClones[it->second],it->first.c_str(),_sSignal?"f":"l");
+      else _leg2->AddEntry(_hClones[it->second],it->first.c_str(),_sSignal?"f":"l");
+    }
+    else _leg->AddEntry(_hClones[it->second],it->first.c_str(),_sSignal?"f":"l");
+    countEntries +=1;
   }
 
 }
