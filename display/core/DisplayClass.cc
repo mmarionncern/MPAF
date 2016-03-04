@@ -1400,7 +1400,7 @@ DisplayClass::drawDataMCRatio() {
   //if(_empty!=nullptr) emptyHisto=(TH1*)_empty->Clone();
   emptyHisto->Reset("ICEM");
 
-  TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC, _mcOnly );
+  TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC, _mcOnly, "" );
   ratio->SetName( ("ratio") );
  
   for(int ib=0;ib<emptyHisto->GetNbinsX()+2;ib++)
