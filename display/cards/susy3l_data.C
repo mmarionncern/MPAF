@@ -25,12 +25,12 @@ void susy3l_data() {
  
     string sigs = "none"; 
     bool data = true;
-    bool manual = true;
+    bool manual = false;
     if(!manual) string region = "REGION";
     else string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "srs";}
+    else{string obs = "njets";}
  
 
     //Binning & title ************************* Binning & titre
