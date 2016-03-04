@@ -520,18 +520,26 @@ MPAFDisplay::setHistograms() {
     Dataset* ds=anConf.getDataset( _ids );
     string tmpDs= _ids;
     vector<string> obss = ds->getObservables();
+    vector<string> samples= ds->getSamples();
+    // cout<<_ids<<"   "<<ds<<endl;
+    // for(size_t is=0;is<samples.size(); is++) {
+    //   cout<<samples[is]<<" --> "<<ds->getSample(samples[is])->isData()<<endl;
+    // }
 
     for(size_t io=0;io<obss.size();io++) {
       TH1* htmp(0);
-      vector<string> samples= ds->getSamples();
+
       for(size_t is=0;is<samples.size(); is++) {
         float w = ds->getWeight(is);
-        
-        if(ds->getSample(samples[is])->isNorm()) {
-          w=ds->getSample(samples[is])->getNorm()/(anConf.getLumi()*ds->getHisto( obss[io], samples[is] )->Integral(0,1000000));
-        } 
-        
-        if(ds->getSample(samples[is])->isDD()) w/=anConf.getLumi();
+	
+	if(ds->getSample(samples[is])->isNorm()) {
+	  w=ds->getSample(samples[is])->getNorm()/(anConf.getLumi()*ds->getHisto( obss[io], samples[is] )->Integral(0,1000000));
+	} 
+	
+	//pseudodata
+	if(_ids=="data" && !ds->getSample(samples[is])->isData()) w*=anConf.getLumi();
+	
+	if(ds->getSample(samples[is])->isDD()) w/=anConf.getLumi();
         
         if(is==0) {
           htmp = ds->getHisto( obss[io], samples[is] );
@@ -1127,21 +1135,22 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
           // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<<"  "
           // 	<<uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<<endl;
 
-          if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
-            uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0.00001;}
-          if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
-            uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0.00001;}
+          //----------------------
+		  //if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
+          //  uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0.00001;}
+          //if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
+          //  uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0.00001;}
           //special treatment of application regions with 0 yields -> set statistical uncertainty up variation to 0.35
-          if(_dsNames[id]=="fake" && uncNames[iu].find("fake")!= std::string::npos ){
-              if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
-                  uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] = 0.35;}
-              if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
-                  uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0;}
-          }
+          //if(_dsNames[id]=="fake" && uncNames[iu].find("fake")!= std::string::npos ){
+          //    if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
+          //        uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] = 0.35;}
+          //    if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
+          //        uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0;}
+          //}
+          //----------------------
           hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
           hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
-        } 
-        else { //no uncertainty, central value
+        } else { //no uncertainty, central value
           hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
           hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic].begin()->second[ _dsNames[id] ][0] );
         }

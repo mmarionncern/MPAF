@@ -394,6 +394,7 @@ void SUSY3L_sync::modifyWeight() {
         }
         if (LHESYS == 0) {
             _weight *= _vc->get("genWeight");
+            _genWeight = _vc->get("genWeight");
             }
         else {
             _weight *= _susyMod->getLHEweight(LHESYS);
@@ -406,8 +407,14 @@ void SUSY3L_sync::modifyWeight() {
 	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
 	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
 	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
+            _puWeight = _dbm->getDBValue(db, _vc->get("nTrueInt") );
             //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
         }
+    
+        if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+            cout << "nTrueInt " << _vc->get("nTrueInt") << " weight " << _puWeight << " nVert " << _vc->get("nTrueInt") << endl;
+        }}
+
     }
 
 }
@@ -422,9 +429,9 @@ void SUSY3L_sync::run(){
     }
 
 	//debug output    
-	_run = 254914;
-	_lumi = 49;
-    _evt = 51353613;
+	_run = 1;
+	_lumi = 1284;
+    _evt = 424885;
     
     _run2 = 1;
 	_lumi2 = 1;
@@ -536,6 +543,7 @@ void SUSY3L_sync::run(){
         if(!isInUncProc())  {
 	        _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
 	        _weight *= _btagW;
+            _btagWeight = _btagW;
         }
         else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1, _fastSim); 
@@ -565,6 +573,7 @@ void SUSY3L_sync::run(){
         //fullSim scale factors, flat uncertainty added in display card
         if(!_fastSim) {
 	        _weight*=_susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
+            _sfWeight = _susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
         }
         //fastSim scale factors and flavor and pt dependent shape uncertainty
         else{
@@ -671,13 +680,13 @@ void SUSY3L_sync::defineOutput(){
     */
     
     //SR yields
-    _hm->addVariable("SRS"  ,  15,  1,  16, "SR"    );
+    _hm->addVariable("SRS"  ,  15,  1,  16, "signal region"    );
     
     if(!_doPlots) return; 
 
     //event based observables
     _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                                           );
-    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "#slash{E}_{T} [GeV]"                                   );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "E^{miss}_{T} [GeV]"                                    );
     _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "N_{b-jet}"                                             );
     _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "N_{jet}"                                               ); 
 
@@ -1498,7 +1507,7 @@ void SUSY3L_sync::advancedSelection(int WF){
     long int run = _vc->get("run");
     long int lumi = _vc->get("lumi");
     long int evt = _vc->get("evt");
-    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " " << _weight << endl;
+    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " " << _genWeight << " " << _puWeight << " " << _btagWeight << " " << _sfWeight << " " << _isOnZ << endl;
     }}
     
 

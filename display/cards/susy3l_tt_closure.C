@@ -12,6 +12,8 @@ void susy3l_tt_closure() {
     string hName="";
 
     bool mcOnly = false;
+    bool closure = true;
+    bool fixLeg = true;
   
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
@@ -21,22 +23,22 @@ void susy3l_tt_closure() {
    
     string sigs = "none"; 
     bool data = false;
-    bool manual = true;
-    string region = "OffZBaseline";
+    bool manual = false;
+    if(!manual){string region = "REGION";}
+    else string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "njets";}
+    else{string obs = "met";}
  
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
     //int binning=1;
     int addBinBkg=1; //BinB = binning*AddBin
     double rangeY[2]={0,0};
-    bool logYScale=true;
+    bool logYScale=false;
     //double rangeX[2]={0,7};
     int xDiv[3]={8,6,0};
     int yDiv[3]={6,6,0}; //Nlabel /  sous-Div /ssdiv
-    bool logYScale=false;
     bool overFlowBin=true;
     bool underFlowBin=false;
     bool showDMCRatio=true;
@@ -181,42 +183,41 @@ void susy3l_tt_closure() {
     //===============================================================
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
+
     //single top
-//    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "single top"    , kRed+2      );
-//    md.anConf.addSample( "TBar_tWch"                            ,  "single top"    , kRed+2      );
-//    md.anConf.addSample( "T_tWch"                               ,  "single top"    , kRed+2      );
-//    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "single top"    , kRed+2      );
-//    md.anConf.addSample( "TToLeptons_tch"                       ,  "single top"    , kRed+2      );
+//    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "single top"    , kGreen-6      );
+//    md.anConf.addSample( "TBar_tWch"                            ,  "single top"    , kGreen-6      );
+//    md.anConf.addSample( "T_tWch"                               ,  "single top"    , kGreen-6      );
+//    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "single top"    , kGreen-6      );
+//    md.anConf.addSample( "TToLeptons_tch"                       ,  "single top"    , kGreen-6      );
   
-  //W+Jets
-//    md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kRed+1      );
-    
-
-    //Drell-Yan
-//    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "DY"    , kRed-4     );
-//    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "DY"    , kRed-4     );
-
+    //W+Jets
+//    md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kOrange      );
 
     //ttbar
-    md.anConf.addSample( "TT_pow"                             ,  "t#bar{t}"    , kRed-6      );
-    md.anConf.addSample( "TTJets_DiLepton"                    ,  "pseudodata"  , kBlack      );
+//    md.anConf.addSample( "TT_pow"                             ,  "t#bar{t}"    , kRed-6      );
 
-    //md.anConf.addSample( "TTJets_DiLepton"                      ,  "TT"    , kRed-6      );
-    //md.anConf.addSample( "_Fake:TTJets_DiLepton"                 ,  "predicted sig"    , kBlack      );
+    //Drell-Yan
+    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "DY"    , kCyan     );
+    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "DY"    , kCyan     );
 
 
-//    md.anConf.addSample( "_Fake:TbarToLeptons_tch"               ,  "predicted sig"    , kBlack      );
-//    md.anConf.addSample( "_Fake:TBar_tWch"                       ,  "predicted sig"    , kBlack      );
-//    md.anConf.addSample( "_Fake:T_tWch"                          ,  "predicted sig"    , kBlack      );
-//    md.anConf.addSample( "_Fake:TToLeptons_sch_amcatnlo"         ,  "predicted sig"    , kBlack      );
-//    md.anConf.addSample( "_Fake:TToLeptons_tch"                  ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "TTJets_DiLepton"                      ,  "TT"    , kRed-6      );
+    //md.anConf.addSample( "_Fake:TTJets_DiLepton"                 ,  "pseudodata"    , kBlack      );
 
-//    md.anConf.addSample( "_Fake:WJetsToLNu"                      ,  "predicted sig"    , kBlack      );
 
-//    md.anConf.addSample( "_Fake:DYJetsToLL_M10to50"              ,  "predicted sig"    , kBlack      );
-//    md.anConf.addSample( "_Fake:DYJetsToLL_M50"                  ,  "predicted sig"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TbarToLeptons_tch"               ,  "pseudodata"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TBar_tWch"                       ,  "pseudodata"    , kBlack      );
+//    md.anConf.addSample( "_Fake:T_tWch"                          ,  "pseudodata"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TToLeptons_sch_amcatnlo"         ,  "pseudodata"    , kBlack      );
+//    md.anConf.addSample( "_Fake:TToLeptons_tch"                  ,  "pseudodata"    , kBlack      );
 
-//    md.anConf.addSample( "_Fake:TT_pow"                        ,  "pseudodata" );
+//    md.anConf.addSample( "_Fake:WJetsToLNu"                      ,  "pseudodata"    , kBlack      );
+
+    md.anConf.addSample( "_Fake:DYJetsToLL_M10to50"              ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:DYJetsToLL_M50"                  ,  "pseudodata"    , kBlack      );
+
+//    md.anConf.addSample( "_Fake:TT_pow"                          ,  "pseudodata"    , kBlack      );
 
 
     // }
@@ -240,7 +241,7 @@ void susy3l_tt_closure() {
 			 underFlowBin, showDMCRatio, showGrid, 
 			 stacking, addSystematics, mcStatSyst,
 			 markerSize, lineWidth,summedSignal,
-             mcOnly,cmsPrel, uncDet);
+             mcOnly,cmsPrel, uncDet, closure, fixLeg);
     md.prepareDisplay();
     md.doPlot();
     //md.doStatisticsPlot();

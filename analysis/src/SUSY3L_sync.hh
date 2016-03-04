@@ -283,6 +283,11 @@ private:
   	TH3D* _hScanWeight;
   	int _nProcEvtScan;
 
+    float _genWeight;
+    float _puWeight;
+    float _btagWeight;
+    float _sfWeight;
+
 };
 
 #endif
