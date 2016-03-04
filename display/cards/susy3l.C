@@ -14,7 +14,6 @@ void susy3l() {
     bool mcOnly = true;
     bool closure = false;
     bool fixLeg = true;
-    string sigs = "t"; 
   
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
@@ -22,12 +21,17 @@ void susy3l() {
     //}
  
     bool data = false;
-    bool manual = true;
+    bool manual = false;
     if(!manual) string region = "REGION";
-    else string region = "OffZBaseline";
+    else string region = "OnZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
     else{string obs = "srs";}
+    
+    string sigs;
+    if(region=="OffZBaseline") sigs = "t"; 
+    else if(region=="OnZBaseline") sigs = "q"; 
+    else sigs = "non";
  
 
     //Binning & title ************************* Binning & titre
@@ -300,8 +304,8 @@ void susy3l() {
     if(sigs=="q"){
     //md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4WZ315 sig"  , kGreen+2  );
     //md.anConf.addSample( "T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4WZ325 sig"  , kMagenta  );
-    md.anConf.addSample( "T5qqqqWZ_mGo1200_mCh1000_mChi800_lep"       ,  "T5qqqqWZ (1200) x10 sig"   , kCyan, 10  );
-    md.anConf.addSample( "T5qqqqWZ_mGo1500_mCh800_mChi100_lep"        ,  "T5qqqqWZ (1500) x10 sig"   , kCyan, 10  );
+    md.anConf.addSample( "T5qqqqWZ_mGo1200_mCh1000_mChi800_lep"       ,  "T5qqqqWZ (1200) x20 sig"   , kCyan+3, 20  );
+    md.anConf.addSample( "T5qqqqWZ_mGo1500_mCh800_mChi100_lep"        ,  "T5qqqqWZ (1500) x20 sig"   , kCyan+3, 20  );
     //md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh315_mChi300_dilep"     ,  "T5q4ZZ315 sig"  , kGreen+3  );
     //md.anConf.addSample( "T5qqqqZZDeg_mGo1000_mCh325_mChi300_dilep"     ,  "T5q4ZZ325 sig"  , kMagenta+2  );
     //md.anConf.addSample( "T5qqqqZZ_mGo1200_mCh1000_mChi800_dilep"       ,  "T5q4ZZ12 sig"   , kRed-9  );

@@ -1,20 +1,26 @@
 #!/bin/bash
 
-#VAR=("njets" "nbjets" "met" "ht" "pt1" "pt2" "pt3" "srs")
-VAR=("ttbar_lep1_dxy" "ttbar_lep1_dz" "ttbar_lep2_dxy" "ttbar_lep2_dz" "ZMuMu_lep1_dxy" "ZMuMu_lep1_dz" "ZMuMu_lep2_dxy" "ZMuMu_lep2_dz" "ZElEl_lep1_dxy" "ZElEl_lep1_dz" "ZElEl_lep2_dxy" "ZElEl_lep2_dz" "Wl_lep1_dxy" "Wl_lep1_dz" "Wl_lep2_dxy" "Wl_lep2_dz" "Zl_lep1_dxy" "Zl_lep1_dz" "Zl_lep2_dxy" "Zl_lep2_dz" )
+VAR=( "njets" "nbjets" "met" "ht" "pt1" "pt2" "pt3" "srs" )
+REG=( "OffZBaseline" "OnZBaseline" )
+ #"lep1dxy" "lep1dz" "lep1sip" "lep2dxy" "lep2dz" "lep2sip" "lep3dxy" "lep3dz" "lep3sip" ) #"flavor" "mt") # "el_multi" "mu_multi" "lep_multi")
+#VAR=("flavor") #"lep1dxy" "lep1dz" "lep1sip" "lep2dxy" "lep2dz" "lep2sip" "lep3dxy" "lep3dz" "lep3sip" ) #"flavor" "mt") # "el_multi" "mu_multi" "lep_multi")
 #VAR=("ftype")
 #VAR=("srs")
+#VAR=("lep1dxy" "lep1dz" "lep1sip" "lep2dxy" "lep2dz" "lep2sip" "lep3dxy" "lep3dz" "lep3sip" ) # "srs" "flavor" "mt") # "el_multi" "mu_multi" "lep_multi")
+#VAR=("lep1sip" "lep2sip" "lep3sip" ) # "srs" "flavor" "mt") # "el_multi" "mu_multi" "lep_multi")
 
+for reg in ${REG[@]}; do
+    region=$reg
+    for var in ${VAR[@]}; do
 
-for var in ${VAR[@]}; do
+        variable=$var
 
-    variable=$var
+        cp cards/susy3l.C cards/tmpFiles/susy3l.C
+        sed -i 's|VARIABLE|'$variable'|' cards/tmpFiles/susy3l.C
+        sed -i 's|REGION|'$region'|' cards/tmpFiles/susy3l.C
 
-    cp cards/susy3l.C cards/tmpFiles/susy3l.C
-    #sed -i 's|VARIABLE|'$variable'|' cards/tmpFiles/susy3l.C
-    sed -i 's|OBS|'$variable'|' cards/tmpFiles/susy3l.C
-
-    root -l -b cards/tmpFiles/susy3l.C
+        root -l -b cards/tmpFiles/susy3l.C
+    done
 
 done
 
