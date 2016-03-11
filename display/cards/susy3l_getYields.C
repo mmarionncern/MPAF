@@ -1,15 +1,15 @@
 MPAFDisplay md;
-
-void susy3l_getYields2(){
+void susy3l_getYields(){
     md.refresh();
 
     //general parameters ********************* general parameters
-    string sig="T6ttWWBENCH";
+    string sig="T1ttttBENCH";
 
     string dir="SUSY3L";
-    string fileName="merged_2fb";
-    if(sig=="T1ttttBENCH") string fileList="merged_2fb_T1tttt-MASS-"; //susy3lUnc
-    if(sig=="T6ttWWBENCH") string fileList="merged_2fb_T6ttWW_325_125"; //susy3lUnc
+    string fileName="3l_test";
+    if(sig=="T1ttttBENCH") string fileList="3l_test"; //susy3lUnc
+    if(sig=="T6ttWWBENCH") string fileList="3l_scanSig_T6ttWW_600_300"; //susy3lUnc
+    if(sig=="T5qqqqVVBENCH") string fileList="3l_scanSig_T5qqqqVV_800_550"; //susy3lUnc
   
     bool mcOnly = false;
   
@@ -34,8 +34,9 @@ void susy3l_getYields2(){
  
     //===============================================================
   
-    if(sig=="T1ttttBENCH") md.addDataCardSigSample("T1tttt-MASS-",sig);
-    if(sig=="T6ttWWBENCH") md.addDataCardSigSample("T6ttWW_325_125",sig);
+    if(sig=="T1ttttBENCH") md.addDataCardSigSample("T1tttt-1000-600-",sig);
+    if(sig=="T6ttWWBENCH") md.addDataCardSigSample("T6ttWW_600_300",sig);
+    if(sig=="T5qqqqVVBENCH") md.addDataCardSigSample("T5qqqqVV_800_550",sig);
 
     md.addDataCardSample( "TGJets", "XG"); 
     md.addDataCardSample( "TTGJets", "XG"); 
@@ -298,21 +299,22 @@ void susy3l_getYields2(){
     }
 
     //md.makeMultiDataCard(sig, vcategs, "selected", "susy3l_"+sig);
-    md.getStatistics("global_OffZSR001");
-    md.getStatistics("global_OffZSR002");
-    md.getStatistics("global_OffZSR003");
-    md.getStatistics("global_OffZSR004");
-    md.getStatistics("global_OffZSR005");
-    md.getStatistics("global_OffZSR006");
-    md.getStatistics("global_OffZSR007");
-    md.getStatistics("global_OffZSR008");
-    md.getStatistics("global_OffZSR009");
-    md.getStatistics("global_OffZSR010");
-    md.getStatistics("global_OffZSR011");
-    md.getStatistics("global_OffZSR012");
-    md.getStatistics("global_OffZSR013");
-    md.getStatistics("global_OffZSR014");
-    md.getStatistics("global_OffZSR015");
+    //md.getStatistics("global_OffZSR001");
+    //md.getStatistics("global_OffZSR002");
+    //md.getStatistics("global_OffZSR003");
+    //md.getStatistics("global_OffZSR004");
+    //md.getStatistics("global_OffZSR005");
+    //md.getStatistics("global_OffZSR006");
+    //md.getStatistics("global_OffZSR007");
+    //md.getStatistics("global_OffZSR008");
+    //md.getStatistics("global_OffZSR009");
+    //md.getStatistics("global_OffZSR010");
+    //md.getStatistics("global_OffZSR011");
+    //md.getStatistics("global_OffZSR012");
+    //md.getStatistics("global_OffZSR013");
+    //md.getStatistics("global_OffZSR014");
+    //md.getStatistics("global_OffZSR015");
+    md.getStatistics("global_OffZBaseline");
 
     gROOT->ProcessLine(".qqqqqqqqqqqqqq");
 }

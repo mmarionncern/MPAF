@@ -11,7 +11,7 @@ void susy3l_tt_closure() {
     string fileList="160208_closure_without_PUandBTagWeights"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
-    bool mcOnly = false;
+    bool mcOnly = true;
     bool closure = true;
     bool fixLeg = true;
   
@@ -185,17 +185,17 @@ void susy3l_tt_closure() {
     //if( md.isInitStatus() ) {
 
     //single top
-//    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "single top"    , kGreen-6      );
-//    md.anConf.addSample( "TBar_tWch"                            ,  "single top"    , kGreen-6      );
-//    md.anConf.addSample( "T_tWch"                               ,  "single top"    , kGreen-6      );
-//    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "single top"    , kGreen-6      );
-//    md.anConf.addSample( "TToLeptons_tch"                       ,  "single top"    , kGreen-6      );
+    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "single top"    , kGreen-6      );
+    md.anConf.addSample( "TBar_tWch"                            ,  "single top"    , kGreen-6      );
+    md.anConf.addSample( "T_tWch"                               ,  "single top"    , kGreen-6      );
+    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "single top"    , kGreen-6      );
+    md.anConf.addSample( "TToLeptons_tch"                       ,  "single top"    , kGreen-6      );
   
     //W+Jets
-//    md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kOrange      );
+    md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kOrange      );
 
     //ttbar
-//    md.anConf.addSample( "TT_pow"                             ,  "t#bar{t}"    , kRed-6      );
+    md.anConf.addSample( "TT_pow"                             ,  "t#bar{t}"    , kRed-6      );
 
     //Drell-Yan
     md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "DY"    , kCyan     );
@@ -206,18 +206,18 @@ void susy3l_tt_closure() {
     //md.anConf.addSample( "_Fake:TTJets_DiLepton"                 ,  "pseudodata"    , kBlack      );
 
 
-//    md.anConf.addSample( "_Fake:TbarToLeptons_tch"               ,  "pseudodata"    , kBlack      );
-//    md.anConf.addSample( "_Fake:TBar_tWch"                       ,  "pseudodata"    , kBlack      );
-//    md.anConf.addSample( "_Fake:T_tWch"                          ,  "pseudodata"    , kBlack      );
-//    md.anConf.addSample( "_Fake:TToLeptons_sch_amcatnlo"         ,  "pseudodata"    , kBlack      );
-//    md.anConf.addSample( "_Fake:TToLeptons_tch"                  ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:TbarToLeptons_tch"               ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:TBar_tWch"                       ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:T_tWch"                          ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:TToLeptons_sch_amcatnlo"         ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:TToLeptons_tch"                  ,  "pseudodata"    , kBlack      );
 
-//    md.anConf.addSample( "_Fake:WJetsToLNu"                      ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:WJetsToLNu"                      ,  "pseudodata"    , kBlack      );
 
     md.anConf.addSample( "_Fake:DYJetsToLL_M10to50"              ,  "pseudodata"    , kBlack      );
     md.anConf.addSample( "_Fake:DYJetsToLL_M50"                  ,  "pseudodata"    , kBlack      );
 
-//    md.anConf.addSample( "_Fake:TT_pow"                          ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:TT_pow"                          ,  "pseudodata"    , kBlack      );
 
 
     // }

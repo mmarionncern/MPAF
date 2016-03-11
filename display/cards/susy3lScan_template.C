@@ -1,15 +1,16 @@
 MPAFDisplay md;
 
-void susy3l_scanSig_BENCH(){
+void susy3l_scanSigBENCH(){
     md.refresh();
 
     //general parameters ********************* general parameters
-    string sig="T6ttWWBENCH";
+    string sig="T5qqqqVVBENCH";
 
     string dir="SUSY3L";
     string fileName="merged_2fb";
     if(sig=="T1ttttBENCH") string fileList="merged_2fb_T1tttt-MASS-"; //susy3lUnc
     if(sig=="T6ttWWBENCH") string fileList="merged_2fb_T6ttWWMASS"; //susy3lUnc
+    if(sig=="T5qqqqVVBENCH") string fileList="merged_2fb_T5qqqqVVMASS"; //susy3lUnc
   
     bool mcOnly = false;
   
@@ -34,8 +35,11 @@ void susy3l_scanSig_BENCH(){
  
     //===============================================================
   
+    float kfac = 0.55555555;
+
     if(sig=="T1ttttBENCH") md.addDataCardSigSample("T1tttt-MASS-",sig);
     if(sig=="T6ttWWBENCH") md.addDataCardSigSample("T6ttWWMASS",sig);
+    if(sig=="T5qqqqVVBENCH") md.addDataCardSigSample("T5qqqqVVMASS",sig, kfac);
 
     md.addDataCardSample( "TGJets", "XG"); 
     md.addDataCardSample( "TTGJets", "XG"); 
@@ -222,10 +226,10 @@ void susy3l_scanSig_BENCH(){
         "global_OffZSR013", "global_OffZSR014", "global_OffZSR015"
     };
     vector<string> vcategs;
-    for(int i=0;i<nBins;i++) {
-        vcategs.push_back( categs[i] );
-    }
-    //vcategs.push_back( categs[15] );
+    //for(int i=0;i<nBins;i++) {
+    //    vcategs.push_back( categs[i] );
+    //}
+    vcategs.push_back( categs[NUMBER] );
 
     //external uncertainties ===================================
     float AccTTW[30]={
