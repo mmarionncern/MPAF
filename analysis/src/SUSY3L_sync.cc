@@ -134,6 +134,8 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("TauGood_idDecayMode"             );     //
     _vc->registerVar("TauGood_isoCI3hit"               );     //
 
+    _vc->registerVar("nBJetLoose30"               ); 
+    _vc->registerVar("nBJetMedium30"               ); 
 
     vector<string> extsJEC({"","_jecUp","_jecDown"});
     for(unsigned int ie=0;ie<extsJEC.size();ie++) {
@@ -424,22 +426,22 @@ void SUSY3L_sync::modifyWeight() {
 void SUSY3L_sync::run(){
     
     //limit run number to unblineded json
-    if(_vc->get("isData") == 1){
-        if(_vc->get("run")>258750){return;}
-    }
+    //if(_vc->get("isData") == 1){
+    //    if(_vc->get("run")>258750){return;}
+    //}
 
 	//debug output    
 	_run = 1;
-	_lumi = 1284;
-    _evt = 424885;
+	_lumi = 239;
+    _evt = 78924;
     
     _run2 = 1;
-	_lumi2 = 1;
-    _evt2 = 1;
+	_lumi2 = 366;
+    _evt2 = 121134;
   
   	_run3 = 1;
-	_lumi3 = 1;
-    _evt3 = 1;
+	_lumi3 = 398;
+    _evt3 = 131626;
     
     
     if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
@@ -639,6 +641,7 @@ void SUSY3L_sync::run(){
 
     //fillSkimTree();
 
+    _sumTF = 0;
     //signal event
     if(!_isFake){
         setWorkflow(kGlobal);
@@ -648,15 +651,15 @@ void SUSY3L_sync::run(){
     //fake background event 
     else{
 		//loop over all combinations of tight and fake leptons
-        float sumTF = 0;
+        _sumTF = 0;
         for(unsigned int ic=0;ic<_combList.size();ic++) {
             int type = _combType[ic];
-            if(type==kIsSingleFake){ sumTF += getTF_SingleFake(ic); }
-            if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
-            if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
+            if(type==kIsSingleFake){ _sumTF += getTF_SingleFake(ic); }
+            if(type==kIsDoubleFake){ _sumTF += getTF_DoubleFake(ic); }
+            if(type==kIsTripleFake){ _sumTF += getTF_TripleFake(ic); }
             if(_doPlots) fill("fake_type" , type+1       , _weight);
         }
-        _weight *= sumTF;
+        _weight *= _sumTF;
 	    setWorkflow(kGlobal_Fake);
         advancedSelection( kGlobal_Fake );
     
@@ -1502,12 +1505,14 @@ void SUSY3L_sync::advancedSelection(int WF){
 
     //print out event info
     if(!_debug){ 
-    if(WF==kGlobal){
+    if(WF==kGlobal || WF==kGlobal_Fake){
     //printout for sync     
     long int run = _vc->get("run");
     long int lumi = _vc->get("lumi");
     long int evt = _vc->get("evt");
-    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " " << _genWeight << " " << _puWeight << " " << _btagWeight << " " << _sfWeight << " " << _isOnZ << endl;
+    //cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " " << _genWeight << " " << _puWeight << " " << _btagWeight << " " << _sfWeight << " " << _isOnZ  << " " << _isFake << " " << _sumTF << endl;
+    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " "  << _isOnZ  << " " << _isFake << " " << _sumTF << endl;
+    //cout << run << " " << lumi << " " << evt << " " << _isOnZ  << " " << _vc->get("nBJetLoose30") << " " << _vc->get("nBJetMedium30") << " " << _met->pt() << endl;
     }}
     
 

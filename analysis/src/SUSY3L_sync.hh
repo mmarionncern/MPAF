@@ -287,7 +287,7 @@ private:
     float _puWeight;
     float _btagWeight;
     float _sfWeight;
-
+    float _sumTF;
 };
 
 #endif
