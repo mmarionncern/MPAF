@@ -15,18 +15,18 @@ if len(argv)<2:
 
 INPUT = argv[1]
 
-models   = ["T1bbbb", "T1tttt","T6ttWW","T1qqqq","T2qq","T2bb","T2tt"]
+models   = ["T1bbbb", "T1tttt","T6ttWW","T1qqqq","T2qq","T2bb","T2tt","T5qqqqVV"]
 model = "mymodel"
 for m in models:
     if m in INPUT:
         model = m
 
-if "T1" in model:
+if "T1tttt" in model or "T5qqqqVV" in model:
     xsfile = "/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVgluglu.root"
-    print 'using T1tttt x-section file'
-elif "T6" in model:
+    print 'using gluino-gluino x-section file'
+elif "T6ttWW" in model:
     xsfile = "/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVsbottomsbottom.root"
-    print 'using T6ttWW x-section file'
+    print 'using sbottom-sbottom x-section file'
 else:
     xsfile = "theXSfile.root"
 
@@ -154,7 +154,7 @@ m1min, m1max = 0, 2000
 m2min, m2max = 0, 2000
 binSize = 25
 
-mass1 = "mGlu" if "T1" in model else "mSq" if model=="T2qq" else "mSb" if model=="T2bb" else "mSt" if model=="T2tt" else "m1"
+mass1 = "mGlu" if "T1tttt" in model or "T5qqqqVV" in model else "mSq" if model=="T2qq" else "mSb" if model=="T2bb" else "mSt" if model=="T2tt" else "m1"
 mass2 = "mLSP"
 
 # create histos
@@ -219,7 +219,7 @@ for lim in limits:
     
 print "smoothing..."
 for lim in limits:
-    nSmooth = 1# if model!="T1tttt" else 3  # more aggresive smoothing for t1tttt since it's full of holes
+    nSmooth = 3# if model!="T1tttt" else 3  # more aggresive smoothing for t1tttt since it's full of holes
     graphs1[lim] = extractSmoothedContour(h_lims_mu[lim], nSmooth)
     graphs1[lim].SetName( graphs1[lim].GetName().replace("_mu","") ) 
     graphs1[lim].Write()

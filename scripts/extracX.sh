@@ -1,7 +1,8 @@
 #!/bin/bash/
 
-#for file in /pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-12-04-21-54-00/*
-for file in /pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2016-02-02-11-22-00/*.root
+#for file in /pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2015-12-04-21-54-00/*          #T1tttt
+#for file in /pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2016-02-02-11-22-00/*.root     #T6ttWW
+for file in /pnfs/psi.ch/cms/trivcat/store/user/cheidegg/sea/11/2016-03-04-18-49-00/*.root      #T5qqqqVV
     do
         fdir=$(dirname "$file")
         fname=$(basename "$file")

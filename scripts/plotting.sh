@@ -1,8 +1,8 @@
 #!/bin/bash
 
 VAR=("njets" "nbjets" "met" "ht" "pt1" "pt2" "pt3" "srs" "flavor") # "mt") # "el_multi" "mu_multi" "lep_multi")
-#REG=("OffZBaseline" " OnZBaseline" )
-REG=(" OnZBaseline" )
+REG=("OffZBaseline" " OnZBaseline" )
+#REG=(" OnZBaseline" )
 #VAR=("ftype")
 #VAR=("njets")
 
