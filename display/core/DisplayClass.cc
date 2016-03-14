@@ -2835,7 +2835,7 @@ DisplayClass::cmsPrel() {
     
     latex.SetTextFont(52);
     latex.SetTextSize(textSize*0.76);
-    if(!_mcOnly) {
+    if(!_mcOnly && !_closure) {
       if(_prel)
 	latex.DrawLatex(0.80,0.84,"Preliminary");
     }
