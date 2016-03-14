@@ -2671,6 +2671,7 @@ bool SUSY3L_sync::checkMassBenchmark(){
     string s;
     if(_susyProcessName == "T1tttt") s="-"+os.str()+"-"+os1.str()+"-";
     if(_susyProcessName == "T6ttWW") s="_"+os.str()+"_"+os1.str();
+    if(_susyProcessName == "T5qqqqVV") s="_"+os.str()+"_"+os1.str();
     
     if(_ie==0 && _susyProcessName == "T1tttt") {
         unsigned int p=_sampleName.find("-");
@@ -2685,7 +2686,7 @@ bool SUSY3L_sync::checkMassBenchmark(){
         _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
     }
  
-    if(_ie==0 && _susyProcessName == "T6ttWW") {
+    if(_ie==0 && (_susyProcessName == "T6ttWW" || _susyProcessName == "T5qqqqVV")) {
         unsigned int p=_sampleName.find("_");
         unsigned int p1=_sampleName.find("_",p+1);
         unsigned int p2=_sampleName.size();
@@ -2740,6 +2741,10 @@ float SUSY3L_sync::getFastSimXFactor(float dir){
     if(_susyProcessName == "T6ttWW"){
         if(dir == 1) return 1.333;
         else return 0.7312;
+    }
+     if(_susyProcessName == "T5qqqqVV"){
+        if(dir == 1) return 1.34;
+        else return 0.7275;
     }
     else{
         cout << "Warning: could not find X factors for susy model " << _susyProcessName << endl;
