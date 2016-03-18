@@ -431,9 +431,9 @@ void SUSY3L_sync::run(){
     //}
 
 	//debug output    
-	_run = 1;
-	_lumi = 239;
-    _evt = 78924;
+	_run = 257613;
+	_lumi = 18;
+    _evt = 28910203;
     
     _run2 = 1;
 	_lumi2 = 366;
@@ -654,9 +654,12 @@ void SUSY3L_sync::run(){
         _sumTF = 0;
         for(unsigned int ic=0;ic<_combList.size();ic++) {
             int type = _combType[ic];
-            if(type==kIsSingleFake){ _sumTF += getTF_SingleFake(ic); }
-            if(type==kIsDoubleFake){ _sumTF += getTF_DoubleFake(ic); }
-            if(type==kIsTripleFake){ _sumTF += getTF_TripleFake(ic); }
+            if(type==kIsSingleFake){ _sumTF += getTF_SingleFake(ic); 
+            if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "single fake TF: " << getTF_SingleFake(ic) << endl;}}}
+            if(type==kIsDoubleFake){ _sumTF += getTF_DoubleFake(ic); 
+            if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "double fake TF: " << getTF_DoubleFake(ic) << endl;}}}
+            if(type==kIsTripleFake){ _sumTF += getTF_TripleFake(ic); 
+            if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "triple fake TF: " << getTF_TripleFake(ic) << endl;}}}
             if(_doPlots) fill("fake_type" , type+1       , _weight);
         }
         _weight *= _sumTF;
@@ -1556,6 +1559,11 @@ float SUSY3L_sync::getTF_SingleFake(int ic){
     if(_combType[ic]!=kIsSingleFake){cout<<"WARNING: called 'getTFSingleFake' for wrong combination"<<endl; return 0;}
     //for single fake combinations with 3 leptons, always last entry is the fake
     float f3=getFR(_combList[ic][2], _combIdxs[ic][2]);
+    if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
+        cout << "fake rate: " << f3 << endl;
+        cout << "pt: " << _combList[ic][2]->pt() << endl;
+        cout << "eta: " << _combList[ic][2]->eta() << endl;
+        }}
     //calculate transfer factor
     float tF = f3/(1-f3);
     

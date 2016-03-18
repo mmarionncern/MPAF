@@ -14,7 +14,7 @@ NJ=0
 NSR=0
 
 N=0
-NUMBER=(1) # 1 2 3 4 5 6 7 8 9 10 11 12 13 14 )
+NUMBER=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 )
 
 for nr in ${NUMBER[@]}; do
 
@@ -43,7 +43,7 @@ for nr in ${NUMBER[@]}; do
 	    sub  susy3l_scanSig${bench}.C
 	    NJ=0
         fi
-        break
+        #break
     done
     mv $MPAF/workdir/datacards/susy3l* $MPAF/workdir/datacards/SR$nr/
 done
