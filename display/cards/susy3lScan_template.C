@@ -13,12 +13,14 @@ void susy3l_scanSigBENCH(){
     if(sig=="T5qqqqVVBENCH") string fileList="merged_2fb_T5qqqqVVMASS"; //susy3lUnc
   
     bool mcOnly = false;
+    bool onlyOneSR = true;
+    int testSR = NUMBER;
   
     md.anConf.configureNames( dir, fileName, fileList );
     md.anConf.configureData(false, 0, mcOnly);
      
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=2260; //pb-1 19470
+    float lumi=2320; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=true;
@@ -159,7 +161,7 @@ void susy3l_scanSigBENCH(){
     md.addNuisanceParameter("LepEffFS",sig,"shape","");
 	md.addNuisanceParameter("HLTFS",sig,"shape","");
     md.addNuisanceParameter("ISR",sig,"shape","");
-    md.addNuisanceParameter("XSFS",sig,"shape","");
+    //md.addNuisanceParameter("XSFS",sig,"shape","");
 	md.addNuisanceParameter("ACCFS",sig,"shape","");
 
     md.addNuisanceParameter("ttWAcc","ttW","shape","");
@@ -168,20 +170,35 @@ void susy3l_scanSigBENCH(){
     //md.addNuisanceParameter("ttHAcc","ttH","shape","");
     md.addNuisanceParameter("wzTh","WZ","shape","");
 
-    const int nBins = 30;
-    string cats[nBins]={
-        "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006",
-        "OnZSR007", "OnZSR008", "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012",
+
+    vector<string> vcategs;
+    int nBins = 30;
+    string categs[30]={
+        "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004",
+        "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
+        "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012",
         "OnZSR013", "OnZSR014", "OnZSR015",
-	
-        "OffZSR001", "OffZSR002", "OffZSR003", "OffZSR004", "OffZSR005", "OffZSR006",
-        "OffZSR007", "OffZSR008", "OffZSR009", "OffZSR010", "OffZSR011", "OffZSR012",
+    
+        "OffZSR001", "OffZSR002", "OffZSR003", "OffZSR004", 
+        "OffZSR005", "OffZSR006", "OffZSR007", "OffZSR008", 
+        "OffZSR009", "OffZSR010", "OffZSR011", "OffZSR012",
         "OffZSR013", "OffZSR014", "OffZSR015"
     };
-  
+
+    if(!onlyOneSR){
+        for(int i=0;i<nBins;i++) {
+            vcategs.push_back( categs[i] );
+        }
+    }
+    else{
+        nBins = 1;
+        vcategs.push_back(categs[testSR-1]);
+    }
+
+    
     //Flat uncertanties =================================
     //lumi
-    md.addNuisanceParameter("lumi","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.046:1.046:1.046:1.046:1.046:1.046");
+    md.addNuisanceParameter("lumi","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.027:1.027:1.027:1.027:1.027:1.027");
     //experimental uncertainties
     md.addNuisanceParameter("HLTEff","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.03:1.03:1.03:1.03:1.03:1.03");
     md.addNuisanceParameter("LepEff","ttW:ttZH:ttZlowM:XG:rares:"+sig,"lnN","1.06:1.06:1.06:1.06:1.06:1.06"); //2% per lepton
@@ -197,13 +214,13 @@ void susy3l_scanSigBENCH(){
     md.addNuisanceParameter("rareTh","rares","lnN","1.50");
   
     //pdf uncertainty
-    md.addNuisanceParameter("ttWPdf","ttW","lnN","1.02");
-    md.addNuisanceParameter("ttZPdf","ttZH:ttZlowM","lnN","1.03:1.06");
+    md.addNuisanceParameter("ttWPdf","ttW","lnN","1.03");
+    md.addNuisanceParameter("ttZPdf","ttZH:ttZlowM","lnN","1.02:1.06");
     //md.addNuisanceParameter("ttHPdf","ttH","lnN","1.035");
 
     //x-section uncertainty
-    md.addNuisanceParameter("ttWXs","ttW","lnN","1.11");
-    md.addNuisanceParameter("ttZXs","ttZH:ttZlowM","lnN","1.13:1.33");
+    md.addNuisanceParameter("ttWXs","ttW","lnN","1.13");
+    md.addNuisanceParameter("ttZXs","ttZH:ttZlowM","lnN","1.11:1.33");
     //md.addNuisanceParameter("ttHXs","ttH","lnN","1.09");
 
 
@@ -213,24 +230,7 @@ void susy3l_scanSigBENCH(){
     md.dp.setLumiAndEnergy( lumi, energy );
    
     md.prepareDisplay();
-
-    string categs[nBins]={
-        "global_OnZSR001", "global_OnZSR002", "global_OnZSR003", "global_OnZSR004",
-        "global_OnZSR005", "global_OnZSR006", "global_OnZSR007", "global_OnZSR008",
-        "global_OnZSR009", "global_OnZSR010", "global_OnZSR011", "global_OnZSR012",
-        "global_OnZSR013", "global_OnZSR014", "global_OnZSR015",
     
-        "global_OffZSR001", "global_OffZSR002", "global_OffZSR003", "global_OffZSR004", 
-        "global_OffZSR005", "global_OffZSR006", "global_OffZSR007", "global_OffZSR008", 
-        "global_OffZSR009", "global_OffZSR010", "global_OffZSR011", "global_OffZSR012",
-        "global_OffZSR013", "global_OffZSR014", "global_OffZSR015"
-    };
-    vector<string> vcategs;
-    //for(int i=0;i<nBins;i++) {
-    //    vcategs.push_back( categs[i] );
-    //}
-    vcategs.push_back( categs[NUMBER] );
-
     //external uncertainties ===================================
     float AccTTW[30]={
         0.05, 0.05, 0.18, 0.18, 0.05, 
@@ -288,19 +288,24 @@ void susy3l_scanSigBENCH(){
     //statistical uncertainties for all processes
     for(int isr=0;isr<nBins;isr++) {
         for(size_t id=0;id<8;id++) {
-            md.addNuisanceParameter(dss[id]+cats[isr]+"stat",dss[id],"shape","");
+            md.addNuisanceParameter(dss[id]+vcategs[isr]+"stat",dss[id],"shape","");
         }
+    }
+ 
+    for(int i=0;i<nBins;i++){
+        vcategs[i] = "global_" + vcategs[i];
     }
 
     //Q2 background acceptance uncertainties 
     for(size_t ic=0;ic<nBins;ic++) {
-        md.addExternalSystUnc("ttW"     ,"ttWAcc"       ,AccTTW[ic]     , -1*AccTTW[ic]     , categs[ic], "selected");
-        md.addExternalSystUnc("ttZH"    ,"ttZAcc"       ,AccTTZ[ic]     , -1*AccTTZ[ic]     , categs[ic], "selected");
-        md.addExternalSystUnc("ttZlowM" ,"ttZlowMAcc"   ,AccTTZlowM[ic] , -1*AccTTZlowM[ic] , categs[ic], "selected");
-        //md.addExternalSystUnc("ttH"     ,"ttHAcc"       ,AccTTH[ic]     , -1*AccTTH[ic]     , categs[ic], "selected");
-        md.addExternalSystUnc("WZ"      ,"wzTh"         ,ExtrapolWZ[ic] , -1*ExtrapolWZ[ic] , categs[ic], "selected");
+        md.addExternalSystUnc("ttW"     ,"ttWAcc"       ,AccTTW[ic]     , -1*AccTTW[ic]     , vcategs[ic], "selected");
+        md.addExternalSystUnc("ttZH"    ,"ttZAcc"       ,AccTTZ[ic]     , -1*AccTTZ[ic]     , vcategs[ic], "selected");
+        md.addExternalSystUnc("ttZlowM" ,"ttZlowMAcc"   ,AccTTZlowM[ic] , -1*AccTTZlowM[ic] , vcategs[ic], "selected");
+        //md.addExternalSystUnc("ttH"     ,"ttHAcc"       ,AccTTH[ic]     , -1*AccTTH[ic]     , vcategs[ic], "selected");
+        md.addExternalSystUnc("WZ"      ,"wzTh"         ,ExtrapolWZ[ic] , -1*ExtrapolWZ[ic] , vcategs[ic], "selected");
     }
 
+   
     md.makeMultiDataCard(sig, vcategs, "selected", "susy3l_"+sig);
 
     gROOT->ProcessLine(".qqqqqqqqqqqqqq");
