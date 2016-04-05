@@ -28,7 +28,7 @@ while read fileLine; do
 	sed -i 's|SIMFLAG|1|' $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
 
     #analysis -c $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
-	qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/SUSY3L/3l_scanSig_${file}.out -e $MPAF/workdir/logs/SUSY3L/3l_scanSig_${file}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
+	qsub -q all.q -N MPAFjob $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
 
 	N=`echo $N + 1 | bc`
     #break

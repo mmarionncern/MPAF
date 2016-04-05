@@ -36,6 +36,7 @@ class sms():
         self.diagTextY = 0.45
         # turn off diagonal lines
         self.diagOn = True
+        self.fixMass = ''
         
     def T1bbbb(self):
         # model name

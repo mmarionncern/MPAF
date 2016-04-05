@@ -18,8 +18,8 @@ while read fileLine; do
     path=`echo $fileLine | awk '{print $1}'`
     file=`echo $fileLine | awk '{print $2}'`
 
-    echo $path
-	echo $file
+    #echo $path
+	#echo $file
 
 	cp $MPAF/cfg/3l_scan.cfg $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
 
@@ -28,7 +28,7 @@ while read fileLine; do
 	sed -i 's|SIMFLAG|1|' $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
 
     #analysis -c $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
-	qsub -q all.q -N MPAFjob -o $MPAF/workdir/logs/SUSY3L/3l_scanSig_${file}.out -e $MPAF/workdir/logs/SUSY3L/3l_scanSig_${file}.err $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
+	qsub -q all.q -N MPAFjob $MPAF/scripts/submit.sh $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
 
 	N=`echo $N + 1 | bc`
     #break
