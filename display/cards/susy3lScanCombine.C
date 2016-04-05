@@ -4,7 +4,8 @@ void susy3l_scanSigBENCH(){
     md.refresh();
 
     //general parameters ********************* general parameters
-    string sig="fs_t1ttttBENCH";
+    //string sig="fs_t1ttttBENCH";
+    string sig="fs_t5qqqqvvBENCH";
 
     string dir="SUSY3L";
     string fileName="merged_2fb";
@@ -13,14 +14,12 @@ void susy3l_scanSigBENCH(){
     if(sig=="fs_t5qqqqvvBENCH") string fileList="merged_2fb_T5qqqqVVMASS"; //susy3lUnc
   
     bool mcOnly = false;
-    bool onlyOneSR = false;
-    //int testSR = NUMBER;
   
     md.anConf.configureNames( dir, fileName, fileList );
     md.anConf.configureData(false, 0, mcOnly);
      
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=2260; //pb-1 19470
+    float lumi=2320; //pb-1 19470  
     float energy=13; //TeV
 
     bool useXS=true;
@@ -60,7 +59,7 @@ void susy3l_scanSigBENCH(){
     md.addDataCardSample( "tZq_ll", "rares"); 
     md.addDataCardSample( "VHToNonbb", "rares"); 
     md.addDataCardSample( "GGHZZ4L", "rares"); 
-    //md.addDataCardSample( "ZZTo4L", "rares"); 
+    md.addDataCardSample( "ZZTo4L", "rares"); 
     md.addDataCardSample( "WWZ", "rares"); 
     md.addDataCardSample( "WZZ", "rares"); 
     md.addDataCardSample( "ZZZ", "rares"); 
@@ -88,12 +87,11 @@ void susy3l_scanSigBENCH(){
     md.addDataCardSample( "Fake:tZq_ll", "fakes", -1 );
     md.addDataCardSample( "Fake:VHToNonbb", "fakes", -1 );
     md.addDataCardSample( "Fake:GGHZZ4L", "fakes", -1 );
-//    md.addDataCardSample( "Fake:ZZTo4L", "fakes", -1 );
+    md.addDataCardSample( "Fake:ZZTo4L", "fakes", -1 );
     md.addDataCardSample( "Fake:WWZ", "fakes", -1 );
     md.addDataCardSample( "Fake:WZZ", "fakes", -1 );
     md.addDataCardSample( "Fake:ZZZ", "fakes", -1 );
     md.addDataCardSample( "Fake:TTTT", "fakes", -1 );
-
 /*
     md.addDataCardSample( "TGJets", "pseudodata"); 
     md.addDataCardSample( "TTGJets", "pseudodata"); 
@@ -188,14 +186,8 @@ void susy3l_scanSigBENCH(){
         "OffZSR013", "OffZSR014", "OffZSR015"
     };
 
-    if(!onlyOneSR){
-        for(int i=0;i<nBins;i++) {
-            vcategs.push_back( categs[i] );
-        }
-    }
-    else{
-        nBins = 1;
-        vcategs.push_back(categs[testSR-1]);
+    for(int i=0;i<nBins;i++) {
+        vcategs.push_back( categs[i] );
     }
 
  
@@ -217,13 +209,16 @@ void susy3l_scanSigBENCH(){
     md.addNuisanceParameter("rares","rares","lnN","1.50");
 
     //pdf uncertainty
-    md.addNuisanceParameter("ttw_pdf","ttw","lnN","1.03");
-    md.addNuisanceParameter("ttzh_pdf","ttzh:ttZlowM","lnN","1.02:1.06");
+    md.addNuisanceParameter("ttw_pdf","ttw","lnN","1.03"); 
+    md.addNuisanceParameter("ttzh_pdf","ttzh:ttZlowM","lnN","1.02:1.06"); 
+
     //md.addNuisanceParameter("ttHPdf","ttH","lnN","1.035");
 
     //x-section uncertainty
     md.addNuisanceParameter("TTW","ttw","lnN","1.13");
+
     md.addNuisanceParameter("TTZH","ttzh:ttzlowM","lnN","1.11:1.33");
+
     //md.addNuisanceParameter("ttHXs","ttH","lnN","1.09");
 
 
@@ -254,7 +249,7 @@ void susy3l_scanSigBENCH(){
         0.00, 0.18, 0.18, 0.00, 0.00, 
         0.18, 0.18, 0.18, 0.18, 0.18
     };
-  
+ 
     float AccTTZlowHT[30]={
         0.03, 0.03, 0.00, 0.00, 0.03, 
         0.03, 0.00, 0.00, 0.03, 0.03, 
@@ -274,7 +269,7 @@ void susy3l_scanSigBENCH(){
         0.00, 0.08, 0.08, 0.00, 0.00, 
         0.08, 0.08, 0.08, 0.08, 0.08
     };
-    
+   
     float AccTTZlowMlowHT[30]={
         0.03, 0.03, 0.00, 0.00, 0.03, 
         0.03, 0.00, 0.00, 0.03, 0.03, 
@@ -306,7 +301,6 @@ void susy3l_scanSigBENCH(){
     };
 
 	//datasets
-    //string dss[8]={sig,"xg","ttzh","ttzlowM","ttw","wz","rares","fakes"};
     string dss[8]={sig,"xg","ttzh","ttzlowM","ttw","wz","rares","fakes"};
 
     //statistical uncertainties for all processes
@@ -328,6 +322,7 @@ void susy3l_scanSigBENCH(){
         md.addExternalSystUnc("ttzh"    ,"ttzh_extr_hth"    ,AccTTZhighHT[ic]       , -1*AccTTZhighHT[ic]       , vcategs[ic], "selected");
         md.addExternalSystUnc("ttzlowM" ,"ttz_lowM_extr_htl",AccTTZlowMlowHT[ic]    , -1*AccTTZlowMlowHT[ic]    , vcategs[ic], "selected");
         md.addExternalSystUnc("ttzlowM" ,"ttz_lowM_extr_hth",AccTTZlowMhighHT[ic]   , -1*AccTTZlowMhighHT[ic]   , vcategs[ic], "selected");
+        
         md.addExternalSystUnc("wz"      ,"wz_extr"          ,ExtrapolWZ[ic]         , -1*ExtrapolWZ[ic]         , vcategs[ic], "selected");
     }
 
