@@ -1137,12 +1137,26 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
 
           //----------------------
           //special treatment of application regions with 0 yields -> set statistical uncertainty up variation to 0.35
-          if(_dsNames[id]=="fake" && uncNames[iu].find("fake")!= std::string::npos ){
+          if(_dsNames[id]=="fakes" && uncNames[iu].find("fakes")!= std::string::npos && uncNames[iu].find("stat")!= std::string::npos){
               if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]<=0){
                   uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] = 0.35;}
               if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
                   uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0;}
           }
+ 
+          //prevent negative down variations
+          if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<0){
+            uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0;
+          }
+          
+          if(uncNames[iu].find("stat")!= std::string::npos){
+              //prevent 0 up variation for stat uncertainty if central value is fixed to 0.0001
+              if(uncShapes[ic].begin()->second[ _dsNames[id] ][0]<=0.0001){
+                  uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1]=0.0001;
+                  uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0.0001;
+              }
+          }
+         
           //----------------------
           hUp[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][1] );
           hDown[ _dsNames[id]+"_"+uncNames[iu] ]->SetBinContent(ic+1, uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2] );
