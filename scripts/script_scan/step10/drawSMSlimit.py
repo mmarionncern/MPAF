@@ -22,10 +22,10 @@ for m in models:
         model = m
 
 if "T1tttt" in model or "T5qqqqVV" in model:
-    xsfile = "/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVgluglu.root"
+    xsfile = "/mnt/t3nfs01/data01/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVgluglu.root"
     print 'using gluino-gluino x-section file'
 elif "T6ttWW" in model:
-    xsfile = "/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVsbottomsbottom.root"
+    xsfile = "/mnt/t3nfs01/data01/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVsbottomsbottom.root"
     print 'using sbottom-sbottom x-section file'
 else:
     xsfile = "theXSfile.root"
@@ -36,7 +36,7 @@ h_xs = f_xs.Get("xs")
 limits = ["obs", "exp", "ep1s", "em1s", "ep2s", "em2s", "op1s", "om1s"]
 
 # coloum-limit map for txt files (n -> column n+1) 
-fileMap = {"exp":2, "obs":3, "ep1s":4, "em1s":5, "ep2s":6, "em2s":7}
+fileMap = {"obs":2, "exp":3, "em1s":4, "ep1s":5, "em2s":6, "ep2s":7}
 
 
 def getLimitYN ( h_lim_mu, r_exluded=1):
@@ -171,7 +171,6 @@ for lim in limits:
 # read txt file with limits (map defined above)
 print "reading file..."
 readLimitsFromFile(INPUT, fileMap, h_lims_mu0, h_lims_xs0, h_lims_yn0)
-
 
 output = INPUT.replace(".txt",".root")
 fout = ROOT.TFile(output, "RECREATE")
