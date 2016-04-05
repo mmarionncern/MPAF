@@ -295,7 +295,7 @@ void SUSY3L::initialize(){
     if(_fastSim) {
         //load signal cross section and number of generated events
         _dbm->loadDb(_susyProcessName+"Xsect", _susyProcessName+"Xsect.db");
-        _dbm->loadDb(_susyProcessName+"Xsect_variation", _susyProcessName+"Xsect_variation.db");
+        //_dbm->loadDb(_susyProcessName+"Xsect_variation", _susyProcessName+"Xsect_variation.db");
         loadScanHistogram();
     }
     
@@ -355,18 +355,18 @@ void SUSY3L::initialize(){
 
     //systematic uncertianties
     if(_runSystematics){
-        addManualSystSource("BTAG",SystUtils::kNone);
-        addManualSystSource("JES",SystUtils::kNone);
-        addManualSystSource("EWKFR",SystUtils::kNone);
-        addManualSystSource("PUXS",SystUtils::kNone);
+        addManualSystSource("btag",SystUtils::kNone);
+        addManualSystSource("jes",SystUtils::kNone);
+        addManualSystSource("fakes_EWK",SystUtils::kNone);
+        addManualSystSource("pu",SystUtils::kNone);
         //addManualSystSource("Theory",SystUtils::kNone);   -> accounted for in display card
         //fastSim only
-        addManualSystSource("ISR",SystUtils::kNone);
-        addManualSystSource("LepEffFS",SystUtils::kNone);
-        addManualSystSource("HLTFS",SystUtils::kNone);
-        addManualSystSource("BTAGFS",SystUtils::kNone);
-        addManualSystSource("XSFS",SystUtils::kNone);
-        addManualSystSource("ACCFS",SystUtils::kNone);
+        addManualSystSource("isr",SystUtils::kNone);
+        addManualSystSource("fs_lep",SystUtils::kNone);
+        addManualSystSource("fs_hlt",SystUtils::kNone);
+        addManualSystSource("fs_btag",SystUtils::kNone);
+        //addManualSystSource("XSFS",SystUtils::kNone);
+        addManualSystSource("scale",SystUtils::kNone);
     }
 
 }
@@ -384,11 +384,11 @@ void SUSY3L::modifyWeight() {
         //generator weights
         int LHESYS = _LHESYS;
         float Xfactor = 1;
-        if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kUp==getUncDir() ){
+        if(_fastSim && (isInUncProc() &&  getUncName()=="scale") && SystUtils::kUp==getUncDir() ){
             LHESYS = 1009;
             Xfactor = getFastSimXFactor(1);
             }
-	    if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kDown==getUncDir() ){
+	    if(_fastSim && (isInUncProc() &&  getUncName()=="scale") && SystUtils::kDown==getUncDir() ){
             LHESYS = 1005;
             Xfactor = getFastSimXFactor(-1);
         }
@@ -403,8 +403,8 @@ void SUSY3L::modifyWeight() {
 	    //pile-up weights
         if(!_closure){
             string db="puWeights";
-	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
-	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
+	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
+	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
 	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
             //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
         }
@@ -475,25 +475,25 @@ void SUSY3L::run(){
 	        _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
 	        _weight *= _btagW;
         }
-        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+        else if(isInUncProc() && getUncName()=="btag" && getUncDir()==SystUtils::kUp )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1, _fastSim); 
-        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+        else if(isInUncProc() && getUncName()=="btag" && getUncDir()==SystUtils::kDown )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1, _fastSim); 
-        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
+        else if(isInUncProc() && getUncName()=="fs_btag" && getUncDir()==SystUtils::kUp )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 1); 
-        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
+        else if(isInUncProc() && getUncName()=="fs_btag" && getUncDir()==SystUtils::kDown )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, -1); 
         else //other syst. variations
 	        _weight *= _btagW;
     }
-    counter("btag SF");
+    counter("b-tag SF");
 
     //ISR variation for fastsim
     if(_fastSim){
-        if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
+        if(isInUncProc() && getUncName()=="isr" && getUncDir()==SystUtils::kUp ){
 	        _susyMod->applyISRWeight(0, 1 , _weight); // up variation
         }
-        else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
+        else if(isInUncProc() && getUncName()=="isr" && getUncDir()==SystUtils::kDown ){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
     }
@@ -508,9 +508,9 @@ void SUSY3L::run(){
         else{
             _weight*=_susyMod->applyFastSimLepSfRA7(_tightLepsPtCutMllCut, _vc->get("nTrueInt"));
             // //uncertainties
-	        if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
+	        if((isInUncProc() &&  getUncName()=="fs_lep") && SystUtils::kUp==getUncDir() )
 	            _weight *= _susyMod->getVarWeightFastSimLepSFRA7(_tightLepsPtCutMllCut, 1);
-	        if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
+	        if((isInUncProc() &&  getUncName()=="fs_lep") && SystUtils::kDown==getUncDir() )
 	          _weight *= _susyMod->getVarWeightFastSimLepSFRA7(_tightLepsPtCutMllCut, -1);
         }
     } 
@@ -521,9 +521,9 @@ void SUSY3L::run(){
         //fastSim scale factors and flavor and pt dependent shape uncertainty
         _weight*=_susyMod->getWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT);
         // //uncertainties
-	    if((isInUncProc() &&  getUncName()=="HLTFS") && SystUtils::kUp==getUncDir() )
+	    if((isInUncProc() &&  getUncName()=="fs_hlt") && SystUtils::kUp==getUncDir() )
 	        _weight *= _susyMod->getVarWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT, 1);
-	    if((isInUncProc() &&  getUncName()=="HLTFS") && SystUtils::kDown==getUncDir() )
+	    if((isInUncProc() &&  getUncName()=="fs_hlt") && SystUtils::kDown==getUncDir() )
 	        _weight *= _susyMod->getVarWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT, -1);
     } 
     counter("HLT SF");
@@ -888,7 +888,7 @@ void SUSY3L::collectKinematicObjects(){
 
     //clean jets
     _susyMod->cleanJets( &_fakableLepsPtCut, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, 30, 30, getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, 30, 30, getUncName()=="jes", getUncDir() );
     _nJets = _jets.size();
     _nBJets = _bJets.size();
     
@@ -897,7 +897,7 @@ void SUSY3L::collectKinematicObjects(){
  
     //create met candidate for every event
     string ext="met";
-    if((isInUncProc() &&  getUncName()=="JES") )
+    if((isInUncProc() &&  getUncName()=="jes") )
         ext += ((SystUtils::kUp==getUncDir())?"_jecUp":"_jecDown");
     _met = Candidate::create(_vc->get(ext+"_pt"), _vc->get(ext+"_phi") );
     _metPt = _met->pt();
@@ -1184,8 +1184,8 @@ float SUSY3L::getFR(Candidate* cand, int idx) {
     //distinguish data and mc
     if(_vc->get("isData")!=1) db +="MC";
 
-    if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
-    if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
+    if(isInUncProc() && getUncName()=="fakes_EWK" && getUncDir()==SystUtils::kUp ) db+="Up";
+    if(isInUncProc() && getUncName()=="fakes_EWK" && getUncDir()==SystUtils::kDown ) db+="Do";
 
     //get pt and eta of candidate
     float ptVal=cand->pt();
@@ -2591,14 +2591,14 @@ bool SUSY3L::checkMassBenchmark(){
     if(_sampleName.find(s)==string::npos) return false;
  
     float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1);
-	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kUp==getUncDir() ){
-        //fastSim x-section up variation
-        XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) + _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
-    }
-  	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kDown==getUncDir() ){
-        //fastSim x-section down variation
-        XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) - _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
-    }
+	//if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kUp==getUncDir() ){
+    //    //fastSim x-section up variation
+    //    XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) + _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
+    //}
+  	//if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kDown==getUncDir() ){
+    //    //fastSim x-section down variation
+    //    XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) - _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
+    //}
 
     _weight *= XS/_nProcEvtScan;
     
