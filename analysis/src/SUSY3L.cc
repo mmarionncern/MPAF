@@ -294,8 +294,12 @@ void SUSY3L::initialize(){
 
     if(_fastSim) {
         //load signal cross section and number of generated events
-        _dbm->loadDb(_susyProcessName+"Xsect", _susyProcessName+"Xsect.db");
-        //_dbm->loadDb(_susyProcessName+"Xsect_variation", _susyProcessName+"Xsect_variation.db");
+        if(_susyProcessName=="T1tttt" || _susyProcessName=="T5qqqqVV" || _susyProcessName=="T5ttttdeg" || _susyProcessName=="T5tttt"){
+            _dbm->loadDb(_susyProcessName+"Xsect", "GluinoGluinoXsect.db");
+        }
+        if(_susyProcessName=="T6ttWW"){
+            _dbm->loadDb(_susyProcessName+"Xsect", "SbottomSbottomXsect.db");
+        }
         loadScanHistogram();
     }
     
@@ -2561,6 +2565,7 @@ bool SUSY3L::checkMassBenchmark(){
     if(_susyProcessName == "T1tttt") s="-"+os.str()+"-"+os1.str()+"-";
     if(_susyProcessName == "T6ttWW") s="_"+os.str()+"_"+os1.str();
     if(_susyProcessName == "T5qqqqVV") s="_"+os.str()+"_"+os1.str();
+    if(_susyProcessName == "T5ttttdeg") s="_"+os.str()+"_"+os1.str();
     
     if(_ie==0 && _susyProcessName == "T1tttt") {
         unsigned int p=_sampleName.find("-");
@@ -2575,7 +2580,7 @@ bool SUSY3L::checkMassBenchmark(){
         _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
     }
  
-    if(_ie==0 && (_susyProcessName == "T6ttWW" || _susyProcessName == "T5qqqqVV")) {
+    if(_ie==0 && (_susyProcessName == "T6ttWW" || _susyProcessName == "T5qqqqVV" || _susyProcessName == "T5ttttdeg")) {
         unsigned int p=_sampleName.find("_");
         unsigned int p1=_sampleName.find("_",p+1);
         unsigned int p2=_sampleName.size();
@@ -2591,14 +2596,6 @@ bool SUSY3L::checkMassBenchmark(){
     if(_sampleName.find(s)==string::npos) return false;
  
     float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1);
-	//if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kUp==getUncDir() ){
-    //    //fastSim x-section up variation
-    //    XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) + _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
-    //}
-  	//if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kDown==getUncDir() ){
-    //    //fastSim x-section down variation
-    //    XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) - _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
-    //}
 
     _weight *= XS/_nProcEvtScan;
     
@@ -2631,7 +2628,7 @@ float SUSY3L::getFastSimXFactor(float dir){
         if(dir == 1) return 1.333;
         else return 0.7312;
     }
-     if(_susyProcessName == "T5qqqqVV"){
+     if(_susyProcessName == "T5qqqqVV" || _susyProcessName == "T5ttttdeg"){
         if(dir == 1) return 1.34;
         else return 0.7275;
     }
