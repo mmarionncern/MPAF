@@ -9,7 +9,7 @@ using namespace std;
 void getTH3Histo(){
 
   //ifstream ifile("/shome/cheidegg/d/MPAF/scripts/scanScripts/filesScan", ios::in );
-  ifstream ifile("/shome/jhoss/analysis/MPAF/scripts/script_scan/step2/scanFiles", ios::in );
+  ifstream ifile("/mnt/t3nfs01/data01/shome/jhoss/analysis/MPAF/scripts/script_scan/step2/scanFiles", ios::in );
   
   TH3D* h3(0);
   
@@ -42,7 +42,7 @@ void getTH3Histo(){
     ifile.close();
   }
   
-  TFile* ofile=new TFile("histoScanT5qqqqVV.root","recreate");
+  TFile* ofile=new TFile("histoScanT5ttttdeg.root","recreate");
   ofile->cd();
   h3->Write();
   ofile->Write();

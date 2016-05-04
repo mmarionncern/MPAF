@@ -1,5 +1,5 @@
 #!/bin/bash
-source /swshare/ROOT/root_v5.34.18_slc6_amd64/bin/thisroot.sh
+source /mnt/t3nfs01/data01/swshare/ROOT/root_v5.34.18_slc6_amd64/bin/thisroot.sh
 #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/dcap
 
 cd /mnt/t3nfs01/data01/shome/jhoss/analysis/MPAF/
