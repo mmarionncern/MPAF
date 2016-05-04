@@ -5,13 +5,15 @@ void susy3l_scanSigBENCH(){
 
     //general parameters ********************* general parameters
     //string sig="fs_t1ttttBENCH";
-    string sig="fs_t5qqqqvvBENCH";
+    string sig="fs_t5tttt_degenBENCH";
+    bool allSR = true;
 
     string dir="SUSY3L";
     string fileName="merged_2fb";
     if(sig=="fs_t1ttttBENCH") string fileList="merged_2fb_T1tttt-MASS-"; //susy3lUnc
     if(sig=="fs_t6ttww_50BENCH") string fileList="merged_2fb_T6ttWWMASS"; //susy3lUnc
     if(sig=="fs_t5qqqqvvBENCH") string fileList="merged_2fb_T5qqqqVVMASS"; //susy3lUnc
+    if(sig=="fs_t5tttt_degenBENCH") string fileList="merged_2fb_T5ttttMASS"; //susy3lUnc
   
     bool mcOnly = false;
   
@@ -41,6 +43,7 @@ void susy3l_scanSigBENCH(){
     if(sig=="fs_t1ttttBENCH") md.addDataCardSigSample("T1tttt-MASS-",sig);
     if(sig=="fs_t6ttww_50BENCH") md.addDataCardSigSample("T6ttWWMASS",sig);
     if(sig=="fs_t5qqqqvvBENCH") md.addDataCardSigSample("T5qqqqVVMASS",sig, kfac);
+    if(sig=="fs_t5tttt_degenBENCH") md.addDataCardSigSample("T5ttttMASS",sig);
 
     md.addDataCardSample( "TGJets", "xg"); 
     md.addDataCardSample( "TTGJets", "xg"); 
@@ -186,10 +189,18 @@ void susy3l_scanSigBENCH(){
         "OffZSR013", "OffZSR014", "OffZSR015"
     };
 
-    for(int i=0;i<nBins;i++) {
-        vcategs.push_back( categs[i] );
+    if(allSR == true){
+        for(int i=0;i<nBins;i++) {
+            vcategs.push_back( categs[i] );
+        }
     }
-
+    else{
+        //section for datacards with one SR only
+        nBins = 1;
+        int testSR = NUMBER;
+        vcategs.push_back( categs[testSR-1] );
+        cout << "making datacard for SR " << categs[testSR-1] << endl;
+    }
  
     //Flat uncertanties =================================
     //lumi
