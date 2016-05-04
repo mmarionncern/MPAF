@@ -726,6 +726,9 @@ void SUSY3L_sync::defineOutput(){
     _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
     _hm->addVariable("flavor"           ,  5,     0.0,  5.0,    "N_{#mu}"                                           );
     
+    _hm->addVariable("chargeMult_3lep"  ,  5,     0.0,  5.0,    "same sign multiplicity"                            );
+    _hm->addVariable("chargeMult_4lep"  ,  5,     0.0,  5.0,    "same sign multiplicity"                            );
+    
     if(!_doValidationPlots) return; 
     
     //additional histograms  
@@ -1507,16 +1510,49 @@ void SUSY3L_sync::advancedSelection(int WF){
         cout << "WF: " << WF << endl;}}
 
     //print out event info
-    if(!_debug){ 
+    //if(!_debug){ 
     if(WF==kGlobal || WF==kGlobal_Fake){
     //printout for sync     
     long int run = _vc->get("run");
     long int lumi = _vc->get("lumi");
     long int evt = _vc->get("evt");
     //cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " " << _genWeight << " " << _puWeight << " " << _btagWeight << " " << _sfWeight << " " << _isOnZ  << " " << _isFake << " " << _sumTF << endl;
-    cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " "  << _isOnZ  << " " << _isFake << " " << _sumTF << endl;
+    //here
+    //cout << run << " " << lumi << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets << " " << _met->pt() << " " << _HT << " "  << _isOnZ  << " " << _isFake << " " << _sumTF << endl;
     //cout << run << " " << lumi << " " << evt << " " << _isOnZ  << " " << _vc->get("nBJetLoose30") << " " << _vc->get("nBJetMedium30") << " " << _met->pt() << endl;
-    }}
+    
+    int chargeMult = 0;
+    if(_tightLepsPtCutMllCut.size()==3){
+        if((_tightLepsPtCutMllCut[0]->charge() == _tightLepsPtCutMllCut[1]->charge() )&& (_tightLepsPtCutMllCut[0]->charge()==_tightLepsPtCutMllCut[2]->charge())){
+            chargeMult = 3;
+        }
+        else{
+            chargeMult = 2;
+        }
+        fill( "chargeMult_3lep", chargeMult, _weight);
+    }
+    
+    if(_tightLepsPtCutMllCut.size()==4){
+        if((_tightLepsPtCutMllCut[0]->charge() == _tightLepsPtCutMllCut[1]->charge()) && (_tightLepsPtCutMllCut[0]->charge() == _tightLepsPtCutMllCut[2]->charge()) && (_tightLepsPtCutMllCut[0]->charge() == _tightLepsPtCutMllCut[3]->charge())){
+            chargeMult = 4;
+        }
+        else{
+            if(_tightLepsPtCutMllCut[0]->charge()*_tightLepsPtCutMllCut[1]->charge()*_tightLepsPtCutMllCut[2]->charge()*_tightLepsPtCutMllCut[3]->charge() < 0){
+                chargeMult = 3;
+            }
+            else{
+                chargeMult = 2;
+            }
+        }
+    fill( "chargeMult_4lep", chargeMult, _weight);
+    }
+    
+    if(chargeMult==0){
+        fill( "chargeMult_3lep", chargeMult, _weight);
+        fill( "chargeMult_4lep", chargeMult, _weight);
+    }
+    }
+    //}
     
 
     fillHistos(true);
