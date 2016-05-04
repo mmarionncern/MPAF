@@ -6,12 +6,12 @@ void susy3l() {
 
 
     //general parameters ********************* general parameters
-    string dir="SUSY3L";
-    string fileName="160208_3l"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="160208_3l"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string dir="SUSY3L_sync";
+    string fileName="sync"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="sync"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
-    bool mcOnly = true;
+    bool mcOnly = false;
     bool closure = false;
     bool fixLeg = true;
   
@@ -20,13 +20,13 @@ void susy3l() {
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
-    bool data = false;
-    bool manual = false;
+    bool data = true;
+    bool manual = true;
     if(!manual) string region = "REGION";
-    else string region = "OnZBaseline";
+    else string region = "";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "srs";}
+    else{string obs = "lep3_charge";}
     
     string sigs;
     if(region=="OffZBaseline") sigs = "t"; 
@@ -211,6 +211,13 @@ void susy3l() {
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
+    if(obs == "lep3_charge"){
+        md.dp.setObservables("chargeMult_3lep" + region);
+        int binning=1;
+        double rangeX[2]={0,5};
+        //bool logYScale=true;
+    }
+
 
 
     //string autoBinFile="susybinninghigh";
