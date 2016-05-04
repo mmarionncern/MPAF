@@ -37,6 +37,7 @@ class smsPlotXSEC(smsPlotABS):
         rt.gStyle.SetNumberContours(NCont)
         
         self.c.cd()
+        #self.histo.Smooth(1)
         self.histo.Draw("colz")
         
         rt.gPad.Update()
@@ -49,7 +50,7 @@ class smsPlotXSEC(smsPlotABS):
         palette.SetLabelSize(0.035)
 
     def DrawPaletteLabel(self):
-        textCOLZ = rt.TLatex(0.98,0.15,"95% C.L. upper limit on cross section [pb]")
+        textCOLZ = rt.TLatex(0.99,0.15,"95% C.L. upper limit on cross section (pb)")
         textCOLZ.SetNDC()
         #textCOLZ.SetTextAlign(13)
         textCOLZ.SetTextFont(42)
@@ -61,8 +62,19 @@ class smsPlotXSEC(smsPlotABS):
     def Draw(self):
         self.emptyHisto.GetXaxis().SetRangeUser(self.model.Xmin, self.model.Xmax)
         self.emptyHisto.GetYaxis().SetRangeUser(self.model.Ymin, self.model.Ymax)
-        self.emptyHisto.Draw()
-        self.histo.Draw("COLZSAME")
+      
+        for x in range(self.emptyHisto.GetNbinsX()):
+            for y in range(self.emptyHisto.GetNbinsY()):
+                xval = self.emptyHisto.GetXaxis().GetBinCenter(x+1)
+                yval = self.emptyHisto.GetYaxis().GetBinCenter(y+1)
+                histoBin=self.histo.FindBin(xval,yval)
+                emptyHistoBin=self.emptyHisto.FindBin(xval,yval)
+                z=self.histo.GetBinContent(histoBin)
+                self.emptyHisto.SetBinContent(emptyHistoBin,z)
+
+        self.emptyHisto.GetZaxis().SetRangeUser(self.model.Zmin, self.model.Zmax)
+        self.emptyHisto.Draw("COLZ")
+        #self.histo.Draw("SAME COLZ")
         if self.model.diagOn:
             self.DrawDiagonal()
         self.DrawLines()

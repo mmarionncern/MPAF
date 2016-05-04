@@ -15,13 +15,13 @@ if len(argv)<2:
 
 INPUT = argv[1]
 
-models   = ["T1bbbb", "T1tttt","T6ttWW","T1qqqq","T2qq","T2bb","T2tt","T5qqqqVV"]
+models   = ["T1bbbb", "T1tttt","T6ttWW","T1qqqq","T2qq","T2bb","T2tt","T5qqqqVV", "T5ttttdeg"]
 model = "mymodel"
 for m in models:
     if m in INPUT:
         model = m
 
-if "T1tttt" in model or "T5qqqqVV" in model:
+if "T1tttt" in model or "T5qqqqVV" in model or "T5ttttdeg" in model:
     xsfile = "/mnt/t3nfs01/data01/shome/jhoss/analysis/MPAF/scripts/script_scan/step9/SUSYCrossSections13TeVgluglu.root"
     print 'using gluino-gluino x-section file'
 elif "T6ttWW" in model:
@@ -90,7 +90,7 @@ def extractSmoothedContour(hist, nSmooth=1):
     isMu = "mu" in hist.GetName()
     #ROOT.gStyle.SetNumberContours(4 if isMu else 2)
     shist = hist.Clone(hist.GetName()+"_smoothed")
-
+    
     # if smoothing a limit from mu, we need to modify the zeros outside the diagonal, otherwise the smoothing fools us in the diagonal transition
     if isMu:
         for ix in range(1, shist.GetNbinsX()):
@@ -150,11 +150,11 @@ h_lims_yn   = {} # limits in excluded/non-exluded, interpolated
 h_lims_xs   = {} # limits in cross-section, interpolated
 g2_lims_mu  = {} # TGraph2D limits in signal-strength, automatic interpolation
 
-m1min, m1max = 0, 2000
-m2min, m2max = 0, 2000
+m1min, m1max = 0, 1700
+m2min, m2max = 0, 1700
 binSize = 25
 
-mass1 = "mGlu" if "T1tttt" in model or "T5qqqqVV" in model else "mSq" if model=="T2qq" else "mSb" if model=="T2bb" else "mSt" if model=="T2tt" else "m1"
+mass1 = "mGlu" if "T1tttt" in model or "T5qqqqVV" in model or "T5ttttdeg" in model else "mSq" if model=="T2qq" else "mSb" if model=="T2bb" else "mSt" if model=="T2tt" else "m1"
 mass2 = "mLSP"
 
 # create histos

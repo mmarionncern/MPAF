@@ -28,7 +28,8 @@ class smsPlotABS(object):
         self.emptyhisto = self.emptyHistogramFromModel()
 
     def emptyHistogramFromModel(self):
-        self.emptyHisto = rt.TH2D("emptyHisto", "", 1, self.model.Xmin, self.model.Xmax, 1, self.model.Ymin, self.model.Ymax)
+        #self.emptyHisto = rt.TH2D("emptyHisto", "", 1, self.model.Xmin, self.model.Xmax, 1, self.model.Ymin, self.model.Ymax)
+        self.emptyHisto = rt.TH2D("emptyHisto", "", int((self.model.Xmax-self.model.Xmin)/25), self.model.Xmin, self.model.Xmax, int((self.model.Ymax-self.model.Ymin)/25), self.model.Ymin, self.model.Ymax)
         
     # define the plot canvas
     def setStyle(self):
@@ -40,9 +41,9 @@ class smsPlotABS(object):
         self.c.SetTickx(1)
         self.c.SetTicky(1)
 
-        self.c.SetRightMargin(0.19)
+        self.c.SetRightMargin(0.16)
         self.c.SetTopMargin(0.08)
-        self.c.SetLeftMargin(0.14)
+        self.c.SetLeftMargin(0.16)
         self.c.SetBottomMargin(0.14)
 
         # set x axis
@@ -59,10 +60,10 @@ class smsPlotABS(object):
         self.emptyHisto.GetYaxis().SetLabelSize(0.035)
         self.emptyHisto.GetYaxis().SetTitleFont(42)
         self.emptyHisto.GetYaxis().SetTitleSize(0.05)
-        self.emptyHisto.GetYaxis().SetTitleOffset(1.30)
+        self.emptyHisto.GetYaxis().SetTitleOffset(1.50)
         self.emptyHisto.GetYaxis().SetTitle(self.model.LSP)
         #self.emptyHisto.GetYaxis().CenterTitle(True)
-                
+       
     def DrawText(self):
         #redraw axes
         self.c.RedrawAxis()
@@ -77,8 +78,8 @@ class smsPlotABS(object):
         graphWhite.SetLineWidth(3)
         graphWhite.SetPoint(0,self.model.Xmin, self.model.Ymax)
         graphWhite.SetPoint(1,self.model.Xmax, self.model.Ymax)
-        graphWhite.SetPoint(2,self.model.Xmax, self.model.Ymax*0.75) #default 0.75, bigger 0.68
-        graphWhite.SetPoint(3,self.model.Xmin, self.model.Ymax*0.75) #default 0.75. bigger 0.68
+        graphWhite.SetPoint(2,self.model.Xmax, (self.model.Ymax-self.model.Ymin)*.75+self.model.Ymin) #default 0.75, bigger 0.68
+        graphWhite.SetPoint(3,self.model.Xmin, (self.model.Ymax-self.model.Ymin)*.75+self.model.Ymin) #default 0.75. bigger 0.68
         graphWhite.SetPoint(4,self.model.Xmin, self.model.Ymax)
         graphWhite.Draw("FSAME")
         graphWhite.Draw("LSAME")
@@ -91,7 +92,8 @@ class smsPlotABS(object):
 	iPos=0
 	CMS_lumi.CMS_lumi(self.c,4, iPos)
         # CMS LABEL
-        textCMS = rt.TLatex(0.25,0.96,"  %s " %(self.preliminary))
+        #textCMS = rt.TLatex(0.25,0.96,"  %s " %(self.preliminary))
+        textCMS = rt.TLatex(0.25,0.96,"   " )
         textCMS.SetNDC()
         textCMS.SetTextAlign(13)
         textCMS.SetTextFont(52)
@@ -100,7 +102,7 @@ class smsPlotABS(object):
         self.c.textCMS = textCMS
         # MODEL LABEL
         #textModelLabel= rt.TLatex(0.15,0.90,"#splitline{%s}{NLO+NLL exclusion}" %self.model.label)
-        textModelLabel= rt.TLatex(0.15,0.90,"%s    NLO+NLL exclusion" %self.model.label)
+        textModelLabel= rt.TLatex(0.18,0.90,"%s  NLO+NLL exclusion" %self.model.label)
         textModelLabel.SetNDC()
         textModelLabel.SetTextAlign(13)
         textModelLabel.SetTextFont(42)
@@ -116,7 +118,7 @@ class smsPlotABS(object):
         textNLONLL.Draw()
         #self.c.textNLONLL = textNLONLL
         # fixed sparticle mass
-        textFixedMass = rt.TLatex(0.15,0.70,"  %s " %(self.model.fixMass))
+        textFixedMass = rt.TLatex(0.18,0.70,"  %s " %(self.model.fixMass))
         textFixedMass.SetNDC()
         textFixedMass.SetTextAlign(13)
         textFixedMass.SetTextFont(42)

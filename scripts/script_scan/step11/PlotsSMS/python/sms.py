@@ -8,35 +8,63 @@ class sms():
         if modelname.find("T1qqqq") != -1: self.T1qqqq()
         if modelname.find("T6ttWW") != -1: self.T6ttWW()
         if modelname.find("T5qqqqVV") != -1: self.T5qqqqVV()
-
-
+        if modelname.find("T5ttttdeg") != -1: self.T5ttttdeg()
+    
     def T1tttt(self):
         # model name
         self.modelname = "T1tttt"
         # decay chain
         self.label= "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g} #rightarrow t#bar{t}#tilde{#chi}^{0}_{1}";
         # scan range to plot
-        self.Xmin = 700
-        self.Xmax = 1950
-        self.Ymin = 0
-        self.Ymax = 1900
+        self.Xmin = 687.5
+        self.Xmax = 1712.5
+        self.Ymin = -12.5
+        self.Ymax = 1712.5
         self.Zmin = 0.01
         self.Zmax = 50
         # produce sparticle
-        self.sParticle = "m_{#tilde{g}} [GeV]"
+        self.sParticle = "m_{#tilde{g}} (GeV)"
         # LSP
-        self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
+        self.LSP = "m_{#tilde{#chi}_{1}^{0}} (GeV)"
         # diagonal position: mLSP = mgluino - 2m(W+b)
         mT = 170
         self.diagX = array('d',[0,20000])
         self.diagY = array('d',[-mT, 20000-mT])        
         self.diagText = 'm_{#tilde{g}} - m_{#tilde{#chi}^{0}_{1}} = 2 (m_{W} + m_{b})'
-        self.diagAngle = 36.87
+        self.diagAngle = 34.6
         self.diagTextX = 0.2
-        self.diagTextY = 0.45
+        self.diagTextY = 0.47
         # turn off diagonal lines
         self.diagOn = True
         self.fixMass = ''
+ 
+    def T5ttttdeg(self):
+        # model name
+        self.modelname = "T5ttttdeg"
+        # decay chain
+        self.label= "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g} #rightarrow #tilde{t}_{1}t, #tilde{t}_{1} #rightarrow t#tilde{#chi}^{0}_{1}";
+        # scan range to plot
+        self.Xmin = 587.5
+        self.Xmax = 1312.5
+        self.Ymin = -12.5
+        self.Ymax = 1362.5
+        self.Zmin = 0.01
+        self.Zmax = 50
+        # produce sparticle
+        self.sParticle = "m_{#tilde{g}} (GeV)"
+        # LSP
+        self.LSP = "m_{#tilde{#chi}_{1}^{0}} (GeV)"
+        # diagonal position: mLSP = mgluino - 2m(W+b)
+        mT = 85
+        self.diagX = array('d',[0,20000])
+        self.diagY = array('d',[-mT, 20000-mT])        
+        self.diagText = 'm_{#tilde{g}} - m_{#tilde{#chi}^{0}_{1}} = m_{W} + m_{b}'
+        self.diagAngle = 29.5
+        self.diagTextX = 0.2
+        self.diagTextY = 0.49
+        # turn off diagonal lines
+        self.diagOn = True
+        self.fixMass = 'm_{#tilde{t}_{1}} = m_{#tilde{#chi}^{0}_{1}} + 20 GeV'
         
     def T1bbbb(self):
         # model name
@@ -51,9 +79,9 @@ class sms():
         self.Zmin = 0.001
         self.Zmax = 2
         # produce sparticle
-        self.sParticle = "m_{#tilde{g}} [GeV]"
+        self.sParticle = "m_{#tilde{g}} (GeV)"
         # LSP
-        self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
+        self.LSP = "m_{#tilde{#chi}_{1}^{0}} (GeV)"
         # diagonal position: mLSP = mgluino - 2mtop
         self.diagX = array('d',[0,20000])
         self.diagY = array('d',[0, 20000])
@@ -73,9 +101,9 @@ class sms():
         self.Zmin = 0.001
         self.Zmax = 2
         # produce sparticle
-        self.sParticle = "m_{#tilde{g}} [GeV]"
+        self.sParticle = "m_{#tilde{g}} (GeV)"
         # LSP
-        self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
+        self.LSP = "m_{#tilde{#chi}_{1}^{0}} (GeV)"
         # diagonal position: mLSP = mgluino - 2mtop
         self.diagX = array('d',[0,20000])
         self.diagY = array('d',[0, 20000])
@@ -89,16 +117,16 @@ class sms():
         # decay chain
         self.label= "pp #rightarrow #tilde{b}_{1}#tilde{b}_{1}*, #tilde{b}_{1}#rightarrow tW#tilde{#chi}^{0}_{1} ";
         # scan range to plot
-        self.Xmin = 300
-        self.Xmax = 950
-        self.Ymin = 75
-        self.Ymax = 1100
+        self.Xmin = 287.5
+        self.Xmax = 912.5
+        self.Ymin = 62.5
+        self.Ymax = 1112.5
         self.Zmin = 0.01
         self.Zmax = 10
         # produce sparticle
-        self.sParticle = "m_{#tilde{b}} [GeV]"
+        self.sParticle = "m_{#tilde{b}} (GeV)"
         # LSP
-        self.LSP = "m_{#tilde{#chi}^{#pm}_{1}} [GeV]"
+        self.LSP = "m_{#tilde{#chi}^{#pm}_{1}} (GeV)"
         # diagonal position: msbottom = mXpm
         mT = 0
         self.diagX = array('d',[0,20000])
@@ -106,7 +134,7 @@ class sms():
         self.diagText = 'm_{#tilde{b}} = m_{#tilde{#chi}^{#pm}_{1}}'
         self.diagAngle = 35.5
         self.diagTextX = 0.2
-        self.diagTextY = 0.4
+        self.diagTextY = 0.38
         # turn off diagonal lines
         self.diagOn = True
         self.fixMass = 'm_{#tilde{#chi}^{0}_{1}} = 50 GeV'
@@ -118,24 +146,24 @@ class sms():
         # decay chain
         self.label= "pp #rightarrow #tilde{g}#tilde{g}, #tilde{g} #rightarrow q#bar{q}'W/Z#tilde{#chi}^{0}_{1}";
         # scan range to plot
-        self.Xmin = 600
-        self.Xmax = 1700
-        self.Ymin = 0
-        self.Ymax = 1700
+        self.Xmin = 587.5
+        self.Xmax = 1312.5
+        self.Ymin = -12.5
+        self.Ymax = 1412.5
         self.Zmin = 0.01
         self.Zmax = 50
         # produce sparticle
-        self.sParticle = "m_{#tilde{g}} [GeV]"
+        self.sParticle = "m_{#tilde{g}} (GeV)"
         # LSP
-        self.LSP = "m_{#tilde{#chi}_{1}^{0}} [GeV]"
+        self.LSP = "m_{#tilde{#chi}_{1}^{0}} (GeV)"
         # diagonal position: mLSP = mgluino - 2mtop 
         mT = 0
         self.diagX = array('d',[0,20000])
         self.diagY = array('d',[-mT, 20000-mT])        
         self.diagText = 'm_{#tilde{g}} = m_{#tilde{#chi}^{0}_{1}}'
-        self.diagAngle = 36.06
+        self.diagAngle = 29.01
         self.diagTextX = 0.2
-        self.diagTextY = 0.5
+        self.diagTextY = 0.53
         # turn off diagonal lines
         self.diagOn = True
         self.fixMass = 'm_{#tilde{#chi}^{#pm}_{1}} = 0.5 (m_{#tilde{g}} + m_{#tilde{#chi}^{0}_{1}})'
