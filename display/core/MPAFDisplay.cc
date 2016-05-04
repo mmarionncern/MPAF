@@ -1145,8 +1145,8 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
           }
  
           //prevent negative down variations
-          if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<0){
-            uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0;
+          if(uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]<=0){
+            uncShapes[ic][ uncNames[iu] ][ _dsNames[id] ][2]=0.000001;
           }
           
           if(uncNames[iu].find("stat")!= std::string::npos){
