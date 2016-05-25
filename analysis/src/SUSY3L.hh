@@ -66,6 +66,7 @@ private:
     float getFR(Candidate* cand, int idx);
     void setCut(std::string, float, std::string, float = 0);
     bool hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg);
+    bool ptSelection(CandList leptons);
     void fillHistos(bool);
     void fillValidationHistos(string reg);
     float getMT2();

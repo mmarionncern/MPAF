@@ -1311,8 +1311,9 @@ bool SUSY3L::multiLepSelection(){
             if(!((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3))) continue;
             counter("low mll veto");
             //require hard legs
-            if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) continue;
-            counter("hard leg selection");
+            //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) continue;
+            if(!ptSelection(_tightLepsPtCutMllCut)) continue;
+            counter("lepton pt selection");
             
             //Z selection
             bool passMass = false;
@@ -1518,8 +1519,9 @@ bool SUSY3L::wzCRSelection(){
     if(!(_tightLepsPtCutMllCut.size()==3)) return false;
     counter("lepton multiplicity");
     //require hard legs
-    if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
-    counter("hard leg selection");
+    //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
+    if(!ptSelection(_tightLepsPtCutMllCut)) return false;
+    counter("lepton pt selection");
     //Z selection
     bool pass = false;
     for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
@@ -1623,8 +1625,9 @@ void SUSY3L::fakeCRSelection(){
     if(!(_tightLepsPtCutMllCut.size()==3)) return;
     counter("lepton multiplicity");
     //require hard legs
-    if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return;
-    counter("hard leg selection");
+    //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return;
+    if(!ptSelection(_tightLepsPtCutMllCut)) return;
+    counter("lepton pt selection");
     //off-Z selection
     for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
         if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){return;}
@@ -2030,8 +2033,8 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
                 tmp_idxsPtCorr.push_back(idxsPtCorr[i1]);
                 tmp_idxsPtCorr.push_back(idxsPtCorr[i2]);
                 tmp_idxsPtCorr.push_back(idxsPtCorr[i3]);
-                
-                if(!hardLeg(tmpList, nHardestLeptons, pt_cut_hardest_legs, nHardLeptons, pt_cut_hard_legs )) continue;
+                //if(!hardLeg(tmpList, nHardestLeptons, pt_cut_hardest_legs, nHardLeptons, pt_cut_hard_legs )) continue;
+                if(!ptSelection(tmpList)) continue;
                 vclist.push_back(tmpList);
                 combIdxs.push_back(tmp_idxsPtCorr);
 
@@ -2095,6 +2098,98 @@ bool SUSY3L::hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, i
 }
 
 //____________________________________________________________________________
+bool SUSY3L::ptSelection(CandList leptons){
+    /*
+        Makes the pt selection of the leptons. Depending in whether the offline HT is below or above 400 GeV
+        different flavor dependent pt cuts apply to the leading and subleading leg
+        return: true (if the event fulfills pt selection), false (else)
+    */
+
+    
+    //sort list of lepton by pt
+
+    CandList leps_tmp;
+    CandList leps_tmp2;
+        
+    for(size_t il=0;il<leptons.size();il++){
+        leps_tmp.push_back(leptons[il]);
+    }
+    leptons.clear();
+
+    while(leps_tmp.size()>0){
+        float pt = -1;
+        float pt_tmp = -1;
+        size_t i_save = -1;
+        for(size_t i=0; i < leps_tmp.size(); i++){
+            pt_tmp = leps_tmp[i]->pt();
+            if(pt_tmp > pt){
+                pt = pt_tmp;
+                i_save = i;
+            }
+        }
+        for(size_t i=0; i < leps_tmp.size(); i++){
+            if(i!=i_save){
+                leps_tmp2.push_back(leps_tmp[i]);
+            }
+        }
+        leptons.push_back(leps_tmp[i_save]);
+            
+        leps_tmp.clear();
+        leps_tmp = leps_tmp2;
+        leps_tmp2.clear();
+    }
+
+    //check that lepton list is pt ordered
+    if(leptons[2]->pt()>leptons[1]->pt() || leptons[2]->pt()>leptons[0]->pt() || leptons[1]->pt()>leptons[0]->pt()){
+        cout << "WARNING: lepton candidate list not pt ordered in ptSelection" << endl;
+    }
+    
+    //offline HT below HT trigger plateau
+    if(_HT<400){
+        //leading leg
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<18) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<20) return false;
+        //sub-leading leg
+        if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<10) return false;
+        if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;
+    }
+    //offline HT above HT trigger plateau
+    else{
+        //leading leg
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<10) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<15) return false;
+        //sub-leading leg
+        if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<10) return false;
+        if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;
+    }
+   
+/*      
+    //offline HT below HT trigger plateau
+    if(_HT<400){
+        //leading leg
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<20) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<20) return false;
+        //sub-leading leg
+        if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<15) return false;
+        if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;
+    }
+    //offline HT above HT trigger plateau
+    else{
+        //leading leg
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<20) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<20) return false;
+        //sub-leading leg
+        if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<15) return false;
+        if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;
+    }
+*/    
+   
+    
+    return true;
+
+}
+
+//____________________________________________________________________________
 float SUSY3L::lowestOssfMll(CandList leps){
     /*
         Checks if event has an ossf lepton pair and computes the lowest invariant mass of all ossf pairs
@@ -2126,69 +2221,6 @@ float SUSY3L::lowestOssfMll(CandList leps){
 }
 
 
-//____________________________________________________________________________
-//float SUSY3L::getMT2(){
-    /*
-        selected the two leptons that should be used for the MT2 calculation
-        parameters: none
-        return: none
-    */
-/*    
-    bool allSameSigned = false;
-    float ptsum = 0; 
-    float ptsum_tmp = 0;
-    int il1_save = -1;
-    int il2_save = -1;
-
-    if(_nMus+_nEls != 3){
-        return 0;
-    }
-   
-    if(((signbit(_leps[0]->pdgId())) == (signbit(_leps[1]->pdgId()))) && ((signbit(_leps[0]->pdgId())) == (signbit(_leps[2]->pdgId())))){
-         allSameSigned = true; 
-    }
-     
-    if(allSameSigned){
-        for(int il1=0;il1<_nleps;il1++){
-            for(int il2=il1+1;il2<_nleps;il2++){
-                //calculate sum of pt's
-                ptsum_tmp = _leps[il1]->pt() + _leps[il2]->pt();
-                //keep lepton pair candidate if it has the highest sum of pt's
-                if(ptsum_tmp >= ptsum) {
-                    ptsum = _leps[il1]->pt() + _leps[il2]->pt();
-                    il1_save = il1;
-                    il2_save = il2;
-                }
-            }   
-        }
-    }
-    //in case not all leptons are of the same sign require os lepton pair 
-    else{
-        for(int il1=0;il1<_nleps;il1++){
-            for(int il2=il1+1;il2<_nleps;il2++){
-                //continue if not os
-                if((signbit(_leps[il1]->pdgId())) == (signbit(_leps[il2]->pdgId()))){
-                    continue;
-                }
-                //calculate sum of pt's
-                ptsum_tmp = _leps[il1]->pt() + _leps[il2]->pt();
-                //keep lepton pair candidate if it has the highest sum of pt's
-                if(ptsum_tmp >= ptsum) {
-                    ptsum = _leps[il1]->pt() + _leps[il2]->pt();
-                    il1_save = il1;
-                    il2_save = il2;
-                }
-            }   
-        }
-    }
-
-    //take the two selected leptons and compute MT2 with them
-    _lep1 = _leps[il1_save];
-    _lep2 = _leps[il2_save];
-              
-    return MT2(_lep1, _lep2, _met, 0.0);
-}
-*/
 /*******************************************************************************
 * ******************************************************************************
 * ** EXECUTING TASKS                                                          **
