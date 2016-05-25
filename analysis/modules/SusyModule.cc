@@ -316,28 +316,35 @@ SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, 
 bool
 SusyModule::elHLTEmulSel(int idx, bool withIso, string branch) const {
 
-    //long int lumi = 629;
-    //long int evt = 1126708841;
+    long int lumi = 683;
+    long int evt = 226025;
+    bool debug = false;
 
   if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "entering emu sel" << endl;}
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "entering emu sel" << endl;}}
     if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.011 ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "pssing _sigmaIEtaIEta" << endl;}
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _sigmaIEtaIEta" << endl;}}
     if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dEtaScTrkIn" << endl;}
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dEtaScTrkIn" << endl;}}
     if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.04  ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dPhiScTrkIn" << endl;}
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dPhiScTrkIn" << endl;}}
     if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _hadronicOverEm" << endl;}
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _hadronicOverEm" << endl;}}
     if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
   }
   else {
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "entering emu sel" << endl;}}
     if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.031 ) return false;
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _sigmaIEtaIEta" << endl;}}
     if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dEtaScTrkIn" << endl;}}
     if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.08  ) return false;
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dPhiScTrkIn" << endl;}}
     if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _hadronicOverEm" << endl;}}
     if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
+        if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
   }
   if(!elMvaSel(idx, kLoose, branch)                                ) return false;
   
