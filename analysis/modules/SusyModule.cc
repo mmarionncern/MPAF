@@ -962,7 +962,7 @@ SusyModule::cleanJets(CandList* leptons,
 				       _vc->get(jType+ext+"_phi", ij) );
 
       jets.push_back(jet);
-      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.890 );//0.814
+      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.80 );//0.814
       tmpIdxs.push_back(make_pair(jType+ext, ij));
     }
   }
