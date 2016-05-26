@@ -432,12 +432,12 @@ void SUSY3L_sync::run(){
 
 	//debug output    
 	_run = 1;
-	_lumi = 454;
-    _evt = 150258;
+	_lumi = 995;
+    _evt = 329095;
     
     _run2 = 1;
-	_lumi2 = 459;
-    _evt2 = 151675;
+	_lumi2 = 999999;
+    _evt2 = 999999;
   
   	_run3 = 1;
 	_lumi3 = 99999;
@@ -451,7 +451,18 @@ void SUSY3L_sync::run(){
                 cout << "nLepGood " << _vc->get("nLepGood") << endl;
                 for(size_t il=0;il<_vc->get("nLepGood");il++) {
                     cout << "LepGood " << il << " pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << " phi: " << _vc->get("LepGood_phi", il) << " pdgId: " << _vc->get("LepGood_pdgId", il) << " miniIso: " << _vc->get("LepGood_miniRelIso", il) << " ptratio: " << _vc->get("LepGood_jetPtRatiov2", il)<< " ptrel: " << _vc->get("LepGood_jetPtRelv2", il) << endl;
-            } cout << endl;
+                } 
+                for(size_t il=0;il<_vc->get("nJet");il++) {
+                    cout << "nJet " << il << " pt: " << _vc->get("Jet_pt", il)  << " eta: " << _vc->get("Jet_eta", il) << " phi: " << _vc->get("Jet_phi", il) << " csv: " << _vc->get("Jet_btagCSV", il) << endl;
+                }
+                for(size_t il=0;il<_vc->get("nDiscJet");il++) {
+                    cout << "nDiscJet " << il << " pt: " << _vc->get("DiscJet_pt", il)  << " eta: " << _vc->get("DiscJet_eta", il) << " phi: " << _vc->get("DiscJet_phi", il) << " csv: " << _vc->get("DiscJet_btagCSV", il) << endl;
+                }
+                
+                
+                cout << endl;
+            
+            
             }}
 
     //increment event counter, used as denominator for yield calculation
@@ -511,8 +522,13 @@ void SUSY3L_sync::run(){
                 } 
                 cout << "jets: " << endl;
                 for(size_t il=0;il<_jets.size();il++) {
-                    cout << "pt: " << _jets[il]->pt() << " " << "eta: " << _jets[il]->eta() << " "<< "phi: " << _jets[il]->phi() << " " << endl;
+                    cout << "pt: " << _jets[il]->pt() << " " << "eta: " << _jets[il]->eta() << " "<< "phi: " << _jets[il]->phi() <<  endl;
                 }
+                cout << "b-jets: " << endl;
+                for(size_t il=0;il<_bJets.size();il++) {
+                    cout << "pt: " << _bJets[il]->pt() << " " << "eta: " << _bJets[il]->eta() << " "<< "phi: " << _bJets[il]->phi() <<  endl;
+                }
+                
                 cout << endl;
             }
             }
@@ -990,7 +1006,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //clean jets
     _susyMod->cleanJets( &_fakableLepsPtCut, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, 30, 25, getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, _jetThreshold, _bjetThreshold, getUncName()=="JES", getUncDir() );
     _nJets = _jets.size();
     _nBJets = _bJets.size();
     
@@ -1180,7 +1196,7 @@ void SUSY3L_sync::setBaselineRegion(){
         setCut("MET"                ,    0, ">=")  ;     //missing transverse energy
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
-        _bjetThreshold                = 30.         ;     //bjet threshold
+        _bjetThreshold                = 25.         ;     //bjet threshold
     }
 
 }
