@@ -296,8 +296,12 @@ void SUSY3L_sync::initialize(){
 
     if(_fastSim) {
         //load signal cross section and number of generated events
-        _dbm->loadDb(_susyProcessName+"Xsect", _susyProcessName+"Xsect.db");
-        _dbm->loadDb(_susyProcessName+"Xsect_variation", _susyProcessName+"Xsect_variation.db");
+        if(_susyProcessName=="T1tttt" || _susyProcessName=="T5qqqqVV" || _susyProcessName=="T5ttttdeg" || _susyProcessName=="T5tttt"){
+            _dbm->loadDb(_susyProcessName+"Xsect", "GluinoGluinoXsect.db");
+        }
+        if(_susyProcessName=="T6ttWW"){
+            _dbm->loadDb(_susyProcessName+"Xsect", "SbottomSbottomXsect.db");
+        }
         loadScanHistogram();
     }
     
@@ -357,18 +361,18 @@ void SUSY3L_sync::initialize(){
 
     //systematic uncertianties
     if(_runSystematics){
-        addManualSystSource("BTAG",SystUtils::kNone);
-        addManualSystSource("JES",SystUtils::kNone);
-        addManualSystSource("EWKFR",SystUtils::kNone);
-        addManualSystSource("PUXS",SystUtils::kNone);
+        addManualSystSource("btag",SystUtils::kNone);
+        addManualSystSource("jes",SystUtils::kNone);
+        addManualSystSource("fakes_EWK",SystUtils::kNone);
+        addManualSystSource("pu",SystUtils::kNone);
         //addManualSystSource("Theory",SystUtils::kNone);   -> accounted for in display card
         //fastSim only
-        addManualSystSource("ISR",SystUtils::kNone);
-        addManualSystSource("LepEffFS",SystUtils::kNone);
-        addManualSystSource("HLTFS",SystUtils::kNone);
-        addManualSystSource("BTAGFS",SystUtils::kNone);
-        addManualSystSource("XSFS",SystUtils::kNone);
-        addManualSystSource("ACCFS",SystUtils::kNone);
+        addManualSystSource("isr",SystUtils::kNone);
+        addManualSystSource("fs_lep",SystUtils::kNone);
+        addManualSystSource("fs_hlt",SystUtils::kNone);
+        addManualSystSource("fs_btag",SystUtils::kNone);
+        //addManualSystSource("XSFS",SystUtils::kNone);
+        addManualSystSource("scale",SystUtils::kNone);
     }
 
 }
@@ -386,11 +390,11 @@ void SUSY3L_sync::modifyWeight() {
         //generator weights
         int LHESYS = _LHESYS;
         float Xfactor = 1;
-        if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kUp==getUncDir() ){
+        if(_fastSim && (isInUncProc() &&  getUncName()=="scale") && SystUtils::kUp==getUncDir() ){
             LHESYS = 1009;
             Xfactor = getFastSimXFactor(1);
             }
-	    if(_fastSim && (isInUncProc() &&  getUncName()=="ACCFS") && SystUtils::kDown==getUncDir() ){
+	    if(_fastSim && (isInUncProc() &&  getUncName()=="scale") && SystUtils::kDown==getUncDir() ){
             LHESYS = 1005;
             Xfactor = getFastSimXFactor(-1);
         }
@@ -406,8 +410,8 @@ void SUSY3L_sync::modifyWeight() {
 	    //pile-up weights
         if(!_closure){
             string db="puWeights";
-	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
-	        if((isInUncProc() &&  getUncName()=="PUXS") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
+	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
+	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
 	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
             _puWeight = _dbm->getDBValue(db, _vc->get("nTrueInt") );
             //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
@@ -570,25 +574,25 @@ void SUSY3L_sync::run(){
 	        _weight *= _btagW;
             _btagWeight = _btagW;
         }
-        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kUp )
+        else if(isInUncProc() && getUncName()=="btag" && getUncDir()==SystUtils::kUp )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1, _fastSim); 
-        else if(isInUncProc() && getUncName()=="BTAG" && getUncDir()==SystUtils::kDown )
+        else if(isInUncProc() && getUncName()=="btag" && getUncDir()==SystUtils::kDown )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, -1, _fastSim); 
-        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kUp )
+        else if(isInUncProc() && getUncName()=="fs_btag" && getUncDir()==SystUtils::kUp )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 1); 
-        else if(isInUncProc() && getUncName()=="BTAGFS" && getUncDir()==SystUtils::kDown )
+        else if(isInUncProc() && getUncName()=="fs_btag" && getUncDir()==SystUtils::kDown )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, -1); 
         else //other syst. variations
 	        _weight *= _btagW;
     }
-    counter("btag SF");
+    counter("b-tag SF");
 
     //ISR variation for fastsim
     if(_fastSim){
-        if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kUp ){
+        if(isInUncProc() && getUncName()=="isr" && getUncDir()==SystUtils::kUp ){
 	        _susyMod->applyISRWeight(0, 1 , _weight); // up variation
         }
-        else if(isInUncProc() && getUncName()=="ISR" && getUncDir()==SystUtils::kDown ){
+        else if(isInUncProc() && getUncName()=="isr" && getUncDir()==SystUtils::kDown ){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
     }
@@ -604,9 +608,9 @@ void SUSY3L_sync::run(){
         else{
             _weight*=_susyMod->applyFastSimLepSfRA7(_tightLepsPtCutMllCut, _vc->get("nTrueInt"));
             // //uncertainties
-	        if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kUp==getUncDir() )
+	        if((isInUncProc() &&  getUncName()=="fs_lep") && SystUtils::kUp==getUncDir() )
 	            _weight *= _susyMod->getVarWeightFastSimLepSFRA7(_tightLepsPtCutMllCut, 1);
-	        if((isInUncProc() &&  getUncName()=="LepEffFS") && SystUtils::kDown==getUncDir() )
+	        if((isInUncProc() &&  getUncName()=="fs_lep") && SystUtils::kDown==getUncDir() )
 	          _weight *= _susyMod->getVarWeightFastSimLepSFRA7(_tightLepsPtCutMllCut, -1);
         }
     } 
@@ -617,9 +621,9 @@ void SUSY3L_sync::run(){
         //fastSim scale factors and flavor and pt dependent shape uncertainty
         _weight*=_susyMod->getWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT);
         // //uncertainties
-	    if((isInUncProc() &&  getUncName()=="HLTFS") && SystUtils::kUp==getUncDir() )
+	    if((isInUncProc() &&  getUncName()=="fs_hlt") && SystUtils::kUp==getUncDir() )
 	        _weight *= _susyMod->getVarWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT, 1);
-	    if((isInUncProc() &&  getUncName()=="HLTFS") && SystUtils::kDown==getUncDir() )
+	    if((isInUncProc() &&  getUncName()=="fs_hlt") && SystUtils::kDown==getUncDir() )
 	        _weight *= _susyMod->getVarWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT, -1);
     } 
     counter("HLT SF");
@@ -678,7 +682,7 @@ void SUSY3L_sync::run(){
     //fake background event 
     else{
 		//loop over all combinations of tight and fake leptons
-        _sumTF = 0;
+        float sumTF = 0;
         for(unsigned int ic=0;ic<_combList.size();ic++) {
             int type = _combType[ic];
             if(type==kIsSingleFake){ _sumTF += getTF_SingleFake(ic); 
@@ -692,7 +696,7 @@ void SUSY3L_sync::run(){
             }
             if(_doPlots) fill("fake_type" , type+1       , _weight);
         }
-        _weight *= _sumTF;
+        _weight *= sumTF;
 	    setWorkflow(kGlobal_Fake);
         advancedSelection( kGlobal_Fake );
     
@@ -971,7 +975,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-        //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
         //count muons and electrons
         if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
         if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
@@ -1006,7 +1010,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //clean jets
     _susyMod->cleanJets( &_fakableLepsPtCut, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, _jetThreshold, _bjetThreshold, getUncName()=="JES", getUncDir() );
+		       _lepJets, _lepJetsIdx, _jetThreshold, _bjetThreshold, getUncName()=="jes", getUncDir() );
     _nJets = _jets.size();
     _nBJets = _bJets.size();
     
@@ -1015,7 +1019,7 @@ void SUSY3L_sync::collectKinematicObjects(){
  
     //create met candidate for every event
     string ext="met";
-    if((isInUncProc() &&  getUncName()=="JES") )
+    if((isInUncProc() &&  getUncName()=="jes") )
         ext += ((SystUtils::kUp==getUncDir())?"_jecUp":"_jecDown");
     _met = Candidate::create(_vc->get(ext+"_pt"), _vc->get(ext+"_phi") );
     _metPt = _met->pt();
@@ -1189,11 +1193,11 @@ void SUSY3L_sync::setBaselineRegion(){
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
-        setCut("NJets"              ,    0, ">=" )  ;     //number of jets in event
-        setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
+        setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
+        setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
-        setCut("HT"                 ,    0, ">=")  ;     //sum of jet pT's
-        setCut("MET"                ,    0, ">=")  ;     //missing transverse energy
+        setCut("HT"                 ,   60, ">=")  ;     //sum of jet pT's
+        setCut("MET"                ,   50, ">=")  ;     //missing transverse energy
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
         _bjetThreshold                = 25.         ;     //bjet threshold
@@ -1324,8 +1328,8 @@ float SUSY3L_sync::getFR(Candidate* cand, int idx) {
     //distinguish data and mc
     if(_vc->get("isData")!=1) db +="MC";
 
-    if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kUp ) db+="Up";
-    if(isInUncProc() && getUncName()=="EWKFR" && getUncDir()==SystUtils::kDown ) db+="Do";
+    if(isInUncProc() && getUncName()=="fakes_EWK" && getUncDir()==SystUtils::kUp ) db+="Up";
+    if(isInUncProc() && getUncName()=="fakes_EWK" && getUncDir()==SystUtils::kDown ) db+="Do";
 
     //get pt and eta of candidate
     float ptVal=cand->pt();
@@ -1447,8 +1451,9 @@ bool SUSY3L_sync::multiLepSelection(){
             if(!((_exactlyThreeLep && _tightLepsPtCutMllCut.size()==3)||(!_exactlyThreeLep && _tightLepsPtCutMllCut.size()>=3))) continue;
             counter("low mll veto");
             //require hard legs
-            if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) continue;
-            counter("hard leg selection");
+            //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) continue;
+            if(!ptSelection(_tightLepsPtCutMllCut)) continue;
+            counter("lepton pt selection");
             
             //Z selection
             bool passMass = false;
@@ -1711,8 +1716,9 @@ bool SUSY3L_sync::wzCRSelection(){
     if(!(_tightLepsPtCutMllCut.size()==3)) return false;
     counter("lepton multiplicity");
     //require hard legs
-    if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
-    counter("hard leg selection");
+    //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
+    if(!ptSelection(_tightLepsPtCutMllCut)) return false;
+    counter("lepton pt selection");
     //Z selection
     bool pass = false;
     for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
@@ -1816,8 +1822,9 @@ void SUSY3L_sync::fakeCRSelection(){
     if(!(_tightLepsPtCutMllCut.size()==3)) return;
     counter("lepton multiplicity");
     //require hard legs
-    if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return;
-    counter("hard leg selection");
+    //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return;
+    if(!ptSelection(_tightLepsPtCutMllCut)) return;
+    counter("lepton pt selection");
     //off-Z selection
     for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
         if(!_susyMod->passMllMultiVeto( _tightLepsPtCutMllCut[il], &_tightLepsPtCutMllCut, 76, 106, true) ){return;}
@@ -2229,8 +2236,8 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
                 tmp_idxsPtCorr.push_back(idxsPtCorr[i1]);
                 tmp_idxsPtCorr.push_back(idxsPtCorr[i2]);
                 tmp_idxsPtCorr.push_back(idxsPtCorr[i3]);
-                
-                if(!hardLeg(tmpList, nHardestLeptons, pt_cut_hardest_legs, nHardLeptons, pt_cut_hard_legs )) continue;
+                //if(!hardLeg(tmpList, nHardestLeptons, pt_cut_hardest_legs, nHardLeptons, pt_cut_hard_legs )) continue;
+                if(!ptSelection(tmpList)) continue;
                 vclist.push_back(tmpList);
                 combIdxs.push_back(tmp_idxsPtCorr);
 
@@ -2290,6 +2297,98 @@ bool SUSY3L_sync::hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestL
     if(nHardestLepCount >= n_hardestLeg && nHardLepCount >= n_hardLeg) return true;
 
     return false;
+
+}
+
+//____________________________________________________________________________
+bool SUSY3L_sync::ptSelection(CandList leptons){
+    /*
+        Makes the pt selection of the leptons. Depending in whether the offline HT is below or above 400 GeV
+        different flavor dependent pt cuts apply to the leading and subleading leg
+        return: true (if the event fulfills pt selection), false (else)
+    */
+
+    
+    //sort list of lepton by pt
+
+    CandList leps_tmp;
+    CandList leps_tmp2;
+        
+    for(size_t il=0;il<leptons.size();il++){
+        leps_tmp.push_back(leptons[il]);
+    }
+    leptons.clear();
+
+    while(leps_tmp.size()>0){
+        float pt = -1;
+        float pt_tmp = -1;
+        size_t i_save = -1;
+        for(size_t i=0; i < leps_tmp.size(); i++){
+            pt_tmp = leps_tmp[i]->pt();
+            if(pt_tmp > pt){
+                pt = pt_tmp;
+                i_save = i;
+            }
+        }
+        for(size_t i=0; i < leps_tmp.size(); i++){
+            if(i!=i_save){
+                leps_tmp2.push_back(leps_tmp[i]);
+            }
+        }
+        leptons.push_back(leps_tmp[i_save]);
+            
+        leps_tmp.clear();
+        leps_tmp = leps_tmp2;
+        leps_tmp2.clear();
+    }
+
+    //check that lepton list is pt ordered
+    if(leptons[2]->pt()>leptons[1]->pt() || leptons[2]->pt()>leptons[0]->pt() || leptons[1]->pt()>leptons[0]->pt()){
+        cout << "WARNING: lepton candidate list not pt ordered in ptSelection" << endl;
+    }
+    
+    //offline HT below HT trigger plateau
+    if(_HT<400){
+        //leading leg
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<18) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<20) return false;
+        //sub-leading leg
+        if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<10) return false;
+        if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;
+    }
+    //offline HT above HT trigger plateau
+    else{
+        //leading leg
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<10) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<15) return false;
+        //sub-leading leg
+        if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<10) return false;
+        if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;
+    }
+   
+/*      
+    //offline HT below HT trigger plateau
+    if(_HT<400){
+        //leading leg
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<20) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<20) return false;
+        //sub-leading leg
+        if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<15) return false;
+        if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;
+    }
+    //offline HT above HT trigger plateau
+    else{
+        //leading leg
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<20) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<20) return false;
+        //sub-leading leg
+        if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<15) return false;
+        if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;
+    }
+*/    
+   
+    
+    return true;
 
 }
 
@@ -2764,6 +2863,7 @@ bool SUSY3L_sync::checkMassBenchmark(){
     if(_susyProcessName == "T1tttt") s="-"+os.str()+"-"+os1.str()+"-";
     if(_susyProcessName == "T6ttWW") s="_"+os.str()+"_"+os1.str();
     if(_susyProcessName == "T5qqqqVV") s="_"+os.str()+"_"+os1.str();
+    if(_susyProcessName == "T5ttttdeg") s="_"+os.str()+"_"+os1.str();
     
     if(_ie==0 && _susyProcessName == "T1tttt") {
         unsigned int p=_sampleName.find("-");
@@ -2778,7 +2878,7 @@ bool SUSY3L_sync::checkMassBenchmark(){
         _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
     }
  
-    if(_ie==0 && (_susyProcessName == "T6ttWW" || _susyProcessName == "T5qqqqVV")) {
+    if(_ie==0 && (_susyProcessName == "T6ttWW" || _susyProcessName == "T5qqqqVV" || _susyProcessName == "T5ttttdeg")) {
         unsigned int p=_sampleName.find("_");
         unsigned int p1=_sampleName.find("_",p+1);
         unsigned int p2=_sampleName.size();
@@ -2794,14 +2894,6 @@ bool SUSY3L_sync::checkMassBenchmark(){
     if(_sampleName.find(s)==string::npos) return false;
  
     float XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1);
-	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kUp==getUncDir() ){
-        //fastSim x-section up variation
-        XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) + _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
-    }
-  	if((isInUncProc() &&  getUncName()=="XSFS") && SystUtils::kDown==getUncDir() ){
-        //fastSim x-section down variation
-        XS = _dbm->getDBValue(_susyProcessName+"Xsect",M1) - _dbm->getDBValue(_susyProcessName+"Xsect_variation",M1)/100*_dbm->getDBValue(_susyProcessName+"Xsect",M1);
-    }
 
     _weight *= XS/_nProcEvtScan;
     
@@ -2834,7 +2926,7 @@ float SUSY3L_sync::getFastSimXFactor(float dir){
         if(dir == 1) return 1.333;
         else return 0.7312;
     }
-     if(_susyProcessName == "T5qqqqVV"){
+     if(_susyProcessName == "T5qqqqVV" || _susyProcessName == "T5ttttdeg"){
         if(dir == 1) return 1.34;
         else return 0.7275;
     }

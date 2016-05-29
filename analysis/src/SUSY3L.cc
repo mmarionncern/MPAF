@@ -892,7 +892,7 @@ void SUSY3L::collectKinematicObjects(){
 
     //clean jets
     _susyMod->cleanJets( &_fakableLepsPtCut, _jets, _jetsIdx, _bJets, _bJetsIdx,
-		       _lepJets, _lepJetsIdx, 30, 30, getUncName()=="jes", getUncDir() );
+		       _lepJets, _lepJetsIdx, _jetThreshold, _bjetThreshold, getUncName()=="jes", getUncDir() );
     _nJets = _jets.size();
     _nBJets = _bJets.size();
     
@@ -1048,19 +1048,19 @@ void SUSY3L::setBaselineRegion(){
     */
 
     if(_BR == "BR0"){
-        _pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
-        _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
-        _nHardLeptons                 = 1           ;     //number of leptons which need to fulfill harder pt cut
+        //_pt_cut_hardest_legs          = 20          ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        //_nHardestLeptons              = 1           ;     //number of leptons which need to fulfill harder pt cut
+        //_pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
+        //_nHardLeptons                 = 1           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
         setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,   60, ">=")  ;     //sum of jet pT's
         setCut("MET"                ,   50, ">=")  ;     //missing transverse energy
-        setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
+        //setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
-        _bjetThreshold                = 30.         ;     //bjet threshold
+        _bjetThreshold                = 25.         ;     //bjet threshold
     }
 
 }
