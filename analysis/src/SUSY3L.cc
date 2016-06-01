@@ -121,6 +121,7 @@ void SUSY3L::initialize(){
     _vc->registerVar("LepGood_hcalPFClusterIso"        );    
     _vc->registerVar("LepGood_dr03TkSumPt"             );    
     _vc->registerVar("LepGood_mcMatchId"               );    //MC truth information (1 gen-matched, 0 not)
+    _vc->registerVar("LepGood_mvaTTZMoriond16"         );    //lepton MVA ID
     
     //taus
     _vc->registerVar("nTauGood"                        );    //number of taus in event
@@ -293,13 +294,14 @@ void SUSY3L::initialize(){
     _LHESYS = getCfgVarI("LHESYS", 0);
 
     if(_fastSim) {
-        //load signal cross section and number of generated events
+        //load signal cross section
         if(_susyProcessName=="T1tttt" || _susyProcessName=="T5qqqqVV" || _susyProcessName=="T5ttttdeg" || _susyProcessName=="T5tttt"){
             _dbm->loadDb(_susyProcessName+"Xsect", "GluinoGluinoXsect.db");
         }
         if(_susyProcessName=="T6ttWW"){
             _dbm->loadDb(_susyProcessName+"Xsect", "SbottomSbottomXsect.db");
         }
+        //load number of generated events
         loadScanHistogram();
     }
     
@@ -610,33 +612,33 @@ void SUSY3L::defineOutput(){
     if(!_doPlots) return; 
 
     //event based observables
-    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                                           );
-    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "E^{miss}_{T} [GeV]"                                    );
+    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} (GeV)"                                           );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "E^{miss}_{T} (GeV)"                                    );
     _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "N_{b-jet}"                                             );
     _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "N_{jet}"                                               ); 
 
     //other observables
-    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} leading lepton [GeV]"                );
-    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} sub-leading lepton [GeV]"            );
-    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} 3rd lepton [GeV]"                    );
-    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]"              );
+    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} leading lepton (GeV)"                );
+    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} sub-leading lepton (GeV)"            );
+    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} 3rd lepton (GeV)"                    );
+    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll (GeV)"              );
     _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
     _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
     _hm->addVariable("lep1_SIP3D"       , 100,       0.,    5.0,    "leading lepton SIP_{3D}"                   );
-    _hm->addVariable("lep1_dxy"         , 400,    -200.,  200.0,    "leading lepton d_{xy} [#mum]"              );
-    _hm->addVariable("lep1_dz"          , 800,    -400.,  400.0,    "leading lepton d_{z} [#mum]"               );
+    _hm->addVariable("lep1_dxy"         , 400,    -200.,  200.0,    "leading lepton d_{xy} (#mum)"              );
+    _hm->addVariable("lep1_dz"          , 800,    -400.,  400.0,    "leading lepton d_{z} (#mum)"               );
     _hm->addVariable("lep2_SIP3D"       , 100,       0.,    5.0,    "sub-leading lepton SIP_{3D}"               );
-    _hm->addVariable("lep2_dxy"         , 400,    -200.,  200.0,    "sub-leading lepton d_{xy} [#mum]"          );
-    _hm->addVariable("lep2_dz"          , 800,    -400.,  400.0,    "sub-leading lepton d_{z} [#mum]"           );
+    _hm->addVariable("lep2_dxy"         , 400,    -200.,  200.0,    "sub-leading lepton d_{xy} (#mum)"          );
+    _hm->addVariable("lep2_dz"          , 800,    -400.,  400.0,    "sub-leading lepton d_{z} (#mum)"           );
     _hm->addVariable("lep3_SIP3D"       , 100,       0.,    5.0,    "3rd lepton SIP_{3D}"                       );
-    _hm->addVariable("lep3_dxy"         , 400,    -200.,  200.0,    "3rd lepton d_{xy} [#mum]"                  );
-    _hm->addVariable("lep3_dz"          , 800,    -400.,  400.0,    "3rd lepton d_{z} [#mum]"                   );
+    _hm->addVariable("lep3_dxy"         , 400,    -200.,  200.0,    "3rd lepton d_{xy} (#mum)"                  );
+    _hm->addVariable("lep3_dz"          , 800,    -400.,  400.0,    "3rd lepton d_{z} (#mum)"                   );
    
     //on-Z only observables 
-    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                               );
-    _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"                    );
-    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} [GeV]"                   );
+    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} (GeV)"                               );
+    _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass (GeV)"                    );
+    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} (GeV)"                   );
 
     //auxiliary for fake estimartion
     _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "N_{fakeable-not-tight leptons}"                    );
@@ -657,27 +659,27 @@ void SUSY3L::defineOutput(){
   
     for (size_t r=0; r<reg.size(); r++) {
         // lepton variables
-        _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 1.2, "leading lepton jet p_{T} ratio [GeV]", false);
-        _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 40., "leading lepton jet p_{T} rel   [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 1.2, "leading lepton jet p_{T} ratio (GeV)", false);
+        _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 40., "leading lepton jet p_{T} rel   (GeV)", false);
         _hm->addVariable(reg[r]+"_lep1_miniRelIso", 100, 0., 0.4, "leading lepton isolation", false);
-        _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "leading lepton p_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "leading lepton p_{T} (GeV)", false);
         _hm->addVariable(reg[r]+"_lep1_Eta"       , 100, 0., 2.5, "leading lepton #eta", false);
         _hm->addVariable(reg[r]+"_lep1_SIP3D"     , 100, 0., 5.0, "leading lepton SIP_{3D}", false);
-        _hm->addVariable(reg[r]+"_lep1_dxy"       , 200, -0.2, 0.2, "leading lepton d_{xy} [cm]", false);
-        _hm->addVariable(reg[r]+"_lep1_dz"        , 200, -0.2, 0.2, "leading lepton d_{z} [cm]", false);
-        _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "subleading lepton jet p_{T} Ratio [GeV]", false);
-        _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "subleading lepton jet p_{T} Rel   [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_dxy"       , 200, -0.2, 0.2, "leading lepton d_{xy} (cm)", false);
+        _hm->addVariable(reg[r]+"_lep1_dz"        , 200, -0.2, 0.2, "leading lepton d_{z} (cm)", false);
+        _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "subleading lepton jet p_{T} Ratio (GeV)", false);
+        _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "subleading lepton jet p_{T} Rel   (GeV)", false);
         _hm->addVariable(reg[r]+"_lep2_miniRelIso", 100, 0., 0.4, "subleading lepton isolation", false);
-        _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "subleading lepton p_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "subleading lepton p_{T} (GeV)", false);
         _hm->addVariable(reg[r]+"_lep2_Eta"       , 100, 0., 2.5, "subleading lepton #eta", false);
         _hm->addVariable(reg[r]+"_lep2_SIP3D"     , 100, 0., 5.0, "subleading lepton SIP_{3D}", false);
-        _hm->addVariable(reg[r]+"_lep2_dxy"       , 200, -0.2, 0.2, "subleading lepton d_{xy} [cm]", false);
-        _hm->addVariable(reg[r]+"_lep2_dz"        , 200, -0.2, 0.2, "subleading lepton d_{z} [cm]", false);
+        _hm->addVariable(reg[r]+"_lep2_dxy"       , 200, -0.2, 0.2, "subleading lepton d_{xy} (cm)", false);
+        _hm->addVariable(reg[r]+"_lep2_dz"        , 200, -0.2, 0.2, "subleading lepton d_{z} (cm)", false);
   
         // event variables 
-        _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
-        _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]", false);
-        _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "E_{T}^{miss} (GeV)", false);
+        _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} (GeV)", false);
+        _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} (GeV)", false);
         _hm->addVariable(reg[r]+"_NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
         _hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
         _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
