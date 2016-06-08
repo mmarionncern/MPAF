@@ -42,9 +42,10 @@ public:
 
   bool elHLTEmulSel(int idx, bool withIso, string branch = "LepGood") const;
   bool elHLTEmulSelIso(int idx, int mvaWP = kLooseHT, string branch = "LepGood") const;
-  bool elIdSel(const Candidate* c, int idx, int wp, int mvaWp = kTight, bool chCut = true, bool invSIP = false, string branch = "LepGood") const;
+  bool elIdSel(const Candidate* c, int idx, int wp, int mvaWp = kTight, bool chCut = true, bool invSIP = false, bool LepMVA = false, string branch = "LepGood") const;
   bool elMvaSel(int elIdx, int wp, string branch = "LepGood") const;
-  bool muIdSel(const Candidate* c, int idx, int wp, bool chCut = true, bool invSIP = false, string branch = "LepGood") const;
+  bool muIdSel(const Candidate* c, int idx, int wp, bool chCut = true, bool invSIP = false, bool LepMVA = false, string branch = "LepGood") const;
+  bool lepMVAIdSel(int idx, int wp, string branch = "LepGood") const;
   bool multiIsoSel(int idx, int wp, string branch = "LepGood") const;
   bool multiIsoSelCone(int idx, int wp, string branch = "LepGood") const;
   bool multiIsoSelInSitu(int idx, int wp, string branch = "LepGood") const;
@@ -166,7 +167,7 @@ public:
   enum {kMiniIso=0,kPtRatio,kPtRel};
   enum {kEBC=0,kEBF,kEE};
   enum {kEl=0,kMu};
-
+  enum {kVeryLooseMu=0, kLooseMu, kMediumMu, kTightMu, kVeryTightMu, kExtraTightMu, kVeryLooseEl, kLooseEl, kMediumEl, kTightEl, kVeryTightEl, kExtraTightEl};
   
 
 private:
@@ -215,7 +216,9 @@ private:
   vector<float> _miniIsoWP;
   vector<float> _ptRelWP;
   vector<float> _sipWP;
+  vector<float> _sipWPLepMVA;
   vector<float> _muIdWP;
+  vector<float> _lepMVAIdWP;
 
   vector<vector<float> > _elMvaIdWP;
   vector<vector<float> > _multiIsoWP;

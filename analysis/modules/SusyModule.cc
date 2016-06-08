@@ -105,10 +105,12 @@ SusyModule::defineLeptonWPS() {
   _cLostHitWP.resize(kNWPs);
   _tChWP.resize(kNWPs);
   _sipWP.resize(kNWPs);
+  _sipWPLepMVA.resize(kNWPs);
   _muIdWP.resize(kNWPs);
   _dxyWP.resize(kNWPs);
   _dzWP.resize(kNWPs);
   _elMvaIdWP.resize(3);
+  _lepMVAIdWP.resize(12);
   _multiIsoWP.resize(3);
   _ptWP.resize(2);
 
@@ -138,6 +140,10 @@ SusyModule::defineLeptonWPS() {
   _sipWP[kDenom] = 4.0; 
   _sipWP[kLoose] = 1000.0;//1000. 
   _sipWP[kTight] = 4.0; 
+  
+  _sipWPLepMVA[kDenom] = 8.0; 
+  _sipWPLepMVA[kLoose] = 1000.0;//1000. 
+  _sipWPLepMVA[kTight] = 8.0; 
   
   _dxyWP[kDenom] = 0.05; //cm
   _dxyWP[kLoose] = 0.05; //cm
@@ -193,8 +199,24 @@ SusyModule::defineLeptonWPS() {
 
   _multiIsoWP[kMiniIso][kSpecFakeEl] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeEl] = 0.80; _multiIsoWP[kPtRel][kSpecFakeEl] = 7.2;
   _multiIsoWP[kMiniIso][kSpecFakeMu] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeMu] = 0.76; _multiIsoWP[kPtRel][kSpecFakeMu] = 7.2;
-}
 
+  //lepton MVA ID =======================
+ 
+  _lepMVAIdWP[kVeryLooseMu]     = -0.90;
+  _lepMVAIdWP[kLooseMu]         = -0.60;
+  _lepMVAIdWP[kMediumMu]        = -0.20;
+  _lepMVAIdWP[kTightMu]         = 0.15;
+  _lepMVAIdWP[kVeryTightMu]     = 0.45;
+  _lepMVAIdWP[kExtraTightMu]    = 0.65;
+
+  _lepMVAIdWP[kVeryLooseEl]     = -0.30;
+  _lepMVAIdWP[kLooseEl]         = 0.25;
+  _lepMVAIdWP[kMediumEl]        = 0.50;
+  _lepMVAIdWP[kTightEl]         = 0.65;
+  _lepMVAIdWP[kVeryTightEl]     = 0.75;
+  _lepMVAIdWP[kExtraTightEl]    = 0.85;
+
+}
 
 //=====================================================
 // lepton selection
@@ -265,7 +287,7 @@ SusyModule::inSituFO(int idx, int wp, string branch) const {
 
 
 bool
-SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP, string branch) const {
+SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP, bool LepMVA, string branch) const {
 
   int wpIso = kDenom;
 
@@ -276,11 +298,21 @@ SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP
   if(std::abs(_vc->get(branch + "_dz"          , idx)) > _dzWP[wp]     ) return false;
   if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
 
-  if(invSIP){
-    if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+  if(!LepMVA){
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+    }
   }
-  else {
-    if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+  else{
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWPLepMVA[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWPLepMVA[wp]    ) return false;
+    }
   }
 
   return true;
@@ -288,7 +320,7 @@ SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP
 }
 
 bool
-SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, bool invSIP, string branch) const {
+SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, bool invSIP, bool LepMVA, string branch) const {
 
   int wpIso=kDenom;
 
@@ -302,11 +334,21 @@ SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, 
   if(!elMvaSel(idx, mvaWp, branch)                                     ) return false;
   if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
 
-  if(invSIP){
-    if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+  if(!LepMVA){
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+    }
   }
-  else {
-    if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+  else{
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWPLepMVA[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWPLepMVA[wp]    ) return false;
+    }
   }
 
   return true;
@@ -365,6 +407,15 @@ SusyModule::elHLTEmulSelIso(int idx, int mvaWP, string branch) const {
   if(!elMvaSel(idx, mvaWP, branch)                                                      ) return false;
 
   return true;
+}
+
+
+bool
+SusyModule::lepMVAIdSel(int idx, int wp, string branch) const {
+
+  if(_vc->get(branch + "_mvaSUSY", idx)  <  _lepMVAIdWP[wp]  ) return false;
+  return true;
+
 }
 
 bool
