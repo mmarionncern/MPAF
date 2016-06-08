@@ -707,7 +707,7 @@ DisplayClass::drawDistribution() {
       mcUnc->SetMarkerSize(0); 
       mcUnc->SetMarkerStyle(1);
       mcUnc->SetMarkerColor(1);
-      mcUnc->SetFillStyle(3001);
+      mcUnc->SetFillStyle(3013);
       mcUnc->SetFillColor(kGray+1);
 
       TGraphAsymmErrors* tmpUnc=(TGraphAsymmErrors*)mcUnc->Clone();
@@ -1994,7 +1994,7 @@ DisplayClass::residualData(const hObs* theObs) {
     mcUnc->SetMarkerSize(0); 
     mcUnc->SetMarkerStyle(1);
     mcUnc->SetMarkerColor(1);
-    mcUnc->SetFillStyle(3001);
+    mcUnc->SetFillStyle(3013);
     mcUnc->SetFillColor(kGray+1);
     TGraphAsymmErrors* tmpUnc=(TGraphAsymmErrors*)mcUnc->Clone();
     tmpUnc->SetName("uncertainties");
@@ -2099,7 +2099,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
   mcUncert->SetMarkerSize(0); 
   mcUncert->SetMarkerStyle(1);
   mcUncert->SetMarkerColor(1);
-  mcUncert->SetFillStyle(3001);
+  mcUncert->SetFillStyle(3013);
   mcUncert->SetFillColor(kGray+1);
   
   size_t idat=(_mcOnly)?-1:( vals[0].second.size()-1);
@@ -2380,7 +2380,7 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
     unc[0]->SetFillColor(kGray+1);
     unc[0]->SetLineColor(kGray+1);
     unc[0]->SetLineStyle(3);
-    unc[0]->SetFillStyle(3001);
+    unc[0]->SetFillStyle(3013);
   
   }
 
