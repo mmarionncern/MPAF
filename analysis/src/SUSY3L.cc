@@ -121,7 +121,9 @@ void SUSY3L::initialize(){
     _vc->registerVar("LepGood_hcalPFClusterIso"        );    
     _vc->registerVar("LepGood_dr03TkSumPt"             );    
     _vc->registerVar("LepGood_mcMatchId"               );    //MC truth information (1 gen-matched, 0 not)
-    _vc->registerVar("LepGood_mvaTTZMoriond16"         );    //lepton MVA ID
+    _vc->registerVar("LepGood_mvaSUSY"                 );    //lepton MVA ID
+    _vc->registerVar("LepGood_mcMatchId"              );    
+    _vc->registerVar("LepGood_mcPromptGamma"          );
     
     //taus
     _vc->registerVar("nTauGood"                        );    //number of taus in event
@@ -292,6 +294,8 @@ void SUSY3L::initialize(){
     _runSystematics = getCfgVarI("runSystematics", 1);
     _susyProcessName = getCfgVarS("susyProcessName", "T1tttt");
     _LHESYS = getCfgVarI("LHESYS", 0);
+    _useLepMVA = getCfgVarI("useLepMVA", 0);
+    _doGenMatch = getCfgVarI("doGenMatch", 1);
 
     if(_fastSim) {
         //load signal cross section
@@ -407,6 +411,7 @@ void SUSY3L::modifyWeight() {
         }
 
 	    //pile-up weights
+        /*
         if(!_closure){
             string db="puWeights";
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
@@ -414,6 +419,7 @@ void SUSY3L::modifyWeight() {
 	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
             //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
         }
+        */
     }
 
 }
@@ -431,6 +437,9 @@ void SUSY3L::run(){
     counter("denominator");
 
     if(_fastSim && !checkMassBenchmark()) return;
+    
+    //check what kind of MC sample is used
+    checkSample();
 
     //event filter
     if(!passNoiseFilters()) return;
@@ -444,6 +453,7 @@ void SUSY3L::run(){
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
+   
 
     //event reweighting //////////////////////////////////////////////////////////
     
@@ -474,7 +484,7 @@ void SUSY3L::run(){
         _weight *= 1+sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
         }
     }*/   
-
+/*
     //btag-scale factors
     if(!_vc->get("isData") && !_closure ) {
         if(!isInUncProc())  {
@@ -533,7 +543,7 @@ void SUSY3L::run(){
 	        _weight *= _susyMod->getVarWeightFastSimHltSFRA7(_tightLepsPtCutMllCut, _HT, -1);
     } 
     counter("HLT SF");
-
+*/
 
     //end event reweighting ////////////////////////////////////////////////////
   
@@ -588,6 +598,9 @@ void SUSY3L::run(){
         advancedSelection( kGlobal_Fake );
     
     }
+
+
+
 }
 
 
@@ -646,6 +659,8 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("nFakeComb"        ,  5,     0.0,  5.0,    "number of tight-fake-combinations per event"       );
     _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
     _hm->addVariable("flavor"           ,  5,     0.0,  5.0,    "N_{#mu}"                                           );
+    
+    _hm->addVariable("mcMatchId",  115,  -10.0,  105.0,    "LepGood_mcMatchId"                             );
     
     if(!_doValidationPlots) return; 
     
@@ -918,14 +933,15 @@ bool SUSY3L::looseLepton(const Candidate* c, int idx, int pdgId) {
         parameters: position in LepGood, pdgId
         return: true (if leptons is selected as loose lepton), false (else)
     */
+    
     if(abs(pdgId)==13) {//mu case
         if(c->pt() < 5) return false;
-        if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose, false) ) return false;
+        if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
         if(c->pt() < 7) return false;
-        if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
+        if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
         if(!_susyMod->elHLTEmulSel(idx, false ) ) return false; 
     }
@@ -946,11 +962,11 @@ bool SUSY3L::fakableLepton(const Candidate* c, int idx, int pdgId, bool bypass){
     */
 
     if(abs(pdgId)==13) {//mu case
-        if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false) ) return false;
+        if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false, false, _useLepMVA) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
-        if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false) ) return false;
+        if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
         if(!_susyMod->elHLTEmulSel(idx, false ) ) return false;
     }
@@ -967,13 +983,30 @@ bool SUSY3L::tightLepton(const Candidate* c, int idx, int pdgId){
         return: true (if the lepton fulfills the tight lepton selection, false (else)
     */
 
-    if(std::abs(pdgId)==13) {//mu case
-        if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false) ) return false;
-        if(!_susyMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+    //use lepton MVA
+    if(_useLepMVA){
+        if(std::abs(pdgId)==13) {//mu case
+            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumMu) ) return false;
+        }
+        else {
+            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumEl) ) return false;
+        }   
     }
-    else {
-        if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight, false) ) return false;
-        if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
+    //cut based
+    else{
+        if(std::abs(pdgId)==13) {//mu case
+            if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false, false, _useLepMVA) ) return false;
+            if(!_susyMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+        }
+        else {
+            if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight, false, false, _useLepMVA) ) return false;
+            if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
+        }
+    }
+
+    //gen matching
+    if(_doGenMatch){
+        if(_promptSample && _vc->get("LepGood_mcMatchId",idx) ==0) return false;
     }
 
     return true;
@@ -1411,12 +1444,18 @@ void SUSY3L::advancedSelection(int WF){
     //require minimum missing transvers energy
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
-    counter("baseline");
+    //gen matching
+    if(!_vc->get("isData") && _doGenMatch && !_isFake) {
+        if(!passGenSelection()) return;
+        counter("gen matching");
+    }
+    counter("selected");
+ 
     fillHistos(true);
 
     setWorkflow(WF);
     
-    counter("baseline on and off-Z");
+    counter("selected");
 
     fillHistos(true);
 
@@ -1540,7 +1579,7 @@ bool SUSY3L::wzCRSelection(){
     counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
     counter("MET selection");
-    counter("passing WZ selection");
+    counter("selected");
   
     //compute MT of 3rd lepton with MET
     _zMass = Candidate::create(_zPair[0], _zPair[1])->mass();
@@ -1584,7 +1623,7 @@ bool SUSY3L::wzCRFakeSelection(){
     counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
     counter("MET selection");
-    counter("passing WZ selection");
+    counter("selected");
   
     //get and sort lepton candidates 
     CandList clist;
@@ -1642,7 +1681,7 @@ void SUSY3L::fakeCRSelection(){
     counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 100)) return;
     counter("MET selection");
-    counter("passing WZ selection");
+    counter("selected");
   
     //get and sort lepton candidates 
     sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
@@ -1676,7 +1715,7 @@ void SUSY3L::fakeCRFakeSelection(){
     counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 100)) return;
     counter("MET selection");
-    counter("passing WZ selection");
+    counter("selected");
  
     //get and sort lepton candidates 
     CandList clist;
@@ -2421,6 +2460,78 @@ void SUSY3L::sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx){
             lepsIdx_tmp2.clear();
         }
  
+}
+
+//____________________________________________________________________________
+bool SUSY3L::passGenSelection(){
+    /*
+        checks if at least one lepton is fake or conversion at gen level for 
+        simulation processes which are supposed to yield such leptons
+        parameters: none
+        return: true (if gen matched), false (else)
+    */
+
+    //data or MC sample yielding prompt leptons
+    if(_vc->get("isData") || _promptSample){
+        return true;
+    }
+    
+    //fakes
+    else if( _fakeSample) {
+        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+            if(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il])==0 && _vc->get("LepGood_mcPromptGamma",_tightLepsPtCutMllCutIdx[il])==0) return true;
+        }
+    }
+    //conversions
+    else if( _convSample){
+        /*
+        int countTop = 0;
+        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+            if(std::abs(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il]))==6) countTop +=1;
+        }
+        if(countTop==2){
+            for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+                if(std::abs(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il]))!=6){
+                    int value = _vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il]);
+                    fill("mcMatchId", value, _weight);
+                }
+            }
+        } 
+        */
+     
+        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+            if(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il])==0 && _vc->get("LepGood_mcPromptGamma",_tightLepsPtCutMllCutIdx[il])==1) return true;
+        }
+ 
+    }
+
+    return false;
+
+}
+
+//____________________________________________________________________________
+void SUSY3L::checkSample(){
+    /*
+        tests if simulation sample is fakes, conversions or irreducible background
+        parameters: none
+        return: none
+    */
+
+    //samples yielding fakes
+    if( _sampleName.find("DYJets")!=(size_t)-1 || _sampleName.find("TTJets")!=(size_t)-1 || _sampleName.find("WJets")!=(size_t)-1 || _sampleName.find("TTLep")!=(size_t)-1 || _sampleName.find("TToLeptons")!=(size_t)-1 || _sampleName.find("TBarToLeptons")!=(size_t)-1 || _sampleName.find("TBar_tWch")!=(size_t)-1 || _sampleName.find("T_tWch")!=(size_t)-1 || _sampleName.find("WWTo2L2Nu")!=(size_t)-1 || _sampleName.find("ZZTo2L2Nu")!=(size_t)-1) {
+        _fakeSample = true;
+    }
+
+    //samples yielding conversions
+    else if( _sampleName.find("WGToLNuG")!=(size_t)-1 || _sampleName.find("ZGTo2LG")!=(size_t)-1 || _sampleName.find("TTGJets")!=(size_t)-1 || _sampleName.find("TGJets")!=(size_t)-1){
+        _convSample = true;
+    }
+
+    //samples yielding irreducible background
+    else if(!_vc->get("isData")){
+        _promptSample = true;
+    }
+
 }
 
 
