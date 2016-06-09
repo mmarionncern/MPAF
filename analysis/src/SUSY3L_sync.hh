@@ -55,6 +55,8 @@ private:
     bool WlSelection();
     void categorize();
     bool testRegion();
+    void checkSample();
+    bool passGenSelection();
     vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
 		const CandList fakableLeps, vector<unsigned int> idxsL, const CandList fakableLepsPtCorr,
 		vector<unsigned int> idxsLPtCorr, int nHardestLepton, float pt_cut_hardest_legs, 
@@ -101,6 +103,8 @@ private:
     int _closure;
     bool _exactlyThreeLep;
     bool _runSystematics;
+    bool _useLepMVA;
+    bool _doGenMatch;
     int _LHESYS;
     string _susyProcessName;
     string _BR;
@@ -270,6 +274,9 @@ private:
     bool _isMultiLep = false;
     bool _isFake = false;
     int _flavor = -1;
+    bool _fakeSample = false;
+    bool _convSample = false;
+    bool _promptSample = false;
 
     //for fake background
     vector<CandList> _combList;

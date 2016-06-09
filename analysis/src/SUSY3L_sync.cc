@@ -121,6 +121,9 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("LepGood_hcalPFClusterIso"        );    
     _vc->registerVar("LepGood_dr03TkSumPt"             );    
     _vc->registerVar("LepGood_mcMatchId"               );    //MC truth information (1 gen-matched, 0 not)
+    _vc->registerVar("LepGood_mvaSUSY"                 );    //lepton MVA ID
+    _vc->registerVar("LepGood_mcMatchId"               );    
+    _vc->registerVar("LepGood_mcPromptGamma"           );
     
     //taus
     _vc->registerVar("nTauGood"                        );    //number of taus in event
@@ -134,8 +137,6 @@ void SUSY3L_sync::initialize(){
     _vc->registerVar("TauGood_idDecayMode"             );     //
     _vc->registerVar("TauGood_isoCI3hit"               );     //
 
-    _vc->registerVar("nBJetLoose30"               ); 
-    _vc->registerVar("nBJetMedium30"               ); 
 
     vector<string> extsJEC({"","_jecUp","_jecDown"});
     for(unsigned int ie=0;ie<extsJEC.size();ie++) {
@@ -293,15 +294,18 @@ void SUSY3L_sync::initialize(){
     _runSystematics = getCfgVarI("runSystematics", 1);
     _susyProcessName = getCfgVarS("susyProcessName", "T1tttt");
     _LHESYS = getCfgVarI("LHESYS", 0);
+    _useLepMVA = getCfgVarI("useLepMVA", 0);
+    _doGenMatch = getCfgVarI("doGenMatch", 1);
 
     if(_fastSim) {
-        //load signal cross section and number of generated events
+        //load signal cross section
         if(_susyProcessName=="T1tttt" || _susyProcessName=="T5qqqqVV" || _susyProcessName=="T5ttttdeg" || _susyProcessName=="T5tttt"){
             _dbm->loadDb(_susyProcessName+"Xsect", "GluinoGluinoXsect.db");
         }
         if(_susyProcessName=="T6ttWW"){
             _dbm->loadDb(_susyProcessName+"Xsect", "SbottomSbottomXsect.db");
         }
+        //load number of generated events
         loadScanHistogram();
     }
     
@@ -400,7 +404,6 @@ void SUSY3L_sync::modifyWeight() {
         }
         if (LHESYS == 0) {
             _weight *= _vc->get("genWeight");
-            _genWeight = _vc->get("genWeight");
             }
         else {
             _weight *= _susyMod->getLHEweight(LHESYS);
@@ -413,7 +416,6 @@ void SUSY3L_sync::modifyWeight() {
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
 	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
-            _puWeight = _dbm->getDBValue(db, _vc->get("nTrueInt") );
             //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
         }
     
@@ -428,7 +430,10 @@ void SUSY3L_sync::modifyWeight() {
 
 //____________________________________________________________________________
 void SUSY3L_sync::run(){
-    
+   
+    //set cut values
+    setBaselineRegion();
+
     //limit run number to unblineded json
     //if(_vc->get("isData") == 1){
     //    if(_vc->get("run")>258750){return;}
@@ -473,6 +478,9 @@ void SUSY3L_sync::run(){
     counter("denominator");
 
     if(_fastSim && !checkMassBenchmark()) return;
+    
+    //check what kind of MC sample is used
+    checkSample();
 
     //event filter
     if(!passNoiseFilters()){
@@ -572,7 +580,6 @@ void SUSY3L_sync::run(){
         if(!isInUncProc())  {
 	        _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
 	        _weight *= _btagW;
-            _btagWeight = _btagW;
         }
         else if(isInUncProc() && getUncName()=="btag" && getUncDir()==SystUtils::kUp )
 	        _weight *= _susyMod->bTagSF( _jets, _jetsIdx, _bJets,_bJetsIdx, 1, _fastSim); 
@@ -602,7 +609,6 @@ void SUSY3L_sync::run(){
         //fullSim scale factors, flat uncertainty added in display card
         if(!_fastSim) {
 	        _weight*=_susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
-            _sfWeight = _susyMod->applyLepSfRA7(_tightLepsPtCutMllCut);
         }
         //fastSim scale factors and flavor and pt dependent shape uncertainty
         else{
@@ -647,7 +653,7 @@ void SUSY3L_sync::run(){
     //bool wzFakeSel = wzCRFakeSelection();
     //if(wzSel||wzFakeSel){return;}	
     setWorkflow(kGlobal);	
- 
+
              if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
                 cout << "not in WZ control region" << endl;}}
 
@@ -662,7 +668,6 @@ void SUSY3L_sync::run(){
 
 
     //baseline selection
-    setBaselineRegion();
     bool baseSel = multiLepSelection();
     if(!baseSel){return;}
 
@@ -685,15 +690,9 @@ void SUSY3L_sync::run(){
         float sumTF = 0;
         for(unsigned int ic=0;ic<_combList.size();ic++) {
             int type = _combType[ic];
-            if(type==kIsSingleFake){ _sumTF += getTF_SingleFake(ic); 
-                    //if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "single fake TF: " << getTF_SingleFake(ic) << endl;}}
-            }
-            if(type==kIsDoubleFake){ _sumTF += getTF_DoubleFake(ic); 
-                    //if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "double fake TF: " << getTF_DoubleFake(ic) << endl;}}
-            }
-            if(type==kIsTripleFake){ _sumTF += getTF_TripleFake(ic); 
-                    //if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "triple fake TF: " << getTF_TripleFake(ic) << endl;}}
-            }
+            if(type==kIsSingleFake){ sumTF += getTF_SingleFake(ic); }
+            if(type==kIsDoubleFake){ sumTF += getTF_DoubleFake(ic); }
+            if(type==kIsTripleFake){ sumTF += getTF_TripleFake(ic); }
             if(_doPlots) fill("fake_type" , type+1       , _weight);
         }
         _weight *= sumTF;
@@ -725,33 +724,33 @@ void SUSY3L_sync::defineOutput(){
     if(!_doPlots) return; 
 
     //event based observables
-    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} [GeV]"                                           );
-    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "E^{miss}_{T} [GeV]"                                    );
+    _hm->addVariable("HT"        , 1000,   0.0, 1000.0, "H_{T} (GeV)"                                           );
+    _hm->addVariable("MET"       , 1000,   0.0, 1000.0, "E^{miss}_{T} (GeV)"                                    );
     _hm->addVariable("NBJets"    ,   20,   0.0,   20.0, "N_{b-jet}"                                             );
     _hm->addVariable("NJets"     ,   20,   0.0,   20.0, "N_{jet}"                                               ); 
 
     //other observables
-    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} leading lepton [GeV]"                );
-    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} sub-leading lepton [GeV]"            );
-    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} 3rd lepton [GeV]"                    );
-    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll [GeV]"              );
+    _hm->addVariable("pt_1st_lepton"    ,  200,     0.0,  200.0,    "p_{T} leading lepton (GeV)"                );
+    _hm->addVariable("pt_2nd_lepton"    ,  200,     0.0,  200.0,    "p_{T} sub-leading lepton (GeV)"            );
+    _hm->addVariable("pt_3rd_lepton"    ,  200,     0.0,  200.0,    "p_{T} 3rd lepton (GeV)"                    );
+    _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll (GeV)"              );
     _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
     _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
     _hm->addVariable("lep1_SIP3D"       , 100,       0.,    5.0,    "leading lepton SIP_{3D}"                   );
-    _hm->addVariable("lep1_dxy"         , 400,    -200.,  200.0,    "leading lepton d_{xy} [#mum]"              );
-    _hm->addVariable("lep1_dz"          , 800,    -400.,  400.0,    "leading lepton d_{z} [#mum]"               );
+    _hm->addVariable("lep1_dxy"         , 400,    -200.,  200.0,    "leading lepton d_{xy} (#mum)"              );
+    _hm->addVariable("lep1_dz"          , 800,    -400.,  400.0,    "leading lepton d_{z} (#mum)"               );
     _hm->addVariable("lep2_SIP3D"       , 100,       0.,    5.0,    "sub-leading lepton SIP_{3D}"               );
-    _hm->addVariable("lep2_dxy"         , 400,    -200.,  200.0,    "sub-leading lepton d_{xy} [#mum]"          );
-    _hm->addVariable("lep2_dz"          , 800,    -400.,  400.0,    "sub-leading lepton d_{z} [#mum]"           );
+    _hm->addVariable("lep2_dxy"         , 400,    -200.,  200.0,    "sub-leading lepton d_{xy} (#mum)"          );
+    _hm->addVariable("lep2_dz"          , 800,    -400.,  400.0,    "sub-leading lepton d_{z} (#mum)"           );
     _hm->addVariable("lep3_SIP3D"       , 100,       0.,    5.0,    "3rd lepton SIP_{3D}"                       );
-    _hm->addVariable("lep3_dxy"         , 400,    -200.,  200.0,    "3rd lepton d_{xy} [#mum]"                  );
-    _hm->addVariable("lep3_dz"          , 800,    -400.,  400.0,    "3rd lepton d_{z} [#mum]"                   );
+    _hm->addVariable("lep3_dxy"         , 400,    -200.,  200.0,    "3rd lepton d_{xy} (#mum)"                  );
+    _hm->addVariable("lep3_dz"          , 800,    -400.,  400.0,    "3rd lepton d_{z} (#mum)"                   );
    
     //on-Z only observables 
-    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} [GeV]"                               );
-    _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass [GeV]"                    );
-    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} [GeV]"                   );
+    _hm->addVariable("MT"               ,  400,     0.0,  400.0,    "M_{T} (GeV)"                               );
+    _hm->addVariable("Zmass"            ,  250,     0.0,  250.0,    "Z candidate mass (GeV)"                    );
+    _hm->addVariable("Zpt"              ,  250,     0.0,  250.0,    "Z candidate p_{T} (GeV)"                   );
 
     //auxiliary for fake estimartion
     _hm->addVariable("fake_type"        ,  5,     0.0,  5.0,    "N_{fakeable-not-tight leptons}"                    );
@@ -760,9 +759,10 @@ void SUSY3L_sync::defineOutput(){
     _hm->addVariable("ptRank"           ,  5,     0.0,  5.0,    "p_{T} rank of fake lepton in TTF events"           );
     _hm->addVariable("flavor"           ,  5,     0.0,  5.0,    "N_{#mu}"                                           );
     
+    _hm->addVariable("mcMatchId",  115,  -10.0,  105.0,    "LepGood_mcMatchId"                             );
     _hm->addVariable("chargeMult_3lep"  ,  5,     0.0,  5.0,    "same sign multiplicity"                            );
     _hm->addVariable("chargeMult_4lep"  ,  5,     0.0,  5.0,    "same sign multiplicity"                            );
-    
+  
     if(!_doValidationPlots) return; 
     
     //additional histograms  
@@ -775,27 +775,27 @@ void SUSY3L_sync::defineOutput(){
   
     for (size_t r=0; r<reg.size(); r++) {
         // lepton variables
-        _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 1.2, "leading lepton jet p_{T} ratio [GeV]", false);
-        _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 40., "leading lepton jet p_{T} rel   [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_jetPtRatio", 100, 0., 1.2, "leading lepton jet p_{T} ratio (GeV)", false);
+        _hm->addVariable(reg[r]+"_lep1_jetPtRel"  , 100, 0., 40., "leading lepton jet p_{T} rel   (GeV)", false);
         _hm->addVariable(reg[r]+"_lep1_miniRelIso", 100, 0., 0.4, "leading lepton isolation", false);
-        _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "leading lepton p_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_Pt"        , 100, 0., 100, "leading lepton p_{T} (GeV)", false);
         _hm->addVariable(reg[r]+"_lep1_Eta"       , 100, 0., 2.5, "leading lepton #eta", false);
         _hm->addVariable(reg[r]+"_lep1_SIP3D"     , 100, 0., 5.0, "leading lepton SIP_{3D}", false);
-        _hm->addVariable(reg[r]+"_lep1_dxy"       , 200, -0.2, 0.2, "leading lepton d_{xy} [cm]", false);
-        _hm->addVariable(reg[r]+"_lep1_dz"        , 200, -0.2, 0.2, "leading lepton d_{z} [cm]", false);
-        _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "subleading lepton jet p_{T} Ratio [GeV]", false);
-        _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "subleading lepton jet p_{T} Rel   [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep1_dxy"       , 200, -0.2, 0.2, "leading lepton d_{xy} (cm)", false);
+        _hm->addVariable(reg[r]+"_lep1_dz"        , 200, -0.2, 0.2, "leading lepton d_{z} (cm)", false);
+        _hm->addVariable(reg[r]+"_lep2_jetPtRatio", 100, 0., 1.2, "subleading lepton jet p_{T} Ratio (GeV)", false);
+        _hm->addVariable(reg[r]+"_lep2_jetPtRel"  , 100, 0., 40., "subleading lepton jet p_{T} Rel   (GeV)", false);
         _hm->addVariable(reg[r]+"_lep2_miniRelIso", 100, 0., 0.4, "subleading lepton isolation", false);
-        _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "subleading lepton p_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_lep2_Pt"        , 100, 0., 100, "subleading lepton p_{T} (GeV)", false);
         _hm->addVariable(reg[r]+"_lep2_Eta"       , 100, 0., 2.5, "subleading lepton #eta", false);
         _hm->addVariable(reg[r]+"_lep2_SIP3D"     , 100, 0., 5.0, "subleading lepton SIP_{3D}", false);
-        _hm->addVariable(reg[r]+"_lep2_dxy"       , 200, -0.2, 0.2, "subleading lepton d_{xy} [cm]", false);
-        _hm->addVariable(reg[r]+"_lep2_dz"        , 200, -0.2, 0.2, "subleading lepton d_{z} [cm]", false);
+        _hm->addVariable(reg[r]+"_lep2_dxy"       , 200, -0.2, 0.2, "subleading lepton d_{xy} (cm)", false);
+        _hm->addVariable(reg[r]+"_lep2_dz"        , 200, -0.2, 0.2, "subleading lepton d_{z} (cm)", false);
   
         // event variables 
-        _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "#slash{E}_{T} [GeV]", false);
-        _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} [GeV]", false);
-        _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} [GeV]", false);
+        _hm->addVariable(reg[r]+"_MET"            , 500, 0. , 500, "E_{T}^{miss} (GeV)", false);
+        _hm->addVariable(reg[r]+"_mZ1"            , 300, 0. , 300, "best m_{l^{+}l^{-}} (GeV)", false);
+        _hm->addVariable(reg[r]+"_htJet40j"       , 800, 0. , 800, "H_{T} (GeV)", false);
         _hm->addVariable(reg[r]+"_NBJetsLoose25"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, loose)", false);
         _hm->addVariable(reg[r]+"_NBJetsMedium25" ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 25 GeV, medium)", false);
         _hm->addVariable(reg[r]+"_NBJetsTight40"  ,   8,-0.5, 7.5, "N_{b-jets} (p_{T} > 40 GeV, tight)", false);
@@ -883,6 +883,8 @@ void SUSY3L_sync::collectKinematicObjects(){
     _jetsIdx.clear();
     _bJets.clear();
     _bJetsIdx.clear();
+    _lepJets.clear();
+    _lepJetsIdx.clear();
   
     _combList.clear();
     _combType.clear();
@@ -1040,14 +1042,14 @@ bool SUSY3L_sync::looseLepton(const Candidate* c, int idx, int pdgId) {
     if(abs(pdgId)==13) {//mu case
         if(c->pt() < 5) return false;
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing loose muon pt cut. pt " << c-> pt() << endl;}}
-        if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose, false) ) return false;
+        if(!_susyMod->muIdSel(c, idx, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing loose muon ID" << endl;}}
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
     }
     else {
         if(c->pt() < 7) return false;
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing loose el pt cut. pt " << c->pt() << endl;}}
-        if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false) ) return false;
+        if(!_susyMod->elIdSel(c, idx, SusyModule::kLoose, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing loose elIdSel" << endl;}}
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false; 
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing loose multiIso " << endl;}}
@@ -1073,13 +1075,13 @@ bool SUSY3L_sync::fakableLepton(const Candidate* c, int idx, int pdgId, bool byp
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << endl; cout << "entering fakable lepton selection " << endl;}}
     
     if(abs(pdgId)==13) {//mu case
-        if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false) ) return false;
+        if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false, false, _useLepMVA) ) return false;
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing tight muon ID" << endl;}}
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing multiIso denom" << endl;}}
     }
     else {
-        if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false) ) return false;
+        if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing tight election ID" << endl;}}
         if(!_susyMod->multiIsoSel(idx, SusyModule::kDenom) ) return false;
                 if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing multiIso denom" << endl;}}
@@ -1099,19 +1101,32 @@ bool SUSY3L_sync::tightLepton(const Candidate* c, int idx, int pdgId){
         return: true (if the lepton fulfills the tight lepton selection, false (else)
     */
 
-                if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << endl; cout << "entering tight lepton selection " << endl;}}
-    
-    if(std::abs(pdgId)==13) {//mu case
-        if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false) ) return false;
-                if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing tight muon ID" << endl;}}
-        if(!_susyMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
-                if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing multiIso loose WP" << endl;}}
+    //use lepton MVA
+    if(_useLepMVA){
+        if(std::abs(pdgId)==13) {//mu case
+            if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false, false, _useLepMVA) ) return false;
+            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumMu) ) return false;
+        }
+        else {
+            if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
+            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumEl) ) return false;
+        }   
     }
-    else {
-        if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight, false) ) return false;
-                if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing electron tight ID" << endl;}}
-        if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
-                if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){cout << "passing multiIso medium WP" << endl;}}
+    //cut based
+    else{
+        if(std::abs(pdgId)==13) {//mu case
+            if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false, false, _useLepMVA) ) return false;
+            if(!_susyMod->multiIsoSel(idx, SusyModule::kLoose) ) return false;
+        }
+        else {
+            if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kTight, false, false, _useLepMVA) ) return false;
+            if(!_susyMod->multiIsoSel(idx, SusyModule::kMedium) ) return false;
+        }
+    }
+
+    //gen matching
+    if(_doGenMatch){
+        if(_promptSample && _vc->get("LepGood_mcMatchId",idx) ==0) return false;
     }
 
     return true;
@@ -1549,16 +1564,24 @@ void SUSY3L_sync::advancedSelection(int WF){
     //require minimum missing transvers energy
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
+    //gen matching
+    if(!_vc->get("isData") && _doGenMatch && !_isFake) {
+        if(!passGenSelection()) return;
+        counter("gen matching");
+    }
+    
+    counter("selected");
+
     if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
         cout << "passing advanced selection" << endl;}}
 
-    counter("baseline");
+    
     fillHistos(true);
 
     setWorkflow(WF);
-    
-    counter("baseline on and off-Z");
 
+    counter("selected");
+    
     if(_debug){if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
         cout << "WF: " << WF << endl;}}
 
@@ -1631,8 +1654,8 @@ void SUSY3L_sync::advancedSelection(int WF){
         if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
         fillHistos(true);
+        counter("selected");
     }
-    counter("selected");
 
 }
 
@@ -1735,7 +1758,7 @@ bool SUSY3L_sync::wzCRSelection(){
     counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
     counter("MET selection");
-    counter("passing WZ selection");
+    counter("selected");
   
     //compute MT of 3rd lepton with MET
     _zMass = Candidate::create(_zPair[0], _zPair[1])->mass();
@@ -1779,7 +1802,7 @@ bool SUSY3L_sync::wzCRFakeSelection(){
     counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 100)) return false;
     counter("MET selection");
-    counter("passing WZ selection");
+    counter("selected");
   
     //get and sort lepton candidates 
     CandList clist;
@@ -1837,7 +1860,7 @@ void SUSY3L_sync::fakeCRSelection(){
     counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 100)) return;
     counter("MET selection");
-    counter("passing WZ selection");
+    counter("selected");
   
     //get and sort lepton candidates 
     sortSelectedLeps(_tightLepsPtCutMllCut, _tightLepsPtCutMllCutIdx);
@@ -1871,7 +1894,7 @@ void SUSY3L_sync::fakeCRFakeSelection(){
     counter("b-jet multiplicity");
     if(!(_met->pt() > 30 && _met->pt() < 100)) return;
     counter("MET selection");
-    counter("passing WZ selection");
+    counter("selected");
  
     //get and sort lepton candidates 
     CandList clist;
@@ -2424,69 +2447,6 @@ float SUSY3L_sync::lowestOssfMll(CandList leps){
 }
 
 
-//____________________________________________________________________________
-//float SUSY3L_sync::getMT2(){
-    /*
-        selected the two leptons that should be used for the MT2 calculation
-        parameters: none
-        return: none
-    */
-/*    
-    bool allSameSigned = false;
-    float ptsum = 0; 
-    float ptsum_tmp = 0;
-    int il1_save = -1;
-    int il2_save = -1;
-
-    if(_nMus+_nEls != 3){
-        return 0;
-    }
-   
-    if(((signbit(_leps[0]->pdgId())) == (signbit(_leps[1]->pdgId()))) && ((signbit(_leps[0]->pdgId())) == (signbit(_leps[2]->pdgId())))){
-         allSameSigned = true; 
-    }
-     
-    if(allSameSigned){
-        for(int il1=0;il1<_nleps;il1++){
-            for(int il2=il1+1;il2<_nleps;il2++){
-                //calculate sum of pt's
-                ptsum_tmp = _leps[il1]->pt() + _leps[il2]->pt();
-                //keep lepton pair candidate if it has the highest sum of pt's
-                if(ptsum_tmp >= ptsum) {
-                    ptsum = _leps[il1]->pt() + _leps[il2]->pt();
-                    il1_save = il1;
-                    il2_save = il2;
-                }
-            }   
-        }
-    }
-    //in case not all leptons are of the same sign require os lepton pair 
-    else{
-        for(int il1=0;il1<_nleps;il1++){
-            for(int il2=il1+1;il2<_nleps;il2++){
-                //continue if not os
-                if((signbit(_leps[il1]->pdgId())) == (signbit(_leps[il2]->pdgId()))){
-                    continue;
-                }
-                //calculate sum of pt's
-                ptsum_tmp = _leps[il1]->pt() + _leps[il2]->pt();
-                //keep lepton pair candidate if it has the highest sum of pt's
-                if(ptsum_tmp >= ptsum) {
-                    ptsum = _leps[il1]->pt() + _leps[il2]->pt();
-                    il1_save = il1;
-                    il2_save = il2;
-                }
-            }   
-        }
-    }
-
-    //take the two selected leptons and compute MT2 with them
-    _lep1 = _leps[il1_save];
-    _lep2 = _leps[il2_save];
-              
-    return MT2(_lep1, _lep2, _met, 0.0);
-}
-*/
 /*******************************************************************************
 * ******************************************************************************
 * ** EXECUTING TASKS                                                          **
@@ -2685,6 +2645,85 @@ void SUSY3L_sync::sortSelectedLeps(CandList leps, std::vector<unsigned int> leps
             lepsIdx_tmp2.clear();
         }
  
+}
+
+//____________________________________________________________________________
+bool SUSY3L_sync::passGenSelection(){
+    /*
+        checks if at least one lepton is fake or conversion at gen level for 
+        simulation processes which are supposed to yield such leptons
+        parameters: none
+        return: true (if gen matched), false (else)
+    */
+
+    //data or MC sample yielding prompt leptons
+    if(_vc->get("isData") || _promptSample){
+        return true;
+    }
+    
+    //fakes
+    else if( _fakeSample) {
+        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+            if(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il])==0 && _vc->get("LepGood_mcPromptGamma",_tightLepsPtCutMllCutIdx[il])==0) return true;
+        }
+    }
+    //conversions
+    else if( _convSample){
+        /*
+        int countTop = 0;
+        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+            if(std::abs(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il]))==6) countTop +=1;
+        }
+        if(countTop==2){
+            for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+                if(std::abs(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il]))!=6){
+                    int value = _vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il]);
+                    fill("mcMatchId", value, _weight);
+                }
+            }
+        } 
+        */
+     
+        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+            if(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il])==0 && _vc->get("LepGood_mcPromptGamma",_tightLepsPtCutMllCutIdx[il])==1) return true;
+        }
+ 
+    }
+
+    return false;
+
+}
+
+//____________________________________________________________________________
+void SUSY3L_sync::checkSample(){
+    /*
+        tests if simulation sample is fakes, conversions or irreducible background
+        parameters: none
+        return: none
+    */
+
+    //samples yielding fakes
+    if( _sampleName.find("DYJets")!=(size_t)-1 || _sampleName.find("TTJets")!=(size_t)-1 || _sampleName.find("WJets")!=(size_t)-1 || _sampleName.find("TTLep")!=(size_t)-1 || _sampleName.find("TToLeptons")!=(size_t)-1 || _sampleName.find("TBarToLeptons")!=(size_t)-1 || _sampleName.find("TBar_tWch")!=(size_t)-1 || _sampleName.find("T_tWch")!=(size_t)-1 || _sampleName.find("WWTo2L2Nu")!=(size_t)-1 || _sampleName.find("ZZTo2L2Nu")!=(size_t)-1) {
+        _fakeSample = true;
+        _convSample = false;
+        _promptSample = false;
+    }
+
+    //samples yielding conversions
+    else if( _sampleName.find("WGToLNuG")!=(size_t)-1 || _sampleName.find("ZGTo2LG")!=(size_t)-1 || _sampleName.find("TTGJets")!=(size_t)-1 || _sampleName.find("TGJets")!=(size_t)-1){
+        _convSample = true;
+        _fakeSample = false;
+        _promptSample = false;
+
+    }
+
+    //samples yielding irreducible background
+    else if(!_vc->get("isData")){
+        _promptSample = true;
+        _convSample = false;
+        _fakeSample = false;
+    }
+
 }
 
 

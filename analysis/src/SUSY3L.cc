@@ -427,10 +427,10 @@ void SUSY3L::modifyWeight() {
 
 //____________________________________________________________________________
 void SUSY3L::run(){
-    
+   
     //set cut values
     setBaselineRegion();
-    
+
     //limit run number to unblineded json
     //if(_vc->get("isData") == 1){
     //    if(_vc->get("run")>258750){return;}
@@ -441,7 +441,7 @@ void SUSY3L::run(){
   
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
-    
+
     if(_fastSim && !checkMassBenchmark()) return;
     
     //check what kind of MC sample is used
@@ -569,7 +569,7 @@ void SUSY3L::run(){
     bool wzFakeSel = wzCRFakeSelection();
     if(wzSel||wzFakeSel){return;}	
     setWorkflow(kGlobal);	
-   
+  
     //select events for fake control region in data
     fakeCRSelection();
     fakeCRFakeSelection();
@@ -601,9 +601,6 @@ void SUSY3L::run(){
         advancedSelection( kGlobal_Fake );
     
     }
-
-
-
 }
 
 
@@ -664,7 +661,9 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("flavor"           ,  5,     0.0,  5.0,    "N_{#mu}"                                           );
     
     _hm->addVariable("mcMatchId",  115,  -10.0,  105.0,    "LepGood_mcMatchId"                             );
-    
+    _hm->addVariable("chargeMult_3lep"  ,  5,     0.0,  5.0,    "same sign multiplicity"                            );
+    _hm->addVariable("chargeMult_4lep"  ,  5,     0.0,  5.0,    "same sign multiplicity"                            );
+  
     if(!_doValidationPlots) return; 
     
     //additional histograms  
@@ -908,9 +907,10 @@ void SUSY3L::collectKinematicObjects(){
         }
     }
     }
+    
     //number of taus in the event
     _nTaus = _taus.size();
-    
+
     //clean jets
     _susyMod->cleanJets( &_fakableLepsPtCut, _jets, _jetsIdx, _bJets, _bJetsIdx,
 		       _lepJets, _lepJetsIdx, _jetThreshold, _bjetThreshold, getUncName()=="jes", getUncDir() );
@@ -1456,11 +1456,10 @@ void SUSY3L::advancedSelection(int WF){
         counter("gen matching");
     }
     counter("selected");
- 
     fillHistos(true);
 
     setWorkflow(WF);
-   
+
     counter("selected");
     
     fillHistos(true);
@@ -1486,8 +1485,8 @@ void SUSY3L::advancedSelection(int WF){
         if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
         counter("signal region categorization");
         fillHistos(true);
+        counter("selected");
     }
-    counter("selected");
 
 }
 
