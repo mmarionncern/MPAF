@@ -122,8 +122,8 @@ void SUSY3L::initialize(){
     _vc->registerVar("LepGood_dr03TkSumPt"             );    
     _vc->registerVar("LepGood_mcMatchId"               );    //MC truth information (1 gen-matched, 0 not)
     _vc->registerVar("LepGood_mvaSUSY"                 );    //lepton MVA ID
-    _vc->registerVar("LepGood_mcMatchId"              );    
-    _vc->registerVar("LepGood_mcPromptGamma"          );
+    _vc->registerVar("LepGood_mcMatchId"               );    
+    _vc->registerVar("LepGood_mcPromptGamma"           );
     
     //taus
     _vc->registerVar("nTauGood"                        );    //number of taus in event
@@ -428,14 +428,20 @@ void SUSY3L::modifyWeight() {
 //____________________________________________________________________________
 void SUSY3L::run(){
     
+    //set cut values
+    setBaselineRegion();
+    
     //limit run number to unblineded json
     //if(_vc->get("isData") == 1){
     //    if(_vc->get("run")>258750){return;}
     //}
 
+    //skim tree
+    //if(_vc->get("nLepGood") >2) fillSkimTree();
+  
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
-
+    
     if(_fastSim && !checkMassBenchmark()) return;
     
     //check what kind of MC sample is used
@@ -570,11 +576,8 @@ void SUSY3L::run(){
     setWorkflow(kGlobal);	
     
     //baseline selection
-    setBaselineRegion();
     bool baseSel = multiLepSelection();
     if(!baseSel){return;}
-
-    //fillSkimTree();
 
     //signal event
     if(!_isFake){
@@ -782,6 +785,8 @@ void SUSY3L::collectKinematicObjects(){
     _jetsIdx.clear();
     _bJets.clear();
     _bJetsIdx.clear();
+    _lepJets.clear();
+    _lepJetsIdx.clear();
   
     _combList.clear();
     _combType.clear();
@@ -903,10 +908,9 @@ void SUSY3L::collectKinematicObjects(){
         }
     }
     }
-    
     //number of taus in the event
     _nTaus = _taus.size();
-
+    
     //clean jets
     _susyMod->cleanJets( &_fakableLepsPtCut, _jets, _jetsIdx, _bJets, _bJetsIdx,
 		       _lepJets, _lepJetsIdx, _jetThreshold, _bjetThreshold, getUncName()=="jes", getUncDir() );
@@ -986,9 +990,11 @@ bool SUSY3L::tightLepton(const Candidate* c, int idx, int pdgId){
     //use lepton MVA
     if(_useLepMVA){
         if(std::abs(pdgId)==13) {//mu case
+            if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false, false, _useLepMVA) ) return false;
             if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumMu) ) return false;
         }
         else {
+            if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
             if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumEl) ) return false;
         }   
     }
@@ -1454,9 +1460,9 @@ void SUSY3L::advancedSelection(int WF){
     fillHistos(true);
 
     setWorkflow(WF);
-    
+   
     counter("selected");
-
+    
     fillHistos(true);
 
     //categorize events into signal regions
@@ -2520,16 +2526,23 @@ void SUSY3L::checkSample(){
     //samples yielding fakes
     if( _sampleName.find("DYJets")!=(size_t)-1 || _sampleName.find("TTJets")!=(size_t)-1 || _sampleName.find("WJets")!=(size_t)-1 || _sampleName.find("TTLep")!=(size_t)-1 || _sampleName.find("TToLeptons")!=(size_t)-1 || _sampleName.find("TBarToLeptons")!=(size_t)-1 || _sampleName.find("TBar_tWch")!=(size_t)-1 || _sampleName.find("T_tWch")!=(size_t)-1 || _sampleName.find("WWTo2L2Nu")!=(size_t)-1 || _sampleName.find("ZZTo2L2Nu")!=(size_t)-1) {
         _fakeSample = true;
+        _convSample = false;
+        _promptSample = false;
     }
 
     //samples yielding conversions
     else if( _sampleName.find("WGToLNuG")!=(size_t)-1 || _sampleName.find("ZGTo2LG")!=(size_t)-1 || _sampleName.find("TTGJets")!=(size_t)-1 || _sampleName.find("TGJets")!=(size_t)-1){
         _convSample = true;
+        _fakeSample = false;
+        _promptSample = false;
+
     }
 
     //samples yielding irreducible background
     else if(!_vc->get("isData")){
         _promptSample = true;
+        _convSample = false;
+        _fakeSample = false;
     }
 
 }
