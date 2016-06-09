@@ -436,15 +436,15 @@ void SUSY3L_sync::run(){
 
 	//debug output    
 	_run = 1;
-	_lumi = 995;
-    _evt = 329095;
+	_lumi = 1270;
+    _evt = 420400;
     
     _run2 = 1;
-	_lumi2 = 999999;
-    _evt2 = 999999;
+	_lumi2 = 9999;
+    _evt2 = 9999;
   
   	_run3 = 1;
-	_lumi3 = 99999;
+	_lumi3 = 999;
     _evt3 = 99999;
     
     
@@ -454,7 +454,7 @@ void SUSY3L_sync::run(){
                 cout << _vc->get("run") << " "  << _vc->get("lumi") << " "  << _vc->get("evt") << endl; 
                 cout << "nLepGood " << _vc->get("nLepGood") << endl;
                 for(size_t il=0;il<_vc->get("nLepGood");il++) {
-                    cout << "LepGood " << il << " pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << " phi: " << _vc->get("LepGood_phi", il) << " pdgId: " << _vc->get("LepGood_pdgId", il) << " miniIso: " << _vc->get("LepGood_miniRelIso", il) << " ptratio: " << _vc->get("LepGood_jetPtRatiov2", il)<< " ptrel: " << _vc->get("LepGood_jetPtRelv2", il) << endl;
+                    cout << "LepGood " << il << " pt: " << _vc->get("LepGood_pt", il)  << " eta: " << _vc->get("LepGood_eta", il) << " phi: " << _vc->get("LepGood_phi", il) << " pdgId: " << _vc->get("LepGood_pdgId", il) << " miniIso: " << _vc->get("LepGood_miniRelIso", il) << " ptratio: " << _vc->get("LepGood_jetPtRatiov2", il)<< " ptrel: " << _vc->get("LepGood_jetPtRelv2", il) << " hadronicOverEm: " << _vc->get("LepGood_hadronicOverEm", il)<< " dEtaScTrkIn: " << _vc->get("LepGood_dEtaScTrkIn", il) << " dPhiScTrkIn: " << _vc->get("LepGood_dPhiScTrkIn", il) << " eInvMinusPInv: " << _vc->get("LepGood_eInvMinusPInv", il) << " sigmaIEtaIEta: " << _vc->get("LepGood_sigmaIEtaIEta", il) << endl;
                 } 
                 for(size_t il=0;il<_vc->get("nJet");il++) {
                     cout << "nJet " << il << " pt: " << _vc->get("Jet_pt", il)  << " eta: " << _vc->get("Jet_eta", il) << " phi: " << _vc->get("Jet_phi", il) << " csv: " << _vc->get("Jet_btagCSV", il) << endl;
@@ -975,7 +975,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-        if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
         //count muons and electrons
         if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
         if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
