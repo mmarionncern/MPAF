@@ -991,11 +991,11 @@ bool SUSY3L::tightLepton(const Candidate* c, int idx, int pdgId){
     if(_useLepMVA){
         if(std::abs(pdgId)==13) {//mu case
             if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false, false, _useLepMVA) ) return false;
-            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumMu) ) return false;
+            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kVeryTightMu) ) return false;
         }
         else {
             if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
-            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumEl) ) return false;
+            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kVeryTightEl) ) return false;
         }   
     }
     //cut based
