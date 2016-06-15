@@ -98,6 +98,7 @@ private:
     bool _selectTaus;
     int _onZ; 
     bool _doPlots;
+    bool _doPlotsVerbose;
     bool _doValidationPlots;
     int _closureByFlavor;
     int _closure;
