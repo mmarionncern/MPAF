@@ -57,6 +57,7 @@ private:
     bool testRegion();
     void checkSample();
     bool passGenSelection();
+    bool genMatched(const CandList leptons, vector<int> lepIdx);
     vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
 		const CandList fakableLeps, vector<unsigned int> idxsL, const CandList fakableLepsPtCorr,
 		vector<unsigned int> idxsLPtCorr, int nHardestLepton, float pt_cut_hardest_legs, 
@@ -106,6 +107,7 @@ private:
     bool _runSystematics;
     bool _useLepMVA;
     bool _doGenMatch;
+    bool _v80X;
     int _LHESYS;
     string _susyProcessName;
     string _BR;
