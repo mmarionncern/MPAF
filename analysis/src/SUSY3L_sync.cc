@@ -441,8 +441,8 @@ void SUSY3L_sync::run(){
 
 	//debug output    
 	_run = 1;
-	_lumi = 1270;
-    _evt = 420400;
+	_lumi = 423;
+    _evt = 140010;
     
     _run2 = 1;
 	_lumi2 = 9999;
@@ -1208,11 +1208,11 @@ void SUSY3L_sync::setBaselineRegion(){
         _pt_cut_hard_legs             = 15           ;     //harsher pT requirement for at least _nHardestLeptons (below)
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
-        setCut("NJets"              ,    0, ">=" )  ;     //number of jets in event
-        setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
+        setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
+        setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,    0, ">=")  ;     //sum of jet pT's
-        setCut("MET"                ,    0, ">=")  ;     //missing transverse energy
+        setCut("MET"                ,   50, ">=")  ;     //missing transverse energy
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
         _bjetThreshold                = 25.         ;     //bjet threshold
@@ -1467,7 +1467,7 @@ bool SUSY3L_sync::multiLepSelection(){
             counter("low mll veto");
             //require hard legs
             //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) continue;
-            //if(!ptSelection(_tightLepsPtCutMllCut)) continue;
+            if(!ptSelection(_tightLepsPtCutMllCut)) continue;
             counter("lepton pt selection");
             
             //Z selection
@@ -1740,7 +1740,7 @@ bool SUSY3L_sync::wzCRSelection(){
     counter("lepton multiplicity");
     //require hard legs
     //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return false;
-    //if(!ptSelection(_tightLepsPtCutMllCut)) return false;
+    if(!ptSelection(_tightLepsPtCutMllCut)) return false;
     counter("lepton pt selection");
     //Z selection
     bool pass = false;
@@ -1846,7 +1846,7 @@ void SUSY3L_sync::fakeCRSelection(){
     counter("lepton multiplicity");
     //require hard legs
     //if(!hardLeg(_tightLepsPtCutMllCut, _nHardestLeptons, _pt_cut_hardest_legs, _nHardLeptons, _pt_cut_hard_legs )) return;
-    //if(!ptSelection(_tightLepsPtCutMllCut)) return;
+    if(!ptSelection(_tightLepsPtCutMllCut)) return;
     counter("lepton pt selection");
     //off-Z selection
     for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++) {
@@ -2260,7 +2260,7 @@ vector<CandList> SUSY3L_sync::build3LCombFake(const CandList tightLeps, vector<u
                 tmp_idxsPtCorr.push_back(idxsPtCorr[i2]);
                 tmp_idxsPtCorr.push_back(idxsPtCorr[i3]);
                 //if(!hardLeg(tmpList, nHardestLeptons, pt_cut_hardest_legs, nHardLeptons, pt_cut_hard_legs )) continue;
-                //if(!ptSelection(tmpList)) continue;
+                if(!ptSelection(tmpList)) continue;
                 vclist.push_back(tmpList);
                 combIdxs.push_back(tmp_idxsPtCorr);
 
@@ -2374,7 +2374,7 @@ bool SUSY3L_sync::ptSelection(CandList leptons){
     if(_HT<400){
         //leading leg
         if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<18) return false;
-        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<20) return false;
+        if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<25) return false;
         //sub-leading leg
         if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<10) return false;
         if(std::abs(leptons[1]->pdgId())==11 && leptons[1]->pt()<15) return false;

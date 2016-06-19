@@ -1135,13 +1135,13 @@ void SUSY3L::setSignalRegion() {
     _val["MET"] = &(_metPt);
 
     //0 b-jets
-    if( _SR== "OnZSR001" || _SR== "OffZSR001" ) {
+    if( _SR==  "OffZSR001" || _SR== "OnZSR001") {
         setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:60:400");
     }
     else if( _SR== "OnZSR002" || _SR== "OffZSR002" ) {
         setSelLine("NJ:>=:2|NB:=:0|MET:[[:150:300|HT:[[:60:400");
     }
-    else if( _SR== "OnZSR003" || _SR== "OffZSR003" ) {
+     else if(_SR== "OffZSR003" || _SR== "OnZSR003") {
         setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:400:600");
     }
     else if( _SR== "OnZSR004" || _SR== "OffZSR004" ) {
@@ -1149,13 +1149,13 @@ void SUSY3L::setSignalRegion() {
     }
 
     //1 b-jet
-    else if( _SR== "OnZSR005" || _SR== "OffZSR005" ) {
+    else if( _SR== "OffZSR005" || _SR== "OnZSR005" ) {
         setSelLine("NJ:>=:2|NB:=:1|MET:[[:50:150|HT:[[:60:400");
     }
     else if( _SR== "OnZSR006" || _SR== "OffZSR006" ) {
         setSelLine("NJ:>=:2|NB:=:1|MET:[[:150:300|HT:[[:60:400");
     }
-    else if( _SR== "OnZSR007" || _SR== "OffZSR007" ) {
+    else if( _SR== "OffZSR007" || _SR== "OnZSR007" ) {
         setSelLine("NJ:>=:2|NB:=:1|MET:[[:50:150|HT:[[:400:600");
     }
     else if( _SR== "OnZSR008" || _SR== "OffZSR008" ) {
@@ -1469,6 +1469,9 @@ void SUSY3L::advancedSelection(int WF){
     //require minimum missing transvers energy
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
+    //extra cut for onZ to remove DY
+    //if(_isOnZ && _met->pt() < 70 && _nBJets<2) return;
+    
     //gen matching
     if(!_vc->get("isData") && _doGenMatch && !_isFake) {
         if(!passGenSelection()) return;

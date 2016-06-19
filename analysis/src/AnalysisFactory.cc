@@ -30,18 +30,18 @@ AnalysisFactory::get(const string& analysis, const string& cfg) {
 //  if(analysis=="csa14exerc") {
 //    return new csa14exerc(cfg);
 //  }
-  if(analysis=="SSDLBoosted") {
-    return new SSDLBoosted(cfg);
-  }
+//  if(analysis=="SSDLBoosted") {
+//    return new SSDLBoosted(cfg);
+//  }
 //  if(analysis=="synchECO") {
 //    return new synchECO(cfg);
 //  }
 //  if(analysis=="synchRA5") {
 //    return new synchRA5(cfg);
 //  }
-  if(analysis=="phys14limits") {
-    return new phys14limits(cfg);
-  }
+//  if(analysis=="phys14limits") {
+//    return new phys14limits(cfg);
+//  }
   if(analysis=="SUSY3L") {
     return new SUSY3L(cfg);
   }
@@ -57,7 +57,7 @@ AnalysisFactory::get(const string& analysis, const string& cfg) {
   if(analysis=="SUSY3L_sync3") {
     return new SUSY3L_sync3(cfg);
   }
-  if(analysis=="FakeRatio") {
+/*  if(analysis=="FakeRatio") {
     return new FakeRatio(cfg);
   }
   if(analysis=="FakeRatioStudy") {
@@ -75,7 +75,7 @@ AnalysisFactory::get(const string& analysis, const string& cfg) {
   if(analysis=="UncertaintyTest") {
     return new UncertaintyTest(cfg);
   }
-  //if(analysis=="Comissioning") {
+*/  //if(analysis=="Comissioning") {
   //  return new Comissioning(cfg);
   //}
   return 0;
