@@ -868,7 +868,7 @@ AnaUtils::prepareDSNames(bool wMC, vector<int>& idxs) {
 
 
 void
-AnaUtils::printTables(string categ) {
+AnaUtils::printTables(string categ, bool latexOnly, bool header) {
   
   int icat= getCategId(categ);
   
@@ -877,10 +877,10 @@ AnaUtils::printTables(string categ) {
   bool hasData = _dsNames.back()=="data" || _dsNames.back()=="Data";
   
   //Numbers =======================================================
-  cout<<endl<<endl;
+  if(!latexOnly) cout<<endl<<endl;
   //For Latex
   
-  bool header=true;
+  //bool header=true;
   //start from one to skip the simulation in a first time
   for(size_t ic=0;ic<_categories[ icat ].effNames.size();ic++) { //cuts
 
@@ -896,7 +896,8 @@ AnaUtils::printTables(string categ) {
       header=false;
     }
 
-    cout<<_categories[ icat ].effNames[ ic ]<<" ";
+    //cout<<_categories[ icat ].effNames[ ic ]<<" ";
+    cout<<categ<<" ";
 
     //start from one to skip the simulation summary
     for(size_t id=0;id<dsNames.size();id++) { //datasets _itEMap
@@ -925,14 +926,15 @@ AnaUtils::printTables(string categ) {
       
     }//datasets
   }//cuts
-
+  
+  if(latexOnly) return;
 
   cout<<endl<<endl;
   
 
   //For Visu
 
-  header=true;
+  //header=true;
   //to skip the simulation in a first time
   for(size_t ic=0;ic<_categories[icat].effNames.size();ic++) { //cuts
     

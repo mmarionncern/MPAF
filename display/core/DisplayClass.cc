@@ -1144,8 +1144,8 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
       htmp->Reset("icem");
       int nb=htmp->GetNbinsX();
       for(int ib=0;ib<nb+2;ib++) {
-	for(int ic=0;ic<=ib;ic++)
-	  htmp->AddBinContent(ic, _hClones[ih]->GetBinContent(ib) );
+	    for(int ic=0;ic<=ib;ic++)
+            htmp->AddBinContent(ic, _hClones[ih]->GetBinContent(ib) );
       }
       _hClones[ih] = (TH1*)htmp->Clone();
     
@@ -1173,7 +1173,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   if( _is1D && !_dOnly) {
     if(_hClones.size()!=nsig)
       _hMC = (TH1*)_hClones[nsig]->Clone();
-    _hMC->SetLineWidth(2);
+    _hMC->SetLineWidth(1);
     _hMC->SetLineColor(kBlack);
     _hMC->SetFillStyle(0);
     _hMC->SetName("simulation");

@@ -67,8 +67,8 @@ MPAFDisplay::drawStatistics(string categ, string cname, bool multiScheme, bool v
 
 
 void
-MPAFDisplay::getStatistics(string categ) {
-  _au->printTables(categ);
+MPAFDisplay::getStatistics(string categ, bool latexOnly, bool header) {
+  _au->printTables(categ, latexOnly, header);
 }
 
 

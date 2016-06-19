@@ -607,6 +607,18 @@ void HistoManager::saveHistos(string anName, string conName, map<string, int> cn
     
     for(size_t ids = 0; ids < _dsNames.size(); ++ids) {
       TH1* htmp = (TH1*) getHisto(obs, ids)->Clone();
+      //protection against negative yields in histo bins
+      if(false){
+      for(size_t bin =0; bin < htmp->GetNbinsX()+2;bin++){
+          if(htmp->GetBinContent(bin)<0){
+              float mean = htmp->GetBinContent(bin);
+              float err = htmp->GetBinError(bin);
+              htmp->SetBinContent(bin,0);
+              float err_new = sqrt(err*err+(std::abs(mean)*std::abs(mean)));
+              htmp->SetBinError(bin,err_new);
+          }
+      }
+      }
       htmp->SetName( _dsNames[ids].c_str() );
       htmp->Write();     
 

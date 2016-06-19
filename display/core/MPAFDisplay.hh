@@ -117,7 +117,7 @@ public:
   void loadAutoBinning(string file);
     
 
-  void getStatistics(string categ="nominal");
+  void getStatistics(string categ="nominal", bool latexOnly = false, bool header=true);
   void drawStatistics(string categ="nominal", string cname="", 
 		      bool multiScheme=false, bool vetoOpt=false, string optCateg="");
 
