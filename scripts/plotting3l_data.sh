@@ -1,7 +1,9 @@
 #!/bin/bash
 
-VAR=( "njets" "nbjets" "met" "ht" "mt" "pt1" "pt2" "pt3" "srs" )
-REG=( "OffZBaseline" "OnZBaseline" "WZCR" "FakeCR" )
+#VAR=( "njets" "nbjets" "met" "ht" "mt" "pt1" "pt2" "pt3" "srs" )
+VAR=( "srs" )
+REG=( "OffZBaseline" "OnZBaseline")
+#REG=( "WZCR" "FakeCR" )
  #"lep1dxy" "lep1dz" "lep1sip" "lep2dxy" "lep2dz" "lep2sip" "lep3dxy" "lep3dz" "lep3sip" ) #"flavor" "mt") # "el_multi" "mu_multi" "lep_multi")
 #VAR=("flavor") #"lep1dxy" "lep1dz" "lep1sip" "lep2dxy" "lep2dz" "lep2sip" "lep3dxy" "lep3dz" "lep3sip" ) #"flavor" "mt") # "el_multi" "mu_multi" "lep_multi")
 #VAR=("ftype")

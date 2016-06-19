@@ -10,14 +10,13 @@ void susy3l_data() {
     //string fileName="3l_unblinded_2260pb"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="3l_unblinded_2260pb"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
-    //string fileName="cutBased_baseline"; //was treeName in LUNE susy_cut_lowpt
-    //string fileList="cutBased_baseline"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
-    string fileName="lepMVAveryTight"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="lepMVAveryTight"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="merged_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
  
+
     string hName="";
 
-    bool mcOnly = true;
+    bool mcOnly = false;
     bool closure = false;
     bool fixLeg = true;
   
@@ -27,14 +26,22 @@ void susy3l_data() {
     //}
  
     string sigs = "none"; 
-    bool data = false;
-    bool manual = true;
+    bool data = true;
+    bool manual = false;
     if(!manual) string region = "REGION";
-    else string region = "OnZBaseline";
+    else string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "srs";}
- 
+    else{string obs = "met";}
+     
+    float lumi=804; //pb-1 19470
+    //float lumi=2600; //pb-1 19470
+    float energy=13; //TeV
+
+    if(lumi>804 && data && !(region=="WZCR" || region=="FakeCR")){
+        cout << "Warning: this region is blinded!" << endl;
+        return;
+    }
 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
@@ -242,9 +249,6 @@ void susy3l_data() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=2320; //pb-1 19470
-    float energy=13; //TeV
-
     bool useXS=false;
 
     md.anConf.loadXSDB("XSectionsSpring16.db");
@@ -265,10 +269,10 @@ void susy3l_data() {
     //===============================================================
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
-/*
+
     //rare
     md.anConf.addSample( "GGHZZ4L"                              ,  "rare"        , kMagenta-7    );
-    //md.anConf.addSample( "VHToNonbb"                            ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "VHToNonbb"                            ,  "rare"        , kMagenta-7    );
     md.anConf.addSample( "ZZTo4L"                               ,  "rare"        , kMagenta-7    );
     md.anConf.addSample( "WWZ"                                  ,  "rare"        , kMagenta-7    );
     md.anConf.addSample( "WZZ"                                  ,  "rare"        , kMagenta-7    );
@@ -278,43 +282,47 @@ void susy3l_data() {
 
     //WZ
     md.anConf.addSample( "WZTo3LNu"                             ,  "WZ"          , kOrange       );
-*/
+
     //X+gamma
-    //md.anConf.addSample( "TGJets"                               ,  "X+#gamma"    , kViolet+2     );
-    //md.anConf.addSample( "TTGJets"                              ,  "X+#gamma"    , kViolet+2     );
-    //md.anConf.addSample( "WGToLNuG"                             ,  "X+#gamma"    , kViolet+2     );
-    //md.anConf.addSample( "ZGTo2LG"                              ,  "X+#gamma"    , kViolet+2     );
+    md.anConf.addSample( "TGJets"                               ,  "X+#gamma"    , kViolet+2     );
+    md.anConf.addSample( "TTGJets"                              ,  "X+#gamma"    , kViolet+2     );
+    md.anConf.addSample( "WGToLNuG"                             ,  "X+#gamma"    , kViolet+2     );
+    md.anConf.addSample( "ZGTo2LG"                              ,  "X+#gamma"    , kViolet+2     );
 
-    md.anConf.addSample( "TGJets"                               ,  "TG"    , kMagenta     );
-    md.anConf.addSample( "WGToLNuG"                             ,  "WG"    , kMagenta+2     );
-    md.anConf.addSample( "ZGTo2LG"                              ,  "ZG"    , kBlue-10     );
-    md.anConf.addSample( "TTGJets"                              ,  "TTG"   , kBlue     );
+    //md.anConf.addSample( "TGJets"                               ,  "TG"    , kMagenta     );
+    //md.anConf.addSample( "WGToLNuG"                             ,  "WG"    , kMagenta+2     );
+    //md.anConf.addSample( "ZGTo2LG"                              ,  "ZG"    , kBlue-10     );
+    //md.anConf.addSample( "TTGJets"                              ,  "TTG"   , kBlue     );
 
 
 
-/*
+
     //TTZ/H
-    md.anConf.addSample( "TTZToLLNuNu_LO"                       ,  "t#bar{t}Z/H" , kGreen-6      );
-    md.anConf.addSample( "TTHnobb"                              ,  "t#bar{t}Z/H" , kGreen-6      );
+    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z/H" , kGreen-6      );
+    md.anConf.addSample( "TTHnobb_pow"                          ,  "t#bar{t}Z/H" , kGreen-6      );
     md.anConf.addSample( "TTLLJets_m1to10"                      ,  "t#bar{t}Z/H" , kGreen-6      );
     
     //TTW
     md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );
-*/
-/*
+
+
     //non-prompt
     md.anConf.addSample( "TTJets"                               ,  "non-prompt"       , 18            );
     md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "non-prompt"       , 18            );
     md.anConf.addSample( "DYJetsToLL_M50"                       ,  "non-prompt"       , 18            );
     md.anConf.addSample( "TToLeptons_sch"                       ,  "non-prompt"       , 18      );
-    md.anConf.addSample( "TToLeptons_tch_powheg"                ,  "non-prompt"       , 18      );
-    md.anConf.addSample( "TBarToLeptons_tch_powheg"             ,  "non-prompt"       , 18      );
+    //md.anConf.addSample( "TToLeptons_tch_powheg"                ,  "non-prompt"       , 18      );
+    //md.anConf.addSample( "TBarToLeptons_tch_powheg"             ,  "non-prompt"       , 18      );
     md.anConf.addSample( "TBar_tWch"                            ,  "non-prompt"       , 18      );
     md.anConf.addSample( "T_tWch"                               ,  "non-prompt"       , 18      );
     md.anConf.addSample( "WJetsToLNu"                           ,  "non-prompt"       , 18      );
-    md.anConf.addSample( "WWTo2L2Nu"                            ,  "non-prompt"       , 18      );
-    md.anConf.addSample( "ZZTo2L2Nu"                            ,  "non-prompt"       , 18      );
-*/
+    //md.anConf.addSample( "WWTo2L2Nu"                            ,  "non-prompt"       , 18      );
+    //md.anConf.addSample( "ZZTo2L2Nu"                            ,  "non-prompt"       , 18      );
+
+
+
+
+
     //non-prompt
 /*    md.anConf.addSample( "TTJets"                               ,  "TT"       , kBlue-10            );
     md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "DY"       , kBlue-7            );
@@ -330,15 +338,9 @@ void susy3l_data() {
 */
 
     //non-prompt predicted
-    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2015C_Oct05_runs_254231_254914"           , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2015D_Oct05_runs_256630_258158"           , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2015D_PromptV4_runs_258159_260627"        , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2015C_Oct05_runs_254231_254914"         , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2015D_Oct05_runs_256630_258158"         , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2015D_PromptV4_runs_258159_260627"      , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:MuonEG_Run2015C_Oct05_runs_254231_254914"             , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:MuonEG_Run2015D_Oct05_runs_256630_258158"             , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627"          , "non-prompt"          , 18    );
+    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18    );
+    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18    );
+    //md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18    );
 
     //signal
     if(sigs=="t"){
@@ -362,21 +364,12 @@ void susy3l_data() {
     
     //data
     if(data){
-    md.anConf.addSample( "DoubleEG_Run2015C_Oct05_runs_254231_254914"           , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleEG_Run2015D_Oct05_runs_256630_258158"           , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleEG_Run2015D_PromptV4_runs_258159_260627"        , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015C_Oct05_runs_254231_254914"         , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015D_Oct05_runs_256630_258158"         , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2015D_PromptV4_runs_258159_260627"      , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015C_Oct05_runs_254231_254914"             , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015D_Oct05_runs_256630_258158"             , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2015D_PromptV4_runs_258159_260627"          , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "data"          , kBlack    );
     }
 
 
-//    md.anConf.addSample( "T5ttttDeg_mGo1000_mStop300_mCh285_mChi280_skim"  ,  "T5tttt (1000) * 20 sig" , kOrange-3 );
-  //md.anConf.addSample( "T5ttttDeg_mGo1300_mStop300_mCh285_mChi280_skim"  ,  "T5tttt (1300) #cdot 20 sig" , kOrange+6 );
-    // }
     //===============================================================
 
     //*********************************************************************²
@@ -388,6 +381,9 @@ void susy3l_data() {
     //md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
    
     // }
+    
+
+
 
     //plotting ================
     md.dp.setLumiAndEnergy( lumi, energy );
@@ -399,10 +395,14 @@ void susy3l_data() {
 			 markerSize, lineWidth,summedSignal,
              mcOnly,cmsPrel, uncDet, closure, fixLeg);
     md.prepareDisplay();
+    
+    //external systematic uncertainties
+    //md.addExternalSystUnc("WZ","test",0.50,-0.50 ,"global_OnZSR001" , "selected");
+
     md.doPlot();
     // md.doStatisticsPlot();
     
-    //md.getStatistics("global_OffZBaseline");
+    //md.getStatistics("global_OnZSR001");
     
     md.savePlot("SUSY3L");
     // md.dp.addText(xt,yt,st,addText);
