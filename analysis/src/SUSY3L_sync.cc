@@ -977,7 +977,7 @@ void SUSY3L_sync::collectKinematicObjects(){
 
     //tight leptons with low mll veto
     for(size_t il=0;il<_tightLepsPtCut.size();il++) {
-        //if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
+        if(!_susyMod->passMllMultiVeto( _tightLepsPtCut[il], &_tightLepsPtCut, 0, 12, true) ) continue;
         //count muons and electrons
         if(std::abs(_tightLepsPtCut[il]->pdgId())==13){mus+=1;}
         if(std::abs(_tightLepsPtCut[il]->pdgId())==11){els+=1;}
@@ -1209,10 +1209,10 @@ void SUSY3L_sync::setBaselineRegion(){
         _nHardLeptons                 = 0           ;     //number of leptons which need to fulfill harder pt cut
         _M_T_3rdLep_MET_cut           =  -1         ;     //minimum transverse mass of 3rd lepton and met in On-Z events
         setCut("NJets"              ,    2, ">=" )  ;     //number of jets in event
-        setCut("NBJets"             ,    1, ">=" )  ;     //number of b-tagged jets in event
+        setCut("NBJets"             ,    0, ">=" )  ;     //number of b-tagged jets in event
         _ZMassWindow                  = 15.         ;     //width around Z mass to define on- or off-Z events
         setCut("HT"                 ,    0, ">=")  ;     //sum of jet pT's
-        setCut("MET"                ,   50, ">=")  ;     //missing transverse energy
+        setCut("MET"                ,    0, ">=")  ;     //missing transverse energy
         setCut("MT2"                ,   55, "<" )   ;     //MT2 cut value
         _jetThreshold                 = 30.         ;     //jet threshold
         _bjetThreshold                = 25.         ;     //bjet threshold
