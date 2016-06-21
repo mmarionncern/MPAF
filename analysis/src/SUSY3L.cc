@@ -433,7 +433,7 @@ void SUSY3L::modifyWeight() {
 	        //_weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") ); #TODO: roll back to nTrueInt once available
             _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
         }
-        
+
     }
 
 }
@@ -837,7 +837,7 @@ void SUSY3L::collectKinematicObjects(){
                       _vc->get("LepGood_pdgId", il),
                       _vc->get("LepGood_charge", il),
                       isMu?0.105:0.0005); 
-        
+    
         if(!looseLepton(cand, il, cand->pdgId() ) ) continue;
         _looseLeps.push_back(cand);
         _looseLepsIdx.push_back(il);
@@ -855,7 +855,7 @@ void SUSY3L::collectKinematicObjects(){
         }
    
     }  
-   
+ 
     //select fakable leptons with pt cut (used for jet cleaning)
     for(size_t il=0;il<_looseLepsPtCut.size();il++){
         if(!fakableLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId(), true)) continue;
@@ -1004,11 +1004,11 @@ bool SUSY3L::tightLepton(const Candidate* c, int idx, int pdgId){
     if(_useLepMVA){
         if(std::abs(pdgId)==13) {//mu case
             if(!_susyMod->muIdSel(c, idx, SusyModule::kTight, false, false, _useLepMVA) ) return false;
-            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kVeryTightMu) ) return false;
+            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumMu) ) return false;
         }
         else {
             if(!_susyMod->elIdSel(c, idx, SusyModule::kTight, SusyModule::kLoose, false, false, _useLepMVA) ) return false;
-            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kVeryTightEl) ) return false;
+            if(!_susyMod->lepMVAIdSel(idx, SusyModule::kMediumEl) ) return false;
         }   
     }
     //cut based
@@ -1129,13 +1129,13 @@ void SUSY3L::setSignalRegion() {
     _val["MET"] = &(_metPt);
 
     //0 b-jets
-    if( _SR==  "OffZSR001" || _SR== "OnZSR001") {
+    if( _SR== "OnZSR001" || _SR== "OffZSR001" ) {
         setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:60:400");
     }
     else if( _SR== "OnZSR002" || _SR== "OffZSR002" ) {
         setSelLine("NJ:>=:2|NB:=:0|MET:[[:150:300|HT:[[:60:400");
     }
-     else if(_SR== "OffZSR003" || _SR== "OnZSR003") {
+    else if( _SR== "OnZSR003" || _SR== "OffZSR003" ) {
         setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:400:600");
     }
     else if( _SR== "OnZSR004" || _SR== "OffZSR004" ) {
@@ -1143,13 +1143,13 @@ void SUSY3L::setSignalRegion() {
     }
 
     //1 b-jet
-    else if( _SR== "OffZSR005" || _SR== "OnZSR005" ) {
+    else if( _SR== "OnZSR005" || _SR== "OffZSR005" ) {
         setSelLine("NJ:>=:2|NB:=:1|MET:[[:50:150|HT:[[:60:400");
     }
     else if( _SR== "OnZSR006" || _SR== "OffZSR006" ) {
         setSelLine("NJ:>=:2|NB:=:1|MET:[[:150:300|HT:[[:60:400");
     }
-    else if( _SR== "OffZSR007" || _SR== "OnZSR007" ) {
+    else if( _SR== "OnZSR007" || _SR== "OffZSR007" ) {
         setSelLine("NJ:>=:2|NB:=:1|MET:[[:50:150|HT:[[:400:600");
     }
     else if( _SR== "OnZSR008" || _SR== "OffZSR008" ) {
