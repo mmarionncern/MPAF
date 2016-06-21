@@ -426,7 +426,7 @@ void SUSY3L::modifyWeight() {
 	    //pile-up weights
         
         //TODO: enable for 80X
-        if(!_closure){
+        if(!_closure && _v80X){
             string db="puWeights";
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
@@ -466,6 +466,7 @@ void SUSY3L::run(){
         if(!passHLTbit()) return;
     }
     counter("HLT");
+    
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
@@ -836,7 +837,7 @@ void SUSY3L::collectKinematicObjects(){
                       _vc->get("LepGood_pdgId", il),
                       _vc->get("LepGood_charge", il),
                       isMu?0.105:0.0005); 
-    
+        
         if(!looseLepton(cand, il, cand->pdgId() ) ) continue;
         _looseLeps.push_back(cand);
         _looseLepsIdx.push_back(il);
@@ -848,21 +849,14 @@ void SUSY3L::collectKinematicObjects(){
         }
 
         //cone corrected pt for improved closure
-        if((isMu && _susyMod->conePt(il,wp)>10) || (!isMu && _susyMod->conePt(il,wp)>10)) {
+        if((isMu && _susyMod->conePt(il,wp)>10 && cand->pt()>10 ) || (!isMu && _susyMod->conePt(il,wp)>10 && cand->pt()>10)) {
             _looseLepsPtCorrCut.push_back(candPtCorr);
             _looseLepsPtCorrCutIdx.push_back(il);
         }
    
     }  
-  
-    //select fakable leptons without pt cut (used for jet cleaning in sync round 3)
-    for(size_t il=0;il<_looseLeps.size();il++){
-        if(!fakableLepton(_looseLeps[il], _looseLepsIdx[il], _looseLeps[il]->pdgId(), true)) continue;
-        _fakableLeps.push_back( _looseLeps[il] );
-        _fakableLepsIdx.push_back( _looseLepsIdx[il] );
-    } 
-  
-    //select fakable leptons with pt cut (used for default jet cleaning)
+   
+    //select fakable leptons with pt cut (used for jet cleaning)
     for(size_t il=0;il<_looseLepsPtCut.size();il++){
         if(!fakableLepton(_looseLepsPtCut[il], _looseLepsPtCutIdx[il], _looseLepsPtCut[il]->pdgId(), true)) continue;
         _fakableLepsPtCut.push_back( _looseLepsPtCut[il] );
@@ -881,7 +875,7 @@ void SUSY3L::collectKinematicObjects(){
     for(size_t il=0;il<_looseLepsPtCorrCut.size();il++) {
         if(tightLepton(_looseLepsPtCorrCut[il], _looseLepsPtCorrCutIdx[il], _looseLepsPtCorrCut[il]->pdgId())) continue;
         if(!fakableLepton(_looseLepsPtCorrCut[il], _looseLepsPtCorrCutIdx[il], _looseLepsPtCorrCut[il]->pdgId(),false)) continue; 
-	    _fakableNotTightLepsPtCorrCut.push_back(_looseLepsPtCorrCut[il]);
+        _fakableNotTightLepsPtCorrCut.push_back(_looseLepsPtCorrCut[il]);
 	    _fakableNotTightLepsPtCorrCutIdx.push_back(_looseLepsPtCorrCutIdx[il]);
     }
 
