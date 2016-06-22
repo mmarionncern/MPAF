@@ -368,11 +368,16 @@ void SUSY3L::initialize(){
     //_dbm->loadDb("FastSimElISO", "lepSF_RA7/fastSim/electrons/sf_el_multi.root", "histo3D" );
    
     
-    //load pile-up weights
+    //load pile-up weights 80X
     _dbm->loadDb("puWeights80X","db2016/PileupWeightNVtx_2016_2fb.root","puw");
-    _dbm->loadDb("puWeights74X","","puw");
     //_dbm->loadDb("puWeightsUp","PileupWeightNVtx_2016_800pb.root","puw");
     //_dbm->loadDb("puWeightsDown","PileupWeightNVtx_2016_800pb.root","puw");
+ 
+    //load pile-up weights 74X
+    _dbm->loadDb("puWeights74X","pileupWeights.root","pileup");
+    _dbm->loadDb("puWeights74XUp","pileupWeights.root","pileupUpXS");
+    _dbm->loadDb("puWeights74XDown","pileupWeights.root","pileupDownXS");
+
 
 
 
@@ -425,8 +430,6 @@ void SUSY3L::modifyWeight() {
         }}
 
 	    //pile-up weights
-        
-        //TODO: enable for 80X
         if(!_closure && _version == 8){
             string db="puWeights80X";
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
@@ -436,9 +439,9 @@ void SUSY3L::modifyWeight() {
         }
         if(!_closure && _version == 4){
             string db="puWeights74X";
-	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
-	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
-            _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeights74XUp";}
+	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeights74XDown";}
+	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") );
         }
 
 
@@ -470,7 +473,7 @@ void SUSY3L::run(){
     counter("JME filters");
 
     //check HLT trigger decition, only let triggered events pass (no HLT info in fast sim)
-    if(!_fastSim && !_version == 8){
+    if(!_fastSim && _version != 8){
         if(!passHLTbit()) return;
     }
     counter("HLT");
