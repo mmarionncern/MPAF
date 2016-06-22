@@ -107,7 +107,7 @@ private:
     bool _runSystematics;
     bool _useLepMVA;
     bool _doGenMatch;
-    bool _v80X;
+    int _version;
     int _LHESYS;
     string _susyProcessName;
     string _BR;

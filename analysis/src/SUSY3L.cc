@@ -297,7 +297,7 @@ void SUSY3L::initialize(){
     _LHESYS = getCfgVarI("LHESYS", 0);
     _useLepMVA = getCfgVarI("useLepMVA", 0);
     _doGenMatch = getCfgVarI("doGenMatch", 1);
-    _v80X = getCfgVarI("v80X", 1);
+    _version = getCfgVarI("version", 8);
 
     if(_fastSim) {
         //load signal cross section
@@ -369,7 +369,8 @@ void SUSY3L::initialize(){
    
     
     //load pile-up weights
-    _dbm->loadDb("puWeights","db2016/PileupWeightNVtx_2016_2fb.root","puw");
+    _dbm->loadDb("puWeights80X","db2016/PileupWeightNVtx_2016_2fb.root","puw");
+    _dbm->loadDb("puWeights74X","","puw");
     //_dbm->loadDb("puWeightsUp","PileupWeightNVtx_2016_800pb.root","puw");
     //_dbm->loadDb("puWeightsDown","PileupWeightNVtx_2016_800pb.root","puw");
 
@@ -426,13 +427,20 @@ void SUSY3L::modifyWeight() {
 	    //pile-up weights
         
         //TODO: enable for 80X
-        if(!_closure && _v80X){
-            string db="puWeights";
+        if(!_closure && _version == 8){
+            string db="puWeights80X";
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
 	        //_weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") ); #TODO: roll back to nTrueInt once available
             _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
         }
+        if(!_closure && _version == 4){
+            string db="puWeights74X";
+	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
+	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
+            _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+        }
+
 
     }
 
@@ -446,8 +454,8 @@ void SUSY3L::run(){
     setBaselineRegion();
 
     //skim tree
-    if(_vc->get("nLepGood") >2) fillSkimTree();
-    return; 
+    //if(_vc->get("nLepGood") >2) fillSkimTree();
+    //return; 
     
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -462,7 +470,7 @@ void SUSY3L::run(){
     counter("JME filters");
 
     //check HLT trigger decition, only let triggered events pass (no HLT info in fast sim)
-    if(!_fastSim && !_v80X){
+    if(!_fastSim && !_version == 8){
         if(!passHLTbit()) return;
     }
     counter("HLT");
