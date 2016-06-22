@@ -446,8 +446,8 @@ void SUSY3L::run(){
     setBaselineRegion();
 
     //skim tree
-    //if(_vc->get("nLepGood") >2) fillSkimTree();
-    //return; 
+    if(_vc->get("nLepGood") >2) fillSkimTree();
+    return; 
     
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
