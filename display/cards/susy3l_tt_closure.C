@@ -7,8 +7,8 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="160618_closure_genMatch_dataMaps800pb"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="160618_closure_genMatch_dataMaps800pb"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l_closure"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l_closure"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = true;
@@ -24,7 +24,7 @@ void susy3l_tt_closure() {
    
     string sigs = "none"; 
     bool data = false;
-    bool manual = true;
+    bool manual = false;
     if(!manual){string region = "REGION";}
     else string region = "OnZBaseline";
 
@@ -186,11 +186,11 @@ void susy3l_tt_closure() {
     md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
 
     if(scale){
-        float scaleWJets = 154493.371;
-        float scaleDY10 = 30155.455;
-        float scaleDY50 = 15704.543;
-        float scaleTTJets = 2119.0449;
-        float scaleTToLeptons_sch = 3.37;
+        float scaleWJets = 154506.056;
+        float scaleDY10 = 30156.34;
+        float scaleDY50 = 15704.55;
+        float scaleTTJets = 2120.02;
+        float scaleTToLeptons_sch = 3.38;
     }
     else{
         float scaleWJets = 1;
@@ -211,7 +211,7 @@ void susy3l_tt_closure() {
     md.anConf.addSample( "TToLeptons_sch"                       ,  "single top"    , kCyan, scaleTToLeptons_sch   );
   
     //W+Jets
-    md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kBlue, scaleWJets      );
+    //md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kBlue, scaleWJets      );
 
     //ttbar
     md.anConf.addSample( "TTJets"                             ,  "t#bar{t}"    , kBlue-10, scaleTTJets      );

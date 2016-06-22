@@ -27,12 +27,12 @@ void susy3l_data() {
  
     string sigs = "none"; 
     bool data = true;
-    bool manual = false;
+    bool manual = true;
     if(!manual) string region = "REGION";
-    else string region = "OffZBaseline";
+    else string region = "OnZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "met";}
+    else{string obs = "ht";}
      
     float lumi=804; //pb-1 19470
     //float lumi=2600; //pb-1 19470
@@ -264,30 +264,30 @@ void susy3l_data() {
     md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
 
     
-    
+    float scale = 1.0;    
     
     //===============================================================
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
 
     //rare
-    md.anConf.addSample( "GGHZZ4L"                              ,  "rare"        , kMagenta-7    );
-    md.anConf.addSample( "VHToNonbb"                            ,  "rare"        , kMagenta-7    );
-    md.anConf.addSample( "ZZTo4L"                               ,  "rare"        , kMagenta-7    );
-    md.anConf.addSample( "WWZ"                                  ,  "rare"        , kMagenta-7    );
-    md.anConf.addSample( "WZZ"                                  ,  "rare"        , kMagenta-7    );
-    md.anConf.addSample( "ZZZ"                                  ,  "rare"        , kMagenta-7    );
-    md.anConf.addSample( "TTTT"                                 ,  "rare"        , kMagenta-7    );
-    md.anConf.addSample( "tZq_ll"                               ,  "rare"        , kMagenta-7    );
+    md.anConf.addSample( "GGHZZ4L"                              ,  "rare"        , kMagenta-7, scale    );
+    md.anConf.addSample( "VHToNonbb"                            ,  "rare"        , kMagenta-7, scale   );
+    md.anConf.addSample( "ZZTo4L"                               ,  "rare"        , kMagenta-7, scale    );
+    md.anConf.addSample( "WWZ"                                  ,  "rare"        , kMagenta-7, scale    );
+    md.anConf.addSample( "WZZ"                                  ,  "rare"        , kMagenta-7, scale    );
+    md.anConf.addSample( "ZZZ"                                  ,  "rare"        , kMagenta-7, scale    );
+    md.anConf.addSample( "TTTT"                                 ,  "rare"        , kMagenta-7, scale    );
+    md.anConf.addSample( "tZq_ll"                               ,  "rare"        , kMagenta-7, scale    );
 
     //WZ
-    md.anConf.addSample( "WZTo3LNu"                             ,  "WZ"          , kOrange       );
+    md.anConf.addSample( "WZTo3LNu"                             ,  "WZ"          , kOrange, scale       );
 
     //X+gamma
-    md.anConf.addSample( "TGJets"                               ,  "X+#gamma"    , kViolet+2     );
-    md.anConf.addSample( "TTGJets"                              ,  "X+#gamma"    , kViolet+2     );
-    md.anConf.addSample( "WGToLNuG"                             ,  "X+#gamma"    , kViolet+2     );
-    md.anConf.addSample( "ZGTo2LG"                              ,  "X+#gamma"    , kViolet+2     );
+    md.anConf.addSample( "TGJets"                               ,  "X+#gamma"    , kViolet+2, scale     );
+    md.anConf.addSample( "TTGJets"                              ,  "X+#gamma"    , kViolet+2, scale    );
+    md.anConf.addSample( "WGToLNuG"                             ,  "X+#gamma"    , kViolet+2, scale      );
+    md.anConf.addSample( "ZGTo2LG"                              ,  "X+#gamma"    , kViolet+2, scale     );
 
     //md.anConf.addSample( "TGJets"                               ,  "TG"    , kMagenta     );
     //md.anConf.addSample( "WGToLNuG"                             ,  "WG"    , kMagenta+2     );
@@ -298,24 +298,24 @@ void susy3l_data() {
 
 
     //TTZ/H
-    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z/H" , kGreen-6      );
-    md.anConf.addSample( "TTHnobb_pow"                          ,  "t#bar{t}Z/H" , kGreen-6      );
-    md.anConf.addSample( "TTLLJets_m1to10"                      ,  "t#bar{t}Z/H" , kGreen-6      );
+    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z/H" , kGreen-6, scale      );
+    md.anConf.addSample( "TTHnobb_pow"                          ,  "t#bar{t}Z/H" , kGreen-6, scale      );
+    md.anConf.addSample( "TTLLJets_m1to10"                      ,  "t#bar{t}Z/H" , kGreen-6, scale      );
     
     //TTW
-    md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3      );
+    md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3, scale      );
 
 
     //non-prompt
-    md.anConf.addSample( "TTJets"                               ,  "non-prompt"       , 18            );
-    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "non-prompt"       , 18            );
-    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "non-prompt"       , 18            );
-    md.anConf.addSample( "TToLeptons_sch"                       ,  "non-prompt"       , 18      );
+    //md.anConf.addSample( "TTJets"                               ,  "non-prompt"       , 18            );
+    //md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "non-prompt"       , 18            );
+    //md.anConf.addSample( "DYJetsToLL_M50"                       ,  "non-prompt"       , 18            );
+    //md.anConf.addSample( "TToLeptons_sch"                       ,  "non-prompt"       , 18      );
     //md.anConf.addSample( "TToLeptons_tch_powheg"                ,  "non-prompt"       , 18      );
     //md.anConf.addSample( "TBarToLeptons_tch_powheg"             ,  "non-prompt"       , 18      );
-    md.anConf.addSample( "TBar_tWch"                            ,  "non-prompt"       , 18      );
-    md.anConf.addSample( "T_tWch"                               ,  "non-prompt"       , 18      );
-    md.anConf.addSample( "WJetsToLNu"                           ,  "non-prompt"       , 18      );
+    //md.anConf.addSample( "TBar_tWch"                            ,  "non-prompt"       , 18      );
+    //md.anConf.addSample( "T_tWch"                               ,  "non-prompt"       , 18      );
+    //md.anConf.addSample( "WJetsToLNu"                           ,  "non-prompt"       , 18      );
     //md.anConf.addSample( "WWTo2L2Nu"                            ,  "non-prompt"       , 18      );
     //md.anConf.addSample( "ZZTo2L2Nu"                            ,  "non-prompt"       , 18      );
 
@@ -338,9 +338,9 @@ void susy3l_data() {
 */
 
     //non-prompt predicted
-    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18    );
-    //md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18    );
+    md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18, scale    );
+    md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18, scale    );
+    md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18, scale    );
 
     //signal
     if(sigs=="t"){
