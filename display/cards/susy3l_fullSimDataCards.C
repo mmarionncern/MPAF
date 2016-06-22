@@ -14,7 +14,7 @@ void susy3l_fullSimDataCards(){
     md.anConf.configureData(false, 0, mcOnly);
      
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=2260; //pb-1 19470
+    float lumi=10000; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=true;
@@ -71,6 +71,7 @@ void susy3l_fullSimDataCards(){
     md.addDataCardSample( "data:Fake:MuonEG_Run2015D_Oct05_runs_256630_258158", "fake"); 
     md.addDataCardSample( "data:Fake:MuonEG_Run2015D_PromptV4_runs_258159_260627", "fake"); 
 
+    /*
     md.addDataCardSample( "Fake:TGJets", "fake", -1 );
     md.addDataCardSample( "Fake:TTGJets", "fake", -1 );
     md.addDataCardSample( "Fake:ZGTo2LG", "fake", -1 );
@@ -88,6 +89,7 @@ void susy3l_fullSimDataCards(){
     md.addDataCardSample( "Fake:WZZ", "fake", -1 );
     md.addDataCardSample( "Fake:ZZZ", "fake", -1 );
     md.addDataCardSample( "Fake:TTTT", "fake", -1 );
+    */
     /*
     md.addDataCardSample( "TGJets", "pseudodata"); 
     md.addDataCardSample( "TTGJets", "pseudodata"); 
