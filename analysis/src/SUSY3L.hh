@@ -125,16 +125,16 @@ private:
   enum {kGlobal=0,
 	
     kOnZSR001, kOnZSR002, kOnZSR003, kOnZSR004, kOnZSR005, kOnZSR006, kOnZSR007, kOnZSR008,
-	kOnZSR009, kOnZSR010, kOnZSR011, kOnZSR012, kOnZSR013, kOnZSR014, kOnZSR015,
+	kOnZSR009, kOnZSR010, kOnZSR011, kOnZSR012, kOnZSR013, kOnZSR014, kOnZSR015, kOnZSR016, kOnZSR017,
 
 	kOffZSR001, kOffZSR002, kOffZSR003, kOffZSR004, kOffZSR005, kOffZSR006, kOffZSR007, kOffZSR008,
-	kOffZSR009, kOffZSR010, kOffZSR011, kOffZSR012, kOffZSR013, kOffZSR014, kOffZSR015,
+	kOffZSR009, kOffZSR010, kOffZSR011, kOffZSR012, kOffZSR013, kOffZSR014, kOffZSR015, kOffZSR016, kOffZSR017,
     
 	kOnZSR001_Fake, kOnZSR002_Fake, kOnZSR003_Fake, kOnZSR004_Fake, kOnZSR005_Fake, kOnZSR006_Fake, kOnZSR007_Fake, kOnZSR008_Fake,
-	kOnZSR009_Fake, kOnZSR010_Fake, kOnZSR011_Fake, kOnZSR012_Fake, kOnZSR013_Fake, kOnZSR014_Fake, kOnZSR015_Fake,
+	kOnZSR009_Fake, kOnZSR010_Fake, kOnZSR011_Fake, kOnZSR012_Fake, kOnZSR013_Fake, kOnZSR014_Fake, kOnZSR015_Fake, kOnZSR016_Fake, kOnZSR017_Fake,
 	
 	kOffZSR001_Fake, kOffZSR002_Fake, kOffZSR003_Fake, kOffZSR004_Fake, kOffZSR005_Fake, kOffZSR006_Fake, kOffZSR007_Fake, kOffZSR008_Fake,
-	kOffZSR009_Fake, kOffZSR010_Fake, kOffZSR011_Fake, kOffZSR012_Fake, kOffZSR013_Fake, kOffZSR014_Fake, kOffZSR015_Fake,
+	kOffZSR009_Fake, kOffZSR010_Fake, kOffZSR011_Fake, kOffZSR012_Fake, kOffZSR013_Fake, kOffZSR014_Fake, kOffZSR015_Fake, kOffZSR016_Fake, kOffZSR017_Fake,
 
     kOnZBaseline, kOffZBaseline,
 
@@ -209,6 +209,7 @@ private:
     float _nTaus;
     float _nJets;
     float _nBJets;
+    float _onZSR;
     float _nleps;
     int _fEls;
     int _fMus;

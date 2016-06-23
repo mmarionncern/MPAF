@@ -233,10 +233,10 @@ void SUSY3L::initialize(){
     _susyMod = new SusyModule(_vc, _dbm);
 
     //categories
-    int nCateg=69;
+    int nCateg=77;
     _categs.resize(nCateg);
-    string srs[69]={
-       
+    string srs[77]={
+ /*      
     //signal regions
         "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
 	    "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012", "OnZSR013", "OnZSR014", "OnZSR015",
@@ -250,6 +250,20 @@ void SUSY3L::initialize(){
 
 	    "OffZSR001_Fake", "OffZSR002_Fake", "OffZSR003_Fake", "OffZSR004_Fake", "OffZSR005_Fake", "OffZSR006_Fake", "OffZSR007_Fake", "OffZSR008_Fake",
 	    "OffZSR009_Fake", "OffZSR010_Fake", "OffZSR011_Fake", "OffZSR012_Fake", "OffZSR013_Fake", "OffZSR014_Fake", "OffZSR015_Fake",
+   */     
+    //signal regions
+        "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
+	    "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012", "OnZSR013", "OnZSR014", "OnZSR015", "OnZSR016", "OnZSR017",
+	
+	    "OffZSR001", "OffZSR002", "OffZSR003", "OffZSR004", "OffZSR005", "OffZSR006", "OffZSR007", "OffZSR008",
+	    "OffZSR009", "OffZSR010", "OffZSR011", "OffZSR012", "OffZSR013", "OffZSR014", "OffZSR015", "OffZSR016", "OffZSR017",
+
+    //signal application regions
+        "OnZSR001_Fake", "OnZSR002_Fake", "OnZSR003_Fake", "OnZSR004_Fake", "OnZSR005_Fake", "OnZSR006_Fake", "OnZSR007_Fake", "OnZSR008_Fake",
+	    "OnZSR009_Fake", "OnZSR010_Fake", "OnZSR011_Fake", "OnZSR012_Fake", "OnZSR013_Fake", "OnZSR014_Fake", "OnZSR015_Fake", "OnZSR016_Fake", "OnZSR017_Fake",
+
+	    "OffZSR001_Fake", "OffZSR002_Fake", "OffZSR003_Fake", "OffZSR004_Fake", "OffZSR005_Fake", "OffZSR006_Fake", "OffZSR007_Fake", "OffZSR008_Fake",
+	    "OffZSR009_Fake", "OffZSR010_Fake", "OffZSR011_Fake", "OffZSR012_Fake", "OffZSR013_Fake", "OffZSR014_Fake", "OffZSR015_Fake", "OffZSR016_Fake", "OffZSR017_Fake",
  
     //baseline regions
         "OnZBaseline", "OffZBaseline",
@@ -648,7 +662,7 @@ void SUSY3L::defineOutput(){
     */
     
     //SR yields
-    _hm->addVariable("SRS"  ,  15,  1,  16, "signal region"    );
+    _hm->addVariable("SRS"  ,  17,  1,  18, "signal region"    );
     
     if(!_doPlots) return; 
 
@@ -1139,7 +1153,7 @@ void SUSY3L::setSignalRegion() {
     _val["HT"] = &(_HT);
     _val["MET"] = &(_metPt);
 
-    //0 b-jets
+/*    //0 b-jets
     if( _SR== "OnZSR001" || _SR== "OffZSR001" ) {
         setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:60:400");
     }
@@ -1193,6 +1207,71 @@ void SUSY3L::setSignalRegion() {
     else if( _SR== "OnZSR015" || _SR== "OffZSR015" ) {
         setSelLine("NJ:>=:2|NB:>=:0|MET:>=:300|HT:>=:60");
     }
+  */
+  
+    //0 b-jets
+    if( _SR== "OnZSR001" || _SR== "OffZSR001" ) {
+        setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:60:400");
+    }
+    else if( _SR== "OnZSR002" || _SR== "OffZSR002" ) {
+        setSelLine("NJ:>=:2|NB:=:0|MET:[[:150:300|HT:[[:60:400");
+    }
+    else if( _SR== "OnZSR003" || _SR== "OffZSR003" ) {
+        setSelLine("NJ:>=:2|NB:=:0|MET:[[:50:150|HT:[[:400:600");
+    }
+    else if( _SR== "OnZSR004" || _SR== "OffZSR004" ) {
+        setSelLine("NJ:>=:2|NB:=:0|MET:[[:150:300|HT:[[:400:600");
+    }
+
+    //1 b-jet
+    else if( _SR== "OnZSR005" || _SR== "OffZSR005" ) {
+        setSelLine("NJ:>=:2|NB:=:1|MET:[[:50:150|HT:[[:60:400");
+    }
+    else if( _SR== "OnZSR006" || _SR== "OffZSR006" ) {
+        setSelLine("NJ:>=:2|NB:=:1|MET:[[:150:300|HT:[[:60:400");
+    }
+    else if( _SR== "OnZSR007" || _SR== "OffZSR007" ) {
+        setSelLine("NJ:>=:2|NB:=:1|MET:[[:50:150|HT:[[:400:600");
+    }
+    else if( _SR== "OnZSR008" || _SR== "OffZSR008" ) {
+        setSelLine("NJ:>=:2|NB:=:1|MET:[[:150:300|HT:[[:400:600");
+    }
+
+    //2 b-jets
+    else if( _SR== "OnZSR009" || _SR== "OffZSR009" ) {
+        setSelLine("NJ:>=:2|NB:=:2|MET:[[:50:150|HT:[[:60:400");
+    }
+    else if( _SR== "OnZSR010" || _SR== "OffZSR010" ) {
+        setSelLine("NJ:>=:2|NB:=:2|MET:[[:150:300|HT:[[:60:400");
+    }
+    else if( _SR== "OnZSR011" || _SR== "OffZSR01" ) {
+        setSelLine("NJ:>=:2|NB:=:2|MET:[[:50:150|HT:[[:400:600");
+    }
+    else if( _SR== "OnZSR012" || _SR== "OffZSR012" ) {
+        setSelLine("NJ:>=:2|NB:=:2|MET:[[:150:300|HT:[[:400:600");
+    }
+
+    //3 b-jets
+    else if( _SR== "OnZSR013" || _SR== "OffZSR013" ) {
+        setSelLine("NJ:>=:2|NB:>=:3|MET:[[:50:300|HT:[[:60:600");
+    }
+
+    //ultra high MET and HT region
+
+    //ON-Z
+    else if( _SR== "OnZSR014" || _SR== "OffZSR014") {
+        setSelLine("NJ:>=:2|NB:>=:0|MET:[[:50:150|HT:>=:600");
+    }
+    else if( _SR== "OnZSR015" || _SR== "OffZSR015" ) {
+        setSelLine("NJ:>=:2|NB:>=:0|MET:[[:150:300|HT:>=:600");
+    }
+    else if( _SR== "OnZSR016" || _SR== "OffZSR016") {
+        setSelLine("NJ:>=:2|NB:>=:0|MET:>=:300|HT:[[:60:400");
+    }
+    else if( _SR== "OnZSR017" || _SR== "OffZSR017") {
+        setSelLine("NJ:>=:2|NB:>=:0|MET:>=:300|HT:>=:400");
+    }
+
 }
 
 
@@ -1454,7 +1533,7 @@ void SUSY3L::advancedSelection(int WF){
     */
     
     int offset = 0;
-    if(WF==kGlobal_Fake) offset=kOffZSR015;
+    if(WF==kGlobal_Fake) offset=kOffZSR017;
    
     if(!_isFake){
         if(_isOnZ) setWorkflow(kOnZBaseline);
@@ -1475,8 +1554,8 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     //extra cut for onZ to remove DY
-    //if(_isOnZ && _met->pt() < 70 && _nBJets<2) return;
-    
+    if(_isOnZ && _met->pt() < 70 && _nBJets<2) return;
+   
     //gen matching
     if(!_vc->get("isData") && _doGenMatch && !_isFake) {
         if(!passGenSelection()) return;
@@ -1494,18 +1573,24 @@ void SUSY3L::advancedSelection(int WF){
     //categorize events into signal regions
     if(_categorization){
         categorize();
+      
+        //workaround for asymmetric SR 
+        if(getCurrentWorkflow()==32) setWorkflow(31);
+        if(getCurrentWorkflow()==66) setWorkflow(65);
+        if(getCurrentWorkflow()==34) setWorkflow(33);
+        if(getCurrentWorkflow()==68) setWorkflow(67);
+       
         
         int wf = getCurrentWorkflow();
         int offset = 0;
         if(!_isFake){
             if(_isOnZ){setWorkflow(kOnZBaseline);}
-            else{setWorkflow(kOffZBaseline); offset = kOnZSR015;}
+            else{setWorkflow(kOffZBaseline); offset = kOnZSR017;}
         }    
         if(_isFake){
-            if(_isOnZ){setWorkflow(kOnZBaseline_Fake); offset = kOffZSR015;}
-            else{setWorkflow(kOffZBaseline_Fake); offset = kOnZSR015_Fake;}
+            if(_isOnZ){setWorkflow(kOnZBaseline_Fake); offset = kOffZSR017;}
+            else{setWorkflow(kOffZBaseline_Fake); offset = kOnZSR017_Fake;}
         }
-
         fill( "SRS", wf-offset , _weight );
         
         setWorkflow(wf);
@@ -1948,9 +2033,9 @@ void SUSY3L::categorize(){
     */
     int offset = 0;
     if(!_isFake && _isOnZ) offset =1;
-    else if(!_isFake && !_isOnZ) offset =1+kOnZSR015;
-    else if(_isFake && _isOnZ) offset =1+kOffZSR015;
-    else if(_isFake && !_isOnZ) offset =1+ kOnZSR015_Fake;
+    else if(!_isFake && !_isOnZ) offset =1+kOnZSR017;
+    else if(_isFake && _isOnZ) offset =1+kOffZSR017;
+    else if(_isFake && !_isOnZ) offset =1+ kOnZSR017_Fake;
     
     string categ="";
     for(size_t ic=0;ic< (_categs.size()-6)/2;ic++){
