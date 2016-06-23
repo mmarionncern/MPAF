@@ -1554,7 +1554,7 @@ void SUSY3L::advancedSelection(int WF){
     if(!makeCut<float>( _met->pt(), _valCutMETBR, _cTypeMETBR, "missing transverse energy", _upValCutMETBR) ) return;
 
     //extra cut for onZ to remove DY
-    if(_isOnZ && _met->pt() < 70 && _nBJets<2) return;
+    if(_isOnZ && _met->pt() < 70 && _HT < 400 && _nBJets<2) return;
    
     //gen matching
     if(!_vc->get("isData") && _doGenMatch && !_isFake) {
