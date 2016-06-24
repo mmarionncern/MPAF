@@ -19,23 +19,23 @@ void susy3l_data() {
     bool mcOnly = false;
     bool closure = false;
     bool fixLeg = true;
-  
+    bool printTable = true;
+
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
     md.anConf.configureData(false, 0, mcOnly);
     //}
  
     string sigs = "none"; 
-    bool data = true;
+    bool data = false;
     bool manual = true;
     if(!manual) string region = "REGION";
-    else string region = "OnZBaseline";
+    else string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "ht";}
+    else{string obs = "srs";}
      
-    float lumi=804; //pb-1 19470
-    //float lumi=2600; //pb-1 19470
+    float lumi=10000; //pb-1 19470
     float energy=13; //TeV
 
     if(lumi>804 && data && !(region=="WZCR" || region=="FakeCR")){
@@ -139,7 +139,7 @@ void susy3l_data() {
     if(obs == "srs"){
         md.dp.setObservables("SRS" + region);
         int binning=1;
-        double rangeX[2]={1,16};
+        double rangeX[2]={1,18};
         bool logYScale=false;
     }
     if(obs == "mu_multi"){
@@ -232,7 +232,6 @@ void susy3l_data() {
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
-
 
 
     //string autoBinFile="susybinninghigh";
@@ -338,9 +337,9 @@ void susy3l_data() {
 */
 
     //non-prompt predicted
-    md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18, scale    );
 
     //signal
     if(sigs=="t"){
@@ -367,6 +366,9 @@ void susy3l_data() {
     md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "data"          , kBlack    );
     md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "data"          , kBlack    );
     md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_274444_275125"      , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "data"          , kBlack    );
     }
 
 
@@ -382,7 +384,18 @@ void susy3l_data() {
    
     // }
     
-
+    
+   string categs[32]={
+        "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004",
+        "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
+        "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012",
+        "OnZSR013", "OnZSR014", "OnZSR015", "OnZSR016", "OnZSR017",
+    
+        "OffZSR001", "OffZSR002", "OffZSR003", "OffZSR004", 
+        "OffZSR005", "OffZSR006", "OffZSR007", "OffZSR008", 
+        "OffZSR009", "OffZSR010", "OffZSR011", "OffZSR012",
+        "OffZSR013", "OffZSR014", "OffZSR016"
+    };
 
 
     //plotting ================
@@ -401,7 +414,27 @@ void susy3l_data() {
 
     md.doPlot();
     // md.doStatisticsPlot();
-    
+       
+    if(printTable){
+    //print result table
+    cout << "______________________________________________" <<endl;
+    cout << "On-Z:" << endl;
+    for(int i=0;i<17;i++){
+        string sr= "global_";
+        sr += categs[i];
+        if(i==0) md.getStatistics(sr, true, true);
+        else md.getStatistics(sr, true, false);
+    }
+    cout << "______________________________________________" <<endl;
+    cout << "Off-Z:" << endl;
+    for(int i=0;i<15;i++){
+        string sr= "global_";
+        sr += categs[i+17];
+        if(i==0) md.getStatistics(sr, true, true);
+        else md.getStatistics(sr, true, false);
+    }
+    }
+
     //md.getStatistics("global_OnZSR001");
     
     md.savePlot("SUSY3L");

@@ -24,7 +24,7 @@ void susy3l_tt_closure() {
    
     string sigs = "none"; 
     bool data = false;
-    bool manual = false;
+    bool manual = true;
     if(!manual){string region = "REGION";}
     else string region = "OnZBaseline";
 
@@ -114,7 +114,7 @@ void susy3l_tt_closure() {
     if(obs == "srs"){
         md.dp.setObservables("SRS" + region);
         int binning=1;
-        double rangeX[2]={1,16};
+        double rangeX[2]={1,18};
         //bool logYScale=true;
     }
     if(obs == "mu_multi"){
