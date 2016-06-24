@@ -916,7 +916,7 @@ AnaUtils::printTables(string categ, bool latexOnly, bool header) {
             cout<<" $\\pm$ "<<sqrt(_itEIMap->second.sumw2);
           }
           else
-            cout<<" - "; 
+            cout<<" - " << "$\\pm$" << " - "; 
         }
         
         if(dsNames[id]=="data" || dsNames[id]=="Data" ||
