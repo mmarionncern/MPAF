@@ -2782,13 +2782,13 @@ bool SUSY3L::passNoiseFilters(){
     if(_vc->get("hbheFilterIso"     ) == 0) return false;
     if(_vc->get("Flag_eeBadScFilter") == 0) return false;
     if(_vc->get("Flag_goodVertices" ) == 0) return false;
-    if(_sampleName.find("Run2015C") != std::string::npos){
-        if(_vc -> get("Flag_CSCTightHaloFilter") == 0) return false;
-    }
-    else {
-        if(!passCSCfilter()                          ) return false;
-        if(!passEESCfilter()                         ) return false;
-    }
+    //if(_sampleName.find("Run2015C") != std::string::npos){
+    //    if(_vc -> get("Flag_CSCTightHaloFilter") == 0) return false;
+    //}
+    //else {
+    //    if(!passCSCfilter()                          ) return false;
+    //    if(!passEESCfilter()                         ) return false;
+    //}
 
     return true;
 
