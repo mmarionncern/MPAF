@@ -60,12 +60,21 @@ void SUSY3L::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_DoubleEle8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
     _vTR_lines.push_back("HLT_BIT_HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
     _vTR_lines.push_back("HLT_BIT_HLT_DoubleMu8_Mass8_PFHT300_v");
-    //isolated triggers
-    _vTR_lines.push_back("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");  
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");  
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");
+    //isolated triggers 2016
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");                   //TODO: not in tree yet
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");  
+    _vTR_lines.push_back("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");     
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v");  
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");       //TODO: not in tree yet
+
+    
+    //isolated triggers 2015
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");                  //no longer in 2016 menu
     _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");  
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");      //has prescale 0 in column 1e34 
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+    
     //tri-lepton trigger
     //_vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
     //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_DiEle12_CaloIdL_TrackIdL_v");
@@ -487,7 +496,7 @@ void SUSY3L::run(){
     counter("JME filters");
 
     //check HLT trigger decition, only let triggered events pass (no HLT info in fast sim)
-    if(!_fastSim && _version != 8){
+    if(!_fastSim){
         if(!passHLTbit()) return;
     }
     counter("HLT");
@@ -624,7 +633,9 @@ void SUSY3L::run(){
     if(!_isFake){
         setWorkflow(kGlobal);
         advancedSelection( kGlobal );
-    } 
+    }
+    
+    //if(_vc->get("isData") == 1 && _HT>400 && !_isFake && passNoiseFilters()) cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets <<  " " << _met->pt() << " " << _HT << " "  << _isOnZ  << " " << _isFake << endl;
 
     //fake background event 
     else{
@@ -2697,7 +2708,10 @@ bool SUSY3L::passHLTbit(){
         parameters: none
         return: true (if event has been triggered), false (else)
     */
-
+ 
+    //for 80X simulation return true
+    if(_version == 8 && !_vc->get("isData")) return true;
+    
     vector<string> lines;
 
     lines = _vTR_lines;
