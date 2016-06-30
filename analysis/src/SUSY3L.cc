@@ -621,9 +621,9 @@ void SUSY3L::run(){
     setWorkflow(kGlobal);	
   
     //limit run number to unblineded json
-    if(_vc->get("isData") == 1){
-        if(_vc->get("run")>274240){return;}
-    }
+    //if(_vc->get("isData") == 1){
+    //    if(_vc->get("run")>274240){return;}
+    //}
 
     //baseline selection
     bool baseSel = multiLepSelection();
@@ -634,9 +634,6 @@ void SUSY3L::run(){
         setWorkflow(kGlobal);
         advancedSelection( kGlobal );
     }
-    
-    //if(_vc->get("isData") == 1 && _HT>400 && !_isFake && passNoiseFilters()) cout << _vc->get("run") << " " << _vc->get("lumi") << " " << _vc->get("evt") << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets <<  " " << _met->pt() << " " << _HT << " "  << _isOnZ  << " " << _isFake << endl;
-
     //fake background event 
     else{
 		//loop over all combinations of tight and fake leptons
@@ -686,15 +683,15 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("pt_1st_lepton"    ,  200,    0.0,  200.0,    "p_{T} leading lepton (GeV)"                );
     _hm->addVariable("pt_2nd_lepton"    ,  200,    0.0,  200.0,    "p_{T} sub-leading lepton (GeV)"            );
     _hm->addVariable("pt_3rd_lepton"    ,  200,    0.0,  200.0,    "p_{T} 3rd lepton (GeV)"                    );
-    _hm->addVariable("flavor"           ,  5,      0.0,  5.0,      "N_{#mu}"                                   );
+    _hm->addVariable("flavor"           ,  5,      0.0,  5.0,      "flavor (N_{eee}/N_{#muee}/N_{#mu#mue}/N_{#mu#mu#mu}/N_{>3 leptons})" );
+    _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
+    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
+    _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
 
     if(!_doPlotsVerbose) return; 
     
     //other observables
     _hm->addVariable("lowestOssfMll"    ,  400,     0.0,  400.0,    "smallest ossf pair mll (GeV)"              );
-    _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
-    _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
-    _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
     _hm->addVariable("lep1_SIP3D"       , 100,       0.,    5.0,    "leading lepton SIP_{3D}"                   );
     _hm->addVariable("lep1_dxy"         , 400,    -200.,  200.0,    "leading lepton d_{xy} (#mum)"              );
     _hm->addVariable("lep1_dz"          , 800,    -400.,  400.0,    "leading lepton d_{z} (#mum)"               );
@@ -1566,7 +1563,11 @@ void SUSY3L::advancedSelection(int WF){
 
     //extra cut for onZ to remove DY
     if(_isOnZ && _met->pt() < 70 && _HT < 400 && _nBJets<2) return;
-   
+  
+    //long long int evt=_vc->get("evt");
+    //if(_vc->get("isData") == 1 && _HT>400 && !_isFake) cout << _vc->get("run") << " " << _vc->get("lumi") << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets <<  " " << _met->pt() << " " << _HT << " "  << _isOnZ  << " " << _isFake << endl;
+    //if(_vc->get("isData") == 1 && _HT<400 && !_isFake) return;
+    
     //gen matching
     if(!_vc->get("isData") && _doGenMatch && !_isFake) {
         if(!passGenSelection()) return;
@@ -2422,6 +2423,17 @@ void SUSY3L::fillHistos(bool additionalPlots){
     fill("pt_3rd_lepton" , _leps[2]->pt()   , _weight);
     
     fill("flavor"   , _flavor               , _weight);
+     
+    if(!_isFake){
+        fill("mu_multiplicity"  , _nMus         , _weight);
+        fill("el_multiplicity"  , _nEls         , _weight);
+        fill("lep_multiplicity" , _nMus+_nEls   , _weight);
+    }
+    if(_isFake){
+        fill("mu_multiplicity"  , _fMus         , _weight);
+        fill("el_multiplicity"  , _fEls         , _weight);
+        fill("lep_multiplicity" , _fMus+_fEls   , _weight);
+    }
     
     if(!_doPlotsVerbose) return; 
 
@@ -2444,18 +2456,7 @@ void SUSY3L::fillHistos(bool additionalPlots){
     //other observables
     _lowOSSFMll = lowestOssfMll(_tightLepsPtCutMllCut);
     fill("lowestOssfMll"    , _lowOSSFMll   , _weight);
-    
-    if(!_isFake){
-        fill("mu_multiplicity"  , _nMus         , _weight);
-        fill("el_multiplicity"  , _nEls         , _weight);
-        fill("lep_multiplicity" , _nMus+_nEls   , _weight);
-    }
-    if(_isFake){
-        fill("mu_multiplicity"  , _fMus         , _weight);
-        fill("el_multiplicity"  , _fEls         , _weight);
-        fill("lep_multiplicity" , _fMus+_fEls   , _weight);
-    }
-    
+   
 
 }
 
