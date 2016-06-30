@@ -392,7 +392,7 @@ void SUSY3L::initialize(){
    
     
     //load pile-up weights 80X
-    _dbm->loadDb("puWeights80X","db2016/PileupWeightNVtx_2016_2fb.root","puw");
+    _dbm->loadDb("puWeights80X","db2016/puWeights_4fb.root","puw");
     //_dbm->loadDb("puWeightsUp","PileupWeightNVtx_2016_800pb.root","puw");
     //_dbm->loadDb("puWeightsDown","PileupWeightNVtx_2016_800pb.root","puw");
  
@@ -457,8 +457,8 @@ void SUSY3L::modifyWeight() {
             string db="puWeights80X";
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kUp==getUncDir() ){db="puWeightsUp";}
 	        if((isInUncProc() &&  getUncName()=="pu") && SystUtils::kDown==getUncDir() ){db="puWeightsDown";}
-	        //_weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") ); #TODO: roll back to nTrueInt once available
-            _weight *= _susyMod->getPuWeight( _vc->get("nVert") );
+	        _weight *= _dbm->getDBValue(db, _vc->get("nTrueInt") ); 
+            //_weight *= _susyMod->getPuWeight( _vc->get("nVert") );
         }
         if(!_closure && _version == 4){
             string db="puWeights74X";
