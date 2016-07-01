@@ -361,8 +361,8 @@ Dataset::loadHistos(string path, string dir, string subdir, string filename, str
        // find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() &&
        // !findUnc ) continue;
     
-
     if(optCat!="") {
+      if (optCat.substr(0,1)!="_") optCat="_"+optCat;
       size_t op=varName.find(optCat);
       if(op==string::npos) continue;
       else varName.erase(op,optCat.size());
