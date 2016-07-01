@@ -213,6 +213,9 @@ void SUSY3L::initialize(){
     _vc->registerVar("Flag_eeBadScFilter"              );   
     _vc->registerVar("hbheFilterIso"                   );
     _vc->registerVar("Flag_goodVertices"               );
+    _vc->registerVar("Flag_globalTightHalo2016Filter"  );
+    _vc->registerVar("Flag_badChargedHadronFilter"     );
+    _vc->registerVar("Flag_badMuonFilter"              );
  
     //weights
     _vc->registerVar("genWeight"                       );       //generator weight to account for negative weights in MCatNLO
@@ -2793,10 +2796,13 @@ bool SUSY3L::passNoiseFilters(){
 
     if(!_vc->get("isData")) return true;
 
-    if(_vc->get("hbheFilterNew25ns" ) == 0) return false;
-    if(_vc->get("hbheFilterIso"     ) == 0) return false;
-    if(_vc->get("Flag_eeBadScFilter") == 0) return false;
-    if(_vc->get("Flag_goodVertices" ) == 0) return false;
+    if(_vc->get("hbheFilterNew25ns"             ) == 0) return false;
+    if(_vc->get("hbheFilterIso"                 ) == 0) return false;
+    if(_vc->get("Flag_eeBadScFilter"            ) == 0) return false;
+    if(_vc->get("Flag_goodVertices"             ) == 0) return false;
+    if(_vc->get("Flag_globalTightHalo2016Filter") == 0) return false;
+    if(_vc->get("Flag_badChargedHadronFilter"   ) == 0) return false;               //TODO: to be applied on MC as well after next production
+    if(_vc->get("Flag_badMuonFilter"            ) == 0) return false;               //TODO: to be applied on MC as well after next production
     //if(_sampleName.find("Run2015C") != std::string::npos){
     //    if(_vc -> get("Flag_CSCTightHaloFilter") == 0) return false;
     //}
