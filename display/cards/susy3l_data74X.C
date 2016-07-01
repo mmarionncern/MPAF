@@ -18,6 +18,7 @@ void susy3l_data74X() {
 
     bool mcOnly = false;
     bool closure = false;
+    bool nlo_vs_lo = false;
     bool fixLeg = true;
     bool printTable = false;
   
@@ -404,7 +405,7 @@ void susy3l_data74X() {
 			 underFlowBin, showDMCRatio, showGrid, 
 			 stacking, addSystematics, mcStatSyst,
 			 markerSize, lineWidth,summedSignal,
-             mcOnly,cmsPrel, uncDet, closure, fixLeg);
+             mcOnly,cmsPrel, uncDet, closure, nlo_vs_lo, fixLeg);
     md.prepareDisplay();
     
     //external systematic uncertainties

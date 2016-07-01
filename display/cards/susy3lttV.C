@@ -1,24 +1,24 @@
 MPAFDisplay md;
 
-void susy3l_data() {
+void susy3lttV() {
     md.refresh();
 
 
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    //string fileName="3l_test80Xskim"; //was treeName in LUNE susy_cut_lowpt
-    //string fileList="3l_test80Xskim"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l_test80Xskim"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l_test80Xskim"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
-    string fileName="merged_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    //string fileName="merged_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
+    //string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
  
 
     string hName="";
 
-    bool mcOnly = false;
+    bool mcOnly = true;
     bool closure = false;
-    bool nlo_vs_lo = false;
+    bool nlo_vs_lo = true;
     bool fixLeg = true;
     bool printTable = false;
 
@@ -28,22 +28,16 @@ void susy3l_data() {
     //}
  
     string sigs = "none"; 
-    bool data = true;
+    bool data = false;
     bool manual = true;
     if(!manual) string region = "REGION";
-    else string region = "OnZBaseline";
+    else string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
     else{string obs = "ht";}
      
-    
-    float lumi=3990; //pb-1 19470
+    float lumi=10000; //pb-1 19470
     float energy=13; //TeV
-
-    //if(lumi>804 && data && !(region=="WZCR" || region=="FakeCR")){
-    //    cout << "Warning: this region is blinded!" << endl;
-    //    return;
-    //}
 
     //Binning & title ************************* Binning & titre
     string yTitle="number of events";
@@ -88,14 +82,14 @@ void susy3l_data() {
     if(obs == "met"){
         md.dp.setObservables("MET" + region);
         if(region=="WZCR" || region == "FakeCR"){int binning=10; double rangeX[2]={0,120};bool logYScale=false;}
-        else{int binning=50; double rangeX[2]={50,500};}
+        else{int binning=50; double rangeX[2]={0,500};}
         //bool logYScale=true;
     }
     if(obs == "ht"){
         md.dp.setObservables("HT" + region);
         if(region=="WZCR"){int binning=50; double rangeX[2]={0,200};bool logYScale=false;}
         else if(region=="FakeCR"){int binning=50; double rangeX[2]={0,400};bool logYScale=false;}
-        else{int binning=60; double rangeX[2]={60,960};}
+        else{int binning=60; double rangeX[2]={0,960};}
         //bool logYScale=true;
     }
     if(obs == "mt"){
@@ -110,7 +104,6 @@ void susy3l_data() {
         if(region=="WZCR"){int binning=10;}
         else int binning=20;
         double rangeX[2]={0,200};
-        if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
         //bool logYScale=true;
     }
     if(obs == "pt2"){
@@ -118,7 +111,6 @@ void susy3l_data() {
         if(region=="WZCR"){int binning=10;}
         else int binning=20;
         double rangeX[2]={0,150};
-        if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
         //bool logYScale=true;
     }   
     if(obs == "pt3"){
@@ -126,7 +118,6 @@ void susy3l_data() {
         if(region=="WZCR"){int binning=10;}
         else int binning=20;
         double rangeX[2]={0,100};
-        if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
         //bool logYScale=true;
     }
     if(obs == "ftype"){
@@ -138,36 +129,31 @@ void susy3l_data() {
     if(obs == "flavor"){
         md.dp.setObservables("flavor" + region);
         int binning=1;
-        double rangeX[2]={0,5};
-        if(region=="WZCR" || region == "FakeCR"){double rangeX[2]={0,4};}
-        if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
-        //bool logYScale=false;
+        double rangeX[2]={0,4};
+        //bool logYScale=true;
     }
     if(obs == "srs"){
         md.dp.setObservables("SRS" + region);
         int binning=1;
         double rangeX[2]={1,18};
-        //bool logYScale=false;
+        bool logYScale=false;
     }
     if(obs == "mu_multi"){
         md.dp.setObservables("mu_multiplicity" + region);
         int binning=1;
         double rangeX[2]={0,6};
-        if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
         //bool logYScale=true;
     }
     if(obs == "el_multi"){
         md.dp.setObservables("el_multiplicity" + region);
         int binning=1;
         double rangeX[2]={0,6};
-        if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
         //bool logYScale=true;
     }
     if(obs == "lep_multi"){
         md.dp.setObservables("lep_multiplicity" + region);
         int binning=1;
-        double rangeX[2]={3,7};
-        if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
+        double rangeX[2]={0,6};
         //bool logYScale=true;
     }
     if(obs == "nfo"){
@@ -278,7 +264,7 @@ void susy3l_data() {
     //===============================================================
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
-
+/*
     //rare
     md.anConf.addSample( "GGHZZ4L"                              ,  "rare"        , kMagenta-7, scale    );
     md.anConf.addSample( "VHToNonbb"                            ,  "rare"        , kMagenta-7, scale   );
@@ -303,17 +289,19 @@ void susy3l_data() {
     //md.anConf.addSample( "ZGTo2LG"                              ,  "ZG"    , kBlue-10     );
     //md.anConf.addSample( "TTGJets"                              ,  "TTG"   , kBlue     );
 
-
+*/
 
 
     //TTZ/H
-    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z/H" , kGreen-6, scale      );
-    md.anConf.addSample( "TTHnobb_pow"                          ,  "t#bar{t}Z/H" , kGreen-6, scale      );
-    md.anConf.addSample( "TTLLJets_m1to10"                      ,  "t#bar{t}Z/H" , kGreen-6, scale      );
+    //md.anConf.addSample( "TTZ_LO"                               ,  "t#bar{t}Z LO"   , kGreen-6, scale      );
+    //md.anConf.addSample( "TTZToLLNuNu"                          ,  "pseudodata"     , kBlack  , scale      );
+    //md.anConf.addSample( "TTHnobb_pow"                          ,  "t#bar{t}Z/H" , kGreen-6, scale      );
+    //md.anConf.addSample( "TTLLJets_m1to10"                      ,  "t#bar{t}Z/H" , kGreen-6, scale      );
     
     //TTW
-    md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3, scale      );
-
+    md.anConf.addSample( "TTW_LO"                               ,  "t#bar{t}W LO"   , kGreen+3, scale      );
+    md.anConf.addSample( "TTWToLNu"                             ,  "pseudodata"  , kBlack  , scale      );
+/*
 
     //non-prompt
     //md.anConf.addSample( "TTJets"                               ,  "non-prompt"       , 18            );
@@ -328,7 +316,7 @@ void susy3l_data() {
     //md.anConf.addSample( "WWTo2L2Nu"                            ,  "non-prompt"       , 18      );
     //md.anConf.addSample( "ZZTo2L2Nu"                            ,  "non-prompt"       , 18      );
 
-
+*/
 
 
 
@@ -347,13 +335,10 @@ void susy3l_data() {
 */
 
     //non-prompt predicted
-    md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_274444_275125"      , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "non-prompt"          , 18, scale    );
- 
+    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18, scale    );
+
     //signal
     if(sigs=="t"){
     md.anConf.addSample( "T1tttt_mGo1200_mChi800"                       ,  "T1tttt (1200) x10 sig"     , kBlue-3, 10 );
@@ -379,9 +364,9 @@ void susy3l_data() {
     md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "data"          , kBlack    );
     md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "data"          , kBlack    );
     md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_274444_275125"      , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "data"          , kBlack    );
+    //md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_274444_275125"      , "data"          , kBlack    );
+    //md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "data"          , kBlack    );
+    //md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "data"          , kBlack    );
     }
 
 
@@ -428,6 +413,12 @@ void susy3l_data() {
     md.doPlot();
     // md.doStatisticsPlot();
        
+    
+    md.getIntegral(0,400);
+    md.getIntegral(400,600);
+    md.getIntegral(600,10000);
+    
+    
     if(printTable){
     //print result table
     cout << "______________________________________________" <<endl;
@@ -435,7 +426,6 @@ void susy3l_data() {
     for(int i=0;i<17;i++){
         string sr= "global_";
         sr += categs[i];
-        //sr += "_Fake";
         if(i==0) md.getStatistics(sr, true, true);
         else md.getStatistics(sr, true, false);
     }
@@ -444,7 +434,6 @@ void susy3l_data() {
     for(int i=0;i<15;i++){
         string sr= "global_";
         sr += categs[i+17];
-        //sr += "_Fake";
         if(i==0) md.getStatistics(sr, true, true);
         else md.getStatistics(sr, true, false);
     }

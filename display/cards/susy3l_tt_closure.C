@@ -13,6 +13,7 @@ void susy3l_tt_closure() {
 
     bool mcOnly = true;
     bool closure = true;
+    bool nlo_vs_lo = false;
     bool fixLeg = true;
     bool scale = true;
   
@@ -258,7 +259,7 @@ void susy3l_tt_closure() {
 			 underFlowBin, showDMCRatio, showGrid, 
 			 stacking, addSystematics, mcStatSyst,
 			 markerSize, lineWidth,summedSignal,
-             mcOnly,cmsPrel, uncDet, closure, fixLeg);
+             mcOnly,cmsPrel, uncDet, closure, nlo_vs_lo, fixLeg);
     md.prepareDisplay();
     md.doPlot();
     //md.doStatisticsPlot();
