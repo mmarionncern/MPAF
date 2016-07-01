@@ -1487,6 +1487,7 @@ DisplayClass::drawDataMCRatio() {
   emptyHisto->GetXaxis()->SetTitle( (_xtitle+" ").c_str() );
   emptyHisto->GetYaxis()->SetTitle( "Data/MC" );
   if(_closure) emptyHisto->GetYaxis()->SetTitle( "pred/obs" );
+  if(_nlo_vs_lo) emptyHisto->GetYaxis()->SetTitle( "NLO/LO" );
   emptyHisto->GetXaxis()->SetTitleSize(0.20);
   emptyHisto->GetXaxis()->SetTitleOffset(0.80);
   emptyHisto->GetXaxis()->SetLabelOffset(0.007);
@@ -1506,6 +1507,7 @@ DisplayClass::drawDataMCRatio() {
   ratio->GetXaxis()->SetTitle( (_xtitle+"_").c_str() );
   ratio->GetYaxis()->SetTitle( "Data/MC" );
   if(_closure) ratio->GetYaxis()->SetTitle( "pred/obs" );
+  if(_nlo_vs_lo) ratio->GetYaxis()->SetTitle( "NLO/LO" );
   ratio->GetXaxis()->SetTitleSize(0.20);
   ratio->GetXaxis()->SetTitleOffset(0.83);
   ratio->GetXaxis()->SetLabelSize(0.165);
@@ -2225,7 +2227,7 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
 			       bool ShowDMCRatio, bool ShowGrid, bool staking,
 			       bool AddSystematics, bool mcStatSyst,
 			       float MarkerSize, float LineWidth, bool sSignal,
-			       bool mcOnly, bool cmsPrel, bool uncDet, bool closure, bool fixLeg ) {
+			       bool mcOnly, bool cmsPrel, bool uncDet, bool closure, bool nlo_vs_lo, bool fixLeg ) {
 
   _ytitle = YTitle;
   _ymin = rangeY[0];
@@ -2268,6 +2270,7 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
 
   _uncDet = uncDet;
   _closure = closure;
+  _nlo_vs_lo = nlo_vs_lo;
   _fixLeg = fixLeg;
 }
 
@@ -2721,8 +2724,8 @@ DisplayClass::printInteg(float x1, float x2, float y1, float y2) {
 	  << _hData->IntegralAndError(_hData->GetXaxis()->FindBin(x1), _hData->GetXaxis()->FindBin(x2), (errors.back()) );
       cout<<" +- "<<errors.back()
 	  <<" // MC-> "
-	  <<_hMC->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2), (errors[_nhmc+1]) );
-      cout<<" +- "<<errors[_nhmc+1]<<endl;
+	  <<_hMC->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2), (errors[_nhmc]) );
+      cout<<" +- "<<errors[_nhmc]<<endl;
     }
     else if(_mcOnly && _hMC) {
       cout<<" Integral : MC -> "<<_hMC->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2), errors[_nhmc+1]);
@@ -3019,6 +3022,7 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
 	
   if(!_mcOnly){
     if(_closure) _leg->AddEntry(_gData,"predicted", legOpt.c_str() );
+    if(_nlo_vs_lo) _leg->AddEntry(_gData,"NLO", legOpt.c_str() );
     else _leg->AddEntry(_gData,"data", legOpt.c_str() );
     countEntries +=1;
   }
