@@ -151,8 +151,10 @@ QCD_Pt170to300_EMEnriched	18810
 QCD_Pt300toInf_EMEnriched	1350
 TTWToLNu                0.2043
 TTWToLNu_LO             0.6008
+TTW_LO                  0.6105
 TTZToLLNuNu             0.2529
 TTZToLLNuNu_LO          0.8393
+TTZ_LO                  0.7826 
 WJetsToLNucharge	61526.7
 DYJetsToLL_M50charge	6024
 DYJetsToLL_M10to50charge	18610

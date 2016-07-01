@@ -152,8 +152,10 @@ QCD_Pt170to300_EMEnriched	1.00
 QCD_Pt300toInf_EMEnriched	1.00
 TTWToLNu                                1.00
 TTWToLNu_LO                             1.00
+TTW_LO                                  1.00
 TTZToLLNuNu                             1.00
 TTZToLLNuNu_LO                          1.00
+TTZ_LO                                  1.00
 WWZ	            1 
 WZZ	            1
 ZZTo4L          1
