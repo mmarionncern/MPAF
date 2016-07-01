@@ -41,10 +41,12 @@
 #include "analysis/utils/Parser.hh"
 #include "analysis/utils/Tools.hh"
 #include "analysis/utils/Verbose.hh"
+#include "analysis/utils/mt2_bisect.h"
 
 
 #include "analysis/tools/Candidate.hh"
 #include "analysis/tools/CandFwd.hh"
+
 
 #include "tools/src/DataBaseManager.hh"
 #include "tools/src/Dataset.hh"
@@ -93,9 +95,9 @@ protected:
 		  float v7 = -100000, float v8 = -100000, float v9 = -100000,
 		  float v10 = -100000);
  
-  string getCfgVarS(string n);
-  int getCfgVarI(string n);
-  float getCfgVarF(string n);
+  string getCfgVarS(string n, string def);
+  int getCfgVarI(string n, int def);
+  float getCfgVarF(string n, float def);
 
   //counters and selection functions
   template <typename T> inline
@@ -125,6 +127,8 @@ protected:
   };
   void fillSkimTree() { if(_skim) _skimTree->Fill();};
 
+  //datasets
+  const Dataset* getCurrentDS() const {return _datasets[_inds];};
 
   //uncertainties
   void addSystSource(string name, int dir, string type, vector<string> modVar, 
@@ -133,8 +137,11 @@ protected:
 		     string db, string hname, bool wUnc=false);
   void addWSystSource(string name, int dir, string type, float val);
   void addWSystSource(string name, int dir, string type, string db, string hname);
+  void addManualSystSource(string name, int dir);
 
   bool isInUncProc() {return _uncId;};
+  string getUncName() { return _unc;};
+  int getUncDir() { return _uDir;};
 
   // Private Non-Template Methods
 	
@@ -159,6 +166,7 @@ private:
   // float applySystDBVar(SystST s, string db, float v1, float v2, float v3, float v4,
   // 		       float v5,float v6,float v7,float v8,float v9, float v10);
 
+
   // Protected Members
 
 protected:
@@ -177,16 +185,23 @@ protected:
   float _weight;
 
   std::string _cfgName;
+ 
+  // CH: FakeRatio and FRinSitu need dataset access for reweighting...
+  unsigned int _numDS;
+  std::vector <Dataset*> _datasets;
+
 
   // Private Members
  
 private:
-   
-  int _inds;
 
+  vector<unsigned int> _nEvtsDs;
+  vector<unsigned int> _nEvts; 
   unsigned int _nEvtMax; 
   unsigned int _nSkip; 
   bool _summary;
+
+  int _inds;
 
   std::map<std::string, std::string> _sampleOption;
   
@@ -194,19 +209,18 @@ private:
   TFile* _oFile;
   TTree* _skimTree;
   TH1I* _hnSkim;
-
+  TH1D* _hnwSkim;
 
 
   bool _skim;
   bool _fullSkim;
-
-  std::vector <Dataset*> _datasets;
 
   // Configuration File Variables
   std::string _inputPath;
   std::string _className;
 
   std::string _hname;
+  std::string _hwgtname;
 
   //workflows
   int _curWF;
@@ -222,7 +236,7 @@ private:
   vector<string> _uncSrcs;
   vector<int> _uncDirs;
   map<string, bool> _uType;
-
+  
 };
 
 

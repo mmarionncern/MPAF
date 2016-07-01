@@ -70,30 +70,32 @@ public:
 
   //initilaization
   void configAnalysis(vector<string> datasets);
-  
+  void addDataset(string dsname); 
+ 
   //reset
   void reset();
+  void refresh();
 
   //Histogram access and booking
   
   void addVariable(string var, int nBin, float min, float max, 
-		   string Xleg, bool prof=false, string type="m");
+		   string Xleg, bool isglb=true, bool prof=false, string type="m");
   void addVariable(string var, int nBin, vector<float> bins,
-		   string Xleg, bool prof=false, string type="m");
+		   string Xleg, bool isglb=true, bool prof=false, string type="m");
   void addVariable(string var, int nBinX, float minX, float maxX,
 		   int nBinY, float minY,
 		   float maxY, string Xleg,string Yleg,
-		   bool prof=false, string type="m");
+		   bool isglb=true, bool prof=false, string type="m");
   void addVariable(string var, int nBinX, vector<float> binsX, int nBinY,
 		   vector<float> binsY,
-		   string Xleg,string Yleg,bool prof=false, string type="m");
+		   string Xleg,string Yleg, bool isglb=true, bool prof=false, string type="m");
   
   void addVariableFromTemplate(string var, TH1* h, bool prof, 
 			       bool is2D, string type);
 
   void fill(string var, int ds, float val, float weight=1.);
   void fill(string var, int ds, float valx, float valy, float weight);
-  void fill(string var, string type, float value, float weight=1.,string dir="");
+  void fill(string var, int ds, string type, float value, float weight=1.,string dir="");
   
   void copyHisto( string var, int ds, TH1* h);
 
@@ -105,7 +107,7 @@ public:
   //Prepare observables
   hObs preparehObs(string var, int nbinX, vector<float> bins, 
 		   string Xleg,string Yleg,
-		   string type, bool prof,
+		   string type, bool isglb, bool prof,
 		   int nbinsY=-1, 
 		   vector<float> binsY=vector<float>(0,0) );
    
@@ -120,7 +122,7 @@ public:
   systM findSysts(string var,string type);
 
 
-  void saveHistos(string anName, string conName, std::map<std::string, int> cnts);
+  void saveHistos(string anName, string conName, std::map<std::string, int> cnts, std::map<std::string, double> wgtcnts);
 
   ClassDef(HistoManager,0)
 };

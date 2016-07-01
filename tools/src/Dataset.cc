@@ -10,6 +10,7 @@ Dataset::Dataset():
 _chain(0)
 {
   _isData = false;
+  _isDataDriven = false;
   config("", 1, kTree );
 }
 
@@ -19,6 +20,7 @@ Dataset::Dataset(string name):
   _chain(0)
 {
   _isData = false;
+  _isDataDriven = false;
   config(name, 1, kTree );
 }
 
@@ -29,6 +31,7 @@ Dataset::Dataset(string name, int color):
 {
 
   _isData = false;
+  _isDataDriven = false;
   config(name, color, kHisto);
 
 }
@@ -40,6 +43,7 @@ void Dataset::config(string name, int color, int content) {
   _name = name;
   _color = color;
   _isGhost = false;
+  _isDataDriven = false;
   _dsContentType = content;
 }
 
@@ -54,21 +58,31 @@ void Dataset::freeMemory() {
   delete _chain;
 }
 
+void
+Dataset::setUsefulVars(vector<string> vars) {
+  _usefulVars = vars;
+}
 
 //____________________________________________________________________________
-void Dataset::addSample(const SampleId sId, string path, string dir, string objName, string hname, float xSect, float kFact, float lumi, float eqLumi, bool loadH) {
+void Dataset::addSample(const SampleId sId, string path, string dir, string objName, string hname, string hwgtname, float xSect, float kFact, float lumi, float eqLumi, bool loadH) {
   /*
     adds a sample to the dataset; the sample has a name encoded in sfullname,
     lies in the directory path/dir/, has a tree called objName or a histogram
-    called hname, has cross section xSect, k-factor kFact, luminosity lumi
+    called hname (hwgtname is a histogram for the sum of processed weights
+    corresponding to the sample), has cross section xSect, k-factor kFact, luminosity lumi
     and equivalent luminosity eqLumi (i.e. corrected for the number of events we're
     looping on)
-    parameters: sfullname ("data:sname" or just "sname"), path, dir, objName, hname, xSect, kFact, lumi, eqLumi
+    parameters: sfullname ("data:sname" or just "sname"), path, dir, objName, hname, hwgtname, xSect, kFact, lumi, eqLumi
     return: none
   */
 
   _isData = false;
-  if(sId.dd) _isData=true;  //norm corresponds to a datadriven like stuff
+  
+  if(sId.isData)_isData=true;
+  if(sId.dd) {
+    //norm corresponds to a datadriven like stuff
+    _isDataDriven=true;
+  }
 
   //store the control region from which the sampleshould come from, if any
   // _crSamples[ sId.name ] = sId.cr;
@@ -92,34 +106,36 @@ void Dataset::addSample(const SampleId sId, string path, string dir, string objN
   //======
 	
   //Looking for the tree if not data-driven
-  string tmpPath=isTreeType()?("data/"+path):"root";
+  //string tmpPath=isTreeType()?("data/"+path):"root"; //CH: why? what about absolute paths?
+  string subdir=isTreeType()?"data":"root";
   string tmpFName=isTreeType()?(sId.name):objName;
-  int nProcEvt = (hname=="")?-1:getNProcEvents(tmpPath, dir, tmpFName, hname);
+  int nProcEvt = (hname=="")?-1:getNProcEvents(path, dir, subdir, tmpFName, hname);
+  double sumProcWgt = (hwgtname=="")?-1:getSumProcWgts(path, dir, subdir, tmpFName, hwgtname);
   
-  Sample s(sId, nProcEvt, xSect, kFact, eqLumi);
+  Sample s(sId, nProcEvt, sumProcWgt, xSect, kFact, eqLumi);
   _samples.push_back(s);
   
   //tree analysis 
   if(isTreeType()) {
-    loadTree(path, dir, sId.name, objName);
+    loadTree(path, dir, subdir, sId.name, objName);
 	
     cout<<" Adding "<<sId.name<<"  to "<<_name
 	<<"   :  nEvt "<<_chain->GetEntries()<<" ("<<nProcEvt
-	<<" gen) "<<" / w (/pb-1) = "<<s.getLumW()<<endl;
+	<<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
   }
   else {
     if(loadH) { //reading histograms only when needed (disabled for datacards)
-      loadHistos(path, dir, objName, hname, sId.cr);
+      loadHistos(path, dir, subdir, objName, hname, sId.cr);
     }
     if(sId.norm==-1) {
       if(sId.cr=="" && sId.dd==false)
 	cout<<" Adding "<<sId.name<<"  to "<<_name
 	    <<"   : "<<" ("<<nProcEvt
-	    <<" gen) "<<" / w (/pb-1) = "<<s.getLumW()<<endl;
+	    <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
       else
 	cout<<" Adding "<<sId.name<<" ("<<sId.cr<<")  to "<<_name
 	    <<"   : "<<" ("<<nProcEvt
-	    <<" gen) "<<" / w (/pb-1) = "<<s.getLumW()<<endl; 
+	    <<" gen) "<<" ("<<sumProcWgt<<" genwgts)"<<" / w (/pb-1) = "<<s.getLumW()<<endl;
     
     }
     else {
@@ -138,15 +154,12 @@ Dataset::addFriend(string friendname){
 }
 
 int
-Dataset::getNProcEvents(string path, string dir, string fileName, string hname) {
+Dataset::getNProcEvents(string path, string dir, string subdir, string fileName, string hname) {
 
-  string p= string(getenv ("MPAF"))+"/workdir";
-  string NameF = p+"/"+path+"/"+dir+"/"+fileName+".root";
-  if(path.find(":")!=(size_t)-1) NameF=path+"/"+fileName+".root";
-  if(dir.find("psi.ch")!=(size_t)-1)
-    NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+fileName+".root";
-  
+  string NameF = goodFilePath(path, dir, fileName, subdir);
+
   TFile* file = TFile::Open( NameF.c_str() );
+  if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
   TH1* htmp = (TH1*)file->Get( hname.c_str() );
   int nProc=-1;
   if(htmp) {
@@ -161,10 +174,47 @@ Dataset::getNProcEvents(string path, string dir, string fileName, string hname) 
   return nProc;
 }
 
+double
+Dataset::getSumProcWgts(string path, string dir, string subdir, string fileName, string hwgtname) {
+
+  string NameF = goodFilePath(path, dir, fileName, subdir);
+  
+  TFile* file = TFile::Open( NameF.c_str() );
+  if(file==nullptr) { cout<<" warning, unable to find the proper number of processed events"<<endl;return 1;}
+  TH1* htmp = (TH1*)file->Get( hwgtname.c_str() );
+  double nProc=-1;
+  if(htmp) {
+    nProc = htmp->Integral(0,1001);
+    delete htmp;
+  }
+  else nProc = -1;
+ 
+  file->Close();
+  delete file;
+
+  return nProc;
+}
+
+
+
 int
-Dataset::getNProcEvents(int evt) {
+Dataset::getNProcEvents(/*int evt*/) const {
   //MM fixme, multiple sample handling not considered anymore, still useful?
   return _samples[0].getNProcEvts();
+
+  // for(size_t iv=0;iv<_events.size();iv++) {
+  //   if(evt>=_events[iv].first && evt<_events[iv].second) {
+  //     return _samples[iv]->getNProcEvts();
+  //   }
+  // }
+  // return -1;
+
+}
+
+double
+Dataset::getSumProcWgts(/*int evt*/) const {
+  //MM fixme, multiple sample handling not considered anymore, still useful?
+  return _samples[0].getSumProcWgts();
 
   // for(size_t iv=0;iv<_events.size();iv++) {
   //   if(evt>=_events[iv].first && evt<_events[iv].second) {
@@ -232,15 +282,10 @@ Dataset::getSample(string sname) const {
 
 
 void 
-Dataset::loadTree(string path, string dir, string sname, string objName) {
-  
+Dataset::loadTree(string path, string dir, string subdir, string sname, string objName) {
   TFile* datafile(nullptr);
-  if(dir=="") dir=path;
-  string p= string(getenv ("MPAF"))+"/workdir";
-  string NameF = p+"/data/"+dir+"/"+sname+".root"; 
-  if(path.find(":")!=(size_t)-1) NameF=path+"/"+sname+".root";
-  if(dir.find("psi.ch")!=(size_t)-1)
-    NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+sname+".root";
+
+  string NameF = goodFilePath(path, dir, sname, subdir);
 
   datafile = TFile::Open(NameF.c_str());
   if(datafile==nullptr) { 
@@ -252,40 +297,42 @@ Dataset::loadTree(string path, string dir, string sname, string objName) {
   if(tmptree != nullptr ) {
     _chain->Add( (NameF+"/"+objName).c_str() ); 
 
+    //cleaning friends if needed
+    TList* lfriends = _chain->GetListOfFriends();
+    TIter next(lfriends);
+    TObject* fr = 0;
+    while ((fr = next())) {
+      _chain->RemoveFriend((TTree*)fr);
+    }
+
+
     // adding friend-trees
     for (size_t ft=0; ft<_friends.size(); ft++){
-      string NameFr = p+"/data/"+dir+"/"+_friends[ft]+"/evVarFriend_"+sname+".root";
+      string NameFr = goodFilePath(path, dir, _friends[ft] + "/evVarFriend_" + sname, subdir);
       string name = _friends[ft]+" = sf/t";
       _chain->AddFriend((name).c_str(),(NameFr).c_str());
     } 
     //nEvent = tmptree->GetEntries();
   }
-  else
-    cout<<" Error no correct tree in "<<sname<<" file "<<endl;
+  else {
+    cout<<" Error no correct tree in "<<sname<<" file, aborting"<<endl;
+    abort();
+  }    
 
   delete tmptree;
   delete datafile;
- 
-  //event database
-
-  // bool empty=_events.size()==0;
-  // int m=empty?0:_events.back().second;
-  // int M=empty?nEvent:_events.back().second+nEvent;
-  // pair<int,int> p(m,M);
-  // _events.push_back(p);
-  
+   
 }
 
 void 
-Dataset::loadHistos(string path, string dir, string filename, string hname, string optCat) {
+Dataset::loadHistos(string path, string dir, string subdir, string filename, string hname, string optCat) {
   TFile* datafile(nullptr);
   
-  string NameF = path+"/"+dir+"/"+filename+".root"; 
-  if(path.find(":")!=(size_t)-1) NameF=dir+"/"+filename+".root";
-  if(dir.find("psi.ch")!=(size_t)-1)
-    NameF="dcap://t3se01.psi.ch:22125/"+dir+"/"+filename+".root";
 
+  string NameF = goodFilePath(path, dir, filename, subdir);
   datafile = TFile::Open(NameF.c_str());
+
+  if(datafile==nullptr) {cout<<"warning, unable to load histograms"<<endl; return;}
 
   //scan the file to retrieve the histograms
   TIter nextkey(datafile->GetListOfKeys());
@@ -300,9 +347,20 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
     string varName(obj->GetName());
     map<string, TH1*> tmp;
     
-    //MM FIXME, jsut take a too long time to load everything, should be done in a better way thatn disabling everything 
-    if(varName.find("_")!=string::npos || varName.find("SR")!=string::npos) continue;
-  
+    bool find=false;
+    for(size_t i=0;i<_usefulVars.size();i++) {
+      if(_usefulVars[i]==varName ||
+	 _usefulVars[i]==varName+optCat ||
+	 varName.find(_usefulVars[i]+"Unc")!=string::npos) {
+	find=true; break;
+      }
+    }
+
+    if(_usefulVars.size()!=0 && !find) continue; 
+       // find(_usefulVars.begin(), _usefulVars.end(), varName)==_usefulVars.end() &&
+       // find(_usefulVars.begin(), _usefulVars.end(), varName+optCat)==_usefulVars.end() &&
+       // !findUnc ) continue;
+    
 
     if(optCat!="") {
       size_t op=varName.find(optCat);
@@ -326,6 +384,7 @@ Dataset::loadHistos(string path, string dir, string filename, string hname, stri
 	   
 	//histograms and not normalization file
 	if(varName=="nEvtProc") continue;
+	if(varName=="sumWgtProc") continue;
        
 	
 	if(_histos[ varName ].size()==0) { //initialization
@@ -382,4 +441,52 @@ Dataset::getWeight(string sname) const {
   int is = hasSample(sname);
   if(is==-1) return 0;
   return getWeight(is);
+}
+
+string
+Dataset::goodPath(string path){
+
+  if(path.find("psi.ch") != (size_t) -1) return "dcap://t3se01.psi.ch:22125/" + path;
+  if(path.find("/eos/")  != (size_t) -1) return "root://eoscms.cern.ch/" + path;
+
+  return path;
+
+}
+
+string
+Dataset::goodFilePath(string path, string dir, string fileName, string subdir){
+  // CH: path is the "dir" variable given in the config file
+  //     dir  is the "dir" attribute given to the dataset (if so), whose name is fileName
+
+  // remove the last slash because it's added in the logic below
+  if(dir .length() > 0 && dir .substr(dir .length()-1,1) == "/") dir .erase(dir .length()-1);
+  if(path.length() > 0 && path.substr(path.length()-1,1) == "/") path.erase(path.length()-1);
+
+  // absolute dir
+  if(dir.substr(0,1) == "/") 
+    return goodPath(dir + "/"  + fileName + ".root"); 
+
+  // dir on EOS with root://
+  if(dir.find(":") != (size_t) -1 && dir.find("psi.ch") == (size_t) -1) 
+    return dir + "/"  + fileName + ".root";
+  
+  // relative dir -> relative to path!
+  if(dir != "") 
+    path += "/" + dir;
+
+  // path on EOS with root://
+  if(path.find(":") != (size_t) -1 && path.find("psi.ch") == (size_t) -1) 
+    return path + "/"  + fileName + ".root";
+
+  // absolute path
+  if(path.substr(0,1) == "/") 
+    return goodPath(path + "/" + fileName + ".root");
+
+  // ignore empty subdirs (in case data or root is already appended to path)
+  if(subdir.length() > 0) 
+    path = subdir + "/" + path;
+
+  // relative path -> relative to MPAF/workdir! data or root given in subdir
+  return string(getenv("MPAF")) + "/workdir/" + path + "/" + fileName + ".root";
+
 }

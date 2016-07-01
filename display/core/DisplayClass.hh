@@ -49,6 +49,7 @@ private:
 
   TCanvas* _c;
   TLegend* _leg;
+  TLegend* _leg2;
   vector<vector<TPad*> > _pads;
 
 
@@ -160,11 +161,16 @@ private:
   bool _mcOnly;
   bool _dOnly;
   bool _lockData;
+  
+  //other flags
+  bool _closure;
+  bool _fixLeg;
 
   //uncertainties
   bool _uncDet;
   vector<string> _uncNames;
-
+  bool _mcSystComputed;
+  
   bool _comSyst;
 
   //plot format
@@ -177,8 +183,7 @@ private:
   bool _cumulative;
   
   vector<string> _cNames;
-
-
+  
 public:
 
   DisplayClass();
@@ -186,6 +191,7 @@ public:
 
   void reset();
   void softReset();
+  void refreshHistos();
 
   void configureDisplay(string YTitle, double rangeY[2], 
 			double rangeX[2], bool logYscale,
@@ -197,7 +203,7 @@ public:
 			bool AddSystematics, bool mcStatSyst,
 			float MarkerSize, float LineWidth,
 			bool sSignal, bool mcOnly,
-			bool cmsPrel, bool uncDet=false); //,bool switchRMS, string errorOpt
+			bool cmsPrel, bool uncDet=false, bool closure=false, bool fixLeg=false); //,bool switchRMS, string errorOpt
 
   void setObservables(string v1, string v2="", string v3="",
 		      string v4="", string v5="", string v6="");
@@ -228,8 +234,8 @@ public:
 
   void saveHistos(string hname, const hObs* theObs);
   
-  void prepareStatistics( vector<pair<string,vector<vector<float> > > > vals, vector<string> dsnames, bool isMultiScheme);
-  void drawStatistics( vector<pair<string,vector<vector<float> > > > vals, vector<string> dsnames, bool isMultiScheme);
+  void prepareStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, vector<string> dsnames, bool isMultiScheme);
+  void drawStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, vector<string> dsnames, bool isMultiScheme);
   void drawDetailSystematics(bool cumul);
 
   void addText(float x, float y, float s, string text);
@@ -260,7 +266,6 @@ public:
   
 private:
 
-  void refreshHistos();
 
   vector<vector<TPad*> > preparePads();
   vector<vector<TPad*> > preparePadsWithRatio();

@@ -26,6 +26,7 @@ private:
   string _rootFile;
   vector<string> _statFileList;
   string _hname;
+  string _hwgtname;
 
   vector<string> _samplenames;
   vector<string> _dsnames;
@@ -57,6 +58,8 @@ private:
   bool _skiptree;
 
   DataBaseManager* _dbm;
+
+  vector<string> _usefulVars;
 
 public:
 
@@ -104,7 +107,7 @@ public:
   vector<string> findDSNames(string channel, string crName);
   int findChan(string ds);
 
-  void addSample(string str, string sname, int col, bool loadH=true );
+  void addSample(string str, string sname, int col, float w=1, bool loadH=true );
 
   bool passRunFilter(int run);
 
@@ -115,12 +118,13 @@ public:
   bool isNoDataAna();
 
   string getHName();
+  string getHwgtName();
   
   //void setNMax(size_t testNMax);
 
   void isHistoAnalysis();
   
-
+  void addUsefulVar(string var);
 
 private:
 

@@ -134,7 +134,7 @@ public:
     up =  simpleCut<T>( valUp, valcut, type, seccut);
     down =  simpleCut<T>( valDo, valcut, type, seccut);
     
-    //setSystematics( ds, cName, _uncSrc, up, down, w);
+    //setSystematics( ids, cName, _uncSrc, up, down, w);
     
     return mean;
   };
@@ -171,14 +171,14 @@ public:
   void getSystematics(string ds, string lvl, string categ="");
   void getCategSystematics(string ds, string src, string lvl, string categ="", bool latex=false);
   void getYieldSysts(EffST eST, map<string,float>& rU, map<string,float>& rD,
-		     float& totUp, float& totDown, float& central);
-
+		       float& totUp, float& totDown, float& central);
+  float getYield(int ids, string cName, int icat);
   //workflows
   void setWFEfficiencies(int ids, string cName, float w, bool acc, string uncName="");
   void setWFSystematics(int ids, string cName, string sName,
 			bool up, bool down, float w, string uncName="") ;
 
-  void saveNumbers(string anName, string conName, std::map<string, int> cnts);
+  void saveNumbers(string anName, string conName, std::map<string, int> cnts, std::map<string, double> wgtcnts);
   void printNumbers();
 
   void printTables(string categ="global");
@@ -186,13 +186,17 @@ public:
   // =======
 // 	vector<string> listFiles(string dir, string files);
   int findElement(vector<string> v, string e);
-  vector< pair<string, vector<vector<float> > > > retrieveNumbers(string categ, string cname,
-								  int mcat, string opt="");
+  vector< pair<string, vector<vector<map<string,float> > > > > 
+  retrieveNumbers(string categ, string cname, int mcat, string opt="");
   
-  bool getDataCardLines(map<string,string>& lines, vector<string> dsNames, string sigName,
-			string categ, string cname, int bin,
+  bool getDataCardLines(map<string,string>& lines, 
+			shapeM& shapes, 
+			vector<string> dsNames,
+			string sigName,	string categ, string cname, int bin,
 			map<string,vector<string> > intNuisPars,
-			map<string,bool > nuisParExt);
+			map<string,bool > nuisParExt,
+			map<string,string> nuisParScheme,
+			map<string,vector<string> > nuisParsVals);
  
 
   //void drawNumbers();
@@ -217,8 +221,12 @@ public:
   //int getUncWorkflow(string wf);
 
   int getCategId(string categ);
+  int getCategUniqueId(string categ, string uncTag);
   int getNCateg() {return _categories.size(); };
-  
+  vector<string> getCategories();
+  vector<string> getSelections(int ids, int icat);
+  bool isUncCateg(int catId);
+
 private:
 
   template < typename T > inline
@@ -254,6 +262,12 @@ private:
     }
     else if(type=="][") {
       accept = (value > valcut && value< seccut );
+    }
+    else if(type=="]]") {
+      accept = (value > valcut && value <= seccut );
+    }
+    else if(type=="[[") {
+      accept = (value >= valcut && value < seccut );
     }
     else if(type=="[!]") {
       accept = !(value >= valcut && value <= seccut );
@@ -292,7 +306,6 @@ private:
       }
       else {
 	string uncName="Unc"+_uncSrc+((_uncDir==SystUtils::kUp)?"Up":"Do");
-	//cout<<uncName<<"  "<<_offsetUnc[uncName]<<endl;
     	//separated workflow for uncertainty
 	if( (_nWF==1 || _curWF!=-100) && !_isMultiWF) { //single workflow
 	  setEfficiency(ids, cName, _curWF+_offsetUnc[uncName], w, accept);

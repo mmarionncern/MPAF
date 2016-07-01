@@ -41,6 +41,8 @@ Parser::parseLine(string line) {
     type=Parser::kVar;
   if(tks[0]=="histo")
     type=Parser::kHisto;
+  if(tks[0]=="wgthisto")
+    type=Parser::kWgtHisto;
   if(tks[0]=="tree")
     type=Parser::kTree;
   if(tks[0]=="ds")
@@ -51,15 +53,13 @@ Parser::parseLine(string line) {
     type=Parser::kSummary;
 
   string val = tks[1];
-  pair<int, string> p(type, val);
- 
+
   vector<string> opts;
   for(size_t i=2;i<tks.size();i++) {
     if(tks[i].substr(0,1)!="#")
       opts.push_back(tks[i]);
   }
   
- 
   string id=tks[0];
   if(type==Parser::kVar || type==Parser::kDS || type==Parser::kFT)
     id = val;
@@ -72,13 +72,11 @@ Parser::parseLine(string line) {
     }
   }
 
-
   ip.type = type;
   ip.id = id;
   ip.val = val;
   ip.opts = opts;
 
-  //  if(type!=Parser::kNone)
   return ip;
 }
 

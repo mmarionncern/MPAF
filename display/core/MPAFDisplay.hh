@@ -19,6 +19,23 @@
 #include "tools/src/Debug.cc"
 #include "tools/src/HistoManager.hh"
 
+struct CatId{
+  string categ;
+  string cname;
+  string sname;
+  bool useExt;
+  string redCateg;
+  string ext;
+  string uncTag;
+  int upVar;
+};
+
+struct ValId{
+  float yield;
+  float eyield;
+  int gen;
+};
+
 
 class MPAFDisplay {
 
@@ -27,6 +44,8 @@ class MPAFDisplay {
 private:
 
   bool _recompute;
+  bool _auto;
+  bool _histoSet;
 
   vector<string> _dsNames;
 
@@ -76,7 +95,7 @@ private:
   void readStatFile(string filename, int& icat);
   void storeStatNums(const Dataset* ds, float yield, float eyield, int gen,
 		     int icat, string cname, string sname, string categ,
-		     string uncTag, int upVar, string ext);
+		     string uncTag, int upVar, string ext, bool skipNominal=false);
     
   void associateSystUncs();
 
@@ -93,10 +112,17 @@ public:
   
   void doPlot();
 
+  void setObservables(string v1, string v2="", string v3="",
+		      string v4="", string v5="", string v6="");
+  void loadAutoBinning(string file);
+    
+
   void getStatistics(string categ="nominal");
   void drawStatistics(string categ="nominal", string cname="", 
 		      bool multiScheme=false, bool vetoOpt=false, string optCateg="");
 
+  void addExternalSystUnc(string dsName, string unctag, float Up, float Do,
+			  string categ="", string cname="");
   void getDetailSystematics(string categ, string lvl);
   void getCategSystematic(string src, string categ, string lvl, bool latex=false);
 
@@ -123,13 +149,16 @@ public:
   void saveDataMCRatio(string fname,string hname);
 
   //data cards
-  void addDataCardSample(string sName, string dsName);
-  void addDataCardSigSample(string sName, string dsName);
+  void addDataCardSample(string sName, string dsName, float w=1);
+  void addDataCardSigSample(string sName, string dsName, float w=1);
   void addNuisanceParameter(string npName, string dss, string scheme,  string vals) ;
+  void overwriteNuisanceParameter(string npName, string dss, string vals);
   vector<string> getExternalNuisanceParameters(string sigName);
   void makeSingleDataCard(string sigName, string categ, string cname, string cardName);
+  void makeMultiDataCard(string sigName, vector<string> categs, 
+			 string cname, string cardname);
 
-
+std::string trim(std::string, std::string chr = " ");
 
   ClassDef(MPAFDisplay,0)
 

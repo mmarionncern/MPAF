@@ -61,9 +61,19 @@ void HistoManager::configAnalysis(vector<string> datasets) {
 }
 
 
+//add dataset
+//____________________________________________________________________________
+void HistoManager::addDataset(string dsname) {
+
+  _dsNames.push_back(dsname);
+  _nds = _dsNames.size();
+
+}
+
+
 //Histogram access and booking
 //____________________________________________________________________________
-void HistoManager::addVariable(string var, int nBin, float min, float max, string Xleg, bool prof, string type) {
+void HistoManager::addVariable(string var, int nBin, float min, float max, string Xleg, bool isglb, bool prof, string type) {
 
   //Protection against overdeclaration
  
@@ -76,14 +86,14 @@ void HistoManager::addVariable(string var, int nBin, float min, float max, strin
   vector<float> bins(2,-1);
   bins[0] = min; bins[1] = max;
   hObs tmp;
-  tmp = preparehObs(var, nBin, bins, Xleg,"", type,prof);
+  tmp = preparehObs(var, nBin, bins, Xleg,"", type, isglb, prof);
   _variables[ var ]= tmp;
   
 }
 
 
 //____________________________________________________________________________
-void HistoManager::addVariable(string var, int nBin, vector<float> bins, string Xleg, bool prof, string type) {
+void HistoManager::addVariable(string var, int nBin, vector<float> bins, string Xleg, bool isglb, bool prof, string type) {
   
   //Protection against overdeclaration
   _itVar = _variables.find(var);
@@ -93,7 +103,7 @@ void HistoManager::addVariable(string var, int nBin, vector<float> bins, string 
   }
 
   hObs tmp;
-  tmp = preparehObs( var, nBin, bins, Xleg,"", type, prof);
+  tmp = preparehObs( var, nBin, bins, Xleg,"", type, isglb, prof);
   _variables[ var ]= tmp;
  
 }
@@ -101,7 +111,7 @@ void HistoManager::addVariable(string var, int nBin, vector<float> bins, string 
 //____________________________________________________________________________
 void
 HistoManager::addVariable(string var, int nBinX, float minX, float maxX, int nBinY, float minY,
-			  float maxY, string Xleg, string Yleg, bool prof, string type) {
+			  float maxY, string Xleg, string Yleg, bool isglb, bool prof, string type) {
 
   //Protection against overdeclaration
   _itVar = _variables.find(var);
@@ -117,14 +127,14 @@ HistoManager::addVariable(string var, int nBinX, float minX, float maxX, int nBi
   binsY[0]=minY; binsY[1]=maxY;
 
   hObs tmp;
-  tmp = preparehObs(var, nBinX, binsX, Xleg,Yleg, type, prof, nBinY, binsY);
+  tmp = preparehObs(var, nBinX, binsX, Xleg,Yleg, type, isglb, prof, nBinY, binsY);
   _variables[ var ]= tmp;
 
 }
 
 //____________________________________________________________________________
 void
-HistoManager::addVariableFromTemplate(string var, TH1* h, bool prof, 
+HistoManager::addVariableFromTemplate(string var, TH1* h,  bool prof, 
 				      bool is2D, string type) {
 
   //Protection against overdeclaration
@@ -142,7 +152,7 @@ HistoManager::addVariableFromTemplate(string var, TH1* h, bool prof,
 void
 HistoManager::addVariable(string var, int nBinX, vector<float> binsX, int nBinY,
 			  vector<float> binsY, string Xleg, string Yleg,
-			  bool prof, string type) {
+			  bool isglb, bool prof, string type) {
 
   //Protection against overdeclaration
   _itVar = _variables.find(var);
@@ -151,7 +161,7 @@ HistoManager::addVariable(string var, int nBinX, vector<float> binsX, int nBinY,
     return;
   }
   hObs tmp;
-  tmp = preparehObs(var, nBinX, binsX, Xleg, Yleg, type, prof, nBinY, binsY);
+  tmp = preparehObs(var, nBinX, binsX, Xleg, Yleg, type, isglb, prof, nBinY, binsY);
   _variables[ var ]= tmp;
 
 }
@@ -159,7 +169,7 @@ HistoManager::addVariable(string var, int nBinX, vector<float> binsX, int nBinY,
 
 //____________________________________________________________________________
 hObs HistoManager::preparehObs(string var, int nbinsX, vector<float> bins, string Xleg,
-			       string Yleg, string type, bool prof, int nbinsY, vector<float> binsY ) {
+			       string Yleg, string type, bool isglb, bool prof, int nbinsY, vector<float> binsY ) {
   
   bool twoDim = (nbinsY != -1);
 	
@@ -174,6 +184,7 @@ hObs HistoManager::preparehObs(string var, int nbinsX, vector<float> bins, strin
   otmp.titleY = Yleg;
   otmp.name = var;
   otmp.type = type;
+  otmp.SetGlobal(isglb);
   otmp.htype = (prof?(twoDim?"2DP":"1DP"):(twoDim?"2D":"1D"));
 	
   for(size_t id=0;id<_nds;id++) {
@@ -282,6 +293,7 @@ hObs HistoManager::preparehObsFromTemplate(string var, TH1* h, bool prof, bool i
   otmp.titleY = h->GetYaxis()->GetTitle();
   otmp.name  = var;
   otmp.type  = type;
+  otmp.SetGlobal(false);
   otmp.htype = (prof?(twoDim?"2DP":"1DP"):(twoDim?"2D":"1D"));
 	
   for(size_t id=0;id<_nds;id++) {
@@ -335,7 +347,6 @@ hObs HistoManager::preparehObsFromTemplate(string var, TH1* h, bool prof, bool i
   }
   
   vector<float> tmp;
-	
   otmp.nBX   = otmp.hs[0]->GetNbinsX();
   otmp.nBY   = twoDim?otmp.hs[0]->GetNbinsY():0;
   otmp.binsX = HistoUtils::getXbinning(otmp.hs[0]);
@@ -365,7 +376,7 @@ TH1* HistoManager::getHisto(string obs, int ds) {
 
 //____________________________________________________________________________
 const hObs* HistoManager::getHObs(string obs) {
-
+ 
   _cItVar = _variables.find(obs);
 
   if( _cItVar != _variables.end() ) {	
@@ -418,7 +429,7 @@ void HistoManager::copyHisto(string var, int ds, TH1* htmp ) {
   //uncertainties
   string uVar = var;
   bool isUnc = uVar.find("Unc")!=(size_t)-1;// ds==-10;
-
+  
   //protection against unc. variations in data
   if( isUnc && (_dsNames[ds]=="data" || _dsNames[ds]=="Data") )
     return;
@@ -449,7 +460,7 @@ void HistoManager::copyHisto(string var, int ds, TH1* htmp ) {
     _itVar = _variables.find(var);
   }
 
-  
+  //cout<<var<<"   "<<htmp<<"  "<<ds<<endl;
   _itVar->second.hs[ds]->Add( htmp );
 	
   gErrorIgnoreLevel = kError;
@@ -465,9 +476,8 @@ void HistoManager::fill(string var, int ds, float val, float weight) {
     parameters: var, ds, val, weight
     return: none
   */
- 
   _itVar = _variables.find(var);
-	
+  
   if( _itVar == _variables.end() ) {
     cout << " Error, no such variable declared, " << var << endl;
     return;
@@ -501,7 +511,7 @@ void HistoManager::fill(string var, int ds, float valx, float valy, float weight
 
 
 //____________________________________________________________________________
-void HistoManager::fill(string var, string type, float value, float weight, string dir) {
+void HistoManager::fill(string var, int ds, string type, float value, float weight, string dir) {
   /*
     fills a variable (var) of type (type) with value (value) that has a weight (weight)
     parameters: var, type (possible values??), value, weight, dir (direction of uncertainty, possible values??)
@@ -516,28 +526,31 @@ void HistoManager::fill(string var, string type, float value, float weight, stri
 
   else {
 	  
-    string nameH = var + "Unc" + type + dir;
+    string nameH=var + "Unc" + type + dir;
 		
     _itVar = _variables.find(nameH);
     if( _itVar == _variables.end() ) {
+
+      bool isGbl=_variables[var].IsGlobal();
+
       if( _cItVar->second.binsX.size() == 2) {
 	addVariable(nameH, _cItVar->second.nBX, _cItVar->second.binsX[0], _cItVar->second.binsX[1],
-		    _cItVar->second.titleX, (_cItVar->second.htype.find("P") != (size_t) -1), "u");
+		    _cItVar->second.titleX, isGbl, (_cItVar->second.htype.find("P") != (size_t) -1), "u");
       }
       else {
 	addVariable(nameH, _cItVar->second.nBX, _cItVar->second.binsX, 
-		    _cItVar->second.titleX, (_cItVar->second.htype.find("P") != (size_t) -1), "u");
+		    _cItVar->second.titleX, isGbl, (_cItVar->second.htype.find("P") != (size_t) -1), "u");
       }
       //and point to the good object
       _itVar = _variables.find(nameH);
     }
-    _itVar->second.hs[0]->Fill(value, weight);
+    _itVar->second.hs[ds]->Fill(value, weight);
   }
   
 }
 
 //____________________________________________________________________________
-void HistoManager::saveHistos(string anName, string conName, map<string, int> cnts) {
+void HistoManager::saveHistos(string anName, string conName, map<string, int> cnts, map<string, double> wgtcnts) {
   /*
     creates a root file and stores all variables in it; if the file already
     exists, it renames the existing file to the same name plus the timestamp
@@ -616,6 +629,22 @@ void HistoManager::saveHistos(string anName, string conName, map<string, int> cn
     htmp->Write();     
     delete htmp;
   }
+
+  //counter histograms
+  ofile->mkdir("sumWgtProc");
+  ofile->cd("sumWgtProc");
+  map<string, double>::const_iterator it2;
+  for(size_t ids = 0; ids < _dsNames.size(); ++ids) {
+    
+    it2 = wgtcnts.find( _dsNames[ids] );
+    if(it2==wgtcnts.end() ) continue;
+
+    TH1D* htmp= new TH1D(_dsNames[ids].c_str(), _dsNames[ids].c_str(), 1,0, 1);
+    htmp->SetBinContent(1, it2->second );
+    htmp->Write();     
+    delete htmp;
+  }
+
   
   ofile->cd();
   ofile->Write();
@@ -647,8 +676,7 @@ void HistoManager::savePlots(string path,const TCanvas* c,
     if(i==1)
       cout<<" Dirname "<<dirname_<<endl;
     test_=fopen( dirname_.Data(), "r" );
-    if( test_==0 )
-      {
+    if( test_==0 ) {
   	TString command_ = TString("mkdir -p ") + dirname_; 
   	system( command_.Data());
       }
@@ -679,6 +707,19 @@ HistoManager::reset() {
   
   _nds=0;
   _hname="";
+
+}
+
+void
+HistoManager::refresh() {
+
+  for(_itVar=_variables.begin();_itVar!=_variables.end();_itVar++) {
+    for(size_t ih=0;ih<_itVar->second.hs.size();ih++)
+      delete _itVar->second.hs[ ih ];
+    
+    _itVar->second.hs.clear();
+  }
+  _variables.clear();
 
 }
 

@@ -43,8 +43,12 @@ private:
   int _dsContentType;
   std::vector<std::string> _friends;
 
+  std::vector<string> _usefulVars;
+
   // std::map<std::string, std::string> _crSamples;
   // std::map<std::string, bool> _isNormSamples;
+
+  bool _isDataDriven;
 
 public:
 
@@ -67,24 +71,26 @@ public:
   void setColor(int ncol){ _color=ncol;};
 	
   void addSample(SampleId sId, std::string path, std::string dir, 
-		 std::string objName, std::string hname, float xSect,
+		 std::string objName, std::string hname, std::string hwgtname, float xSect,
 		 float kFact, float lumi, float eqLumi, bool loadH=true);
 
   void addFriend(std::string friendname);
+
+  void setUsefulVars(std::vector<std::string> vars);
 
   //access functions 
   std::string getName() const { return _name;};
   int getColor(){ return _color;};
 	
   bool isDataset(std::string name){return _name==name;};
-  bool isPPcolDataset(){ return _isData;};
+  bool isPPcolDataset() const { return _isData;};
 
   int hasSample(string sname) const;
 	
   bool isTreeType() { return _dsContentType==kTree;};
   bool isHistoType() { return _dsContentType==kHisto;};
 	
-  //bool isDataDriven(){return _isDataDriven;};
+  bool isDataDriven(){return _isDataDriven;};
   bool isFromCS(){return _isFromCS!=0;};
   int csCode(){return _isFromCS;};
 	
@@ -99,11 +105,15 @@ public:
 	
   float getWeight(int is) const {return _samples[is].getLumW(); };
   float getWeight(string sname) const;
+
+  string goodPath(string path);
+  string goodFilePath(string path, string dir, string fileName, string subdir = "data");
 	
   TTree* getTree() {return _chain;};
   int getNEvents() { return _chain->GetEntries(); };
 	
-  int getNProcEvents(int evt);
+  int getNProcEvents(/*int evt*/) const;
+  double getSumProcWgts(/*int evt*/) const;
 	
   //void setNMax(size_t nmax);
 	
@@ -111,19 +121,19 @@ public:
   std::vector<std::string> getObservables();
   TH1* getHisto( std::string varName, std::string sName);
 
-
   const Sample* getSample(string sname) const;
   
 
 private:
 
-  void loadTree(std::string path, std::string dir, std::string sname, std::string objName);
-  void loadHistos(std::string path, std::string dir, std::string sname, std::string hname, std::string optCat);
+  void loadTree(std::string path, std::string dir, string subdir, std::string sname, std::string objName);
+  void loadHistos(std::string path, std::string dir, string subdir, std::string sname, std::string hname, std::string optCat);
 
   // float computeWeight(float nEvts, float xSect, float kFact,
   // 		      float lumi, float& eqLumi);
   
-  int getNProcEvents(string path, string dir, string sname, string hname);
+  int getNProcEvents(string path, string dir, string subdir, string sname, string hname);
+  double getSumProcWgts(string path, string dir, string subdir, string sname, string hwgtname);
   
 
   ClassDef(Dataset,0)

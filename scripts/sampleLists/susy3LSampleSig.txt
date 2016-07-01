@@ -1,0 +1,7 @@
+/pnfs/psi.ch/cms/trivcat/store/user/mmarionn/SusySamples/T6ttWWScan_280115/SMS_miniAODv2_T6ttWW_mSbottom_300to600_mChargino_150to500/T6ttWW.root
+/pnfs/psi.ch/cms/trivcat/store/user/mmarionn/SusySamples/T6ttWWScan_280115/SMS_miniAODv2_T6ttWW_mSbottom_300to600_mChargino_225to575/T6ttWW.root
+/pnfs/psi.ch/cms/trivcat/store/user/mmarionn/SusySamples/T6ttWWScan_280115/SMS_miniAODv2_T6ttWW_mSbottom_300to600_mChargino_75to125/T6ttWW.root
+/pnfs/psi.ch/cms/trivcat/store/user/mmarionn/SusySamples/T6ttWWScan_280115/SMS_miniAODv2_T6ttWW_mSbottom_350to600_mChargino_150to400/T6ttWW.root
+/pnfs/psi.ch/cms/trivcat/store/user/mmarionn/SusySamples/T6ttWWScan_280115/SMS_miniAODv2_T6ttWW_mSbottom_625to950_mChargino_550to875/T6ttWW.root
+/pnfs/psi.ch/cms/trivcat/store/user/mmarionn/SusySamples/T6ttWWScan_280115/SMS_miniAODv2_T6ttWW_mSbottom_625to950_mChargino_75to125/T6ttWW.root
+/pnfs/psi.ch/cms/trivcat/store/user/mmarionn/SusySamples/T6ttWWScan_280115/SMS_miniAODv2_T6ttWW_mSbottom_650to950_mChargino_150to750/T6ttWW.root

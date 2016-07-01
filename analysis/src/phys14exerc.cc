@@ -141,12 +141,12 @@ void phys14exerc::initialize(){
   _au->addCategory( kVetoLepSel, "vetoLepSel" );
 
   //extra input variables
-  _lepflav = getCfgVarS("LEPFLAV");
+  _lepflav = getCfgVarS("LEPFLAV", "");
   //_mva     = getCfgVarS("LEPID"  );
-  _btag    = getCfgVarS("BTAG"   );
-  _PT      = getCfgVarS("PT"     );
+  _btag    = getCfgVarS("BTAG"   , "");
+  _PT      = getCfgVarS("PT"     , "");
   //_BR      = getCfgVarS("BR"     );
-  _SR      = getCfgVarS("SR"     );
+  _SR      = getCfgVarS("SR"     , "");
   
   //add some protection against non-supported values
   if (_PT != "hh" && _PT != "hl" && _PT != "ll") {

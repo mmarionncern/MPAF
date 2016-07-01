@@ -1,10 +1,21 @@
 #Source files to compile
 FILES := AnalysisFactory
-#FILES += csa14exerc
+FILES += csa14exerc
+#FILES += FRClosure
 FILES += SSDLBoosted
-#FILES += synchECO
-#FILES += synchRA5
+FILES += synchECO
+FILES += synchRA5
+FILES += phys14exerc
+FILES += SUSY3L
+FILES += SUSY3L_sync
+FILES += SUSY3L_sync2
+FILES += SUSY3L_sync3
+FILES += SSDLBoosted
 FILES += phys14limits
+FILES += sideband
 FILES += FakeRatio
+FILES += FakeRatioStudy
+FILES += FRinSitu
 FILES += SSDL2015
 FILES += UncertaintyTest
+#FILES += Comissioning

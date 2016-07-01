@@ -571,7 +571,7 @@ HistoUtils::convertHistoToGraph(TH1* h, float datNorm, bool diff, bool byPassPE)
 }
 
 TGraphAsymmErrors*
-HistoUtils::ratioHistoToGraph(TH1* hd, TH1* hmc, string opt) {
+HistoUtils::ratioHistoToGraph(TH1* hd, TH1* hmc, bool allMc, string opt) {
   
   int Nn0=0;
   vector<double> vY;
@@ -586,14 +586,31 @@ HistoUtils::ratioHistoToGraph(TH1* hd, TH1* hmc, string opt) {
 
     Xd = hd->GetBinCenter(ip);
     Yd = hd->GetBinContent(ip);
-    if(opt=="nP" || opt=="PP") {
-      eYld = StatUtils::ErrorPL(Yd);
-      eYhd = StatUtils::ErrorPH(Yd);
+
+    if(allMc) {
+      float eY=hd->GetBinError(ip);
+      float N=pow(Yd/eY,2);
+      float w=Yd/N;
+     
+       if(opt=="nP" || opt=="PP") {
+	 eYld = StatUtils::ErrorPL(N)*w;
+	 eYhd = StatUtils::ErrorPH(N)*w;
+	 //cout<<Yd<<"  "<<eY<<"  "<<N<<"  "<<w<<"   "<<eYld<<"   "<<eYhd<<endl;     
+       } else {
+	 eYld = hd->GetBinError(ip);
+	 eYhd = hd->GetBinError(ip);
+       }
     }
     else {
-      eYld = hd->GetBinError(ip);
-      eYhd = hd->GetBinError(ip);
-  }
+      if(opt=="nP" || opt=="PP") {
+	eYld = StatUtils::ErrorPL(Yd);
+	eYhd = StatUtils::ErrorPH(Yd);
+      }
+      else {
+	eYld = hd->GetBinError(ip);
+	eYhd = hd->GetBinError(ip);
+      }
+    }
 
     //Xm = hmc->GetBinCenter(ip);
     Ym = hmc->GetBinContent(ip);
