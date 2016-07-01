@@ -347,12 +347,17 @@ void susy3l_data() {
 */
 
     //non-prompt predicted
-    md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_274444_275125"      , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "non-prompt"          , 18, scale    );
+    //4/fb production by Marco
+    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_274444_275125"      , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "non-prompt"          , 18, scale    );
+    //md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "non-prompt"          , 18, scale    );
+     //4/fb production by Mattieu
+    md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_275125"      , "non-prompt"          , 18, scale    );
+    md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_275125"    , "non-prompt"          , 18, scale    );
+    md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_275125"        , "non-prompt"          , 18, scale    );
  
     //signal
     if(sigs=="t"){
@@ -376,12 +381,19 @@ void susy3l_data() {
     
     //data
     if(data){
-    md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_274444_275125"      , "data"          , kBlack    );
-    md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "data"          , kBlack    );
-    md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "data"          , kBlack    );
+    //4/fb production by Marco
+    //md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_273150_274443"      , "data"          , kBlack    );
+    //md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_273150_274443"    , "data"          , kBlack    );
+    //md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_273150_274443"        , "data"          , kBlack    );
+    //md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_274444_275125"      , "data"          , kBlack    );
+    //md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "data"          , kBlack    );
+    //md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "data"          , kBlack    );
+    //4/fb production by Mattieu
+    md.anConf.addSample( "DoubleEG_Run2016B_PromptReco_v2_runs_273150_275125"      , "data"          , kBlack    );
+    md.anConf.addSample( "DoubleMuon_Run2016B_PromptReco_v2_runs_273150_275125"    , "data"          , kBlack    );
+    md.anConf.addSample( "MuonEG_Run2016B_PromptReco_v2_runs_273150_275125"        , "data"          , kBlack    );
+    
+    
     }
 
 
