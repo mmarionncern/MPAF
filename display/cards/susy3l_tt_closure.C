@@ -7,13 +7,15 @@ void susy3l_tt_closure() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="160208_closure_without_PUandBTagWeights_ttbarOnly"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="160208_closure_without_PUandBTagWeights_ttbarOnly"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l_closure"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l_closure"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     string hName="";
 
     bool mcOnly = true;
     bool closure = true;
+    bool nlo_vs_lo = false;
     bool fixLeg = true;
+    bool scale = true;
   
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
@@ -25,7 +27,7 @@ void susy3l_tt_closure() {
     bool data = false;
     bool manual = true;
     if(!manual){string region = "REGION";}
-    else string region = "OffZBaseline";
+    else string region = "OnZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
     else{string obs = "met";}
@@ -72,7 +74,7 @@ void susy3l_tt_closure() {
         md.dp.setObservables("MET" + region);
         int binning=50;
         double rangeX[2]={0,350};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
     if(obs == "ht"){
         md.dp.setObservables("HT" + region);
@@ -113,7 +115,7 @@ void susy3l_tt_closure() {
     if(obs == "srs"){
         md.dp.setObservables("SRS" + region);
         int binning=1;
-        double rangeX[2]={1,16};
+        double rangeX[2]={1,18};
         //bool logYScale=true;
     }
     if(obs == "mu_multi"){
@@ -138,8 +140,15 @@ void susy3l_tt_closure() {
         md.dp.setObservables("fake_type" + region);
         int binning=1;
         double rangeX[2]={0,6};
-        bool logYScale=true;
+        //bool logYScale=true;
     }
+    if(obs == "weights"){
+        md.dp.setObservables("applWeight" + region);
+        int binning=1;
+        double rangeX[2]={-.5,1.5};
+        //bool logYScale=true;
+    }
+
 
 
 
@@ -160,16 +169,16 @@ void susy3l_tt_closure() {
     string Norm="";
   
     //Lumis( or XSections ) pb-1 & KFactors ************************************
-    float lumi=2260; //pb-1 19470
+    float lumi=10000; //pb-1 19470
     float energy=13; //TeV
 
     bool useXS=true;
 
-    md.anConf.loadXSDB("XSectionsSpring15.db");
+    md.anConf.loadXSDB("XSectionsSpring16.db");
     
     map<string,float> LumisXS;
     
-    md.anConf.loadKFDB("kFactorsSpring15.db");
+    md.anConf.loadKFDB("kFactorsSpring16.db");
     
     //via XSect
   
@@ -177,29 +186,40 @@ void susy3l_tt_closure() {
     // if( md.isInitStatus() )
     md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
 
-    
-    
+    if(scale){
+        float scaleWJets = 154506.056;
+        float scaleDY10 = 30156.34;
+        float scaleDY50 = 15704.55;
+        float scaleTTJets = 2120.02;
+        float scaleTToLeptons_sch = 3.38;
+    }
+    else{
+        float scaleWJets = 1;
+        float scaleDY10 = 1;
+        float scaleDY50 = 1;
+        float scaleTTJets = 1;
+    }
     
     //===============================================================
     // SDYJetsM50_HT600toInf_PU_S14_POSTLS170_skimamples **************************  samples
     //if( md.isInitStatus() ) {
 
     //single top
-//    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "single top"    , kGreen-6      );
-//    md.anConf.addSample( "TBar_tWch"                            ,  "single top"    , kGreen-6      );
-//    md.anConf.addSample( "T_tWch"                               ,  "single top"    , kGreen-6      );
-//    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "single top"    , kGreen-6      );
-//    md.anConf.addSample( "TToLeptons_tch"                       ,  "single top"    , kGreen-6      );
+//    md.anConf.addSample( "TbarToLeptons_tch"                    ,  "single top"    , kCyan      );
+    md.anConf.addSample( "TBar_tWch"                            ,  "single top"    , kCyan      );
+    md.anConf.addSample( "T_tWch"                               ,  "single top"    , kCyan      );
+//    md.anConf.addSample( "TToLeptons_sch_amcatnlo"              ,  "single top"    , kCyan      );
+    md.anConf.addSample( "TToLeptons_sch"                       ,  "single top"    , kCyan, scaleTToLeptons_sch   );
   
     //W+Jets
-//    md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kOrange      );
+    //md.anConf.addSample( "WJetsToLNu"                           ,  "W+jets"    , kBlue, scaleWJets      );
 
     //ttbar
-    md.anConf.addSample( "TT_pow"                             ,  "t#bar{t}"    , kRed-6      );
+    md.anConf.addSample( "TTJets"                             ,  "t#bar{t}"    , kBlue-10, scaleTTJets      );
 
     //Drell-Yan
-//    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "DY"    , kCyan     );
-//    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "DY"    , kCyan     );
+    md.anConf.addSample( "DYJetsToLL_M10to50"                   ,  "DY"    , kBlue-7, scaleDY10     );
+    md.anConf.addSample( "DYJetsToLL_M50"                       ,  "DY"    , kBlue-7, scaleDY50     );
 
 
 //    md.anConf.addSample( "TTJets_DiLepton"                      ,  "TT"    , kRed-6      );
@@ -207,19 +227,17 @@ void susy3l_tt_closure() {
 
 
 //    md.anConf.addSample( "_Fake:TbarToLeptons_tch"               ,  "pseudodata"    , kBlack      );
-//    md.anConf.addSample( "_Fake:TBar_tWch"                       ,  "pseudodata"    , kBlack      );
-//    md.anConf.addSample( "_Fake:T_tWch"                          ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:TBar_tWch"                       ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:T_tWch"                          ,  "pseudodata"    , kBlack      );
 //    md.anConf.addSample( "_Fake:TToLeptons_sch_amcatnlo"         ,  "pseudodata"    , kBlack      );
-//    md.anConf.addSample( "_Fake:TToLeptons_tch"                  ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:TToLeptons_sch"                  ,  "pseudodata"    , kBlack , scaleTToLeptons_sch  );
 
-//    md.anConf.addSample( "_Fake:WJetsToLNu"                      ,  "pseudodata"    , kBlack      );
+    //md.anConf.addSample( "_Fake:WJetsToLNu"                      ,  "pseudodata"    , kBlack, scaleWJets     );
 
-//    md.anConf.addSample( "_Fake:DYJetsToLL_M10to50"              ,  "pseudodata"    , kBlack      );
-//    md.anConf.addSample( "_Fake:DYJetsToLL_M50"                  ,  "pseudodata"    , kBlack      );
+    md.anConf.addSample( "_Fake:DYJetsToLL_M10to50"              ,  "pseudodata"    , kBlack, scaleDY10      );
+    md.anConf.addSample( "_Fake:DYJetsToLL_M50"                  ,  "pseudodata"    , kBlack, scaleDY50      );
 
-    md.anConf.addSample( "_Fake:TT_pow"                          ,  "pseudodata"    , kBlack      );
-
-
+    md.anConf.addSample( "_Fake:TTJets"                          ,  "pseudodata"    , kBlack, scaleTTJets    );
     // }
     //===============================================================
 
@@ -241,7 +259,7 @@ void susy3l_tt_closure() {
 			 underFlowBin, showDMCRatio, showGrid, 
 			 stacking, addSystematics, mcStatSyst,
 			 markerSize, lineWidth,summedSignal,
-             mcOnly,cmsPrel, uncDet, closure, fixLeg);
+             mcOnly,cmsPrel, uncDet, closure, nlo_vs_lo, fixLeg);
     md.prepareDisplay();
     md.doPlot();
     //md.doStatisticsPlot();

@@ -34,4 +34,4 @@ while read fileLine; do
     #break
 
 #CHANGE depending on scan
-done < fileNamesT5ttttdeg
+done < fileNamesT5ttttdegFix

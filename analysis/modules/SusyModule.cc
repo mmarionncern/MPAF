@@ -105,10 +105,12 @@ SusyModule::defineLeptonWPS() {
   _cLostHitWP.resize(kNWPs);
   _tChWP.resize(kNWPs);
   _sipWP.resize(kNWPs);
+  _sipWPLepMVA.resize(kNWPs);
   _muIdWP.resize(kNWPs);
   _dxyWP.resize(kNWPs);
   _dzWP.resize(kNWPs);
   _elMvaIdWP.resize(3);
+  _lepMVAIdWP.resize(12);
   _multiIsoWP.resize(3);
   _ptWP.resize(2);
 
@@ -138,6 +140,10 @@ SusyModule::defineLeptonWPS() {
   _sipWP[kDenom] = 4.0; 
   _sipWP[kLoose] = 1000.0;//1000. 
   _sipWP[kTight] = 4.0; 
+  
+  _sipWPLepMVA[kDenom] = 8.0; 
+  _sipWPLepMVA[kLoose] = 1000.0;//1000. 
+  _sipWPLepMVA[kTight] = 8.0; 
   
   _dxyWP[kDenom] = 0.05; //cm
   _dxyWP[kLoose] = 0.05; //cm
@@ -193,8 +199,24 @@ SusyModule::defineLeptonWPS() {
 
   _multiIsoWP[kMiniIso][kSpecFakeEl] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeEl] = 0.80; _multiIsoWP[kPtRel][kSpecFakeEl] = 7.2;
   _multiIsoWP[kMiniIso][kSpecFakeMu] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeMu] = 0.76; _multiIsoWP[kPtRel][kSpecFakeMu] = 7.2;
-}
 
+  //lepton MVA ID =======================
+ 
+  _lepMVAIdWP[kVeryLooseMu]     = -0.90;
+  _lepMVAIdWP[kLooseMu]         = -0.60;
+  _lepMVAIdWP[kMediumMu]        = -0.20;
+  _lepMVAIdWP[kTightMu]         = 0.15;
+  _lepMVAIdWP[kVeryTightMu]     = 0.45;
+  _lepMVAIdWP[kExtraTightMu]    = 0.65;
+
+  _lepMVAIdWP[kVeryLooseEl]     = -0.30;
+  _lepMVAIdWP[kLooseEl]         = 0.25;
+  _lepMVAIdWP[kMediumEl]        = 0.50;
+  _lepMVAIdWP[kTightEl]         = 0.65;
+  _lepMVAIdWP[kVeryTightEl]     = 0.75;
+  _lepMVAIdWP[kExtraTightEl]    = 0.85;
+
+}
 
 //=====================================================
 // lepton selection
@@ -265,7 +287,7 @@ SusyModule::inSituFO(int idx, int wp, string branch) const {
 
 
 bool
-SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP, string branch) const {
+SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP, bool LepMVA, string branch) const {
 
   int wpIso = kDenom;
 
@@ -276,11 +298,21 @@ SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP
   if(std::abs(_vc->get(branch + "_dz"          , idx)) > _dzWP[wp]     ) return false;
   if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
 
-  if(invSIP){
-    if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+  if(!LepMVA){
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+    }
   }
-  else {
-    if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+  else{
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWPLepMVA[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWPLepMVA[wp]    ) return false;
+    }
   }
 
   return true;
@@ -288,7 +320,7 @@ SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP
 }
 
 bool
-SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, bool invSIP, string branch) const {
+SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, bool invSIP, bool LepMVA, string branch) const {
 
   int wpIso=kDenom;
 
@@ -302,11 +334,21 @@ SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, 
   if(!elMvaSel(idx, mvaWp, branch)                                     ) return false;
   if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
 
-  if(invSIP){
-    if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+  if(!LepMVA){
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+    }
   }
-  else {
-    if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+  else{
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWPLepMVA[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWPLepMVA[wp]    ) return false;
+    }
   }
 
   return true;
@@ -316,36 +358,64 @@ SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, 
 bool
 SusyModule::elHLTEmulSel(int idx, bool withIso, string branch) const {
 
-    //long int lumi = 629;
-    //long int evt = 1126708841;
-
-  if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "entering emu sel" << endl;}
-    if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.011 ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "pssing _sigmaIEtaIEta" << endl;}
-    if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dEtaScTrkIn" << endl;}
-    if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.04  ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dPhiScTrkIn" << endl;}
-    if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _hadronicOverEm" << endl;}
-    if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
-        //if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}
-  }
-  else {
-    if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.031 ) return false;
-    if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
-    if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.08  ) return false;
-    if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
-    if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
-  }
-  if(!elMvaSel(idx, kLoose, branch)                                ) return false;
+/*    if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
+        if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
+        if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
+        if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.04  ) return false;
+        if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
+        if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.011 ) return false;
+    }
+    else {
+        if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
+        if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
+        if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.08  ) return false;
+        if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
+        if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.031 ) return false;
+    }
+*/    
+    
+    long int lumi = 1270;
+    long int evt = 420400;
+    bool debug = false;
   
-  if(withIso) {
-    if(!elHLTEmulSelIso(idx, kLooseHT, branch)) return false;
-  }
+    if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "entering emu sel (central)" << endl;}}
+        if(         _vc->get(branch + "_hadronicOverEm", idx)  >= 0.10  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _hadronicOverEm" << endl;}}
+        if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) >= 0.01  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dEtaScTrkIn" << endl;}}
+        if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) >= 0.04  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dPhiScTrkIn" << endl;}}
+        if(         _vc->get(branch + "_eInvMinusPInv" , idx)  <= -0.05  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
+        if(         _vc->get(branch + "_eInvMinusPInv" , idx)  >= 0.01  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
+        if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  >= 0.011 ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing trigger emulation" << endl;}}
+    }
+    else {
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "entering emu sel (central)" << endl;}}
+        if(         _vc->get(branch + "_hadronicOverEm", idx)  >= 0.07  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _hadronicOverEm" << endl;}}
+        if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) >= 0.008  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dEtaScTrkIn" << endl;}}
+        if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) >= 0.07  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dPhiScTrkIn" << endl;}}
+        if(         _vc->get(branch + "_eInvMinusPInv" , idx)  <= -0.05  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
+        if(         _vc->get(branch + "_eInvMinusPInv" , idx)  >= 0.005  ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
+        if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  >= 0.03 ) return false;
+                if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing trigger emulation" << endl;}}
+    }
+  
+    if(!elMvaSel(idx, kLoose, branch)                                ) return false;
+  
+    if(withIso) {
+        if(!elHLTEmulSelIso(idx, kLooseHT, branch)) return false;
+    }
 
-  return true;
+    return true;
 }
 
 
@@ -358,6 +428,15 @@ SusyModule::elHLTEmulSelIso(int idx, int mvaWP, string branch) const {
   if(!elMvaSel(idx, mvaWP, branch)                                                      ) return false;
 
   return true;
+}
+
+
+bool
+SusyModule::lepMVAIdSel(int idx, int wp, string branch) const {
+
+  if(_vc->get(branch + "_mvaSUSY", idx)  <  _lepMVAIdWP[wp]  ) return false;
+  return true;
+
 }
 
 bool
@@ -955,11 +1034,10 @@ SusyModule::cleanJets(CandList* leptons,
 				       _vc->get(jType+ext+"_phi", ij) );
 
       jets.push_back(jet);
-      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.890 );//0.814
+      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.80 );//0.814
       tmpIdxs.push_back(make_pair(jType+ext, ij));
     }
   }
-
 
   map<Candidate*, std::pair<float,Candidate*> > cmap;
   map<Candidate*, std::pair<float,Candidate*> >::const_iterator it;
@@ -1002,8 +1080,6 @@ SusyModule::cleanJets(CandList* leptons,
 
 
 
-
-
   for(unsigned int il=0;il<leptons->size();il++) {
     for(unsigned int ij=0;ij<jets.size();ij++) {
       float dR=leptons->at(il)->dR( jets[ij] );
@@ -1027,7 +1103,7 @@ SusyModule::cleanJets(CandList* leptons,
       if(it->second.first > 0.4 ) continue;
       if(it->second.second == jets[ij] ) {pass=false; break;}
     }
-
+    
     if(!pass) { 
       lepJetsIdxs.push_back(tmpIdxs[ij]);
       continue;
@@ -1045,6 +1121,8 @@ SusyModule::cleanJets(CandList* leptons,
     cleanBJets.push_back(jets[ij]);
     bJetIdxs.push_back(tmpIdxs[ij]);
   } //loop jets
+
+
 
 }
 

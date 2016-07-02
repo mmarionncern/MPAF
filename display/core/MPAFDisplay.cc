@@ -67,8 +67,8 @@ MPAFDisplay::drawStatistics(string categ, string cname, bool multiScheme, bool v
 
 
 void
-MPAFDisplay::getStatistics(string categ) {
-  _au->printTables(categ);
+MPAFDisplay::getStatistics(string categ, bool latexOnly, bool header) {
+  _au->printTables(categ, latexOnly, header);
 }
 
 
@@ -313,27 +313,28 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 
       int icat=_au->getCategId( catMap[ic].first.categ );
       for(unsigned int i=0;i<dss.size();i++) {
-	string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
-	if(cr=="") {
-	  storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+        string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
+        if(catMap[ic].first.ext.substr(0,1)!="_" && cr.substr(0,1)=="_") cr=cr.substr(1);
+        if(cr=="") {
+	      storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
 			catMap[ic].second.gen, icat,
 			catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
 			catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
-	}
-	else if(catMap[ic].first.ext==cr && cr!="") { // continue;
-	  storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+	    }
+	    else if(catMap[ic].first.ext==cr && cr!="") { // continue;
+	      storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
 			catMap[ic].second.gen, icat,
 			catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
 			catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
 	  
-	  int icat2=_au->getCategId( catMap[ic].first.redCateg );
-	  storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
+	      int icat2=_au->getCategId( catMap[ic].first.redCateg );
+	      storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
 			catMap[ic].second.gen, icat2,
 			catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.redCateg,
 			catMap[ic].first.uncTag, catMap[ic].first.upVar, "");	  
-	}
+	    }  
 	
-	n++;
+	    n++;
       }
     }
   }
@@ -384,7 +385,9 @@ MPAFDisplay::storeStatNums(const Dataset* ds, float yield, float eyield, int gen
 
   //nominal category ===================
   //identified category for nominal
-  if( ds->getSample(sname)->getCR()!=ext ) return; 
+  string cr=ds->getSample(sname)->getCR();
+  if(ext!="_" && cr.substr(0,1)=="_") cr=cr.substr(1);
+  if( cr!=ext ) return; 
   if(uncTag=="")
     _au->setEffFromStat(idx,cname,AUtils::kNominal,yield,eyield,gen);
   else 

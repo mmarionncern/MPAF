@@ -181,7 +181,7 @@ public:
   void saveNumbers(string anName, string conName, std::map<string, int> cnts, std::map<string, double> wgtcnts);
   void printNumbers();
 
-  void printTables(string categ="global");
+  void printTables(string categ="global", bool latexOnly = false, bool header = false );
 
   // =======
 // 	vector<string> listFiles(string dir, string files);

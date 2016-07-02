@@ -55,6 +55,9 @@ private:
     bool WlSelection();
     void categorize();
     bool testRegion();
+    void checkSample();
+    bool passGenSelection();
+    bool genMatched(const CandList leptons, vector<int> lepIdx);
     vector<CandList> build3LCombFake(const CandList tightLeps, vector<unsigned int> idxsT,
 		const CandList fakableLeps, vector<unsigned int> idxsL, const CandList fakableLepsPtCorr,
 		vector<unsigned int> idxsLPtCorr, int nHardestLepton, float pt_cut_hardest_legs, 
@@ -66,6 +69,7 @@ private:
     float getFR(Candidate* cand, int idx);
     void setCut(std::string, float, std::string, float = 0);
     bool hardLeg(CandList leptons, int n_hardestLeg, float cut_hardestLeg, int n_hardLeg, float cut_hardLeg);
+    bool ptSelection(CandList leptons);
     void fillHistos(bool);
     void fillValidationHistos(string reg);
     float getMT2();
@@ -95,11 +99,15 @@ private:
     bool _selectTaus;
     int _onZ; 
     bool _doPlots;
+    bool _doPlotsVerbose;
     bool _doValidationPlots;
     int _closureByFlavor;
     int _closure;
     bool _exactlyThreeLep;
     bool _runSystematics;
+    bool _useLepMVA;
+    bool _doGenMatch;
+    bool _v80X;
     int _LHESYS;
     string _susyProcessName;
     string _BR;
@@ -269,6 +277,9 @@ private:
     bool _isMultiLep = false;
     bool _isFake = false;
     int _flavor = -1;
+    bool _fakeSample = false;
+    bool _convSample = false;
+    bool _promptSample = false;
 
     //for fake background
     vector<CandList> _combList;

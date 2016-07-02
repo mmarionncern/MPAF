@@ -15,11 +15,11 @@ for reg in ${REG[@]}; do
 
         variable=$var
 
-        cp cards/susy3l.C cards/tmpFiles/susy3l.C
-        sed -i 's|VARIABLE|'$variable'|' cards/tmpFiles/susy3l.C
-        sed -i 's|REGION|'$region'|' cards/tmpFiles/susy3l.C
+        cp cards/susy3lttV.C cards/tmpFiles/susy3lttV.C
+        sed -i 's|VARIABLE|'$variable'|' cards/tmpFiles/susy3lttV.C
+        sed -i 's|REGION|'$region'|' cards/tmpFiles/susy3lttV.C
 
-        root -l -b cards/tmpFiles/susy3l.C
+        root -l -b cards/tmpFiles/susy3lttV.C
     done
 
 done

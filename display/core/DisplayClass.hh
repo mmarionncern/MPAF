@@ -164,6 +164,7 @@ private:
   
   //other flags
   bool _closure;
+  bool _nlo_vs_lo;
   bool _fixLeg;
 
   //uncertainties
@@ -203,7 +204,7 @@ public:
 			bool AddSystematics, bool mcStatSyst,
 			float MarkerSize, float LineWidth,
 			bool sSignal, bool mcOnly,
-			bool cmsPrel, bool uncDet=false, bool closure=false, bool fixLeg=false); //,bool switchRMS, string errorOpt
+			bool cmsPrel, bool uncDet=false, bool closure=false, bool nlo_vs_lo=false, bool fixLeg=false); //,bool switchRMS, string errorOpt
 
   void setObservables(string v1, string v2="", string v3="",
 		      string v4="", string v5="", string v6="");
