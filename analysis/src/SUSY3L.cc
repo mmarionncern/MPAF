@@ -413,7 +413,10 @@ void SUSY3L::initialize(){
         addManualSystSource("jes",SystUtils::kNone);
         addManualSystSource("fakes_EWK",SystUtils::kNone);
         addManualSystSource("pu",SystUtils::kNone);
-        //addManualSystSource("Theory",SystUtils::kNone);   -> accounted for in display card
+        addManualSystSource("ThXSect",SystUtils::kNone);//   -> accounted for in display card
+	addManualSystSource("ThAcc",SystUtils::kNone);
+	addManualSystSource("ThLONLO",SystUtils::kNone);
+	
         //fastSim only
         addManualSystSource("isr",SystUtils::kNone);
         addManualSystSource("fs_lep",SystUtils::kNone);
@@ -512,32 +515,33 @@ void SUSY3L::run(){
     //event reweighting //////////////////////////////////////////////////////////
     
     //theory uncertainty for ttW and ttZ (currently not used but covered in display card)
-/*    if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kDown==getUncDir() ) {
-        if(_sampleName.find("TTW") != string::npos) {
-     	    bool passSR=false;
-     	    _SR="SR013";
-     	    if(testRegion()) passSR=true;
-     	    _SR="SR015";
-     	    if(testRegion()) passSR=true;
-     	    _weight *= 1-sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
-        }
-        if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
-     	    _weight *= 1-sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
-        }
-     }
-     if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kUp==getUncDir() ) {
-        if(_sampleName.find("TTW") != string::npos) {
-     	bool passSR=false;
-     	_SR="SR013";
-     	if(testRegion()) passSR=true;
-     	_SR="SR015";
-     	if(testRegion()) passSR=true;
-     	_weight *= 1+sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
-        }
-        if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
-        _weight *= 1+sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
-        }
-    }*/   
+    theoreticalUncertainties();
+    // if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kDown==getUncDir() ) {
+    //     if(_sampleName.find("TTW") != string::npos) {
+    //  	    bool passSR=false;
+    //  	    _SR="SR013";
+    //  	    if(testRegion()) passSR=true;
+    //  	    _SR="SR015";
+    //  	    if(testRegion()) passSR=true;
+    //  	    _weight *= 1-sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
+    //     }
+    //     if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
+    //  	    _weight *= 1-sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
+    //     }
+    //  }
+    //  if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kUp==getUncDir() ) {
+    //     if(_sampleName.find("TTW") != string::npos) {
+    //  	bool passSR=false;
+    //  	_SR="SR013";
+    //  	if(testRegion()) passSR=true;
+    //  	_SR="SR015";
+    //  	if(testRegion()) passSR=true;
+    //  	_weight *= 1+sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
+    //     }
+    //     if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
+    //     _weight *= 1+sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
+    //     }
+    //  }   
 /*
     //btag-scale factors
     if(!_vc->get("isData") && !_closure ) {
@@ -2944,5 +2948,75 @@ float SUSY3L::getFastSimXFactor(float dir){
         cout << "Warning: could not find X factors for susy model " << _susyProcessName << endl;
         return 1;
     }
+
+}
+
+
+//____________________________________________________________________________
+void
+SUSY3L::theoreticalUncertainties() {
+  
+  if( !isInUncProc() ) return;
+
+  bool isThXSect=getUncName()=="ThXSect";
+  bool isThAcc=getUncName()=="ThAcc";
+  bool isThLONLO=getUncName()=="ThLONLO";
+
+  if( !isThXSect && !isThAcc && !isThLONLO ) return;
+
+  bool isTTW=_sampleName.find("TTW") != string::npos;
+  bool isTTZ=_sampleName.find("TTZ") != string::npos || 
+             _sampleName.find("TTLL") != string::npos;
+  
+  if(!isTTW && !isTTZ) return;
+
+  
+  // ThXSect
+  // ThAcc
+  // ThLONLO
+
+  if( SystUtils::kDown==getUncDir() ) {
+
+    if(isThAcc) {
+      bool passSR=false;
+      _SR="SR013";
+      if(testRegion()) passSR=true;
+      _SR="SR015";
+      if(testRegion()) passSR=true;
+
+      float var=(isTTW?0.18:0.08);
+      _weight *= 1- ( (_HT>400 || passSR)?var:0.05 );
+    }
+    else if(isThXSect) {
+      _weight *= 1-(isTTW?0.13:0.11);
+    }
+    else if(isThLONLO) {
+      if(_HT<400) _weight *= (isTTW?0.99:0.87) ;
+      else if(_HT<600) _weight *= (isTTW?0.87:0.94) ;
+      else _weight *= (isTTW?0.70:0.30) ;
+    }
+  } //up var
+  
+  if( SystUtils::kUp==getUncDir() ) {
+    
+    if(isThAcc) {
+      bool passSR=false;
+      _SR="SR013";
+      if(testRegion()) passSR=true;
+      _SR="SR015";
+      if(testRegion()) passSR=true;
+
+      float var=(isTTW?0.18:0.08);
+      _weight *= 1+ ( (_HT>400 || passSR)?var:0.05 );
+    }
+    else if(isThXSect) {
+      _weight *= 1+(isTTW?0.13:0.11);
+    }
+    else if(isThLONLO) {
+      if(_HT<400) _weight *= (isTTW?1.01:1.13) ;
+      else if(_HT<600) _weight *= (isTTW?1.13:1.06) ;
+      else _weight *= (isTTW?1.30:1.70) ;
+    }
+  } //down var
 
 }
