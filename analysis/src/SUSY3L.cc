@@ -61,19 +61,20 @@ void SUSY3L::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
     _vTR_lines.push_back("HLT_BIT_HLT_DoubleMu8_Mass8_PFHT300_v");
     //isolated triggers 2016
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");                   //TODO: not in tree yet
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");                   //TODO: not in tree yet
     //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");  
     _vTR_lines.push_back("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");     
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v");  
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");       //TODO: not in tree yet
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");       //TODO: not in tree yet
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");      //has prescale 0 in column 1e34 
 
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v");  
     
     //isolated triggers 2015
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");                  //no longer in 2016 menu
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");                  //no longer in 2016 menu
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
     //_vTR_lines.push_back("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");  
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");      //has prescale 0 in column 1e34 
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");      //has prescale 0 in column 1e34 
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
     
     //tri-lepton trigger
     //_vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
@@ -413,17 +414,34 @@ void SUSY3L::initialize(){
         addManualSystSource("jes",SystUtils::kNone);
         addManualSystSource("fakes_EWK",SystUtils::kNone);
         addManualSystSource("pu",SystUtils::kNone);
-        addManualSystSource("ThXSect",SystUtils::kNone);//   -> accounted for in display card
-	addManualSystSource("ThAcc",SystUtils::kNone);
-	addManualSystSource("ThLONLO",SystUtils::kNone);
-	
         //fastSim only
-        addManualSystSource("isr",SystUtils::kNone);
-        addManualSystSource("fs_lep",SystUtils::kNone);
-        addManualSystSource("fs_hlt",SystUtils::kNone);
-        addManualSystSource("fs_btag",SystUtils::kNone);
+   //     addManualSystSource("isr",SystUtils::kNone);
+   //     addManualSystSource("fs_lep",SystUtils::kNone);
+   //     addManualSystSource("fs_hlt",SystUtils::kNone);
+   //     addManualSystSource("fs_btag",SystUtils::kNone);
         //addManualSystSource("XSFS",SystUtils::kNone);
-        addManualSystSource("scale",SystUtils::kNone);
+   //     addManualSystSource("scale",SystUtils::kNone);
+    
+        //uncertainties previously taken care of in display card 
+        addManualSystSource("lumi",SystUtils::kNone);
+        addManualSystSource("HLTEff",SystUtils::kNone);
+        addManualSystSource("LepEff",SystUtils::kNone);
+        addManualSystSource("rare",SystUtils::kNone);
+        addManualSystSource("XG",SystUtils::kNone);
+        addManualSystSource("ra7_WZ",SystUtils::kNone);
+        addManualSystSource("ttzh_pdf",SystUtils::kNone);
+        addManualSystSource("ttw_pdf",SystUtils::kNone);
+        addManualSystSource("TTW",SystUtils::kNone);
+        addManualSystSource("TTZH",SystUtils::kNone);
+        addManualSystSource("fakes",SystUtils::kNone);
+        addManualSystSource("ttzh_extr_htl",SystUtils::kNone);
+        addManualSystSource("ttzh_extr_hth",SystUtils::kNone);
+        addManualSystSource("ttz_lowM_extr_htl",SystUtils::kNone);
+        addManualSystSource("ttz_lowM_extr_hth",SystUtils::kNone);
+        addManualSystSource("ttw_extr_htl",SystUtils::kNone);
+        addManualSystSource("ttw_extr_hth",SystUtils::kNone);
+        addManualSystSource("wz_extr",SystUtils::kNone);
+        addManualSystSource("ttvLO",SystUtils::kNone);
     }
 
 }
@@ -510,39 +528,11 @@ void SUSY3L::run(){
 
     //minimal selection and collection of kinematic variables
     collectKinematicObjects();
+  
+    if(_runSystematics) systUnc();
    
-
-    //event reweighting //////////////////////////////////////////////////////////
-    
-    //theory uncertainty for ttW and ttZ (currently not used but covered in display card)
-    theoreticalUncertainties();
-    // if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kDown==getUncDir() ) {
-    //     if(_sampleName.find("TTW") != string::npos) {
-    //  	    bool passSR=false;
-    //  	    _SR="SR013";
-    //  	    if(testRegion()) passSR=true;
-    //  	    _SR="SR015";
-    //  	    if(testRegion()) passSR=true;
-    //  	    _weight *= 1-sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
-    //     }
-    //     if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
-    //  	    _weight *= 1-sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
-    //     }
-    //  }
-    //  if((isInUncProc() &&  getUncName()=="Theory") && SystUtils::kUp==getUncDir() ) {
-    //     if(_sampleName.find("TTW") != string::npos) {
-    //  	bool passSR=false;
-    //  	_SR="SR013";
-    //  	if(testRegion()) passSR=true;
-    //  	_SR="SR015";
-    //  	if(testRegion()) passSR=true;
-    //  	_weight *= 1+sqrt(0.13*0.13 + ((_HT>400 || passSR)?(0.18*0.18):(0.05*0.05)) );
-    //     }
-    //     if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTLL") != string::npos) {
-    //     _weight *= 1+sqrt(0.11*0.11 + ((_HT>400)?(0.08*0.08):(0.05*0.05)) );
-    //     }
-    //  }   
 /*
+    //event reweighting //////////////////////////////////////////////////////////
     //btag-scale factors
     if(!_vc->get("isData") && !_closure ) {
         if(!isInUncProc())  {
@@ -1570,7 +1560,7 @@ void SUSY3L::advancedSelection(int WF){
 
     //extra cut for onZ to remove DY
     if(_isOnZ && _met->pt() < 70 && _HT < 400 && _nBJets<2) return;
-  
+ 
     //long long int evt=_vc->get("evt");
     //if(_vc->get("isData") == 1 && _HT>400 && !_isFake) cout << _vc->get("run") << " " << _vc->get("lumi") << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets <<  " " << _met->pt() << " " << _HT << " "  << _isOnZ  << " " << _isFake << endl;
     //if(_vc->get("isData") == 1 && _HT<400 && !_isFake) return;
@@ -2328,7 +2318,7 @@ bool SUSY3L::ptSelection(CandList leptons){
     //offline HT below HT trigger plateau
     if(_HT<400){
         //leading leg
-        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<18) return false;
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<20) return false;
         if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<25) return false;
         //sub-leading leg
         if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<10) return false;
@@ -2951,72 +2941,156 @@ float SUSY3L::getFastSimXFactor(float dir){
 
 }
 
-
 //____________________________________________________________________________
-void
-SUSY3L::theoreticalUncertainties() {
-  
-  if( !isInUncProc() ) return;
+void SUSY3L::systUnc(){
 
-  bool isThXSect=getUncName()=="ThXSect";
-  bool isThAcc=getUncName()=="ThAcc";
-  bool isThLONLO=getUncName()=="ThLONLO";
+    //uncertanties
+    float lumiUnc           = 0.027;
+    float hltUnc            = 0.03;
+    float lepUnc            = 0.06;
+    float rareUnc           = 0.50;
+    float xgUnc             = 0.50;
+    float wzNormUnc         = 0.15;
+    float ttzhPdfUnc        = 0.02;
+    float ttzhLowMPdfUnc    = 0.06;
+    float ttwPdfUnc         = 0.03;
+    float ttzhXSUnc         = 0.11;
+    float ttzhLowMXSUnc     = 0.33;
+    float ttwXSUnc          = 0.13;
+    float fakeUnc           = 0.30;
+    float ttzhAccHtlUnc     = 0.05;
+    float ttzhAccHthUnc     = 0.08;
+    float ttzLowMAccHtlUnc  = 0.05;
+    float ttzLowMAccHthUnc  = 0.08;
+    float ttwAccHtlUnc      = 0.05;    
+    float ttwAccHthUnc      = 0.18;
+    float wzExtrHtlUnc      = 0.10;
+    float wzExtrHthUnc      = 0.20;
+    float wzExtrSR13Unc     = 0.30;
+    float ttwNloLoHtlUnc    = 0.01;
+    float ttwNloLoHtmUnc    = 0.13;
+    float ttwNloLoHthUnc    = 0.30;
+    float ttzNloLoHtlUnc    = 0.13;
+    float ttzNloLoHtmUnc    = 0.06;
+    float ttzNloLoHthUnc    = 0.70;
 
-  if( !isThXSect && !isThAcc && !isThLONLO ) return;
 
-  bool isTTW=_sampleName.find("TTW") != string::npos;
-  bool isTTZ=_sampleName.find("TTZ") != string::npos || 
-             _sampleName.find("TTLL") != string::npos;
-  
-  if(!isTTW && !isTTZ) return;
 
-  
-  // ThXSect
-  // ThAcc
-  // ThLONLO
+    bool lowHTregion = false;
+    if(_HT>400 || _nBJets > 2 || _met->pt() > 300) lowHTregion = false;
 
-  if( SystUtils::kDown==getUncDir() ) {
-
-    if(isThAcc) {
-      bool passSR=false;
-      _SR="SR013";
-      if(testRegion()) passSR=true;
-      _SR="SR015";
-      if(testRegion()) passSR=true;
-
-      float var=(isTTW?0.18:0.08);
-      _weight *= 1- ( (_HT>400 || passSR)?var:0.05 );
-    }
-    else if(isThXSect) {
-      _weight *= 1-(isTTW?0.13:0.11);
-    }
-    else if(isThLONLO) {
-      if(_HT<400) _weight *= (isTTW?0.99:0.87) ;
-      else if(_HT<600) _weight *= (isTTW?0.87:0.94) ;
-      else _weight *= (isTTW?0.70:0.30) ;
-    }
-  } //up var
-  
-  if( SystUtils::kUp==getUncDir() ) {
+    //flat uncertainties
     
-    if(isThAcc) {
-      bool passSR=false;
-      _SR="SR013";
-      if(testRegion()) passSR=true;
-      _SR="SR015";
-      if(testRegion()) passSR=true;
+    //uncertainties for all MC non-data driven MC backgrounds and signals
+    if(_sampleName.find("GGHZZ4L") != string::npos || _sampleName.find("VHToNonbb") != string::npos ||_sampleName.find("ZZTo4L") != string::npos ||_sampleName.find("WWZ") != string::npos ||_sampleName.find("WZZ") != string::npos ||_sampleName.find("ZZZ") != string::npos ||_sampleName.find("TTTT") != string::npos ||_sampleName.find("tZq_ll") != string::npos ||_sampleName.find("TGJets") != string::npos ||_sampleName.find("TTGJets") != string::npos ||_sampleName.find("WGToLNuG") != string::npos ||_sampleName.find("ZGTo2LG") != string::npos ||_sampleName.find("TTZ") != string::npos || _sampleName.find("TTW") != string::npos || _sampleName.find("TTHnobb_pow") != string::npos || _sampleName.find("TTLLJets_m1to10") != string::npos || _sampleName.find("T1tttt") != string::npos || _sampleName.find("T6ttWW") != string::npos || _sampleName.find("T5qqqq") != string::npos || _fastSim){
 
-      float var=(isTTW?0.18:0.08);
-      _weight *= 1+ ( (_HT>400 || passSR)?var:0.05 );
+        //lumi
+        if((isInUncProc() &&  getUncName()=="lumi") && SystUtils::kUp   == getUncDir() ){_weight *= 1+lumiUnc;}
+	    if((isInUncProc() &&  getUncName()=="lumi") && SystUtils::kDown == getUncDir() ){_weight *= 1-lumiUnc;}
+	    //HLT
+        if((isInUncProc() &&  getUncName()=="HLTEff") && SystUtils::kUp   == getUncDir() ){_weight *= 1+hltUnc;}
+	    if((isInUncProc() &&  getUncName()=="HLTEff") && SystUtils::kDown == getUncDir() ){_weight *= 1-hltUnc;}
+	    //lepton efficiency
+        if((isInUncProc() &&  getUncName()=="LepEff") && SystUtils::kUp   == getUncDir() ){_weight *= 1+lepUnc;}
+	    if((isInUncProc() &&  getUncName()=="LepEff") && SystUtils::kDown == getUncDir() ){_weight *= 1-lepUnc;}
     }
-    else if(isThXSect) {
-      _weight *= 1+(isTTW?0.13:0.11);
+
+    //rare processes
+    if(_sampleName.find("GGHZZ4L") != string::npos || _sampleName.find("VHToNonbb") != string::npos ||_sampleName.find("ZZTo4L") != string::npos ||_sampleName.find("WWZ") != string::npos ||_sampleName.find("WZZ") != string::npos ||_sampleName.find("ZZZ") != string::npos ||_sampleName.find("TTTT") != string::npos ||_sampleName.find("tZq_ll") != string::npos ){
+        //rare x-section
+        if((isInUncProc() &&  getUncName()=="rare") && SystUtils::kUp   == getUncDir() ){_weight *= 1+rareUnc;}
+	    if((isInUncProc() &&  getUncName()=="rare") && SystUtils::kDown == getUncDir() ){_weight *= 1-rareUnc;}
+	}
+
+    //X+gamma
+    if(_sampleName.find("TGJets") != string::npos ||_sampleName.find("TTGJets") != string::npos ||_sampleName.find("WGToLNuG") != string::npos ||_sampleName.find("ZGTo2LG") != string::npos ){
+        //xg
+        if((isInUncProc() &&  getUncName()=="XG") && SystUtils::kUp   == getUncDir() ){_weight *= 1+xgUnc;}
+	    if((isInUncProc() &&  getUncName()=="XG") && SystUtils::kDown == getUncDir() ){_weight *= 1-xgUnc;}
+	}
+
+    //WZ
+    if(_sampleName.find("WZTo3LNu") != string::npos ){
+        //normalization
+        if((isInUncProc() &&  getUncName()=="ra7_WZ") && SystUtils::kUp   == getUncDir() ){_weight *= 1+wzNormUnc;}
+	    if((isInUncProc() &&  getUncName()=="ra7_WZ") && SystUtils::kDown == getUncDir() ){_weight *= 1-wzNormUnc;}
+	    //extrapolation
+        if((isInUncProc() &&  getUncName()=="wz_extr") && SystUtils::kUp==getUncDir() && lowHTregion) {_weight *= 1+wzExtrHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="wz_extr") && SystUtils::kDown==getUncDir() && lowHTregion) {_weight *= 1-wzExtrHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="wz_extr") && SystUtils::kUp==getUncDir() && !lowHTregion && _nBJets <3) {_weight *= 1+wzExtrHthUnc;}
+        if((isInUncProc() &&  getUncName()=="wz_extr") && SystUtils::kDown==getUncDir() && !lowHTregion && _nBJets <3) {_weight *= 1-wzExtrHthUnc;}
+        if((isInUncProc() &&  getUncName()=="wz_extr") && SystUtils::kUp==getUncDir() && _nBJets >=3) {_weight *= 1+wzExtrSR13Unc;}
+        if((isInUncProc() &&  getUncName()=="wz_extr") && SystUtils::kDown==getUncDir() && _nBJets >=3) {_weight *= 1-wzExtrSR13Unc;}
+    
+    
     }
-    else if(isThLONLO) {
-      if(_HT<400) _weight *= (isTTW?1.01:1.13) ;
-      else if(_HT<600) _weight *= (isTTW?1.13:1.06) ;
-      else _weight *= (isTTW?1.30:1.70) ;
+
+    //ttZH
+    if(_sampleName.find("TTZ") != string::npos || _sampleName.find("TTHnobb_pow") != string::npos ){
+        //pdf uncertanty
+        if((isInUncProc() &&  getUncName()=="ttzh_pdf") && SystUtils::kUp   == getUncDir() ){_weight *= 1+ttzhPdfUnc;}
+	    if((isInUncProc() &&  getUncName()=="ttzh_pdf") && SystUtils::kDown == getUncDir() ){_weight *= 1-ttzhPdfUnc;}
+	    //x-section uncertanty
+        if((isInUncProc() &&  getUncName()=="TTZH") && SystUtils::kUp   == getUncDir() ){_weight *= 1+ttzhXSUnc;}
+	    if((isInUncProc() &&  getUncName()=="TTZH") && SystUtils::kDown == getUncDir() ){_weight *= 1-ttzhXSUnc;}
+	    //acceptance, low mass
+        if((isInUncProc() &&  getUncName()=="ttzh_extr_htl") && SystUtils::kUp==getUncDir() && lowHTregion) {_weight *= 1+ttzhAccHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzh_extr_htl") && SystUtils::kDown==getUncDir() && lowHTregion) {_weight *= 1-ttzhAccHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzh_extr_hth") && SystUtils::kUp==getUncDir() && !lowHTregion) {_weight *= 1+ttzhAccHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzh_extr_hth") && SystUtils::kDown==getUncDir() && !lowHTregion) {_weight *= 1-ttzhAccHthUnc;}
+ 
+    
     }
-  } //down var
+    if(_sampleName.find("TTZ") != string::npos ){
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT < 400) {_weight *= 1+ttzNloLoHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT < 400) {_weight *= 1-ttzNloLoHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1+ttzNloLoHtmUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1-ttzNloLoHtmUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT > 600) {_weight *= 1+ttzNloLoHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT > 600) {_weight *= 1-ttzNloLoHthUnc;}
+    } 
+    
+    if( _sampleName.find("TTLLJets_m1to10") != string::npos  ){
+        //pdf uncertanty, low mass
+        if((isInUncProc() &&  getUncName()=="ttzh_pdf") && SystUtils::kUp   == getUncDir() ){_weight *= 1+ttzhLowMPdfUnc;}
+	    if((isInUncProc() &&  getUncName()=="ttzh_pdf") && SystUtils::kDown == getUncDir() ){_weight *= 1-ttzhLowMPdfUnc;}
+	    //x-section uncertanty, low mass
+        if((isInUncProc() &&  getUncName()=="TTZH") && SystUtils::kUp   == getUncDir() ){_weight *= 1+ttzhLowMXSUnc;}
+	    if((isInUncProc() &&  getUncName()=="TTZH") && SystUtils::kDown == getUncDir() ){_weight *= 1-ttzhLowMXSUnc;}
+        //acceptance, low mass
+        if((isInUncProc() &&  getUncName()=="ttz_lowM_extr_htl") && SystUtils::kUp==getUncDir() && lowHTregion) {_weight *= 1+ttzLowMAccHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttz_lowM_extr_htl") && SystUtils::kDown==getUncDir() && lowHTregion) {_weight *= 1-ttzLowMAccHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttz_lowM_extr_hth") && SystUtils::kUp==getUncDir() && !lowHTregion) {_weight *= 1+ttzLowMAccHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttz_lowM_extr_hth") && SystUtils::kDown==getUncDir() && !lowHTregion) {_weight *= 1-ttzLowMAccHthUnc;}
+        	
+    }
+    if( _sampleName.find("TTW") != string::npos  ){
+        //pdf uncertanty
+        if((isInUncProc() &&  getUncName()=="ttw_pdf") && SystUtils::kUp   == getUncDir() ){_weight *= 1+ttwPdfUnc;}
+	    if((isInUncProc() &&  getUncName()=="ttw_pdf") && SystUtils::kDown == getUncDir() ){_weight *= 1-ttwPdfUnc;}
+	     //x-section uncertanty
+        if((isInUncProc() &&  getUncName()=="TTW") && SystUtils::kUp   == getUncDir() ){_weight *= 1+ttwXSUnc;}
+	    if((isInUncProc() &&  getUncName()=="TTW") && SystUtils::kDown == getUncDir() ){_weight *= 1-ttwXSUnc;}
+        //acceptance
+        if((isInUncProc() &&  getUncName()=="ttw_extr_htl") && SystUtils::kUp==getUncDir() && lowHTregion) {_weight *= 1+ttwAccHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttw_extr_htl") && SystUtils::kDown==getUncDir() && lowHTregion) {_weight *= 1-ttwAccHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttw_extr_hth") && SystUtils::kUp==getUncDir() && !lowHTregion) {_weight *= 1+ttwAccHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttw_extr_hth") && SystUtils::kDown==getUncDir() && !lowHTregion) {_weight *= 1-ttwAccHthUnc;}
+        //LO vs NLO 
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT < 400) {_weight *= 1+ttwNloLoHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT < 400) {_weight *= 1-ttwNloLoHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1+ttwNloLoHtmUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1-ttwNloLoHtmUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT > 600) {_weight *= 1+ttwNloLoHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT > 600) {_weight *= 1-ttwNloLoHthUnc;}
+   
+    }
+
+    //Fake background
+    if(_vc->get("isData") == 1 && _tightLepsPtCutMllCut.size() < 3){
+        //normalization
+        if((isInUncProc() &&  getUncName()=="fakes") && SystUtils::kUp   == getUncDir() ){_weight *= 1+fakeUnc;}
+	    if((isInUncProc() &&  getUncName()=="fakes") && SystUtils::kDown == getUncDir() ){_weight *= 1-fakeUnc;}
+    }
 
 }
