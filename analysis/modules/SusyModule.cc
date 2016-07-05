@@ -591,7 +591,7 @@ SusyModule::bestSSPair(const CandList* leps, bool byflav,
 		       float pTthrMu, float pTthrEl,
 		       int& idx1, int& idx2) {
 
-  CandList clist(2,nullptr);
+  CandList clist(2,NULL);
   int tmpFlav=0;
   int tmpSt=0;
 
@@ -641,7 +641,7 @@ SusyModule::bestSSPair(const CandList* leps1, const CandList* leps2, bool byflav
 
   //LISTS HAVE TO BE COMPLEMENTARY, NO OVERLAPS!
 
-  CandList clist(2,nullptr);
+  CandList clist(2,NULL);
   int tmpFlav=0;
   int tmpSt=0;
 
