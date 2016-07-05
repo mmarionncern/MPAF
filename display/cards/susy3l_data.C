@@ -29,7 +29,7 @@ void susy3l_data() {
  
     string sigs = "none"; 
     bool data = true;
-    bool manual = false;
+    bool manual =false;
     if(!manual) string region = "REGION";
     else string region = "OnZBaseline";
 
@@ -147,7 +147,7 @@ void susy3l_data() {
         md.dp.setObservables("SRS" + region);
         int binning=1;
         double rangeX[2]={1,18};
-        //bool logYScale=false;
+        bool logYScale=false;
     }
     if(obs == "mu_multi"){
         md.dp.setObservables("mu_multiplicity" + region);
