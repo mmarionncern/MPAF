@@ -441,7 +441,8 @@ void SUSY3L::initialize(){
         addManualSystSource("ttw_extr_htl",SystUtils::kNone);
         addManualSystSource("ttw_extr_hth",SystUtils::kNone);
         addManualSystSource("wz_extr",SystUtils::kNone);
-        addManualSystSource("ttvLO",SystUtils::kNone);
+        addManualSystSource("ttzLO",SystUtils::kNone);
+        addManualSystSource("ttwLO",SystUtils::kNone);
     }
 
 }
@@ -3044,12 +3045,12 @@ void SUSY3L::systUnc(){
     
     }
     if(_sampleName.find("TTZ") != string::npos ){
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT < 400) {_weight *= 1+ttzNloLoHtlUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT < 400) {_weight *= 1-ttzNloLoHtlUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1+ttzNloLoHtmUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1-ttzNloLoHtmUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT > 600) {_weight *= 1+ttzNloLoHthUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT > 600) {_weight *= 1-ttzNloLoHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzLO") && SystUtils::kUp==getUncDir() && _HT < 400) {_weight *= 1+ttzNloLoHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzLO") && SystUtils::kDown==getUncDir() && _HT < 400) {_weight *= 1-ttzNloLoHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzLO") && SystUtils::kUp==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1+ttzNloLoHtmUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzLO") && SystUtils::kDown==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1-ttzNloLoHtmUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzLO") && SystUtils::kUp==getUncDir() && _HT > 600) {_weight *= 1+ttzNloLoHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttzLO") && SystUtils::kDown==getUncDir() && _HT > 600) {_weight *= 1-ttzNloLoHthUnc;}
     } 
     
     if( _sampleName.find("TTLLJets_m1to10") != string::npos  ){
@@ -3079,12 +3080,12 @@ void SUSY3L::systUnc(){
         if((isInUncProc() &&  getUncName()=="ttw_extr_hth") && SystUtils::kUp==getUncDir() && !lowHTregion) {_weight *= 1+ttwAccHthUnc;}
         if((isInUncProc() &&  getUncName()=="ttw_extr_hth") && SystUtils::kDown==getUncDir() && !lowHTregion) {_weight *= 1-ttwAccHthUnc;}
         //LO vs NLO 
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT < 400) {_weight *= 1+ttwNloLoHtlUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT < 400) {_weight *= 1-ttwNloLoHtlUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1+ttwNloLoHtmUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1-ttwNloLoHtmUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kUp==getUncDir() && _HT > 600) {_weight *= 1+ttwNloLoHthUnc;}
-        if((isInUncProc() &&  getUncName()=="ttvLO") && SystUtils::kDown==getUncDir() && _HT > 600) {_weight *= 1-ttwNloLoHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttwLO") && SystUtils::kUp==getUncDir() && _HT < 400) {_weight *= 1+ttwNloLoHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttwLO") && SystUtils::kDown==getUncDir() && _HT < 400) {_weight *= 1-ttwNloLoHtlUnc;}
+        if((isInUncProc() &&  getUncName()=="ttwLO") && SystUtils::kUp==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1+ttwNloLoHtmUnc;}
+        if((isInUncProc() &&  getUncName()=="ttwLO") && SystUtils::kDown==getUncDir() && _HT > 400 && _HT < 600) {_weight *= 1-ttwNloLoHtmUnc;}
+        if((isInUncProc() &&  getUncName()=="ttwLO") && SystUtils::kUp==getUncDir() && _HT > 600) {_weight *= 1+ttwNloLoHthUnc;}
+        if((isInUncProc() &&  getUncName()=="ttwLO") && SystUtils::kDown==getUncDir() && _HT > 600) {_weight *= 1-ttwNloLoHthUnc;}
    
     }
 
