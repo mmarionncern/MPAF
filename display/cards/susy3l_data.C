@@ -20,7 +20,7 @@ void susy3l_data() {
     bool closure = false;
     bool nlo_vs_lo = false;
     bool fixLeg = true;
-    bool printTable = false;
+    bool printTable = true;
 
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
@@ -29,7 +29,7 @@ void susy3l_data() {
  
     string sigs = "none"; 
     bool data = true;
-    bool manual = true;
+    bool manual = false;
     if(!manual) string region = "REGION";
     else string region = "OnZBaseline";
 
@@ -307,12 +307,14 @@ void susy3l_data() {
 
 
     //TTZ/H
-    md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z/H" , kGreen-6, scale      );
+    //md.anConf.addSample( "TTZToLLNuNu"                          ,  "t#bar{t}Z/H" , kGreen-6, scale      );
+    md.anConf.addSample( "TTZ_LO"                               ,  "t#bar{t}Z/H" , kGreen-6, scale      );
     md.anConf.addSample( "TTHnobb_pow"                          ,  "t#bar{t}Z/H" , kGreen-6, scale      );
     md.anConf.addSample( "TTLLJets_m1to10"                      ,  "t#bar{t}Z/H" , kGreen-6, scale      );
     
     //TTW
-    md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3, scale      );
+    //md.anConf.addSample( "TTWToLNu"                             ,  "t#bar{t}W"   , kGreen+3, scale      );
+    md.anConf.addSample( "TTW_LO"                               ,  "t#bar{t}W"   , kGreen+3, scale      );
 
 
     //non-prompt

@@ -61,19 +61,20 @@ void SUSY3L::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
     _vTR_lines.push_back("HLT_BIT_HLT_DoubleMu8_Mass8_PFHT300_v");
     //isolated triggers 2016
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");                   //TODO: not in tree yet
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");                   //TODO: not in tree yet
     //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");  
     _vTR_lines.push_back("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");     
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v");  
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");       //TODO: not in tree yet
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");       //TODO: not in tree yet
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");      //has prescale 0 in column 1e34 
 
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v");  
     
     //isolated triggers 2015
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");                  //no longer in 2016 menu
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v");                  //no longer in 2016 menu
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
     //_vTR_lines.push_back("HLT_BIT_HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");  
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");      //has prescale 0 in column 1e34 
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");      //has prescale 0 in column 1e34 
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v");
     
     //tri-lepton trigger
     //_vTR_lines.push_back("HLT_BIT_HLT_Ele16_Ele12_Ele8_CaloIdL_TrackIdL_v");
@@ -1566,7 +1567,7 @@ void SUSY3L::advancedSelection(int WF){
 
     //extra cut for onZ to remove DY
     if(_isOnZ && _met->pt() < 70 && _HT < 400 && _nBJets<2) return;
-  
+ 
     //long long int evt=_vc->get("evt");
     //if(_vc->get("isData") == 1 && _HT>400 && !_isFake) cout << _vc->get("run") << " " << _vc->get("lumi") << " " << evt << " " << _nMus << " " << _nEls << " " << _nTaus << " " << _nJets << " " << _nBJets <<  " " << _met->pt() << " " << _HT << " "  << _isOnZ  << " " << _isFake << endl;
     //if(_vc->get("isData") == 1 && _HT<400 && !_isFake) return;
@@ -2324,7 +2325,7 @@ bool SUSY3L::ptSelection(CandList leptons){
     //offline HT below HT trigger plateau
     if(_HT<400){
         //leading leg
-        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<18) return false;
+        if(std::abs(leptons[0]->pdgId())==13 && leptons[0]->pt()<20) return false;
         if(std::abs(leptons[0]->pdgId())==11 && leptons[0]->pt()<25) return false;
         //sub-leading leg
         if(std::abs(leptons[1]->pdgId())==13 && leptons[1]->pt()<10) return false;

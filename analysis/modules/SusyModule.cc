@@ -357,8 +357,8 @@ SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, 
 
 bool
 SusyModule::elHLTEmulSel(int idx, bool withIso, string branch) const {
-
-/*    if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
+/*
+    if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
         if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
         if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
         if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.04  ) return false;
