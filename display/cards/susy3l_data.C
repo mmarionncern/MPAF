@@ -20,7 +20,7 @@ void susy3l_data() {
     bool closure = false;
     bool nlo_vs_lo = false;
     bool fixLeg = true;
-    bool printTable = true;
+    bool printTable = false;
 
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );

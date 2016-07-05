@@ -410,7 +410,7 @@ void SUSY3L::initialize(){
 
     //systematic uncertianties
     if(_runSystematics){
-   //     addManualSystSource("btag",SystUtils::kNone);
+        addManualSystSource("btag",SystUtils::kNone);
         addManualSystSource("jes",SystUtils::kNone);
         addManualSystSource("fakes_EWK",SystUtils::kNone);
         addManualSystSource("pu",SystUtils::kNone);
@@ -2953,9 +2953,9 @@ void SUSY3L::systUnc(){
     float rareUnc           = 0.50;
     float xgUnc             = 0.50;
     float wzNormUnc         = 0.15;
-    float ttzhPdf           = 0.02;
-    float ttzhLowMPdf       = 0.06;
-    float ttwPdf            = 0.03;
+    float ttzhPdfUnc        = 0.02;
+    float ttzhLowMPdfUnc    = 0.06;
+    float ttwPdfUnc         = 0.03;
     float ttzhXSUnc         = 0.11;
     float ttzhLowMXSUnc     = 0.33;
     float ttwXSUnc          = 0.13;
@@ -3089,7 +3089,7 @@ void SUSY3L::systUnc(){
     }
 
     //Fake background
-    if(_vc->get("isData") == 1 && _tightLepsPtCutMllCut.size < 3){
+    if(_vc->get("isData") == 1 && _tightLepsPtCutMllCut.size() < 3){
         //normalization
         if((isInUncProc() &&  getUncName()=="fakes") && SystUtils::kUp   == getUncDir() ){_weight *= 1+fakeUnc;}
 	    if((isInUncProc() &&  getUncName()=="fakes") && SystUtils::kDown == getUncDir() ){_weight *= 1-fakeUnc;}
