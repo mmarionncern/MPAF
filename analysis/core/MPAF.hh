@@ -156,11 +156,11 @@ private:
   void finalizeSkimming();
 
   void internalWriteOutput();
+  void writeSummary();
 
   void addWorkflowHistos();
 
- 
-
+  
   void applySystVar(SystST s);
   //MM fixme
   // float applySystDBVar(SystST s, string db, float v1, float v2, float v3, float v4,
@@ -177,6 +177,8 @@ protected:
   DataBaseManager* _dbm;
   HistoManager* _hm;
   AnaUtils* _au;
+
+  bool _skim;
 
   MIPar _inputVars;
 
@@ -212,7 +214,7 @@ private:
   TH1D* _hnwSkim;
 
 
-  bool _skim;
+ 
   bool _fullSkim;
 
   // Configuration File Variables
@@ -237,6 +239,10 @@ private:
   vector<int> _uncDirs;
   map<string, bool> _uType;
   
+  bool _systVarOnly;
+  string _systSource;
+  int _systDir;
+
 };
 
 

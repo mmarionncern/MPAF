@@ -694,7 +694,6 @@ DisplayClass::drawDistribution() {
   }
   
   // systematic uncertainties now ============
-  cout<<" systematics? "<<_addSyst<<endl;
   if(_addSyst && !_is2D && _hMC) {
     if(_comSyst) {
       computeSystematics(_isProf,true);
@@ -2369,7 +2368,7 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
   //how many uncertainty sources? 
   if(systs.size() + systsUp.size() > 4) _uncDet=false; //protection
   int nUncSrc = _uncDet?(systs.size() + systsUp.size() + _mcSyst):1;
- 
+  
   vector<TGraphAsymmErrors*> unc(nUncSrc,NULL);
   _uncNames.resize(nUncSrc);
  
@@ -2459,7 +2458,8 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
       string n =  (*itS).first.substr( 0, (*itS).first.size() -2 );
       float sU = ((*itS).second)->GetBinContent(ib) - _hMC->GetBinContent(ib);
       float sD = (systsDo[ n+"Do" ])->GetBinContent(ib) - _hMC->GetBinContent(ib);
-      
+      // if(ib==1)
+      // 	cout<<n<<"   "<<sU<<"  "<<sD<<" ("<<_hMC->GetBinContent(ib)<<"  "<<((*itS).second)->GetBinContent(ib)<<"  "<<(systsDo[ n+"Do" ])->GetBinContent(ib)<<endl;
       for(size_t iv=nu;iv<(cumul?systU.size():(nu+1));iv++) {
 	
 	if( sU*sD > 0) { //same sign errors
