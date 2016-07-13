@@ -87,6 +87,8 @@ private:
     bool passCSCfilter();
     bool passEESCfilter(); 
     
+    void theoreticalUncertainties();
+
     void loadScanHistogram();
     bool checkMassBenchmark();
     float getFastSimXFactor(float dir);

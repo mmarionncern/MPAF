@@ -292,7 +292,7 @@ SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP
   int wpIso = kDenom;
 
   if(std::abs(c->eta())                                >  2.4          ) return false;
-  if(         _vc->get(branch + "_mediumMuonId", idx)  <  _muIdWP[wp]  ) return false;
+  if(     _vc->get(branch + "_mediumMuonID2016", idx)  <  _muIdWP[wp]  ) return false;
   if(chCut && _vc->get(branch + "_tightCharge" , idx)  <= _tChWP[wp]   ) return false;
   if(std::abs(_vc->get(branch + "_dxy"         , idx)) > _dxyWP[wp]    ) return false;
   if(std::abs(_vc->get(branch + "_dz"          , idx)) > _dzWP[wp]     ) return false;

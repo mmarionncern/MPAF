@@ -125,6 +125,7 @@ void SUSY3L::initialize(){
     _vc->registerVar("LepGood_sigmaIEtaIEta"           );    //
     _vc->registerVar("LepGood_eInvMinusPInv"           );    //
     _vc->registerVar("LepGood_mediumMuonId"            );    //mva medium wp muon identification
+    _vc->registerVar("LepGood_mediumMuonID2016"        );
     _vc->registerVar("LepGood_mvaIdPhys14"             );    //mva electron ID
     _vc->registerVar("LepGood_mvaIdSpring15"           );    //updated mva electron ID
     _vc->registerVar("LepGood_ecalPFClusterIso"        );    
@@ -225,6 +226,8 @@ void SUSY3L::initialize(){
     //scan variables
     _vc->registerVar("GenSusyMScan1"                   );
     _vc->registerVar("GenSusyMScan2"                   );
+    _vc->registerVar("GenSusyMGluino");
+    _vc->registerVar("GenSusyMNeutralino");
 
     //generator information
     _vc->registerVar("nGenPart"                        );
@@ -505,8 +508,10 @@ void SUSY3L::run(){
     setBaselineRegion();
 
     //skim tree
-    //if(_vc->get("nLepGood") >2) fillSkimTree();
-    //return; 
+    if(_skim) {
+      if(_vc->get("nLepGood") >2) fillSkimTree();
+      return; 
+    }
     
     //increment event counter, used as denominator for yield calculation
     counter("denominator");
@@ -685,6 +690,25 @@ void SUSY3L::defineOutput(){
     _hm->addVariable("el_multiplicity"  ,  10,      0.0,   10.0,    "N_{el}"                                    );
     _hm->addVariable("mu_multiplicity"  ,  10,      0.0,   10.0,    "N_{#mu}"                                   );
     _hm->addVariable("lep_multiplicity" ,  10,      0.0,   10.0,    "N_{lep}"                                   );
+
+    vector<string> wfs({"OnZBaseline","OffZBaseline",
+	  "OnZBaseline_Fake", "OffZBaseline_Fake",
+	  "Fake","WZCR","FakeCR","WZCR_Fake"});
+
+    _hm->setRelevantWFs( "SRS" ,wfs);
+    _hm->setRelevantWFs( "HT" ,wfs);
+    _hm->setRelevantWFs( "MET" ,wfs);
+    _hm->setRelevantWFs( "NBJets" ,wfs);
+    _hm->setRelevantWFs( "NJets" ,wfs);
+    _hm->setRelevantWFs( "MT" ,wfs);
+    _hm->setRelevantWFs( "pt_1st_lepton" ,wfs);
+    _hm->setRelevantWFs( "pt_2nd_lepton" ,wfs);
+    _hm->setRelevantWFs( "pt_3rd_lepton" ,wfs);
+    _hm->setRelevantWFs( "flavor" ,wfs);
+    _hm->setRelevantWFs( "el_multiplicity" ,wfs);
+    _hm->setRelevantWFs( "mu_multiplicity" ,wfs);
+    _hm->setRelevantWFs( "lep_multiplicity" ,wfs);
+    
 
     if(!_doPlotsVerbose) return; 
     
@@ -2790,6 +2814,9 @@ bool SUSY3L::passNoiseFilters(){
         
     */
 
+    if(_vc->get("Flag_badChargedHadronFilter"   ) == 0) return false;               //TODO: to be applied on MC as well after next production
+    if(_vc->get("Flag_badMuonFilter"            ) == 0) return false;               //TODO: to be applied on MC as well after next production
+
     if(!_vc->get("isData")) return true;
 
     if(_vc->get("hbheFilterNew25ns"             ) == 0) return false;
@@ -2797,8 +2824,7 @@ bool SUSY3L::passNoiseFilters(){
     if(_vc->get("Flag_eeBadScFilter"            ) == 0) return false;
     if(_vc->get("Flag_goodVertices"             ) == 0) return false;
     if(_vc->get("Flag_globalTightHalo2016Filter") == 0) return false;
-    if(_vc->get("Flag_badChargedHadronFilter"   ) == 0) return false;               //TODO: to be applied on MC as well after next production
-    if(_vc->get("Flag_badMuonFilter"            ) == 0) return false;               //TODO: to be applied on MC as well after next production
+  
     //if(_sampleName.find("Run2015C") != std::string::npos){
     //    if(_vc -> get("Flag_CSCTightHaloFilter") == 0) return false;
     //}
@@ -2859,27 +2885,31 @@ bool SUSY3L::passEESCfilter(){
 //____________________________________________________________________________
 bool SUSY3L::checkMassBenchmark(){
 
-    float M1=_vc->get("GenSusyMScan1");
-    float M2=_vc->get("GenSusyMScan2");
+    // float M1=_vc->get("GenSusyMScan1");
+    // float M2=_vc->get("GenSusyMScan2");
+  float M1=_vc->get("GenSusyMGluino");
+  float M2=_vc->get("GenSusyMNeutralino");
 
     ostringstream os,os1;
     os<<M1;
     os1<<M2;
     string s;
-    if(_susyProcessName == "T1tttt") s="-"+os.str()+"-"+os1.str()+"-";
+    if(_susyProcessName == "T1tttt") s="_"+os.str()+"_mN_"+os1.str();
     if(_susyProcessName == "T6ttWW") s="_"+os.str()+"_"+os1.str();
     if(_susyProcessName == "T5qqqqVV") s="_"+os.str()+"_"+os1.str();
     if(_susyProcessName == "T5ttttdeg") s="_"+os.str()+"_"+os1.str();
     
     if(_ie==0 && _susyProcessName == "T1tttt") {
-        unsigned int p=_sampleName.find("-");
-        unsigned int p1=_sampleName.find("-",p+1);
-        unsigned int p2=_sampleName.find("-",p1+1);
+      unsigned int p=_sampleName.find("_",8);
+        unsigned int p1=_sampleName.find("_",p+1);
+	unsigned int p1b=_sampleName.find("_",p1+1);
+        unsigned int p2=_sampleName.find("_",p1+1);
+	//cout<<_sampleName<<"   "<<p<<"  "<<p1<<"  "<<p2<<"   "<<_sampleName.substr(p+1,p1-p-1)<<"  "<<_sampleName.substr(p1+1,p2-p1-1)<<endl;
         float m1=stof( _sampleName.substr(p+1,p1-p-1) );
-        float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
+        float m2=stof( _sampleName.substr(p1b+1,p2-p1-1) );
         float xb = _hScanWeight->GetXaxis()->FindBin(m1);
         float yb = _hScanWeight->GetYaxis()->FindBin(m2);
-        float zb = _hScanWeight->GetZaxis()->FindBin(1);
+        float zb = _hScanWeight->GetZaxis()->FindBin(0.);
   
         _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
     }
@@ -2912,7 +2942,7 @@ bool SUSY3L::checkMassBenchmark(){
 void SUSY3L::loadScanHistogram(){
   
     if(_fastSim){ 
-        string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScan"+_susyProcessName+".root";
+        string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScan"+_susyProcessName+"_2016.root";
         TFile* file=new TFile(mpafenv.c_str(),"read");
         _hScanWeight=(TH3D*)file->Get("CountSMS");
     }
@@ -2942,8 +2972,6 @@ float SUSY3L::getFastSimXFactor(float dir){
     }
 
 }
-    
-
 
 //____________________________________________________________________________
 void SUSY3L::systUnc(){
