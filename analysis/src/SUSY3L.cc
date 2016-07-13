@@ -1601,7 +1601,8 @@ void SUSY3L::advancedSelection(int WF){
             if(_isOnZ){setWorkflow(kOnZBaseline_Fake); offset = kOffZSR017;}
             else{setWorkflow(kOffZBaseline_Fake); offset = kOnZSR017_Fake;}
         }
-        fill( "SRS", wf-offset , _weight );
+        if(offset== kOnZSR017 && wf-offset == 16) fill( "SRS", wf-offset-1 , _weight );
+        else fill( "SRS", wf-offset , _weight );
         
         setWorkflow(wf);
         if(getCurrentWorkflow()==kGlobal_Fake){cout << "WARNING " << offset <<  endl;}
