@@ -85,10 +85,6 @@ void SUSY3L::initialize(){
     //register HLT trigger bit tree variables 
     registerTriggerVars();
 
-    //event filters to remove detector artifacts
-    readCSCevents();
-    readEESCevents();
-
     //event characteristics
     _vc->registerVar("run"                             );    //run number
     _vc->registerVar("lumi"                            );    //lumi section number
@@ -252,21 +248,7 @@ void SUSY3L::initialize(){
     int nCateg=77;
     _categs.resize(nCateg);
     string srs[77]={
- /*      
-    //signal regions
-        "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
-	    "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012", "OnZSR013", "OnZSR014", "OnZSR015",
-	
-	    "OffZSR001", "OffZSR002", "OffZSR003", "OffZSR004", "OffZSR005", "OffZSR006", "OffZSR007", "OffZSR008",
-	    "OffZSR009", "OffZSR010", "OffZSR011", "OffZSR012", "OffZSR013", "OffZSR014", "OffZSR015",
-
-    //signal application regions
-        "OnZSR001_Fake", "OnZSR002_Fake", "OnZSR003_Fake", "OnZSR004_Fake", "OnZSR005_Fake", "OnZSR006_Fake", "OnZSR007_Fake", "OnZSR008_Fake",
-	    "OnZSR009_Fake", "OnZSR010_Fake", "OnZSR011_Fake", "OnZSR012_Fake", "OnZSR013_Fake", "OnZSR014_Fake", "OnZSR015_Fake",
-
-	    "OffZSR001_Fake", "OffZSR002_Fake", "OffZSR003_Fake", "OffZSR004_Fake", "OffZSR005_Fake", "OffZSR006_Fake", "OffZSR007_Fake", "OffZSR008_Fake",
-	    "OffZSR009_Fake", "OffZSR010_Fake", "OffZSR011_Fake", "OffZSR012_Fake", "OffZSR013_Fake", "OffZSR014_Fake", "OffZSR015_Fake",
-   */     
+     
     //signal regions
         "OnZSR001", "OnZSR002", "OnZSR003", "OnZSR004", "OnZSR005", "OnZSR006", "OnZSR007", "OnZSR008",
 	    "OnZSR009", "OnZSR010", "OnZSR011", "OnZSR012", "OnZSR013", "OnZSR014", "OnZSR015", "OnZSR016", "OnZSR017",
@@ -372,12 +354,6 @@ void SUSY3L::initialize(){
         _dbm->loadDb("MuNIsoDo"  , "db2016/FakeRatio2016Bmu_RA7.root", "MR_RatMuMapPtCorrLO_non/datacorrUCSX");
     }
 
-    //load b-tag scale factors and efficiecnies
-    //_dbm->loadDb("BTagSF"     , "BTagSFMedium.db"                                    ); 
-    //_dbm->loadDb("BTagEffUSDG", "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_udsg");
-    //_dbm->loadDb("BTagEffC"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_c"   );
-    //_dbm->loadDb("BTagEffB"   , "GC_BTagEffs.root", "h2_BTaggingEff_csv_med_Eff_b"   );
-
 
     //load lepton scale factors
     //fullSim muons
@@ -418,10 +394,10 @@ void SUSY3L::initialize(){
         addManualSystSource("fakes_EWK",SystUtils::kNone);
         addManualSystSource("pu",SystUtils::kNone);
         //fastSim only
-   //     addManualSystSource("isr",SystUtils::kNone);
+        addManualSystSource("isr",SystUtils::kNone);
    //     addManualSystSource("fs_lep",SystUtils::kNone);
    //     addManualSystSource("fs_hlt",SystUtils::kNone);
-   //     addManualSystSource("fs_btag",SystUtils::kNone);
+        addManualSystSource("fs_btag",SystUtils::kNone);
         //addManualSystSource("XSFS",SystUtils::kNone);
    //     addManualSystSource("scale",SystUtils::kNone);
     
@@ -537,7 +513,7 @@ void SUSY3L::run(){
   
     if(_runSystematics) systUnc();
    
-/*
+
     //event reweighting //////////////////////////////////////////////////////////
     //btag-scale factors
     if(!_vc->get("isData") && !_closure ) {
@@ -567,7 +543,7 @@ void SUSY3L::run(){
 	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
         }
     }
-    
+/*    
     //lepton scale factors
     if(!_vc->get("isData")){
         //fullSim scale factors, flat uncertainty added in display card
@@ -2750,63 +2726,6 @@ bool SUSY3L::passHLTbit(){
 
 }
 
-//____________________________________________________________________________
-void SUSY3L::readCSCevents(){
-    /*
-        apply CSC event filter
-        parameters: none
-        return: true (if event passes filter), false (else)
-    */
-
-    string files[3] = {(string) getenv("MPAF") + "/workdir/database/eventlist_DoubleEG_csc2015.txt"  , \
-                     (string) getenv("MPAF") + "/workdir/database/eventlist_DoubleMuon_csc2015.txt", \
-                     (string) getenv("MPAF") + "/workdir/database/eventlist_MuonEG_csc2015.txt"    };
-    vector<string> f = Tools::toVector(files);
-    readFilteredEvents(_filteredCSCEvents, f);
-
-}
-
-//____________________________________________________________________________
-void SUSY3L::readEESCevents(){
-    /*
-        apply EESC event filter
-        parameters: none
-        return: true (if event passes filter), false (else)
-    */
-
-    string files[3] = {(string) getenv("MPAF") + "/workdir/database/eventlist_DoubleEG_ecalscn1043093.txt"  , \
-                     (string) getenv("MPAF") + "/workdir/database/eventlist_DoubleMuon_ecalscn1043093.txt", \
-                     (string) getenv("MPAF") + "/workdir/database/eventlist_MuonEG_ecalscn1043093.txt"    };
-    vector<string> f = Tools::toVector(files);
-    readFilteredEvents(_filteredEESCEvents, f);
-
-}
-
-
-//____________________________________________________________________________
-void SUSY3L::readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >& evts, vector<string> files){
-    /*
-        
-    */
-
-    for(unsigned int i = 0; i < files.size(); ++i){
-
-        string line;
-        ifstream fs(files[i].c_str());
-        if(!fs.is_open()) continue;
-
-        while(getline(fs, line)){
-      
-        vector<string> splitted = Tools::split(Tools::trim(line, "\n"), ':');
-        std::pair<int, unsigned long int> tmp(atoi(splitted[1].c_str()), strtoul(splitted[2].c_str(), NULL, 0));
-        std::pair<int, std::pair<int, unsigned long int> > tmp2(atoi(splitted[0].c_str()), tmp);
-        evts[ tmp2 ] = 0;
-        }
-        fs.close();
-    }
-
-}
-
 
 //____________________________________________________________________________
 bool SUSY3L::passNoiseFilters(){
@@ -2814,8 +2733,8 @@ bool SUSY3L::passNoiseFilters(){
         
     */
 
-    if(_vc->get("Flag_badChargedHadronFilter"   ) == 0) return false;               //TODO: to be applied on MC as well after next production
-    if(_vc->get("Flag_badMuonFilter"            ) == 0) return false;               //TODO: to be applied on MC as well after next production
+    if(_vc->get("Flag_badChargedHadronFilter"   ) == 0) return false;               
+    if(_vc->get("Flag_badMuonFilter"            ) == 0) return false;               
 
     if(!_vc->get("isData")) return true;
 
@@ -2824,59 +2743,7 @@ bool SUSY3L::passNoiseFilters(){
     if(_vc->get("Flag_eeBadScFilter"            ) == 0) return false;
     if(_vc->get("Flag_goodVertices"             ) == 0) return false;
     if(_vc->get("Flag_globalTightHalo2016Filter") == 0) return false;
-  
-    //if(_sampleName.find("Run2015C") != std::string::npos){
-    //    if(_vc -> get("Flag_CSCTightHaloFilter") == 0) return false;
-    //}
-    //else {
-    //    if(!passCSCfilter()                          ) return false;
-    //    if(!passEESCfilter()                         ) return false;
-    //}
-
-    return true;
-
-}
-
-
-//____________________________________________________________________________
-bool SUSY3L::passCSCfilter(){
-    /*
-        
-    */
-
-    if(!_vc->get("isData")) return true;
-
-    int run=_vc->get("run");
-    int lumi=_vc->get("lumi");
-    unsigned long int evt=(unsigned long int)_vc->get("evt");
-  
-    std::pair<int, unsigned long int> tmp(lumi, evt);
-    std::pair<int, std::pair<int, unsigned long int> > tmp2(run, tmp);
-
-    if(_filteredCSCEvents.count(tmp2) > 0) return false;
-
-    return true;
-
-}
-
-
-//____________________________________________________________________________
-bool SUSY3L::passEESCfilter(){
-    /*
-        
-    */
-
-    if(!_vc->get("isData")) return true;
-
-    int run=_vc->get("run");
-    int lumi=_vc->get("lumi");
-    unsigned long int evt=(unsigned long int)_vc->get("evt");
-  
-    std::pair<int, unsigned long int> tmp(lumi, evt);
-    std::pair<int, std::pair<int, unsigned long int> > tmp2(run, tmp);
-
-    if(_filteredEESCEvents.count(tmp2) > 0) return false;
-
+ 
     return true;
 
 }
