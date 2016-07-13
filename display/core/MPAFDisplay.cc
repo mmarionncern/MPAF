@@ -492,7 +492,7 @@ MPAFDisplay::doPlot() {
     Obs_.push_back( _hm->getHObs( obs_[io] ) );
     systs_.push_back( _hm->getSystObs( obs_[io] ) );
   }  
-
+  
   if(Obs_.size()!=0) {
     dp.setSystematicsUnc( systs_ );
     dp.plotDistributions( Obs_ );
@@ -524,9 +524,10 @@ MPAFDisplay::setHistograms() {
     string tmpDs= _ids;
     vector<string> obss = ds->getObservables();
     vector<string> samples= ds->getSamples();
-    // cout<<_ids<<"   "<<ds<<endl;
+    // cout<<_ids<<"   "<<ds->getName()<<endl;
     // for(size_t is=0;is<samples.size(); is++) {
-    //   cout<<samples[is]<<" --> "<<ds->getSample(samples[is])->isData()<<endl;
+    //   // cout<<samples[is]<<" ==--> "<<ds->getSample(samples[is])->isData()
+    //   // 	  <<"   "<<ds->getSample(samples[is])->isDD()<<endl;
     // }
 
     for(size_t io=0;io<obss.size();io++) {
@@ -544,18 +545,38 @@ MPAFDisplay::setHistograms() {
 	
 	if(ds->getSample(samples[is])->isDD()) w/=anConf.getLumi();
         
+	//cout<<ds->getName()<<"   "<<obss[io]<<" ==>  "<<samples[is]<<" :: "<<ds->getHisto( obss[io], samples[is] )->Integral()<<endl;
+	size_t p=obss[io].find("Unc");
         if(is==0) {
           htmp = ds->getHisto( obss[io], samples[is] );
+	  //cout<<htmp<<"  << "<<endl;
+	
+	  if(htmp==nullptr && p!=string::npos) { //for missing uncertainties
+	    string name=obss[io].substr(0,p);
+	    //cout<<" --> "<<name<<endl;
+	    htmp = ds->getHisto( name, samples[is] );
+	    //cout<<htmp<<"   "<<endl;
+	  }
+	  //cout<<" w "<<w<<endl;
           htmp->Scale( w );
+	  //cout<<" ---> "<<htmp->Integral()<<"  "<<w<<endl;
+	  //cout<<" youpiyou "<<endl;
         }
         else {
-          htmp->Add( ds->getHisto( obss[io], samples[is] ), w);
+	  if(ds->getHisto( obss[io], samples[is])==nullptr && p!=string::npos) {
+	    string name=obss[io].substr(0,p);
+	    htmp->Add( ds->getHisto( name, samples[is] ) );
+	  } else {
+	    htmp->Add( ds->getHisto( obss[io], samples[is] ), w);
+	  }
+	    //cout<<" ---> "<<htmp->Integral()<<"  "<<w<<endl;
+	  //cout<<" quo "<<endl;
         }
       } 
 
       _hm->copyHisto( obss[io] , _inds, htmp );
 
-      delete htmp;
+      //delete htmp;
     
     }
   
@@ -762,7 +783,6 @@ MPAFDisplay::refresh() {
 void
 MPAFDisplay::setObservables(string v1, string v2, string v3,
 			    string v4, string v5, string v6) {
-
   anConf.addUsefulVar(v1);
   if(v2!="") anConf.addUsefulVar(v2);
   if(v3!="") anConf.addUsefulVar(v3);

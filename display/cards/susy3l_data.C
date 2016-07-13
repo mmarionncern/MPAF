@@ -1,6 +1,6 @@
 MPAFDisplay md;
 
-void susy3l_data() {
+void susy3l_data_VARIABLE_REGION() {
     md.refresh();
 
 
@@ -10,8 +10,8 @@ void susy3l_data() {
     //string fileName="3l_test80Xskim"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="3l_test80Xskim"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
-    string fileName="merged_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="merged_v2_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="merged_v2_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
  
 
     string hName="";
@@ -35,8 +35,7 @@ void susy3l_data() {
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
     else{string obs = "ht";}
-     
-    
+        
     float lumi=3990; //pb-1 19470
     float energy=13; //TeV
 
@@ -72,27 +71,27 @@ void susy3l_data() {
     string addText="";
 
     if(obs == "njets"){
-        md.dp.setObservables("NJets" + region);
+        md.setObservables("NJets" + region);
         int binning=1;
         if(region=="WZCR" || region == "FakeCR"){double rangeX[2]={0,4};bool logYScale=false;}
         else{double rangeX[2]={2,10};}
         //bool logYScale=true;
     }
     if(obs == "nbjets"){
-        md.dp.setObservables("NBJets" + region);
+        md.setObservables("NBJets" + region);
         int binning=1;
         if(region=="WZCR" || region == "FakeCR"){double rangeX[2]={0,5};bool logYScale=false;}
         else{double rangeX[2]={0,5};}
         //bool logYScale=true;
     }
     if(obs == "met"){
-        md.dp.setObservables("MET" + region);
+        md.setObservables("MET" + region);
         if(region=="WZCR" || region == "FakeCR"){int binning=10; double rangeX[2]={0,120};bool logYScale=false;}
         else{int binning=50; double rangeX[2]={50,500};}
         //bool logYScale=true;
     }
     if(obs == "ht"){
-        md.dp.setObservables("HT" + region);
+      md.setObservables("HT" + region);
         if(region=="WZCR"){int binning=50; double rangeX[2]={0,200};bool logYScale=false;}
         else if(region=="FakeCR"){int binning=50; double rangeX[2]={0,400};bool logYScale=false;}
         else{int binning=60; double rangeX[2]={60,960};}
@@ -100,13 +99,13 @@ void susy3l_data() {
     }
     if(obs == "mt"){
         if(region!="WZCR"){gROOT->ProcessLine(".q");}
-        md.dp.setObservables("MT" + region);
+        md.setObservables("MT" + region);
         int binning=10;
         double rangeX[2]={0,200};
         bool logYScale=false;
     }
     if(obs == "pt1"){
-        md.dp.setObservables("pt_1st_lepton" + region);
+        md.setObservables("pt_1st_lepton" + region);
         if(region=="WZCR"){int binning=10;}
         else int binning=20;
         double rangeX[2]={0,200};
@@ -114,7 +113,7 @@ void susy3l_data() {
         //bool logYScale=true;
     }
     if(obs == "pt2"){
-        md.dp.setObservables("pt_2nd_lepton" + region);
+        md.setObservables("pt_2nd_lepton" + region);
         if(region=="WZCR"){int binning=10;}
         else int binning=20;
         double rangeX[2]={0,150};
@@ -122,7 +121,7 @@ void susy3l_data() {
         //bool logYScale=true;
     }   
     if(obs == "pt3"){
-        md.dp.setObservables("pt_3rd_lepton" + region);
+        md.setObservables("pt_3rd_lepton" + region);
         if(region=="WZCR"){int binning=10;}
         else int binning=20;
         double rangeX[2]={0,100};
@@ -130,13 +129,13 @@ void susy3l_data() {
         //bool logYScale=true;
     }
     if(obs == "ftype"){
-        md.dp.setObservables("fake_type" + region);
+        md.setObservables("fake_type" + region);
         int binning=1;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "flavor"){
-        md.dp.setObservables("flavor" + region);
+        md.setObservables("flavor" + region);
         int binning=1;
         double rangeX[2]={0,5};
         if(region=="WZCR" || region == "FakeCR"){double rangeX[2]={0,4};}
@@ -144,100 +143,100 @@ void susy3l_data() {
         //bool logYScale=false;
     }
     if(obs == "srs"){
-        md.dp.setObservables("SRS" + region);
+        md.setObservables("SRS" + region);
         int binning=1;
         double rangeX[2]={1,18};
         bool logYScale=false;
     }
     if(obs == "mu_multi"){
-        md.dp.setObservables("mu_multiplicity" + region);
+        md.setObservables("mu_multiplicity" + region);
         int binning=1;
         double rangeX[2]={0,6};
         if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
         //bool logYScale=true;
     }
     if(obs == "el_multi"){
-        md.dp.setObservables("el_multiplicity" + region);
+        md.setObservables("el_multiplicity" + region);
         int binning=1;
         double rangeX[2]={0,6};
         if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
         //bool logYScale=true;
     }
     if(obs == "lep_multi"){
-        md.dp.setObservables("lep_multiplicity" + region);
+        md.setObservables("lep_multiplicity" + region);
         int binning=1;
         double rangeX[2]={3,7};
         if(region=="WZCR" || region == "FakeCR"){bool logYScale=false;}
         //bool logYScale=true;
     }
     if(obs == "nfo"){
-        md.dp.setObservables("nFO" + region);
+        md.setObservables("nFO" + region);
         int binning=1;
         double rangeX[2]={0,6};
         //bool logYScale=true;
     }
     if(obs == "lep1dxy"){
-        md.dp.setObservables("lep1_dxy" + region);
+        md.setObservables("lep1_dxy" + region);
         int binning=20;
         double rangeX[2]={-150,150};
         //bool logYScale=true;
     }
     if(obs == "lep1dz"){
-        md.dp.setObservables("lep1_dz" + region);
+        md.setObservables("lep1_dz" + region);
         int binning=20;
         double rangeX[2]={-200,200};
         //bool logYScale=true;
     }
     if(obs == "lep1sip"){
-        md.dp.setObservables("lep1_SIP3D" + region);
+        md.setObservables("lep1_SIP3D" + region);
         int binning=20;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "lep2dxy"){
-        md.dp.setObservables("lep2_dxy" + region);
+        md.setObservables("lep2_dxy" + region);
         int binning=20;
         double rangeX[2]={-150,150};
         //bool logYScale=true;
     }
     if(obs == "lep2dz"){
-        md.dp.setObservables("lep2_dz" + region);
+        md.setObservables("lep2_dz" + region);
         int binning=20;
         double rangeX[2]={-200,200};
         //bool logYScale=true;
     }
     if(obs == "lep2sip"){
-        md.dp.setObservables("lep2_SIP3D" + region);
+        md.setObservables("lep2_SIP3D" + region);
         int binning=20;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "lep3dxy"){
-        md.dp.setObservables("lep3_dxy" + region);
+        md.setObservables("lep3_dxy" + region);
         int binning=20;
         double rangeX[2]={-150,150};
         //bool logYScale=true;
     }
     if(obs == "lep3dz"){
-        md.dp.setObservables("lep3_dz" + region);
+        md.setObservables("lep3_dz" + region);
         int binning=20;
         double rangeX[2]={-200,200};
         //bool logYScale=true;
     }
     if(obs == "lep3sip"){
-        md.dp.setObservables("lep3_SIP3D" + region);
+        md.setObservables("lep3_SIP3D" + region);
         int binning=20;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "lep3_charge"){
-        md.dp.setObservables("chargeMult_3lep" + region);
+        md.setObservables("chargeMult_3lep" + region);
         int binning=1;
         double rangeX[2]={0,5};
         //bool logYScale=true;
     }
     if(obs == "lep4_charge"){
-        md.dp.setObservables("chargeMult_4lep" + region);
+        md.setObservables("chargeMult_4lep" + region);
         int binning=1;
         double rangeX[2]={0,5};
         //bool logYScale=true;
@@ -357,9 +356,9 @@ void susy3l_data() {
     //md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_274444_275125"    , "non-prompt"          , 18, scale    );
     //md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_274444_275125"        , "non-prompt"          , 18, scale    );
      //4/fb production by Mattieu
-    md.anConf.addSample( "data:_Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_275125"      , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_275125"    , "non-prompt"          , 18, scale    );
-    md.anConf.addSample( "data:_Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_275125"        , "non-prompt"          , 18, scale    );
+    md.anConf.addSample( "data:Fake:DoubleEG_Run2016B_PromptReco_v2_runs_273150_275125"      , "non-prompt"          , 18, scale    );
+    md.anConf.addSample( "data:Fake:DoubleMuon_Run2016B_PromptReco_v2_runs_273150_275125"    , "non-prompt"          , 18, scale    );
+    md.anConf.addSample( "data:Fake:MuonEG_Run2016B_PromptReco_v2_runs_273150_275125"        , "non-prompt"          , 18, scale    );
  
     //signal
     if(sigs=="t"){
