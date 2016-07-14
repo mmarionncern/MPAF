@@ -1,4 +1,4 @@
-import os, sys, math, subprocess
+import os, sys, math,subprocess
 
 def retrieveCategs(inputFile):
 
@@ -61,21 +61,18 @@ def retrieveYields(inputFile):
             if 'global_' in curCateg and 'BR' not in curCateg and 'Fake' not in curCateg and 'mId' not in curCateg and "WZCR" not in curCateg:
                 goodLines[ curCateg ][sample]=line
                 if 'Unc' not in curCateg:
-                    if sample in totYield['global'].keys(): #test
-                        totYield['global'][sample] += float(line.split()[2])
-                        totNGen['global'][sample]  += float(line.split()[3])
-                        totUnc['global'][sample]   += float(line.split()[4])*float(line.split()[4])
+                    totYield['global'][sample] += float(line.split()[2])
+                    totNGen['global'][sample]  += float(line.split()[3])
+                    totUnc['global'][sample]   += float(line.split()[4])*float(line.split()[4])
                 else:
                     p=curCateg.find('Unc')
                     redCateg='global\t'+curCateg[p:]
-                    if sample in totYield[redCateg].keys(): #test
-                         totYield[redCateg][sample] += float(line.split()[2])
-                         totNGen[redCateg][sample]  += float(line.split()[3])
-                         totUnc[redCateg][sample]   += float(line.split()[4])*float(line.split()[4])
+                    totYield[redCateg][sample] += float(line.split()[2])
+                    totNGen[redCateg][sample]  += float(line.split()[3])
+                    totUnc[redCateg][sample]   += float(line.split()[4])*float(line.split()[4])
 
             elif 'global_' in curCateg:
-                if sample in goodLines[ curCateg ].keys(): #test
-                    goodLines[ curCateg ][sample]=line
+                goodLines[ curCateg ][sample]=line
 
 
         if 'endcateg' in line and not init:
@@ -83,7 +80,7 @@ def retrieveYields(inputFile):
 
     for i in totYield.keys():
         for j in totYield[i].keys():
-            totUnc[i][sample] = math.sqrt(totUnc[i][sample])
+            totUnc[i][j] = math.sqrt(totUnc[i][j])
     
     return goodLines, totYield, totNGen, totUnc
 
@@ -168,6 +165,9 @@ def mergeYields(mainFile, addFile,outName):
 
  
     ofile.close()
+
+
+
 
 
 
