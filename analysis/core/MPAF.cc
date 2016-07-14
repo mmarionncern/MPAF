@@ -740,7 +740,11 @@ MPAF::setMultiWorkflow(vector<int> wf) {
 // skimming functions ======================================
 void MPAF::initSkimming() {
   
-  string opath =string(getenv ("MPAF"))+"/workdir/skims"; //"/scratch/mmarionn/MPAFSkims";  //
+  //string opath =string(getenv ("MPAF"))+"/workdir/skims"; //"/scratch/mmarionn/MPAFSkims";
+  string machine=SystemUtils::exec("hostname -d");
+  bool isPsi=(machine.find("psi")!=string::npos);
+  string user=SystemUtils::exec("whoami");
+  string opath = ((isPsi)?("/scratch/"+user):((string)(getenv ("MPAF"))+"/workdir/skims"));
   FILE* test = fopen( opath.c_str(), "r" ); 
   if( test == 0 ) {
     string command_ = "mkdir -p " + opath; 
@@ -782,6 +786,15 @@ void MPAF::finalizeSkimming() {
     _hnwSkim->Write();
   _oFile->Write();
   _oFile->Close();
+
+  //copy file to T3
+  string machine=SystemUtils::exec("hostname -d");
+  if(machine.find("psi")==string::npos) return;
+  string user=SystemUtils::exec("whoami");
+  string cpCommand="lcg-cp -b -D srmv2 "+(string)(_oFile->GetName())+" srm://t3se01.psi.ch:8443/srm/managerv2?SFN=/pnfs/psi.ch/cms/trivcat/store/user/"+user+"/MPAFskims/"+_className+"/"+_sampleName+".root";
+  system( cpCommand.c_str() );
+
+
 }
 
 // Workflow functions =======================================
