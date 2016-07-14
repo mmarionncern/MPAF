@@ -76,16 +76,11 @@ private:
     void sortSelectedLeps(CandList leps, std::vector<unsigned int> lepsIdx);
     float lowestOssfMll(CandList leps);
     void registerTriggerVars();
-    void readCSCevents();
-    void readEESCevents();
-    void readFilteredEvents(map< std::pair<int,std::pair<int,unsigned long int> > , unsigned int >&, vector<string>);
     void systUnc();
 
     bool passHLTbit();
     
     bool passNoiseFilters();
-    bool passCSCfilter();
-    bool passEESCfilter(); 
     
     void theoreticalUncertainties();
 

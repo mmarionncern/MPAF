@@ -26,7 +26,7 @@ void
 SusyModule::loadBTagFastSimReader() {
 
   // setup calibration readers
-  string filename=(string) getenv("MPAF") + "/workdir/database/CSV_13TEV_Combined_20_11_2015.csv";
+  string filename=(string) getenv("MPAF") + "/workdir/database/db2016/CSV_13TEV_T1tttt_1200_800_11_7_2016.csv";
   _calibFS=new BTagCalibration("csvFast", filename.c_str());
   _readerFS_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _readerFS_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
@@ -52,7 +52,7 @@ void
 SusyModule::loadBTagReader() {
 
   // setup calibration readers
-  string filename=(string) getenv("MPAF") + "/workdir/database/BTagSF_CSVv2_25ns.csv";
+  string filename=(string) getenv("MPAF") + "/workdir/database/db2016/CSVv2_4invfb.csv";
   _calib=new BTagCalibration("csvv2", filename.c_str());
   _reader_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _reader_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
@@ -82,21 +82,21 @@ SusyModule::loadDBs() {
   //_dbm->loadDb("PileupWeights.root",""); -> done with trees
 
   //HLT scale factors
-  _dbm->loadDb("hltDEG","hltSFDoubleEG.db");
-  _dbm->loadDb("hltDMu","hltSFDoubleMu.db");
-  _dbm->loadDb("hltSEle","hltSFSingleEle.db");
-  _dbm->loadDb("hltSMu","hltSFSingleMu.db");
+  //_dbm->loadDb("hltDEG","hltSFDoubleEG.db");
+  //_dbm->loadDb("hltDMu","hltSFDoubleMu.db");
+  //_dbm->loadDb("hltSEle","hltSFSingleEle.db");
+  //_dbm->loadDb("hltSMu","hltSFSingleMu.db");
   
   //lepton scale factors
-  _dbm->loadDb("eleSFDb","electronSF.db");
-  _dbm->loadDb("muSFDb","muonSF.db");
-  _dbm->loadDb("tauSFDb","tauSF.db");
+  //_dbm->loadDb("eleSFDb","electronSF.db");
+  //_dbm->loadDb("muSFDb","muonSF.db");
+  //_dbm->loadDb("tauSFDb","tauSF.db");
 
  
-  _dbm->loadDb("BTagEffUDSG","GC_BTagEffs.root",(string)("h2_BTaggingEff_csv_med_Eff_udsg") );
-  _dbm->loadDb("BTagEffC","GC_BTagEffs.root",(string)("h2_BTaggingEff_csv_med_Eff_c") );
-  _dbm->loadDb("BTagEffB","GC_BTagEffs.root",(string)("h2_BTaggingEff_csv_med_Eff_b") );
-  _dbm->loadDb("BTagSF", "BTagSFMedium.db");
+  _dbm->loadDb("BTagEffUDSG","db2016/bTagEffs.root",(string)("eff_total_M_udsg") );
+  _dbm->loadDb("BTagEffC","db2016/bTagEffs.root",(string)("eff_total_M_c") );
+  _dbm->loadDb("BTagEffB","db2016/bTagEffs.root",(string)("eff_total_M_b") );
+
 }
 
 void

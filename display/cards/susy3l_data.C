@@ -10,9 +10,11 @@ void susy3l_data_VARIABLE_REGION() {
     //string fileName="3l_test80Xskim"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="3l_test80Xskim"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
+    //string fileName="merged_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
+    //string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    
     string fileName="merged_v2_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
     string fileList="merged_v2_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
- 
 
     string hName="";
 
@@ -145,7 +147,8 @@ void susy3l_data_VARIABLE_REGION() {
     if(obs == "srs"){
         md.setObservables("SRS" + region);
         int binning=1;
-        double rangeX[2]={1,18};
+        if(region == "OnZBaseline"){double rangeX[2]={1,18};}
+        else {double rangeX[2]={1,16};}
         bool logYScale=false;
     }
     if(obs == "mu_multi"){
