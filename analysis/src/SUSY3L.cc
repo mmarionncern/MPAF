@@ -399,7 +399,7 @@ void SUSY3L::initialize(){
    //     addManualSystSource("fs_hlt",SystUtils::kNone);
         addManualSystSource("fs_btag",SystUtils::kNone);
         //addManualSystSource("XSFS",SystUtils::kNone);
-   //     addManualSystSource("scale",SystUtils::kNone);
+        addManualSystSource("scale",SystUtils::kNone);
     
         //uncertainties previously taken care of in display card 
         addManualSystSource("lumi",SystUtils::kNone);

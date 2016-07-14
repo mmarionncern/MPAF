@@ -2,7 +2,8 @@
 source /mnt/t3nfs01/data01/swshare/ROOT/root_v5.34.18_slc6_amd64/bin/thisroot.sh
 #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64/dcap
 
-cd /mnt/t3nfs01/data01/shome/mmarionn/dev/MPAF_Jan #/mnt/t3nfs01/data01/shome/jhoss/analysis/MPAF/
+#cd /mnt/t3nfs01/data01/shome/mmarionn/dev/MPAF_Jan 
+cd /mnt/t3nfs01/data01/shome/jhoss/analysis/MPAF/
 source setup.sh
 mkdir -p /scratch/$USER/logs/
 

@@ -501,10 +501,9 @@ AnaUtils::getCategSystematics(const string& ds, const string& src, const string&
     cout<<setprecision(2)<<fixed;
     if(cname.find("global")!=string::npos) cname.erase(0,7);
     if(!latex)
-      cout<<setw(10)<<cname<<"\t"<<setw(5)<<central<<" +- "<<setw(5)<<sqrt(eST.sumw2)<<"\t";
+      cout<<setw(10)<<cname<<"\t"<<setw(5)<<central<<" +- "<<setw(5)<<sqrt(eST.sumw2) << setw(5) << " " << sqrt(eST.sumw2)/central*100 << " %" << "\t";
     else
       cout<<setw(10)<<cname<<" & "<<setw(5)<<central<<" $\\pm$ "<<setw(5)<<sqrt(eST.sumw2)<<"  &  ";
-
   
     float yup;
     float ydown;
