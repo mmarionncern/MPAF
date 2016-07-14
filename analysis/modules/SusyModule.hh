@@ -40,7 +40,7 @@ public:
   SusyModule(VarClass* vc, DataBaseManager* dbm);
   ~SusyModule();
 
-  bool elHLTEmulSel(int idx, bool withIso, string branch = "LepGood") const;
+  bool elHLTEmulSel(int idx, bool withIso, string branch = "LepGood", bool v1=false) const;
   bool elHLTEmulSelIso(int idx, int mvaWP = kLooseHT, string branch = "LepGood") const;
   bool elIdSel(const Candidate* c, int idx, int wp, int mvaWp = kTight, bool chCut = true, bool invSIP = false, bool LepMVA = false, string branch = "LepGood") const;
   bool elMvaSel(int elIdx, int wp, string branch = "LepGood") const;

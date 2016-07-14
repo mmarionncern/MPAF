@@ -78,20 +78,6 @@ SusyModule::loadBTagReader() {
 
 void
 SusyModule::loadDBs() {
-
-  //_dbm->loadDb("PileupWeights.root",""); -> done with trees
-
-  //HLT scale factors
-  //_dbm->loadDb("hltDEG","hltSFDoubleEG.db");
-  //_dbm->loadDb("hltDMu","hltSFDoubleMu.db");
-  //_dbm->loadDb("hltSEle","hltSFSingleEle.db");
-  //_dbm->loadDb("hltSMu","hltSFSingleMu.db");
-  
-  //lepton scale factors
-  //_dbm->loadDb("eleSFDb","electronSF.db");
-  //_dbm->loadDb("muSFDb","muonSF.db");
-  //_dbm->loadDb("tauSFDb","tauSF.db");
-
  
   _dbm->loadDb("BTagEffUDSG","db2016/bTagEffs.root",(string)("eff_total_M_udsg") );
   _dbm->loadDb("BTagEffC","db2016/bTagEffs.root",(string)("eff_total_M_c") );
@@ -158,16 +144,6 @@ SusyModule::defineLeptonWPS() {
   _tChWP[kTight]=1;
 
   //el mva id ======================
-  //Phys14 50ns?
-  // _elMvaIdWP[kEBC][kLoose] = -0.11;
-  // _elMvaIdWP[kEBF][kLoose] = -0.35;
-  // _elMvaIdWP[kEE ][kLoose] = -0.55;
-
-  // _elMvaIdWP[kEBC][kTight] = 0.73;
-  // _elMvaIdWP[kEBF][kTight] = 0.57;
-  // _elMvaIdWP[kEE ][kTight] = 0.05;
-
-
   _elMvaIdWP[kEBC][kInSitu] = -0.363;
   _elMvaIdWP[kEBF][kInSitu] = -0.579;
   _elMvaIdWP[kEE ][kInSitu] = -0.623;
@@ -356,24 +332,27 @@ SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, 
 }
 
 bool
-SusyModule::elHLTEmulSel(int idx, bool withIso, string branch) const {
-/*
+SusyModule::elHLTEmulSel(int idx, bool withIso, string branch, bool v1) const {
+  
+  if(v1) {
     if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
-        if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
-        if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
-        if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.04  ) return false;
-        if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
-        if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.011 ) return false;
+      if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
+      if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
+      if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.04  ) return false;
+      if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
+      if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.011 ) return false;
     }
     else {
-        if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
-        if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
-        if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.08  ) return false;
-        if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
-        if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.031 ) return false;
+      if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false;
+      if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false;
+      if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.08  ) return false;
+      if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false;
+      if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.031 ) return false;
     }
-*/    
-    
+    return true;
+  }
+  
+
     long int lumi = 1270;
     long int evt = 420400;
     bool debug = false;
@@ -516,24 +495,8 @@ bool
 SusyModule::passMllSingleVeto(const Candidate* c1, const Candidate* c2, 
 			      float mllm, float mllM, bool ossf) {
 
-	//long long int _run = 257751;
-	//long long int _lumi = 137;
-    //long long int _evt = 204673540;
-    
-    //long long int _run2 = 258159;
-	//long long int _lumi2 = 170;
-    //long long int _evt2 = 217945982;
-  
-  	//long long int _run3 = 258702;
-	//long long int _lumi3 = 294;
-    //long long int _evt3 = 476582910;
-    
-    
-
   if( (c1->pdgId()== -c2->pdgId()) || !ossf) {
     float mll = Candidate::create(c1,c2)->mass();
-    //if((_vc->get("evt") == _evt && _vc->get("lumi") == _lumi)||(_vc->get("evt") == _evt2 && _vc->get("lumi") == _lumi2)||(_vc->get("evt") == _evt3 && _vc->get("lumi") == _lumi3)){
-        //cout << "invariant mass: " << mll << endl;}
     if(mll>mllm && mll<mllM) return false; 
   }
   return true;
@@ -555,12 +518,12 @@ CandList
 SusyModule::findZCand(const CandList* leps, float window, float MTcut) {
     
     float diff = 99999;
-    int il1_save = -1;
-    int il2_save = -1;
+    size_t il1_save = -1;
+    size_t il2_save = -1;
     CandList clist(2,nullptr);
     bool zFound = false;
-    for(int il1=0;il1<leps->size()-1;il1++) {
-        for(int il2=il1+1;il2<leps->size();il2++) {
+    for(size_t il1=0;il1<leps->size()-1;il1++) {
+        for(size_t il2=il1+1;il2<leps->size();il2++) {
             if(!(leps->at(il1)->pdgId() == -leps->at(il2)->pdgId())) continue;
             if(std::abs(91.-Candidate::create(leps->at(il1),leps->at(il2))->mass()) < window && std::abs(91.-Candidate::create(leps->at(il1),leps->at(il2))->mass()) < diff){
                 Candidate* zCand = Candidate::create(leps->at(il1),leps->at(il2));
@@ -572,7 +535,7 @@ SusyModule::findZCand(const CandList* leps, float window, float MTcut) {
         }
     }
     if(zFound){ 
-        for(int il=0;il<leps->size();il++) {
+        for(size_t il=0;il<leps->size();il++) {
             if(il == il1_save || il == il2_save) continue;
             float mt = KineUtils::M_T(leps->at(il)->pt(), _vc->get("met_pt"), leps->at(il)->phi(), _vc->get("met_phi"));
             if(mt > MTcut){
@@ -1022,13 +985,6 @@ SusyModule::cleanJets(CandList* leptons,
       if(_vc->get(jType+ext+"_id",ij)<1) continue;
       if(std::abs(_vc->get(jType+"_eta",ij))>2.4) continue; //introduced in RA7 sync round 3
       
-      // float scale=0.;
-      // if(isJESVar) {
-      // 	scale = _dbm->getDBValue("jes", _vc->get(jType+"_eta", ij), _vc->get(jType+"_pt", ij) );
-      // 	scale = ((SystUtils::kUp==dir)?1:(-1))*scale;
-      // }
-    
-
       Candidate* jet=Candidate::create(_vc->get(jType+ext+"_pt", ij),
 				       _vc->get(jType+ext+"_eta", ij),
 				       _vc->get(jType+ext+"_phi", ij) );
@@ -1041,44 +997,6 @@ SusyModule::cleanJets(CandList* leptons,
 
   map<Candidate*, std::pair<float,Candidate*> > cmap;
   map<Candidate*, std::pair<float,Candidate*> >::const_iterator it;
-
-/*
-//BEGIN hack to clean all overlapping jets
-  for(unsigned int ij=0;ij<jets.size();ij++) {
-    bool clean = false;
-    for(unsigned int il=0;il<leptons->size();il++) {
-      float dR=leptons->at(il)->dR( jets[ij] );
-      if(dR<0.4){clean=true;}
-
-      }
-    if(clean){continue;}
-    //if(!pass) { 
-    //  lepJetsIdxs.push_back(tmpIdxs[ij]);
-    //  continue;
-    //}
-
-    if(jets[ij]->pt()<bthr) continue;
-    
-    if(jets[ij]->pt()>thr) {
-      cleanJets.push_back(jets[ij] );
-      jetIdxs.push_back(tmpIdxs[ij]);
-    }
-    
-    if(bvals[ij]) continue;
-    
-    cleanBJets.push_back(jets[ij]);
-    bJetIdxs.push_back(tmpIdxs[ij]);
-
-    }
-  
-  
-}
-//END hack
-*/
-
-
-
-
 
   for(unsigned int il=0;il<leptons->size();il++) {
     for(unsigned int ij=0;ij<jets.size();ij++) {
@@ -1145,10 +1063,7 @@ SusyModule::getLHEweight(int LHEsysID){
 
 void
 SusyModule::correctFlipRate(float& rate, float eta){
-
-  if( -2.0 < eta && eta < -1.5) rate *= 3.6;
-  else                          rate *= 1.15;
-
+  rate *= 1.1918;
 }
 
 
@@ -1230,7 +1145,7 @@ SusyModule::applyLepSfRA7(const CandList& cands){
     float maxPt = 119.9;
     float maxEta = 2.39;
     const Candidate* cand;
-    for(int il=0; il<cands.size();il++){
+    for(size_t il=0; il<cands.size();il++){
         cand = cands[il];
         int flavor = cand->pdgId();
         if(std::abs(flavor)==11){
@@ -1263,7 +1178,7 @@ SusyModule::applyFastSimLepSfRA7(const CandList& cands, int pileup){
     float maxEta = 2.39;
     int maxPU = 39;
     const Candidate* cand;
-    for(int il=0; il<cands.size();il++){
+    for(size_t il=0; il<cands.size();il++){
         cand = cands[il];
         int flavor = cand->pdgId();
         if(std::abs(flavor)==11){
@@ -2418,7 +2333,7 @@ float
 SusyModule::getVarWeightFastSimLepSFRA7(const CandList& cands, int dir) {
 
     float totUnc = 1.;
-    for(int il = 0;il<cands.size();il++){
+    for(size_t il = 0;il<cands.size();il++){
         const Candidate* cand = cands[il];
         float unc = 1.;
         if(std::abs(cand->pdgId())==11) {
@@ -2441,7 +2356,7 @@ SusyModule::getWeightFastSimHltSFRA7(const CandList& cands, float HT) {
 
     int nEl = 0;
     bool lowPtEl = false;
-    for(int il = 0;il<cands.size();il++){
+    for(size_t il = 0;il<cands.size();il++){
         const Candidate* cand = cands[il];
         if(std::abs(cand->pdgId())==11){
             nEl +=1;
@@ -2460,7 +2375,7 @@ SusyModule::getVarWeightFastSimHltSFRA7(const CandList& cands, float HT, int dir
 
     int nEl = 0;
     bool lowPtEl = false;
-    for(int il = 0;il<cands.size();il++){
+    for(size_t il = 0;il<cands.size();il++){
         const Candidate* cand = cands[il];
         if(std::abs(cand->pdgId())==11){
             nEl +=1;
@@ -2559,11 +2474,6 @@ SusyModule::applyISRWeight(unsigned int process, int var, float& weight) {
 
   Candidate* cand=Candidate::create(collection[0],collection[1]);
 
-  // Candidate* cand=collection[0];
-  // for(unsigned int i=1;i<collection.size(); ++i)
-  //   //pt += collection[i] -> pt();
-  //   cand = Candidate::create(collection[i],cand);
-
   float pt=cand->pt();
   isrWeight(var, pt, weight);
 
@@ -2586,10 +2496,6 @@ SusyModule::isrWeight(int var, float pt, float& weight){
     else if(pt > 400) weight *= 1.15;
   }
 
-  // central value
-  // else {
-  // }
-
 }
 
 
@@ -2597,11 +2503,8 @@ CandList
 SusyModule::collectGenParticles(int pdgId, int status){
 
   CandList list;
-  //cout<<_vc->get("nGenPart")<<endl;
   for(unsigned int i = 0; i < _vc->get("nGenPart"); ++i){
-    //    cout<<(int)_vc->get("GenPart_pdgId")<<"   "<<pdgId<<"   "<<(std::abs(_vc->get("GenPart_pdgId")) == pdgId)<<"   "<<_vc->get("GenPart_pt"    , i)<<"   "<<_vc->get("GenPart_eta"    , i)<<"  "<<_vc->get("GenPart_status")<<endl;
-    if(std::abs(_vc->get("GenPart_pdgId",i)) == pdgId)// &&
-       //_vc->get("GenPart_status",i) == status)
+    if(std::abs(_vc->get("GenPart_pdgId",i)) == pdgId)
       list.push_back(Candidate::create(_vc->get("GenPart_pt"    , i), 
                                        _vc->get("GenPart_eta"   , i),
                                        _vc->get("GenPart_phi"   , i),

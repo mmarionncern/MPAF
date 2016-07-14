@@ -3,7 +3,7 @@
 mainFile=${MPAF}/workdir/stats/SUSY3L/merged_v2_4fb_Bkg.dat
 
 ## first merge backgrounds
-#python ${MPAF}/scripts/script_scan/step3/mergeBkgs.py ${mainFile} ${MPAF}/workdir/stats/SUSY3L/3l_v2_scanBkg_
+python ${MPAF}/scripts/script_scan/step3/mergeBkgs.py ${mainFile} ${MPAF}/workdir/stats/SUSY3L/3l_v2_scanBkg_
 
 ## merge signals and backgrounds
 for i in `ls $MPAF/workdir/stats/SUSY3L/3l_scanSig_*.dat`; do

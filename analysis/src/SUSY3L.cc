@@ -1082,7 +1082,7 @@ bool SUSY3L::tauSelection(int tauIdx){
     
     //remove taus which are within a cone of deltaR around selected electrons or muons
     //loop over all electron candidates
-    bool lepMatch = false;
+    //bool lepMatch = false;
     /*
     for(int ie=0; ie<_nEls; ++ie){
         //calculate delta R, input eta1, eta2, phi1, phi2
@@ -1107,7 +1107,7 @@ bool SUSY3L::tauSelection(int tauIdx){
         //calculate delta R, input eta1, eta2, phi1, phi2
         float dr = KineUtils::dR( _vc->get("LepGood_eta",im), _vc->get("TauGood_eta", tauIdx), _vc->get("LepGood_phi",im), _vc->get("TauGood_phi", tauIdx));
         if(dr < deltaR) {
-            lepMatch = true; 
+	    //lepMatch = true; 
             break;
         }
     }
@@ -1435,7 +1435,7 @@ bool SUSY3L::multiLepSelection(){
         pass = false;
         int nFakes = 0;
         int nPrompt = 0;
-        for(int i=0;i<_tightLepsPtCutMllCut.size();i++){
+        for(size_t i=0;i<_tightLepsPtCutMllCut.size();i++){
             if( std::abs(_tightLepsPtCutMllCut[i]->pdgId() == _closureByFlavor) &&  _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) ==0 ){nFakes+=1;}
             else if( _vc->get("LepGood_mcMatchId" ,_tightLepsPtCutMllCutIdx[i]) !=0 ){nPrompt+=1;}
         }
@@ -1538,8 +1538,8 @@ void SUSY3L::advancedSelection(int WF){
     /*
     */
     
-    int offset = 0;
-    if(WF==kGlobal_Fake) offset=kOffZSR017;
+    // int offset = 0;
+    // if(WF==kGlobal_Fake) offset=kOffZSR017;
    
     if(!_isFake){
         if(_isOnZ) setWorkflow(kOnZBaseline);
@@ -2122,7 +2122,6 @@ vector<CandList> SUSY3L::build3LCombFake(const CandList tightLeps, vector<unsign
     vector<unsigned int> tLepsFake(fakableLepsPtCorr.size(), 0);
     typeLeps.insert(typeLeps.end(), tLepsFake.begin(), tLepsFake.end() );
 
-    bool passZsel=false;
     int fakeRank = -1;
   
     //reject signal events (can make it up to here if they don't have other Z state which is tested in this iteration
@@ -2370,7 +2369,7 @@ float SUSY3L::lowestOssfMll(CandList leps){
         return: smallest mll of ossf lepton pair if a pair is found, -1 if no ossf pair is found
     */
     
-    bool pair_found = false;
+  //bool pair_found = false;
     float mll = 99999;
 
     //loop over all possible combination of two leptons
@@ -2380,7 +2379,7 @@ float SUSY3L::lowestOssfMll(CandList leps){
             if( leps[il1]->pdgId() != - leps[il2]->pdgId()) continue;
             //save mll if it is the smallest of all mll found so far
             float mll_tmp = Candidate::create(leps[il1], leps[il2])->mass();
-            pair_found = true;
+            //pair_found = true;
             if(mll_tmp < mll){
                 mll = mll_tmp;
             }
@@ -2613,18 +2612,18 @@ bool SUSY3L::passGenSelection(){
     
     //fakes
     else if( _fakeSample && !_closure) {
-        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+        for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++){
             if(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il])==0 && _vc->get("LepGood_mcPromptGamma",_tightLepsPtCutMllCutIdx[il])==0) return true;
         }
     }
     else if( _fakeSample && _closure) {
-        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+        for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++){
             if(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il])==0) return true;
         }
     }
     //conversions
     else if( _convSample && !_closure){
-        for(int il=0;il<_tightLepsPtCutMllCut.size();il++){
+        for(size_t il=0;il<_tightLepsPtCutMllCut.size();il++){
             if(_vc->get("LepGood_mcMatchId",_tightLepsPtCutMllCutIdx[il])==0 && _vc->get("LepGood_mcPromptGamma",_tightLepsPtCutMllCutIdx[il])==1) return true;
         }
  
@@ -2647,7 +2646,7 @@ bool SUSY3L::genMatched(const CandList leptons, vector<int> lepIdx){
         return true;
     }
  
-    for(int il=0;il<leptons.size();il++){
+    for(size_t il=0;il<leptons.size();il++){
         if(_vc->get("LepGood_mcMatchId", lepIdx[il])==0) return true;
     }
 
