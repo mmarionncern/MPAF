@@ -387,7 +387,7 @@ void SUSY3L::initialize(){
 
 
 
-    //systematic uncertianties
+    //systematic uncertainties
     if(_runSystematics){
         addManualSystSource("btag",SystUtils::kNone);
         addManualSystSource("jes",SystUtils::kNone);

@@ -270,7 +270,7 @@ DisplayClass::loadAutoBinning(string filename) {
 
 void 
 DisplayClass::setObservables(string v1, string v2, string v3,
-			string v4, string v5, string v6) {
+			     string v4, string v5, string v6) {
 
   _vars.clear();
 
@@ -345,9 +345,9 @@ DisplayClass::preparePads() {
     padhigh_.push_back(padtmp);
 
   }
-
+  cout<<padhigh_[0]<<"  "<<H_<<"  "<<ww_<<endl;
   pad_.push_back(padhigh_);
-
+  cout<<pad_[0][0]<<endl;
   return pad_;
 }
 
@@ -2704,6 +2704,83 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   }    
   legSyst->Draw();
 
+}
+
+void
+DisplayClass::drawStatVsSystematics(vector<vector<vector<float> > > numbers, string src) {
+
+  softReset();
+  
+  if(numbers[0].size()==0) {
+    cout<<"Error, numbers are empty "<<endl;
+  }
+
+  int tmpNvar=_nvars;
+  _nvars=1;
+ 
+  _pads = preparePads();
+  TGraph* upVars=new TGraph();
+  TGraph* downVars=new TGraph();
+  float ymax=0;
+  for(size_t iu=0;iu<numbers[0].size();iu++) {
+    upVars->SetPoint(iu, numbers[0][iu][0], numbers[0][iu][1] );
+    downVars->SetPoint(iu, numbers[1][iu][0], numbers[1][iu][1] );
+    if(std::max(numbers[0][iu][1], numbers[1][iu][1])> ymax)
+      ymax=max(numbers[0][iu][1], numbers[1][iu][1]);
+  }
+
+  TH1F* emptyHisto=new TH1F("empty","",100,0.05,100);
+  for(int ib=0;ib<emptyHisto->GetNbinsX()+2;ib++)
+    emptyHisto->SetBinContent(ib,-1);
+  
+  emptyHisto->GetYaxis()->SetRangeUser(0,ymax*1.05);
+  emptyHisto->GetXaxis()->SetTitle("statistical uncertainty [%] ");
+  emptyHisto->GetXaxis()->SetTitleSize(0.05);
+  emptyHisto->GetXaxis()->SetTitleOffset(1.2);
+  emptyHisto->GetYaxis()->SetTitle("yield variation [%] ");
+  emptyHisto->GetYaxis()->SetTitleSize(0.05);
+  emptyHisto->GetYaxis()->SetTitleOffset(1.3);
+
+  upVars->SetMarkerStyle(20);
+  downVars->SetMarkerStyle(24);
+  
+  //drawing
+  _c->Draw();
+  _pads[0][0]->Draw();
+  _pads[0][0]->cd();
+  
+  emptyHisto->Draw();
+  upVars->Draw("P");
+  downVars->Draw("P");
+  bool tmpMcOnly=_mcOnly;
+  _mcOnly=true;
+ 
+  TLatex latex;
+  float textSize=0.75*_pads[0][0]->GetTopMargin();
+  latex.SetNDC();
+  latex.SetTextAlign(11); // align left
+  latex.SetTextFont(61);
+  latex.SetTextSize(textSize);
+  latex.DrawLatex(0.6776,0.9526,"CMS");
+  latex.SetTextFont(52);
+  latex.SetTextSize(textSize*0.76);
+  latex.DrawLatex(0.777,0.9526,"Simulation");
+
+  //latex.DrawLatex(0.221,0.883,(src+" variations").c_str() );
+
+  _pads[0][0]->SetLogx(1);
+  _pads[0][0]->SetGridx(1);
+  _pads[0][0]->SetGridy(1);
+
+  TLegend * leg=new TLegend(0.236,0.755,0.495,0.895, ("  "+src+" variations").c_str() );
+  leg->SetFillColor(0);
+  leg->AddEntry(upVars,"+1 #sigma","p");
+  leg->AddEntry(downVars,"-1 #sigma","p");
+  leg->Draw();
+  
+  _nvars = tmpNvar;
+  _mcOnly = tmpMcOnly;
+  
 }
 
 

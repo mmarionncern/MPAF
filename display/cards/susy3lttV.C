@@ -7,8 +7,8 @@ void susy3lttV() {
 
     //general parameters ********************* general parameters
     string dir="SUSY3L";
-    string fileName="3l_test80Xskim"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="3l_test80Xskim"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="3l_v2_scanBkg_TTW_LO"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="3l_v2_scanBkg_TTW_LO"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
     //string fileName="merged_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
@@ -300,7 +300,7 @@ void susy3lttV() {
     
     //TTW
     md.anConf.addSample( "TTW_LO"                               ,  "t#bar{t}W LO"   , kGreen+3, scale      );
-    md.anConf.addSample( "TTWToLNu"                             ,  "pseudodata"  , kBlack  , scale      );
+    //md.anConf.addSample( "TTWToLNu"                             ,  "pseudodata"  , kBlack  , scale      );
 /*
 
     //non-prompt
