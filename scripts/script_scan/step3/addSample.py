@@ -80,7 +80,7 @@ def retrieveYields(inputFile):
 
     for i in totYield.keys():
         for j in totYield[i].keys():
-            totUnc[i][sample] = math.sqrt(totUnc[i][sample])
+            totUnc[i][j] = math.sqrt(totUnc[i][j])
     
     return goodLines, totYield, totNGen, totUnc
 
