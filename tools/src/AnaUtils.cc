@@ -509,15 +509,14 @@ AnaUtils::getCategSystematics(const string& dss, const string& src, const string
       float totUp=0,totDown=0;
       map<string,float> rU, rD;
     
-      //retrieve systematic uncertainties
-      getYieldSysts(eST, rU, rD, totUp, totDown, central);
-      cout<<setprecision(2)<<fixed;
-      if(cname.find("global")!=string::npos) cname.erase(0,7);
-      if(!latex)
-	cout<<setw(10)<<cname<<"\t"<<setw(5)<<central<<" +- "<<setw(5)<<sqrt(eST.sumw2)<<"\t";
-      else
-	cout<<setw(10)<<cname<<" & "<<setw(5)<<central<<" $\\pm$ "<<setw(5)<<sqrt(eST.sumw2)<<"  &  ";
-
+    //retrieve systematic uncertainties
+    getYieldSysts(eST, rU, rD, totUp, totDown, central);
+    cout<<setprecision(2)<<fixed;
+    if(cname.find("global")!=string::npos) cname.erase(0,7);
+    if(!latex)
+      cout<<setw(10)<<cname<<"\t"<<setw(5)<<central<<" +- "<<setw(5)<<sqrt(eST.sumw2) << setw(5) << " " << sqrt(eST.sumw2)/central*100 << " %" << "\t";
+    else
+      cout<<setw(10)<<cname<<" & "<<setw(5)<<central<<" $\\pm$ "<<setw(5)<<sqrt(eST.sumw2)<<"  &  ";
   
       float yup;
       float ydown;

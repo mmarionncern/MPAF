@@ -14,23 +14,29 @@ NJ=0
 NSR=0
 
 N=0
-for i in `ls $MPAF/workdir/stats/SUSY3L/3l_scanSig_T1tttt-*-*-.dat`; do
+for i in `ls $MPAF/workdir/stats/SUSY3L/merged_v2_4fb_T1tttt_mG_*_mN_*.dat`; do
 #while [[ $N -lt ${#SIGS[*]} ]]; do
 
-    tmp=${i#"$MPAF/workdir/stats/SUSY3L/3l_scanSig_T1tttt-"}
-    mass=${tmp%"-.dat"}
+    tmp=${i#"$MPAF/workdir/stats/SUSY3L/merged_v2_4fb_T1tttt_mG_"}
+    mass=${tmp%".dat"}
        
     #echo 'bench'
     #echo $bench
     #echo 'mass'
     #echo $mass
-    m1=$(echo $mass | cut -f1 -d-)
-    m2=$(echo $mass | cut -f2 -d-)
+    
+    bench=`echo $mass | tr '_' ' '`
+
+    m1=`echo $bench | awk '{print $1}'`
+    m2=`echo $bench | awk '{print $3}'`
+
+    mass="mG_"$m1"_mN_"$m2
+    bench="_m"$m1"_m"$m2
+
     #echo $m1
     #echo $m2
-    bench="_m"$m1"_m"$m2
-    echo $bench
-
+    #echo $bench
+    
     #cp $MPAF/display/cards/susy3lScanCombine.C $MPAF/display/cards/tmpFilesShape/susy3l_scanSig${bench}.C
     cp $MPAF/display/cards/susy3lScanCombine.C $MPAF/display/cards/tmpFilesShape/susy3l_scanSig${bench}.C
 
@@ -47,5 +53,4 @@ for i in `ls $MPAF/workdir/stats/SUSY3L/3l_scanSig_T1tttt-*-*-.dat`; do
 	sub  susy3l_scanSig${bench}.C
 	NJ=0
     fi
-    #break
 done

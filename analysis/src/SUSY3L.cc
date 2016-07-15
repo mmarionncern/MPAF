@@ -399,7 +399,7 @@ void SUSY3L::initialize(){
    //     addManualSystSource("fs_hlt",SystUtils::kNone);
         addManualSystSource("fs_btag",SystUtils::kNone);
         //addManualSystSource("XSFS",SystUtils::kNone);
-   //     addManualSystSource("scale",SystUtils::kNone);
+        addManualSystSource("scale",SystUtils::kNone);
     
         //uncertainties previously taken care of in display card 
         addManualSystSource("lumi",SystUtils::kNone);
@@ -516,7 +516,7 @@ void SUSY3L::run(){
 
     //event reweighting //////////////////////////////////////////////////////////
     //btag-scale factors
-    if(!_vc->get("isData") && !_closure ) {
+    /*if(!_vc->get("isData") && !_closure ) {
         if(!isInUncProc())  {
 	        _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
 	        _weight *= _btagW;
@@ -533,7 +533,7 @@ void SUSY3L::run(){
 	        _weight *= _btagW;
     }
     counter("b-tag SF");
-
+*/
     //ISR variation for fastsim
     if(_fastSim){
         if(isInUncProc() && getUncName()=="isr" && getUncDir()==SystUtils::kUp ){
