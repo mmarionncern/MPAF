@@ -398,7 +398,6 @@ void SUSY3L::initialize(){
    //     addManualSystSource("fs_lep",SystUtils::kNone);
    //     addManualSystSource("fs_hlt",SystUtils::kNone);
         addManualSystSource("fs_btag",SystUtils::kNone);
-        //addManualSystSource("XSFS",SystUtils::kNone);
         addManualSystSource("scale",SystUtils::kNone);
     
         //uncertainties previously taken care of in display card 
@@ -2732,6 +2731,8 @@ bool SUSY3L::passNoiseFilters(){
     /*
         
     */
+    
+    if(_fastSim) return true;
 
     if(_vc->get("Flag_badChargedHadronFilter"   ) == 0) return false;               
     if(_vc->get("Flag_badMuonFilter"            ) == 0) return false;               

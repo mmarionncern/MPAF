@@ -118,16 +118,16 @@ void susy3l_scanSigBENCH(){
     md.addNuisanceParameter("fakes_EWK"         ,"fakes"                                ,"shape","");
 
     //fastSim related uncertainties
-    //md.addNuisanceParameter("fs_btag"           ,sig                                    ,"shape","");
+    md.addNuisanceParameter("fs_btag"           ,sig                                    ,"shape","");
     //md.addNuisanceParameter("fs_lep"            ,sig                                    ,"shape","");
 	//md.addNuisanceParameter("fs_hlt"            ,sig                                    ,"shape","");
-    //md.addNuisanceParameter("isr"               ,sig                                    ,"shape","");
-	//md.addNuisanceParameter("scale"             ,sig                                    ,"shape","");
+    md.addNuisanceParameter("isr"               ,sig                                    ,"shape","");
+	md.addNuisanceParameter("scale"             ,sig                                    ,"shape","");
 
 
     //flat uncertanties
     md.addNuisanceParameter("lumi"              ,"ttw:ttzh:ttzlowM:xg:rares:"+sig       ,"shape","");
-    //md.addNuisanceParameter("HLTEff"            ,"ttw:ttzh:ttzlowM:xg:rares:"+sig       ,"shape","");
+    md.addNuisanceParameter("HLTEff"            ,"ttw:ttzh:ttzlowM:xg:rares:"+sig       ,"shape","");
     md.addNuisanceParameter("LepEff"            ,"ttw:ttzh:ttzlowM:xg:rares:"+sig       ,"shape","");
     md.addNuisanceParameter("rare"              ,"rares"                                ,"shape","");
     md.addNuisanceParameter("XG"                ,"xg"                                   ,"shape","");
