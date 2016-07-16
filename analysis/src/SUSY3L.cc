@@ -61,11 +61,11 @@ void SUSY3L::initialize(){
     _vTR_lines.push_back("HLT_BIT_HLT_Mu8_Ele8_CaloIdM_TrackIdM_Mass8_PFHT300_v");
     _vTR_lines.push_back("HLT_BIT_HLT_DoubleMu8_Mass8_PFHT300_v");
     //isolated triggers 2016
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");                   //TODO: not in tree yet
-    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");  
-    _vTR_lines.push_back("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");     
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");       //TODO: not in tree yet
-    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");      //has prescale 0 in column 1e34 
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v");
+    //_vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v");
+    _vTR_lines.push_back("HLT_BIT_HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v");
 
     //_vTR_lines.push_back("HLT_BIT_HLT_Mu23_TrkIsoVVL_Ele8_CaloIdL_TrackIdL_IsoVL_v");  
     
@@ -516,7 +516,7 @@ void SUSY3L::run(){
 
     //event reweighting //////////////////////////////////////////////////////////
     //btag-scale factors
-    /*if(!_vc->get("isData") && !_closure ) {
+    if(!_vc->get("isData") && !_closure ) {
         if(!isInUncProc())  {
 	        _btagW = _susyMod->bTagSF( _jets, _jetsIdx, _bJets, _bJetsIdx, 0, _fastSim, 0);
 	        _weight *= _btagW;
@@ -533,7 +533,7 @@ void SUSY3L::run(){
 	        _weight *= _btagW;
     }
     counter("b-tag SF");
-*/
+
     //ISR variation for fastsim
     if(_fastSim){
         if(isInUncProc() && getUncName()=="isr" && getUncDir()==SystUtils::kUp ){
@@ -2754,40 +2754,59 @@ bool SUSY3L::checkMassBenchmark(){
 
     // float M1=_vc->get("GenSusyMScan1");
     // float M2=_vc->get("GenSusyMScan2");
-  float M1=_vc->get("GenSusyMGluino");
-  float M2=_vc->get("GenSusyMNeutralino");
+    float M1=_vc->get("GenSusyMGluino");
+    float M2=_vc->get("GenSusyMNeutralino");
 
     ostringstream os,os1;
     os<<M1;
     os1<<M2;
     string s;
-    if(_susyProcessName == "T1tttt") s="_"+os.str()+"_mN_"+os1.str();
+    if(_susyProcessName == "T1tttt")   s="_"+os.str()+"_mN_"+os1.str();
+    if(_susyProcessName == "T5qqqqVV") s="_"+os.str()+"_mN_"+os1.str();
     if(_susyProcessName == "T6ttWW") s="_"+os.str()+"_"+os1.str();
-    if(_susyProcessName == "T5qqqqVV") s="_"+os.str()+"_"+os1.str();
     if(_susyProcessName == "T5ttttdeg") s="_"+os.str()+"_"+os1.str();
     
     if(_ie==0 && _susyProcessName == "T1tttt") {
-      unsigned int p=_sampleName.find("_",8);
+        unsigned int p=_sampleName.find("_",8);
         unsigned int p1=_sampleName.find("_",p+1);
-	unsigned int p1b=_sampleName.find("_",p1+1);
+    	unsigned int p1b=_sampleName.find("_",p1+1);
         unsigned int p2=_sampleName.find("_",p1b+1);
-	//cout<<_sampleName<<"   "<<p<<"  "<<p1<<"  "<<p2<<"   "<<_sampleName.substr(p+1,p1-p-1)<<"  "<<_sampleName.substr(p1+1,p2-p1-1)<<endl;
+	    //cout<<_sampleName<<"   "<<p<<"  "<<p1<<"  "<<p2<<"   "<<_sampleName.substr(p+1,p1-p-1)<<"  "<<_sampleName.substr(p1+1,p2-p1-1)<<endl;
         float m1=stof( _sampleName.substr(p+1,p1-p-1) );
         float m2=stof( _sampleName.substr(p1b+1,p2-p1b-1) );
+        //cout << m1 << " " << m2 << endl;
         float xb = _hScanWeight->GetXaxis()->FindBin(m1);
         float yb = _hScanWeight->GetYaxis()->FindBin(m2);
         float zb = _hScanWeight->GetZaxis()->FindBin(0.);
-	//cout<<m1<<"  "<<m2<<"  "<<_hScanWeight2D->GetBinContent(xb,yb)<<endl;
+	    //cout<<m1<<"  "<<m2<<"  "<<_hScanWeight2D->GetBinContent(xb,yb)<<endl;
         //_nProcEvtScan=_hScanWeight2D->GetBinContent(xb,yb);
-	_nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
+	    _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
     }
  
-    if(_ie==0 && (_susyProcessName == "T6ttWW" || _susyProcessName == "T5qqqqVV" || _susyProcessName == "T5ttttdeg")) {
+    if(_ie==0 && _susyProcessName == "T5qqqqVV") {
+        unsigned int p=_sampleName.find("_",10);
+        unsigned int p1=_sampleName.find("_",p+1);
+    	unsigned int p1b=_sampleName.find("_",p1+1);
+        unsigned int p2=_sampleName.find("_",p1b+1);
+	    //cout<<_sampleName<<"   "<<p<<"  "<<p1<<"  "<<p2<<"   "<<_sampleName.substr(p+1,p1-p-1)<<"  "<<_sampleName.substr(p1+1,p2-p1-1)<<endl;
+        float m1=stof( _sampleName.substr(p+1,p1-p-1) );
+        float m2=stof( _sampleName.substr(p1b+1,p2-p1b-1) );
+        cout << m1 << " " << m2 << endl;
+        float xb = _hScanWeight->GetXaxis()->FindBin(m1);
+        float yb = _hScanWeight->GetYaxis()->FindBin(m2);
+        float zb = _hScanWeight->GetZaxis()->FindBin(0.);
+	    //cout<<m1<<"  "<<m2<<"  "<<_hScanWeight2D->GetBinContent(xb,yb)<<endl;
+        //_nProcEvtScan=_hScanWeight2D->GetBinContent(xb,yb);
+	    _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
+    }
+    
+    if(_ie==0 && (_susyProcessName == "T6ttWW" || _susyProcessName == "T5ttttdeg")) {
         unsigned int p=_sampleName.find("_");
         unsigned int p1=_sampleName.find("_",p+1);
         unsigned int p2=_sampleName.size();
         float m1=stof( _sampleName.substr(p+1,p1-p-1) );
         float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
+        cout << m1 << " " << m2 << endl;
         float xb = _hScanWeight->GetXaxis()->FindBin(m1);
         float yb = _hScanWeight->GetYaxis()->FindBin(m2);
         float zb = _hScanWeight->GetZaxis()->FindBin(1);
@@ -2810,7 +2829,7 @@ bool SUSY3L::checkMassBenchmark(){
 void SUSY3L::loadScanHistogram(){
   
     if(_fastSim){ 
-        string mpafenv=string(getenv ("MPAF"))+"/workdir/database/histoScan"+_susyProcessName+"_2016.root";
+        string mpafenv=string(getenv ("MPAF"))+"/workdir/database/db2016/histoScan"+_susyProcessName+"_2016.root";
         TFile* file=new TFile(mpafenv.c_str(),"read");
         _hScanWeight=(TH3D*)file->Get("CountSMS");
     }
