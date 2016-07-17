@@ -237,9 +237,9 @@ void SUSY3L::initialize(){
     _vc->registerVar("GenPart_status"				   );
 
     //LHE gen level weights                                                                                                                                                       
-    _vc->registerVar("nLHEweight"                      );
-    _vc->registerVar("LHEweight_id"                    );
-    _vc->registerVar("LHEweight_wgt"                   );
+    //_vc->registerVar("nLHEweight"                      );
+    //_vc->registerVar("LHEweight_id"                    );
+    //_vc->registerVar("LHEweight_wgt"                   );
 
     //SusyModule for common inputs and functions with RA5
     _susyMod = new SusyModule(_vc, _dbm);
@@ -451,7 +451,7 @@ void SUSY3L::modifyWeight() {
             _weight *= _vc->get("genWeight");
             }
         else {
-           _weight *= _susyMod->getLHEweight(LHESYS);
+           //_weight *= _susyMod->getLHEweight(LHESYS);
             _weight *= Xfactor;
         }}
 
@@ -668,7 +668,7 @@ void SUSY3L::defineOutput(){
 
     vector<string> wfs({"OnZBaseline","OffZBaseline",
 	  "OnZBaseline_Fake", "OffZBaseline_Fake",
-	  "Fake","WZCR","FakeCR","WZCR_Fake"});
+	  "Fake","WZCR","FakeCR","WZCR_Fake", "FakeCR_Fake"});
 
     _hm->setRelevantWFs( "SRS" ,wfs);
     _hm->setRelevantWFs( "HT" ,wfs);
