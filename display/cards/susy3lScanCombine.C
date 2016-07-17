@@ -62,6 +62,7 @@ void susy3l_scanSigBENCH(){
     md.addDataCardSample( "GGHZZ4L", "rares"); 
     md.addDataCardSample( "VHToNonbb", "rares"); 
     md.addDataCardSample( "ZZTo4L", "rares"); 
+    md.addDataCardSample( "WWW", "rares"); 
     md.addDataCardSample( "WWZ", "rares"); 
     md.addDataCardSample( "WZZ", "rares"); 
     md.addDataCardSample( "ZZZ", "rares"); 
