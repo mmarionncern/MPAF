@@ -20,6 +20,7 @@ while read fileLine; do
 
     #echo $path
 	#echo $file
+    #break
 
 	cp $MPAF/cfg/3l_scan.cfg $MPAF/cfg/tmpFiles/3l_scanSig_${file}.cfg
 
