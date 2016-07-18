@@ -1,6 +1,7 @@
 MPAFDisplay md;
 
-void susy3l_data_VARIABLE_REGION() {
+//void susy3l_data_VARIABLE_REGION() {
+void susy3l_data() {
     md.refresh();
 
 
@@ -13,8 +14,8 @@ void susy3l_data_VARIABLE_REGION() {
     //string fileName="merged_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
     //string fileList="merged_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
     
-    string fileName="merged_v2_2fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
-    string fileList="merged_v2_2fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
+    string fileName="merged_v2_4fb_Bkg"; //was treeName in LUNE susy_cut_lowpt
+    string fileList="merged_v2_4fb_Bkg"; //CH: since AnaConfig needs a fileName to open, we need to put the data files into a different variable
 
     string hName="";
 
@@ -22,7 +23,7 @@ void susy3l_data_VARIABLE_REGION() {
     bool closure = false;
     bool nlo_vs_lo = false;
     bool fixLeg = true;
-    bool printTable = false;
+    bool printTable = true;
 
     //if(md.isInitStatus()) {
     md.anConf.configureNames( dir, fileName, fileList );//, hName );
@@ -33,12 +34,12 @@ void susy3l_data_VARIABLE_REGION() {
     bool data = true;
     bool manual =true;
     if(!manual) string region = "REGION";
-    else string region = "OnZBaseline";
+    else string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "ht";}
+    else{string obs = "srs";}
         
-    float lumi=3990; //pb-1 19470
+    float lumi=4300; //pb-1 19470
     float energy=13; //TeV
 
     //if(lumi>804 && data && !(region=="WZCR" || region=="FakeCR")){
@@ -285,6 +286,7 @@ void susy3l_data_VARIABLE_REGION() {
     md.anConf.addSample( "GGHZZ4L"                              ,  "rare"        , kMagenta-7, scale    );
     md.anConf.addSample( "VHToNonbb"                            ,  "rare"        , kMagenta-7, scale   );
     md.anConf.addSample( "ZZTo4L"                               ,  "rare"        , kMagenta-7, scale    );
+    md.anConf.addSample( "WWW"                                  ,  "rare"        , kMagenta-7, scale    );
     md.anConf.addSample( "WWZ"                                  ,  "rare"        , kMagenta-7, scale    );
     md.anConf.addSample( "WZZ"                                  ,  "rare"        , kMagenta-7, scale    );
     md.anConf.addSample( "ZZZ"                                  ,  "rare"        , kMagenta-7, scale    );
@@ -438,9 +440,6 @@ void susy3l_data_VARIABLE_REGION() {
              mcOnly,cmsPrel, uncDet, closure, nlo_vs_lo, fixLeg);
     md.prepareDisplay();
     
-    //external systematic uncertainties
-    //md.addExternalSystUnc("WZ","test",0.50,-0.50 ,"global_OnZSR001" , "selected");
-
     md.doPlot();
     // md.doStatisticsPlot();
        

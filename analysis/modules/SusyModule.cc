@@ -79,9 +79,9 @@ SusyModule::loadBTagReader() {
 void
 SusyModule::loadDBs() {
  
-  _dbm->loadDb("BTagEffUDSG","db2016/bTagEffs.root",(string)("eff_total_M_udsg") );
-  _dbm->loadDb("BTagEffC","db2016/bTagEffs.root",(string)("eff_total_M_c") );
-  _dbm->loadDb("BTagEffB","db2016/bTagEffs.root",(string)("eff_total_M_b") );
+  _dbm->loadDb("BTagEffUDSG","db2016/bTagEffs.root",(string)("eff_TT_M_udsg") );
+  _dbm->loadDb("BTagEffC","db2016/bTagEffs.root",(string)("eff_TT_M_c") );
+  _dbm->loadDb("BTagEffB","db2016/bTagEffs.root",(string)("eff_TT_M_b") );
 
 }
 

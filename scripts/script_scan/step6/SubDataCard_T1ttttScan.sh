@@ -53,4 +53,5 @@ for i in `ls $MPAF/workdir/stats/SUSY3L/merged_v2_4fb_T1tttt_mG_*_mN_*.dat`; do
 	sub  susy3l_scanSig${bench}.C
 	NJ=0
     fi
+    #break
 done

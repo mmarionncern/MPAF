@@ -5,14 +5,14 @@ void susy3l_scanSigBENCH(){
 
     //general parameters ********************* general parameters
     //string sig="fs_t1ttttBENCH";
-    string sig="fs_t1ttttBENCH";
+    string sig="fs_t5qqqqvvBENCH";
     bool allSR = true;
 
     string dir="SUSY3L";
     string fileName="merged_4fb";
     if(sig=="fs_t1ttttBENCH") string fileList="merged_v2_4fb_T1tttt_MASS"; //susy3lUnc
+    if(sig=="fs_t5qqqqvvBENCH") string fileList="merged_v2_4fb_T5qqqqVV_MASS"; //susy3lUnc
     if(sig=="fs_t6ttww_50BENCH") string fileList="merged_2fb_T6ttWWMASS"; //susy3lUnc
-    if(sig=="fs_t5qqqqvvBENCH") string fileList="merged_2fb_T5qqqqVVMASS"; //susy3lUnc
     if(sig=="fs_t5tttt_degenBENCH") string fileList="merged_2fb_T5ttttMASS"; //susy3lUnc
   
     bool mcOnly = false;
@@ -42,7 +42,7 @@ void susy3l_scanSigBENCH(){
 
     if(sig=="fs_t1ttttBENCH") md.addDataCardSigSample("T1tttt_MASS",sig);
     if(sig=="fs_t6ttww_50BENCH") md.addDataCardSigSample("T6ttWWMASS",sig);
-    if(sig=="fs_t5qqqqvvBENCH") md.addDataCardSigSample("T5qqqqVVMASS",sig, kfac);
+    if(sig=="fs_t5qqqqvvBENCH") md.addDataCardSigSample("T5qqqqVV_MASS",sig, kfac);
     if(sig=="fs_t5tttt_degenBENCH") md.addDataCardSigSample("T5ttttMASS",sig);
 
     md.addDataCardSample( "TGJets", "xg"); 
@@ -62,6 +62,7 @@ void susy3l_scanSigBENCH(){
     md.addDataCardSample( "GGHZZ4L", "rares"); 
     md.addDataCardSample( "VHToNonbb", "rares"); 
     md.addDataCardSample( "ZZTo4L", "rares"); 
+    md.addDataCardSample( "WWW", "rares"); 
     md.addDataCardSample( "WWZ", "rares"); 
     md.addDataCardSample( "WZZ", "rares"); 
     md.addDataCardSample( "ZZZ", "rares"); 
@@ -118,16 +119,16 @@ void susy3l_scanSigBENCH(){
     md.addNuisanceParameter("fakes_EWK"         ,"fakes"                                ,"shape","");
 
     //fastSim related uncertainties
-    //md.addNuisanceParameter("fs_btag"           ,sig                                    ,"shape","");
+    md.addNuisanceParameter("fs_btag"           ,sig                                    ,"shape","");
     //md.addNuisanceParameter("fs_lep"            ,sig                                    ,"shape","");
 	//md.addNuisanceParameter("fs_hlt"            ,sig                                    ,"shape","");
-    //md.addNuisanceParameter("isr"               ,sig                                    ,"shape","");
-	//md.addNuisanceParameter("scale"             ,sig                                    ,"shape","");
+    md.addNuisanceParameter("isr"               ,sig                                    ,"shape","");
+	md.addNuisanceParameter("scale"             ,sig                                    ,"shape","");
 
 
     //flat uncertanties
     md.addNuisanceParameter("lumi"              ,"ttw:ttzh:ttzlowM:xg:rares:"+sig       ,"shape","");
-    //md.addNuisanceParameter("HLTEff"            ,"ttw:ttzh:ttzlowM:xg:rares:"+sig       ,"shape","");
+    md.addNuisanceParameter("HLTEff"            ,"ttw:ttzh:ttzlowM:xg:rares:"+sig       ,"shape","");
     md.addNuisanceParameter("LepEff"            ,"ttw:ttzh:ttzlowM:xg:rares:"+sig       ,"shape","");
     md.addNuisanceParameter("rare"              ,"rares"                                ,"shape","");
     md.addNuisanceParameter("XG"                ,"xg"                                   ,"shape","");
