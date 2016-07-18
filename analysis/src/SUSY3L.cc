@@ -163,6 +163,7 @@ void SUSY3L::initialize(){
         _vc->registerVar("Jet"+extsJEC[ie]+"_mass"                        );     //jet mass
         _vc->registerVar("Jet"+extsJEC[ie]+"_rawPt"                       );
         _vc->registerVar("Jet"+extsJEC[ie]+"_mcFlavour"                   );
+	_vc->registerVar("Jet"+extsJEC[ie]+"_partonMotherId"              );
 
         //discarded jets (because of leptons cleaning)
         _vc->registerVar("nDiscJet"+extsJEC[ie]                           );
@@ -174,6 +175,7 @@ void SUSY3L::initialize(){
         _vc->registerVar("DiscJet"+extsJEC[ie]+"_mass"                    );
         _vc->registerVar("DiscJet"+extsJEC[ie]+"_btagCSV"                 );
         _vc->registerVar("DiscJet"+extsJEC[ie]+"_mcFlavour"               );
+	_vc->registerVar("DiscJet"+extsJEC[ie]+"_partonMotherId"          );
 
     }
 
@@ -313,7 +315,7 @@ void SUSY3L::initialize(){
 
     if(_fastSim) {
         //load signal cross section
-        if(_susyProcessName=="T1tttt" || _susyProcessName=="T5qqqqVV" || _susyProcessName=="T5ttttdeg" || _susyProcessName=="T5tttt"){
+        if(_susyProcessName=="T1tttt" || _susyProcessName=="T5qqqqVV" || _susyProcessName=="T5ttttdeg" || _susyProcessName=="T5tttt" || _susyProcessName=="T5qqqqVV_noDM"){
             _dbm->loadDb(_susyProcessName+"Xsect", "GluinoGluinoXsect.db");
         }
         if(_susyProcessName=="T6ttWW"){
@@ -389,6 +391,7 @@ void SUSY3L::initialize(){
 
     //systematic uncertainties
     if(_runSystematics){
+      if(false) {
         addManualSystSource("btag",SystUtils::kNone);
         addManualSystSource("jes",SystUtils::kNone);
         addManualSystSource("fakes_EWK",SystUtils::kNone);
@@ -421,8 +424,11 @@ void SUSY3L::initialize(){
         addManualSystSource("wz_extr",SystUtils::kNone);
         addManualSystSource("ttzLO",SystUtils::kNone);
         addManualSystSource("ttwLO",SystUtils::kNone);
+      }
+      addManualSystSource("isr",SystUtils::kNone);
+      //addManualSystSource("ISR",SystUtils::kNone); //used to compute the normalization
     }
-
+      
 }
 
 
@@ -535,11 +541,15 @@ void SUSY3L::run(){
 
     //ISR variation for fastsim
     if(_fastSim){
+      //if(isInUncProc() && getUncName()=="ISR") 
+	_susyMod->applyISRJetWeight(_jetsIdx,0, _sampleName, _weight );
         if(isInUncProc() && getUncName()=="isr" && getUncDir()==SystUtils::kUp ){
-	        _susyMod->applyISRWeight(0, 1 , _weight); // up variation
+	  //_susyMod->applyISRWeight(0, 1 , _weight); // up variation
+	  _susyMod->applyISRJetWeight(_jetsIdx,1, _sampleName, _weight );
         }
         else if(isInUncProc() && getUncName()=="isr" && getUncDir()==SystUtils::kDown ){
-	        _susyMod->applyISRWeight(0, -1, _weight); // down variation
+	  //_susyMod->applyISRWeight(0, -1, _weight); // down variation
+	  _susyMod->applyISRJetWeight(_jetsIdx,-1, _sampleName, _weight );
         }
     }
 /*    
@@ -2763,7 +2773,7 @@ bool SUSY3L::checkMassBenchmark(){
     string s;
     if(_susyProcessName == "T1tttt")   s="_"+os.str()+"_mN_"+os1.str();
     if(_susyProcessName == "T5qqqqVV") s="_"+os.str()+"_mN_"+os1.str();
-    if(_susyProcessName == "T6ttWW") s="_"+os.str()+"_"+os1.str();
+    if(_susyProcessName == "T5qqqqVV_noDM") s="_"+os.str()+"_mN_"+os1.str();
     if(_susyProcessName == "T5ttttdeg") s="_"+os.str()+"_"+os1.str();
     
     if(_ie==0 && _susyProcessName == "T1tttt") {
@@ -2783,7 +2793,7 @@ bool SUSY3L::checkMassBenchmark(){
 
     }
  
-    if(_ie==0 && _susyProcessName == "T5qqqqVV") {
+    if(_ie==0 && (_susyProcessName == "T5qqqqVV") ) {
         unsigned int p=_sampleName.find("_",10);
         unsigned int p1=_sampleName.find("_",p+1);
     	unsigned int p1b=_sampleName.find("_",p1+1);
@@ -2791,7 +2801,7 @@ bool SUSY3L::checkMassBenchmark(){
 	    //cout<<_sampleName<<"   "<<p<<"  "<<p1<<"  "<<p2<<"   "<<_sampleName.substr(p+1,p1-p-1)<<"  "<<_sampleName.substr(p1+1,p2-p1-1)<<endl;
         float m1=stof( _sampleName.substr(p+1,p1-p-1) );
         float m2=stof( _sampleName.substr(p1b+1,p2-p1b-1) );
-        cout << m1 << " " << m2 << endl;
+        //cout << m1 << " " << m2 << endl;
         float xb = _hScanWeight->GetXaxis()->FindBin(m1);
         float yb = _hScanWeight->GetYaxis()->FindBin(m2);
         float zb = _hScanWeight->GetZaxis()->FindBin(0.);
@@ -2799,6 +2809,23 @@ bool SUSY3L::checkMassBenchmark(){
         //_nProcEvtScan=_hScanWeight2D->GetBinContent(xb,yb);
 	    _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
     }
+    if(_ie==0 && (_susyProcessName == "T5qqqqVV_noDM") ) {
+      unsigned int p=_sampleName.find("_",16);
+      unsigned int p1=_sampleName.find("_",p+1);
+      unsigned int p1b=_sampleName.find("_",p1+1);
+      unsigned int p2=_sampleName.find("_",p1b+1);
+      //cout<<_sampleName<<"   "<<p<<"  "<<p1<<"  "<<p2<<"   "<<_sampleName.substr(p+1,p1-p-1)<<"  "<<_sampleName.substr(p1+1,p2-p1-1)<<endl;
+      float m1=stof( _sampleName.substr(p+1,p1-p-1) );
+      float m2=stof( _sampleName.substr(p1b+1,p2-p1b-1) );
+      //cout << m1 << " " << m2 << endl;
+      float xb = _hScanWeight->GetXaxis()->FindBin(m1);
+      float yb = _hScanWeight->GetYaxis()->FindBin(m2);
+      float zb = _hScanWeight->GetZaxis()->FindBin(0.);
+      //cout<<m1<<"  "<<m2<<"  "<<_hScanWeight2D->GetBinContent(xb,yb)<<endl;
+      //_nProcEvtScan=_hScanWeight2D->GetBinContent(xb,yb);
+	    _nProcEvtScan=_hScanWeight->GetBinContent(xb,yb,zb);
+    }
+
     
     if(_ie==0 && (_susyProcessName == "T6ttWW" || _susyProcessName == "T5ttttdeg")) {
         unsigned int p=_sampleName.find("_");
@@ -2806,7 +2833,7 @@ bool SUSY3L::checkMassBenchmark(){
         unsigned int p2=_sampleName.size();
         float m1=stof( _sampleName.substr(p+1,p1-p-1) );
         float m2=stof( _sampleName.substr(p1+1,p2-p1-1) );
-        cout << m1 << " " << m2 << endl;
+        //cout << m1 << " " << m2 << endl;
         float xb = _hScanWeight->GetXaxis()->FindBin(m1);
         float yb = _hScanWeight->GetYaxis()->FindBin(m2);
         float zb = _hScanWeight->GetZaxis()->FindBin(1);

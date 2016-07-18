@@ -83,6 +83,10 @@ SusyModule::loadDBs() {
   _dbm->loadDb("BTagEffC","db2016/bTagEffs.root",(string)("eff_TT_M_c") );
   _dbm->loadDb("BTagEffB","db2016/bTagEffs.root",(string)("eff_TT_M_b") );
 
+  _dbm->loadDb("db2016/T1ttttISR","T1ttttISR.db");
+  _dbm->loadDb("db2016/T5qqqqVV_noDMISR","T5qqqqVV_noDMISR.db");
+
+
 }
 
 void
@@ -2521,10 +2525,9 @@ SusyModule::collectGenParticles(int pdgId, int status){
 // bool
 // SusyModule::getISRweight(bool isJESVar, int dir, const CandList& leptons) {
 
-//   vector<string> jetTypes({"Jet","DiscJet"});
-//   list
+//    vector<string> jetTypes({"Jet","DiscJet"});
 
-//   for(size_t it=0;it<jetTypes.size();it++) {
+//    for(size_t it=0;it<jetTypes.size();it++) {
 //     string jType=jetTypes[it];
 
 //     string ext="";
@@ -2539,11 +2542,9 @@ SusyModule::collectGenParticles(int pdgId, int status){
     
 //     float mcPt=_vc->get(jType+ext+"_mcPt", ij);
     
-
-
-//   }
-
-
+//     if(mcPt!=0 && _vc->get(jType+ext+"_") )
+//       return false;
+//    }
 // }
 
 
@@ -2553,10 +2554,11 @@ SusyModule::applyISRJetWeight(const vector<pair<string, unsigned int> >& jetIdxs
 			      int var, const string& signame, float& weight ) {
 
   int nJet=0;
- 
+  size_t p=signame.find("_mG");
+  string sigtag=signame;
+  if(p!=string::npos) sigtag=signame.substr(0,p);
+  
   for(size_t ij=0;ij<jetIdxs.size();ij++) {
-    // float mcPt=_vc->get(jetIdxs[ij].first+"_mcPt", ij);
-    // if(mcPt==0) continue; //unmatched jets
     
     if(std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==25 ||
        std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==24 ||
@@ -2569,16 +2571,20 @@ SusyModule::applyISRJetWeight(const vector<pair<string, unsigned int> >& jetIdxs
   }
 
   if(nJet>6) nJet=6;
-  string dbName=(var==0)?("fastSimISR"):((var==1)?("fastSimISRUp"):("fastSimISRDown"));
-  weight*=1;//_db->getDBValue(dbName,signame);
-
+  if(var==0)
+    weight*=_dbm->getDBValue(sigtag+"ISR",signame);
+  else if(var==1)
+    weight*=_dbm->getDBErrH(sigtag+"ISR",signame);
+  else if(var==-1)
+    weight*=_dbm->getDBErrL(sigtag+"ISR",signame);
+  
   switch(nJet) {
-  case(1) : {weight*=0.882*(1+var*0.5);}
-  case(2) : {weight*=0.792*(1+var*0.5);}
-  case(3) : {weight*=0.702*(1+var*0.5);}
-  case(4) : {weight*=0.648*(1+var*0.5);}
-  case(5) : {weight*=0.601*(1+var*0.5);}
-  case(6) : {weight*=0.515*(1+var*0.5);}
+  case(1) : {weight*=0.882*(1+var*0.5);break;}
+  case(2) : {weight*=0.792*(1+var*0.5);break;}
+  case(3) : {weight*=0.702*(1+var*0.5);break;}
+  case(4) : {weight*=0.648*(1+var*0.5);break;}
+  case(5) : {weight*=0.601*(1+var*0.5);break;}
+  case(6) : {weight*=0.515*(1+var*0.5);break;}
   }
 
 }
