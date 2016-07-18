@@ -514,7 +514,7 @@ AnaUtils::getCategSystematics(const string& dss, const string& src, const string
     cout<<setprecision(2)<<fixed;
     if(cname.find("global")!=string::npos) cname.erase(0,7);
     if(!latex)
-      cout<<setw(10)<<cname<<"\t"<<setw(5)<<central<<" +- "<<setw(5)<<sqrt(eST.sumw2) << setw(5) << " " << sqrt(eST.sumw2)/central*100 << " %" << "\t";
+      cout<<setw(10)<<cname<<"\t"<<setw(5)<<central<<" +- "<<setw(5)<<sqrt(eST.sumw2) << " (" << setw(5) << sqrt(eST.sumw2)/central*100 << " %)" << "\t";
     else
       cout<<setw(10)<<cname<<" & "<<setw(5)<<central<<" $\\pm$ "<<setw(5)<<sqrt(eST.sumw2)<<"  &  ";
   
@@ -1018,6 +1018,16 @@ AnaUtils::printTables(const string& categ, bool latexOnly, bool header) {
           if(_itEIMap->second.sumw>0.000001 ) {
             cout<<_itEIMap->second.sumw;
             cout<<" $\\pm$ "<<sqrt(_itEIMap->second.sumw2);
+
+	    EffST eST=_itEIMap->second;
+	    float central;
+	    
+	    float totUp=0,totDown=0;
+	    map<string,float> rU, rD;
+	    //retrieve systematic uncertainties
+	    getYieldSysts(eST, rU, rD, totUp, totDown, central);
+	    
+	    cout<<" $^{+"<<totUp<<"}_{-"<<totDown<<"}$ ";
           }
           else
             cout<<" - "; 
@@ -1068,8 +1078,24 @@ AnaUtils::printTables(const string& categ, bool latexOnly, bool header) {
             os <<fixed<<setprecision(2)<<_itEIMap->second.sumw;
             os2 <<fixed<<setprecision(2)<<sqrt(_itEIMap->second.sumw2);
         
-            string tmps=os.str()+" +- "+os2.str();
-            cout<<setw(20)<<tmps;
+	    EffST eST=_itEIMap->second;
+	    float central;
+	    
+	    float totUp=0,totDown=0;
+	    map<string,float> rU, rD;
+	    //retrieve systematic uncertainties
+	    getYieldSysts(eST, rU, rD, totUp, totDown, central);
+
+	    string tmps=os.str()+" +- "+os2.str();
+	    if(totUp>0.000001 || totDown>0.000001) {
+	      ostringstream osUp,osDo;
+	      osUp <<fixed<<setprecision(2)<<totUp;
+	      osDo <<fixed<<setprecision(2)<<totDown;
+	      
+	      tmps+=" + "+osUp.str()+" - "+osDo.str();
+	    }
+
+            cout<<setw(30)<<tmps;
           }
           else
             cout<<" - "; 

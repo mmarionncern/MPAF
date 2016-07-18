@@ -18,5 +18,6 @@ FILES += SUSY3L_sync3
 #FILES += FakeRatioStudy
 #FILES += FRinSitu
 FILES += SSDL2015
+FILES += DoubleCounterChecker
 #FILES += UncertaintyTest
 #FILES += Comissioning

@@ -143,6 +143,8 @@ public:
   float getPuWeight(unsigned int nvtx);
 
   void applyISRWeight(unsigned int process, int var, float& weight);
+  void applyISRJetWeight(const vector<pair<string, unsigned int> >& jetIdxs,
+			 int var, const string& signame, float& weight );
 
   float bTagSF(string dbKeyEffB, string dbKeyEffL, string dbKeyCsv,
                CandList& jets , vector<unsigned int>& jetIdx ,

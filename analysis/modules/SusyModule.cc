@@ -2516,3 +2516,69 @@ SusyModule::collectGenParticles(int pdgId, int status){
   return list;
 }
 
+
+//Veto event if any central jet (|eta|<2.5 && pT>20 GeV) is unmatched (DeltaR<0.3) a to GenJet and has charged hadron fraction<0.1 
+// bool
+// SusyModule::getISRweight(bool isJESVar, int dir, const CandList& leptons) {
+
+//   vector<string> jetTypes({"Jet","DiscJet"});
+//   list
+
+//   for(size_t it=0;it<jetTypes.size();it++) {
+//     string jType=jetTypes[it];
+
+//     string ext="";
+//     if(isJESVar) {
+//       ext=((SystUtils::kUp==dir)?"_jecUp":"_jecDown");
+//     }
+
+//     Candidate* jet=Candidate::create(_vc->get(jType+ext+"_pt", ij),
+// 				     _vc->get(jType+ext+"_eta", ij),
+// 				     _vc->get(jType+ext+"_phi", ij) );
+
+    
+//     float mcPt=_vc->get(jType+ext+"_mcPt", ij);
+    
+
+
+//   }
+
+
+// }
+
+
+//Define NISR-jets≡Define NISR-jets≡ number of jet not matched (∆R<0.3) to MC truth particles descending from top, W, Z, H, or SUSY decay
+void
+SusyModule::applyISRJetWeight(const vector<pair<string, unsigned int> >& jetIdxs,
+			      int var, const string& signame, float& weight ) {
+
+  int nJet=0;
+ 
+  for(size_t ij=0;ij<jetIdxs.size();ij++) {
+    // float mcPt=_vc->get(jetIdxs[ij].first+"_mcPt", ij);
+    // if(mcPt==0) continue; //unmatched jets
+    
+    if(std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==25 ||
+       std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==24 ||
+       std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==23 ||
+       std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==6 ||
+       std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))>999999 )
+      continue;
+       
+    nJet++;
+  }
+
+  if(nJet>6) nJet=6;
+  string dbName=(var==0)?("fastSimISR"):((var==1)?("fastSimISRUp"):("fastSimISRDown"));
+  weight*=1;//_db->getDBValue(dbName,signame);
+
+  switch(nJet) {
+  case(1) : {weight*=0.882*(1+var*0.5);}
+  case(2) : {weight*=0.792*(1+var*0.5);}
+  case(3) : {weight*=0.702*(1+var*0.5);}
+  case(4) : {weight*=0.648*(1+var*0.5);}
+  case(5) : {weight*=0.601*(1+var*0.5);}
+  case(6) : {weight*=0.515*(1+var*0.5);}
+  }
+
+}
