@@ -37,7 +37,7 @@ void susy3l_data() {
     else string region = "OffZBaseline";
 
     if(!manual){string obs = "VARIABLE" ;}    //njets, nbjets, met, ht, lep, zpeak, zpt, mt, pt1, pt2, pt3, mll
-    else{string obs = "ht";}
+    else{string obs = "srs";}
         
     float lumi=4300; //pb-1 19470
     float energy=13; //TeV
@@ -440,9 +440,6 @@ void susy3l_data() {
              mcOnly,cmsPrel, uncDet, closure, nlo_vs_lo, fixLeg);
     md.prepareDisplay();
     
-    //external systematic uncertainties
-    //md.addExternalSystUnc("WZ","test",0.50,-0.50 ,"global_OnZSR001" , "selected");
-
     md.doPlot();
     // md.doStatisticsPlot();
        
