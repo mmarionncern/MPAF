@@ -469,78 +469,159 @@ AnaUtils::getSystematics(const string& ds, const string& lvl, const string& cate
 
 
 void
-AnaUtils::getCategSystematics(const string& ds, const string& src, const string& lvl, const string& categ, bool latex) {
+AnaUtils::getCategSystematics(const string& dss, const string& src, const string& lvl, const string& categ, const string& vetos, bool latex) {
 
-  int ids = -1;
-  for(size_t i=0;i<_dsNames.size();i++) 
-    if(ds==_dsNames[i]) {ids=i; break;}
+  vector<string> vds=parse(dss,":");
+  vector<size_t> idss;
+  for(size_t j=0;j<vds.size();j++) {
+    for(size_t i=0;i<_dsNames.size();i++) { 
+      if(vds[j]==_dsNames[i]) {idss.push_back(i); break;}
+    }
+  }
 
-  if(ids==-1) {
-    cout<<" Error, no ["<<ds<<"] dataset available for printing uncertainties "<<endl;
+  if(idss.size()==0) {
+    cout<<" Error, no ["<<dss<<"] datasets available for printing uncertainties "<<endl;
     return;
   }
   
-  cout<<endl<<" ======================= "<<setw(12)<<ds <<" ("<<src<<") ======================== "<<endl;
 
-  for(_itC=_categories.begin();_itC!=_categories.end();++_itC) {
+  vector<string> vveto=parse(vetos,":");
 
-    string cname=_itC->second.name;
-    if(cname.find(categ)==string::npos) continue;
+  for(size_t idx=0;idx<idss.size();idx++) {
+    size_t ids=idss[idx];
 
-    _itEIMap=_effMap[ ids ][ _itC->second.id ].find(lvl);
-    if(_itEIMap==_effMap[ ids ][ _itC->second.id ].end()) continue;
+    cout<<endl<<" ======================= "<<setw(12)<<_dsNames[ids] <<" ("<<src<<") ======================== "<<endl;
+
+    for(_itC=_categories.begin();_itC!=_categories.end();++_itC) {
+
+      string cname=_itC->second.name;
+      if(cname.find(categ)==string::npos) continue;
+      for(size_t iv=0;iv<vveto.size();iv++) {
+	if(cname.find(vveto[iv])!=string::npos) continue;
+      }
+
+      _itEIMap=_effMap[ ids ][ _itC->second.id ].find(lvl);
+      if(_itEIMap==_effMap[ ids ][ _itC->second.id ].end()) continue;
     
-    EffST eST=_itEIMap->second;
-    float central;
+      EffST eST=_itEIMap->second;
+      float central;
     
-    float totUp=0,totDown=0;
-    map<string,float> rU, rD;
+      float totUp=0,totDown=0;
+      map<string,float> rU, rD;
     
     //retrieve systematic uncertainties
     getYieldSysts(eST, rU, rD, totUp, totDown, central);
     cout<<setprecision(2)<<fixed;
     if(cname.find("global")!=string::npos) cname.erase(0,7);
     if(!latex)
-      cout<<setw(10)<<cname<<"\t"<<setw(5)<<central<<" +- "<<setw(5)<<sqrt(eST.sumw2) << setw(5) << " " << sqrt(eST.sumw2)/central*100 << " %" << "\t";
+      cout<<setw(10)<<cname<<"\t"<<setw(5)<<central<<" +- "<<setw(5)<<sqrt(eST.sumw2) << " (" << setw(5) << sqrt(eST.sumw2)/central*100 << " %)" << "\t";
     else
       cout<<setw(10)<<cname<<" & "<<setw(5)<<central<<" $\\pm$ "<<setw(5)<<sqrt(eST.sumw2)<<"  &  ";
   
-    float yup;
-    float ydown;
-    if(src=="total") {
-      yup=totUp;
-      ydown=totDown;
-    } else {
-      yup=rU[ src];
-      ydown=rD[ src];
-    }
-    float rup=yup*100/central;
-    float rdown=ydown*100/central;
-    if(central==0) { rup=0; rdown=0;}
+      float yup;
+      float ydown;
+      if(src=="total") {
+	yup=totUp;
+	ydown=totDown;
+      } else {
+	yup=rU[ src];
+	ydown=rD[ src];
+      }
+      float rup=yup*100/central;
+      float rdown=ydown*100/central;
+      if(central==0) { rup=0; rdown=0;}
     
-    if(!latex) {
-      if( fabs(rup-rdown)>0.01*central ) { //asymetric
-	cout<<" + "<<setw(5)<<rup<<" - "<<setw(5)<<rdown<<" %  (+"
-	    <<setw(5)<<yup<<" -"<<setw(5)<<ydown<<" events)"<<endl;
+      if(!latex) {
+	if( fabs(rup-rdown)>0.01*central ) { //asymetric
+	  cout<<" + "<<setw(5)<<rup<<" - "<<setw(5)<<rdown<<" %  (+"
+	      <<setw(5)<<yup<<" -"<<setw(5)<<ydown<<" events)"<<endl;
+	}
+	else { //symetric
+	  cout<<" +- "<<setw(5)<<max(rup,rdown)<<" %         (+-      "<<setw(5)<<max(yup,ydown)<<" events)"<<endl;
+	}
       }
-      else { //symetric
-	cout<<" +- "<<setw(5)<<max(rup,rdown)<<" %         (+-      "<<setw(5)<<max(yup,ydown)<<" events)"<<endl;
+      else {
+	if( fabs(rup-rdown)>0.01*central ) { //asymetric
+	  cout<<" +"<<setw(5)<<rup<<"/-"<<setw(5)<<rdown
+	      <<" & +"<<setw(5)<<yup<<"/-"<<setw(5)<<ydown<<" \\\\ "<<endl;
+	}
+	else { //symetric
+	  cout<<" $\\pm$ "<<setw(5)<<max(rup,rdown)<<" & $\\pm$"<<setw(5)<<max(yup,ydown)<<" \\\\ "<<endl;
+	}
       }
-    }
-    else {
-      if( fabs(rup-rdown)>0.01*central ) { //asymetric
-	cout<<" +"<<setw(5)<<rup<<"/-"<<setw(5)<<rdown
-	    <<" & +"<<setw(5)<<yup<<"/-"<<setw(5)<<ydown<<" \\\\ "<<endl;
-      }
-      else { //symetric
-	cout<<" $\\pm$ "<<setw(5)<<max(rup,rdown)<<" & $\\pm$"<<setw(5)<<max(yup,ydown)<<" \\\\ "<<endl;
-      }
-    }
   
-  }//categds
+    }//categds
+
+  }// datasets
 
 }
 
+vector<vector<vector<float> > >
+AnaUtils::retrieveSystematicNumbers(const string& dss, const string& src, 
+				    const string& lvl, const string& categ, 
+				    const string& vetos) {
+
+  vector<vector<vector<float> > > out(2,vector<vector<float> >(0, vector<float>(2,0)) );
+
+  vector<string> vds=parse(dss,":");
+  vector<size_t> idss;
+  for(size_t j=0;j<vds.size();j++) {
+    for(size_t i=0;i<_dsNames.size();i++) { 
+      if(vds[j]==_dsNames[i]) {idss.push_back(i); break;}
+    }
+  }
+
+  if(idss.size()==0) {
+    cout<<" Error, no ["<<dss<<"] datasets available for printing uncertainties "<<endl;
+    return out;
+  }
+  
+  vector<string> vveto=parse(vetos,":");
+
+  for(size_t idx=0;idx<idss.size();idx++) {
+    size_t ids=idss[idx];
+
+    for(_itC=_categories.begin();_itC!=_categories.end();++_itC) {
+
+      string cname=_itC->second.name;
+      if(cname.find(categ)==string::npos) continue;
+      for(size_t iv=0;iv<vveto.size();iv++) {
+	if(cname.find(vveto[iv])!=string::npos) continue;
+      }
+
+      _itEIMap=_effMap[ ids ][ _itC->second.id ].find(lvl);
+      if(_itEIMap==_effMap[ ids ][ _itC->second.id ].end()) continue;
+    
+      EffST eST=_itEIMap->second;
+      float central;
+    
+      float totUp=0,totDown=0;
+      map<string,float> rU, rD;
+    
+      //retrieve systematic uncertainties
+      getYieldSysts(eST, rU, rD, totUp, totDown, central);
+
+      float yup;
+      float ydown;
+      if(src=="total") {
+	yup=totUp;
+	ydown=totDown;
+      } else {
+	yup=rU[ src];
+	ydown=rD[ src];
+      }
+      float rup=yup*100/central;
+      float rdown=ydown*100/central;
+      float stat=sqrt(eST.sumw2)*100/central;
+
+      out[0].push_back( vector<float>({ stat, rup }) );
+      out[1].push_back( vector<float>({ stat, rdown }) );
+
+    }//categs
+  }//datasets
+
+  return out;
+}
 
 
 void 
@@ -937,6 +1018,16 @@ AnaUtils::printTables(const string& categ, bool latexOnly, bool header) {
           if(_itEIMap->second.sumw>0.000001 ) {
             cout<<_itEIMap->second.sumw;
             cout<<" $\\pm$ "<<sqrt(_itEIMap->second.sumw2);
+
+	    EffST eST=_itEIMap->second;
+	    float central;
+	    
+	    float totUp=0,totDown=0;
+	    map<string,float> rU, rD;
+	    //retrieve systematic uncertainties
+	    getYieldSysts(eST, rU, rD, totUp, totDown, central);
+	    
+	    cout<<" $^{+"<<totUp<<"}_{-"<<totDown<<"}$ ";
           }
           else
             cout<<" - "; 
@@ -987,8 +1078,24 @@ AnaUtils::printTables(const string& categ, bool latexOnly, bool header) {
             os <<fixed<<setprecision(2)<<_itEIMap->second.sumw;
             os2 <<fixed<<setprecision(2)<<sqrt(_itEIMap->second.sumw2);
         
-            string tmps=os.str()+" +- "+os2.str();
-            cout<<setw(20)<<tmps;
+	    EffST eST=_itEIMap->second;
+	    float central;
+	    
+	    float totUp=0,totDown=0;
+	    map<string,float> rU, rD;
+	    //retrieve systematic uncertainties
+	    getYieldSysts(eST, rU, rD, totUp, totDown, central);
+
+	    string tmps=os.str()+" +- "+os2.str();
+	    if(totUp>0.000001 || totDown>0.000001) {
+	      ostringstream osUp,osDo;
+	      osUp <<fixed<<setprecision(2)<<totUp;
+	      osDo <<fixed<<setprecision(2)<<totDown;
+	      
+	      tmps+=" + "+osUp.str()+" - "+osDo.str();
+	    }
+
+            cout<<setw(30)<<tmps;
           }
           else
             cout<<" - "; 
@@ -1653,3 +1760,30 @@ AnaUtils::cloneHObs(const hObs* o1) {
 
 //====================================================
 //====================================================
+
+//parsing
+vector<string>
+AnaUtils::parse(const string& str, const string& d) {
+
+  vector<string> parsed;
+  if(str.find(d)==string::npos) {
+    cout<<"--> "<<str<<endl;
+    parsed.push_back(str);
+    return parsed;
+  }
+
+  size_t pt=0;
+  while( pt != (size_t)-1 ) {
+
+    size_t pi=str.find(d,pt);
+    pt = str.find(d,pi+1);
+  
+    if( pt == (size_t)-1) {
+      parsed.push_back( str.substr(pi+1,str.size()-pi-1-2) );    
+    }
+    else {
+      parsed.push_back( str.substr(pi+1,str.size()-pi-1-2) );    
+    }
+  }
+  return parsed;
+} 

@@ -174,7 +174,7 @@ public:
   void setEffFromStat(int ids, const string& cName, int eCateg, float sw, float esw, int ngen);
   void setSystematics( int ids, const string& cName, int iCateg, const string& sName, bool up, bool down, float w);
   void getSystematics(const string& ds, const string& lvl, const string& categ="");
-  void getCategSystematics(const string& ds, const string& src, const string& lvl, const string& categ="", bool latex=false);
+  void getCategSystematics(const string& ds, const string& src, const string& lvl, const string& categ="", const string& vetos="", bool latex=false);
   void getYieldSysts(EffST eST, map<string,float>& rU, map<string,float>& rD,
 		       float& totUp, float& totDown, float& central);
   float getYield(int ids, const string& cName, int icat);
@@ -194,6 +194,10 @@ public:
   vector< pair<string, vector<vector<map<string,float> > > > > 
   retrieveNumbers(const string& categ, const string& cname, int mcat, const string& opt="");
   
+  vector<vector<vector<float> > > 
+  retrieveSystematicNumbers(const string& dss, const string& src, const string& lvl,
+			    const string& categ, const string& vetos);
+
   bool getDataCardLines(map<string,string>& lines, 
 			shapeM& shapes, 
 			vector<string> dsNames,
@@ -233,6 +237,8 @@ public:
   vector<string> getCategories();
   vector<string> getSelections(int ids, int icat);
   bool isUncCateg(int catId);
+
+  static vector<string> parse(const string& str, const string& d);
 
 private:
 
