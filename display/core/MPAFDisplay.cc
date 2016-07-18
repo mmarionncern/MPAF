@@ -82,14 +82,13 @@ MPAFDisplay::getDetailSystematics(string categ, string lvl) {
 }
 
 void
-MPAFDisplay::getCategSystematic(string src, string categ, string lvl, bool latex) {
+MPAFDisplay::getCategSystematic(string src, string categ, string lvl, string vetos, bool latex) {
  
   for(size_t id=0;id<_dsNames.size();id++) {
-    _au->getCategSystematics(_dsNames[id],src, lvl, categ, latex);
+    _au->getCategSystematics(_dsNames[id],src, lvl, categ, vetos, latex);
   }
 
 }
-
 
 void 
 MPAFDisplay::setNumbers() {
@@ -121,7 +120,7 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
   
   if(filename=="") return;
  
-  int tmpICat=icat;
+  //int tmpICat=icat;
 
   vector<std::pair<CatId, ValId> > catMap;
   string ndb = filename;
@@ -252,58 +251,6 @@ MPAFDisplay::readStatFile(string filename, int& icat) {
 
     //Now overwritte when needed and fill the internal DB
     int n=0;
-    //vector<std::pair<CatId, ValId> >::const_iterator it;
-    //vector<std::pair<CatId, ValId> >::const_iterator itEnd=catMap.end();
-    //for(it=catMap.begin();it!=itEnd;++it) {
-
-    //   n++;
-    //   dss=anConf.findDSS( catMap[ic].first.sname );
-    //   for(unsigned int i=0;i<dss.size();i++) {
-    // 	string cr=dss[i]->getSample(catMap[ic].first.sname)->getCR();
-
-    //   if(!it->first.useExt) continue;
-    //
-    //   CatId tmpId;
-    //   tmpId.categ = it->first.redCateg;
-    //   tmpId.cname = it->first.cname;
-    //   tmpId.sname = it->first.sname;
-    //   tmpId.useExt= false;
-    //   tmpId.redCateg = it->first.redCateg;
-    //   tmpId.ext = "";
-    //   tmpId.uncTag = it->first.uncTag;
-    //   tmpId.upVar = it->first.upVar;
-
-    //  
-    //   bool found=false;
-    //   for(size_t ii=0;ii<catMap.size();ii++) {
-    // 	if(catMap[ii].first.categ==tmpId.categ && 
-    // 	   catMap[ii].first.cname==tmpId.cname && 
-    // 	   catMap[ii].first.sname==tmpId.sname && 
-    // 	   catMap[ii].first.useExt==false && 
-    // 	   catMap[ii].first.redCateg==tmpId.redCateg && 
-    // 	   catMap[ii].first.ext=="" && 
-    // 	   catMap[ii].first.uncTag==tmpId.uncTag && 
-    // 	   catMap[ii].first.upVar==tmpId.upVar){
-    // 	  catMap[ii].second = it->second;
-    // 	  found=true;
-    // 	  break;
-    // 	}
-    //   }//end catMap
-    //
-    //   if(!found) {//category missing, need to add it
-    // 	std::pair<CatId, ValId> p(tmpId, it->second);
-    // 	//adding it at the end should work 
-    // 	catMap.push_back(p);
-    //   }
-    // }
-    
-    //   storeStatNums(dss[i], catMap[ic].second.yield, catMap[ic].second.eyield, 
-    // 		    catMap[ic].second.gen, icat,
-    // 		    catMap[ic].first.cname, catMap[ic].first.sname, catMap[ic].first.categ,
-    // 		    catMap[ic].first.uncTag, catMap[ic].first.upVar, catMap[ic].first.ext);
-      
-    // }
-
 
     //now filling
     n=0;
@@ -769,6 +716,18 @@ MPAFDisplay::drawDetailSyst(bool cumul) {
 }
 
 void
+MPAFDisplay::drawStatVsSystematic(const string& dss, const string& src, 
+				  const string& categ, const string& lvl,
+				  const string& vetos) {
+ 
+  vector<vector<vector<float> > > numbers =
+    _au->retrieveSystematicNumbers(dss,src, lvl, categ, vetos);
+  
+  dp.drawStatVsSystematics(numbers, src);
+}
+
+
+void
 MPAFDisplay::getIntegral(float x1, float x2, float y1, float y2) {
   dp.getIntegral(x1, x2, y1, y2);
 }
@@ -1079,9 +1038,10 @@ MPAFDisplay::makeMultiDataCard(string sigName, vector<string> categs,
     map<string,string> tmpLines;
    
     shapeM shapes;
-    bool isValidCard = _au->getDataCardLines(tmpLines, shapes, _dsNames, 
-					     sigName, categs[ic], cname, 0, _nuisPars, 
-					     _nuisParExt, _nuisParScheme,_nuisParVals);
+    //bool isValidCard =
+    _au->getDataCardLines(tmpLines, shapes, _dsNames, 
+			  sigName, categs[ic], cname, 0, _nuisPars, 
+			  _nuisParExt, _nuisParScheme,_nuisParVals);
 
     //if(ic==0) lines=tmpLines;
     for(map<string,string>::const_iterator it=tmpLines.begin();

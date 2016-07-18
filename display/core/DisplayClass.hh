@@ -238,6 +238,8 @@ public:
   void prepareStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, vector<string> dsnames, bool isMultiScheme);
   void drawStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, vector<string> dsnames, bool isMultiScheme);
   void drawDetailSystematics(bool cumul);
+  void drawStatVsSystematics(vector<vector<vector<float> > > numbers, string src);
+
 
   void addText(float x, float y, float s, string text);
   void addLine(float x1, float y1, float x2, float y2, int style, int col, int size);
