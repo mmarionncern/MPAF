@@ -1,0 +1,47 @@
+#!/bin/bash
+
+#determine the host
+host=`echo $HOSTNAME`
+
+if [ "${host:0:6}" == "t3ui02" ]; then
+
+#from PSI to CERN
+rsync --delete  -avzrtu --exclude-from 'scripts/syncExclude.txt' -e ssh /mnt/t3nfs01/data01/shome/mmarionn/analysis/MPAF/ lxplus.cern.ch:/afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/
+
+#from CERN to PSI
+rsync --delete  -avzrtu --exclude-from 'scripts/syncExclude.txt' -e ssh lxplus.cern.ch:/afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/ /mnt/t3nfs01/data01/shome/mmarionn/analysis/MPAF/
+
+
+#from PSI to local
+echo "No possibility to synchronize local MPAF version"
+
+elif [ "${host:0:6}" == "lxplus" ]; then
+
+#from CERN to PSI
+rsync --delete  -avzrtu --exclude-from 'scripts/syncExclude.txt' -e ssh /afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/ t3ui02.psi.ch:/mnt/t3nfs01/data01/shome/mmarionn/analysis/MPAF/
+#from PSI to CERN
+rsync --delete  -avzrtu --exclude-from 'scripts/syncExclude.txt' -e ssh t3ui02.psi.ch:/mnt/t3nfs01/data01/shome/mmarionn/analysis/MPAF/  /afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/
+
+#from PSI to local
+echo "No possibility to synchronize local MPAF version"
+
+
+elif [ "${host:0:8}" == "mmarionn" ]; then
+
+#from local to CERN
+rsync --delete  -avzrtu --exclude-from 'scripts/syncExclude.txt' -e ssh /home/mmarionn/Documents/CMS/MPAF/ lxplus.cern.ch:/afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/
+#from local to PSI
+rsync --delete  -avzrtu --exclude-from 'scripts/syncExclude.txt' -e ssh /home/mmarionn/Documents/CMS/MPAF/ t3ui02.psi.ch:/mnt/t3nfs01/data01/shome/mmarionn/analysis/MPAF/
+
+#from CERN to local
+rsync --delete  -avzrtu --exclude-from 'scripts/syncExclude.txt' -e ssh lxplus.cern.ch:/afs/cern.ch/user/m/mmarionn/workspace/private/MPAF/ /home/mmarionn/Documents/CMS/MPAF/
+#from PSI to local
+rsync --delete  -avzrtu --exclude-from 'scripts/syncExclude.txt' -e ssh t3ui02.psi.ch:/mnt/t3nfs01/data01/shome/mmarionn/analysis/MPAF/ /home/mmarionn/Documents/CMS/MPAF/
+
+
+
+
+else
+echo "Unregistered machine"
+
+fi
