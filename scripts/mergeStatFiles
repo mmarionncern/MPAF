@@ -1,0 +1,9 @@
+#!/bin/bash
+
+AN="$1"
+mainFileName="$2"
+regExp="$3"
+
+mainFile=${MPAF}/workdir/stats/${AN}/${mainFileName}
+
+python ${MPAF}/scripts/script_scan/step3/mergeBkgs.py ${mainFile} ${MPAF}/workdir/stats/${AN}/${regExp}

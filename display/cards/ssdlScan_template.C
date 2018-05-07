@@ -26,6 +26,12 @@ void ssdlScan_BENCH() {
 
   //via XSect
   map<string,float> KFactors;
+  KFactors[ "_standard_prompt_ttW" ] = 1.0213;
+  KFactors[ "_standard_prompt_ttZH" ] = 1.0213;
+  KFactors[ "_standard_prompt_WWss" ] = 1.0213;
+  KFactors[ "_standard_prompt_XG" ] = 1.0213;
+  KFactors[ "_standard_prompt_Rares" ] = 1.0213;
+  KFactors[ "T1ttttMASS-" ] = 1.0213;
   
 
   md.anConf.configureLumi( LumisXS, KFactors, lumi, useXS );
@@ -59,6 +65,8 @@ void ssdlScan_BENCH() {
   md.addNuisanceParameter("LepEffFS","T1ttttBENCH","shape","");
   md.addNuisanceParameter("ISR","T1ttttBENCH","shape","");
 
+  md.addNuisanceParameter("QCDScale","T1ttttBENCH","shape","");
+
   //vector<string> cats(
   string cats[66]={
     "HHSR1","HHSR2","HHSR3","HHSR4","HHSR5","HHSR6","HHSR7","HHSR8",
@@ -79,6 +87,8 @@ void ssdlScan_BENCH() {
   
 
   for(int isr=0;isr<66/*cats.size()*/;isr++) {
+    md.addNuisanceParameter("pdfS"+cats[isr],"T1ttttBENCH","shape","");
+
     md.addNuisanceParameter("flip"+cats[isr]+"stat","flip","shape","");
     md.addNuisanceParameter("fake"+cats[isr]+"stat","fake","shape","");
     for(size_t id=0;id<7/*dss.size()*/;id++) {
@@ -89,7 +99,8 @@ void ssdlScan_BENCH() {
   
   //Flat uncertanties =================================
   //lumi
-  md.addNuisanceParameter("lumi","ttW:ttHZ:WW:XG:rares:T1ttttBENCH","lnN","1.12:1.12:1.12:1.12:1.12:1.12:1.12");
+  md.addNuisanceParameter("lumi","ttW:ttHZ:WW:XG:rares:T1ttttBENCH","lnN","1.046:1.046:1.046:1.046:1.046:1.046:1.046");
+  //md.addNuisanceParameter("lumi","ttW:ttHZ:WW:XG:rares:T1ttttBENCH","lnN","1.12:1.12:1.12:1.12:1.12:1.12:1.12");
   //experimental uncertainties
   md.addNuisanceParameter("lEff","ttW:ttHZ:WW:XG:rares:T1ttttBENCH","lnN","1.04:1.04:1.04:1.04:1.04:1.04");
   md.addNuisanceParameter("tEff","ttW:ttHZ:WW:XG:rares:T1ttttBENCH","lnN","1.02:1.02:1.02:1.02:1.02:1.02");
@@ -210,9 +221,21 @@ void ssdlScan_BENCH() {
   //  int nCateg=66; //47
   //  vector<string> _categs(nCateg,"");
  
+  //qcd scale for signal
+  TFile* iQCDFile=new TFile("/shome/mmarionn/MPAF/workdir/QCDScales/scaleUncMASS-.root","read");
+  TH1F* hQCDUp=(TH1F*)iQCDFile->Get("MASS-ScaleUp");
+  TH1F* hQCDDown=(TH1F*)iQCDFile->Get("MASS-ScaleDown");
   
 
   for(size_t ic=0;ic<66/*categs.size()*/;ic++) {
+     for(int isr=0;isr<66/*cats.size()*/;isr++) {
+       if(categs[ic].substr(7, categs[ic].size()-7)==cats[isr])
+	 md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0.1, -0.1, categs[ic], "selected");
+       else
+	 md.addExternalSystUnc("T1ttttBENCH","pdfS"+cats[isr],0., 0., categs[ic], "selected");
+     }
+     md.addExternalSystUnc("T1ttttBENCH","QCDScale",hQCDUp->GetBinContent(ic+1), hQCDDown->GetBinContent(ic+1), categs[ic], "selected");
+
     //md.addExternalSystUnc("fake","frEwk",EWKFake[ic], -1*EWKFake[ic], categs[ic], "selected");
     md.addExternalSystUnc("ttW","ttWAcc",AccTTW[ic], -1*AccTTW[ic], categs[ic], "selected");
     md.addExternalSystUnc("ttHZ","ttHZAcc",AccTTHZ[ic], -1*AccTTHZ[ic], categs[ic], "selected");

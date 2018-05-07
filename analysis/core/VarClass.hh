@@ -135,7 +135,7 @@ private:
     //vector<float> vf(vals, vals + sizeof(vals) / sizeof(vals[0]));
     vector<float> vf;
     int sa=sizeof(vals)/sizeof(vals[0]);
-    for(size_t iv=0; iv<sa; ++iv) {
+    for(int iv=0; iv<sa; ++iv) {
       vf.push_back( (float)vals[iv] );
     }
 
@@ -278,6 +278,14 @@ private:
   };
 
 
+  template<typename T> inline void reinitArray(map<int, T*>& imap, int cat) {
+    typename map<int, T* >::const_iterator it;
+    for(it=imap.begin(); it!=imap.end(); it++) {
+      for(int ie=0;ie<_leafSizeI[it->first+cat];ie++) {
+	it->second[ie]=0;
+      }
+    }
+  }
 
 
   // Public Non-Template Methods
@@ -297,6 +305,7 @@ public:
   };
 	
   void registerVar(string name);
+  void registerVarPfx(string name, string prefix);
   void registerVar(string name, string type);
   bool isUsefulVar(string name);
 
@@ -313,14 +322,23 @@ public:
   // const vector<string>& getVS(string name);
 	
   // bool tryType(string name, string type);
-  // string getType(string name);
+  string getType(const string& name);
 	
   unsigned int getSize(string name);
-	
+
+  //reinitalization of arrays (avoid weird stuff?)
+  vector<int> getIds(const string& name);
+  
   void buildTree(TTree* tree, bool bypass);
   void buildFriendTree(TTree* tree, bool bypass);
   void registerBranch(TTree* tree, string name, string type, EDataType t, int len);
-	
+
+  //clonage functions
+  void* getBranchAddress(const string& name);
+  string getEncodedFormat(const string& name);
+  void cloneBranch(TTree* skT, const string& name);
+  void reinitArrays();
+  
   //systematic ucnertainty propagation     ============
   void applySystVar(string name, int dir, string mvar, float mag, string type);
   void applySystVar(string name, int dir, string mvar, 
@@ -339,6 +357,24 @@ public:
   SystUtils* _su;
   //===================================================
 
+  // void
+  // printVarNames() {
+  //   for(int i=0;i< _varnames.size();i++)
+  //     std::cout<<_varNames[i]<<std::endl;
+  // }
+  void
+  printUsedVarNames() {
+    for(map<string,bool>::const_iterator it=_usedVars.begin();
+	it!=_usedVars.end();it++)
+      std::cout<<it->first<<std::endl;
+  }
+
+  //   void
+  // printAllVarNames() {
+  //   for(map<string,bool>::const_iterator it=_usedVars.begin();
+  // 	it!=_usedVars.end();it++)
+  //     std::cout<<it->first<<std::endl;
+  // }
 
   // Private Non-Template Methods
 
@@ -350,10 +386,13 @@ private:
   void initIds();
 
   void setIds(string name, int cont, int type, int& id, TTree* tree);
+ 
 
   double findSVal(int tType, int key);
   double findVVal(int tType, int key, int idx);
   double findAVal(int tType, int key, int idx);
+
+  unsigned int findASize(int tType, int key);
 
   vector<float> getUnivF(int id);
 
@@ -366,12 +405,6 @@ private:
   // Public Members
 
 public: 
-
-
-
-  // Private Members
-
-private:
 
   enum {
     kNoneType=0,
@@ -396,6 +429,11 @@ private:
    };
   //static string objectType[VarClass::kNTypes];
 
+  // Private Members
+
+private:
+
+
   //event number
   int _ie;
   map<int,TBranch*> _branches;
@@ -411,7 +449,10 @@ private:
 
   map<string, int> varTypes;
   map<string, int>::const_iterator itVt;
-	
+
+  map<string,int> _leafSize;
+  map<int,int> _leafSizeI;
+  
   //All variables
   mapVI varmVI;
   mapVUI varmVUI;
@@ -467,8 +508,10 @@ private:
   itMapTB itTB;
 	
   //list of variables
+  map<string,bool> _usedVars;
   vector<string> _varnames;
-  std::map<string, std::pair<string,int> > _varTypes;
+  map<string, std::pair<string,int> > _varTypes;
+  map<pair<string,string>,string> _prefix;
 
 private:
   
@@ -496,6 +539,8 @@ private:
 
   bool _nextEvent;
 	
+  std::set<std::string> _regTwice;
+
 };
 
 #endif

@@ -12,6 +12,8 @@ PKGNAME := MPAFTools
 
 ### global options
 
+HOST=$(shell hostname)
+
 # Architecture
 ARCH         := $(shell root-config --arch)
 
@@ -37,7 +39,11 @@ __dummy := $(shell mkdir -p $(OBJDIR) $(DEPDIR) $(BINDIR) $(SOLIBDIR))
 CXX        := g++
 LD         := g++
 OUTPUTOPT  := -o
-OPTFLAGS   := -g -O2 -Wall -fPIC -Wno-deprecated
+ifeq ($(HOST),t3ui02)
+OPTFLAGS   := -g -O2 -Wall -fPIC -Wno-deprecated -std=c++11 -include sstream
+else
+OPTFLAGS   := -g -O2 -Wall -fPIC -Wno-deprecated -std=c++11 -include sstream
+endif
 CXXFLAGS   := $(OPTFLAGS)
 LDFLAGS    := -shared
 LIBS       :=
@@ -77,15 +83,26 @@ CXXFLAGS   += -I. -I.. $(patsubst %, -I%, $(MODULES))
 ### External libraries
 # ROOT
 ROOTCFLAGS := $(shell root-config --cflags)
-ROOTGLIBS  := $(shell root-config --glibs) -lMinuit -lMinuit2 -lHtml -lEG -lThread -lRooFit -lRooFitCore -lFoam
+ROOTGLIBS  := $(shell root-config --glibs) -lMinuit -lMinuit2 -lHtml -lEG -lThread -lRooFit -lRooFitCore -lFoam -lHistPainter
+ifeq ($(HOST),t3ui02)
+BOOSTFLAGS  :=  -I/mnt/t3nfs01/data01/shome/mmarionn/boost/boost_1_61_0
+else
+#ROOTGLIBS  := $(shell root-config --glibs) -lMinuit -lMinuit2 -lHtml -lEG -lThread -lRooFit -lRooFitCore -lFoam -lHistPainter
+ifeq ($(HOST),mmarionn-eth-laptop)
+BOOSTFLAGS  :=
+else
+BOOSTFLAGS  := -I/afs/cern.ch/user/m/mmarionn/workspace/private/boost/boost_1_61_0
+endif
+endif
 
 # add possible new dependencies
 # -lMinuit2
 
 ROOTCINT   := rootcint
+CXXFLAGS   += $(BOOSTFLAGS)
 CXXFLAGS   += $(ROOTCFLAGS)
-LIBS       += $(ROOTGLIBS) 
-
+LIBS       += $(ROOTGLIBS)
+LIBS	   += $(BOOSTLIBS)
 # libxml2
 #CXXFLAGS   += $(shell xml2-config --cflags)
 #LIBS       += $(shell xml2-config --libs)

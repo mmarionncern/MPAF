@@ -37,12 +37,13 @@
 #include "analysis/core/VarClass.hh"
 #include "analysis/utils/CustomTypes.cc"
 #include "analysis/utils/Debug.cc"
+#include "analysis/utils/JSONUtils.hh"
 #include "analysis/utils/KineUtils.hh"
 #include "analysis/utils/Parser.hh"
-#include "analysis/utils/Tools.hh"
+#include "analysis/utils/SystemUtils.hh"
 #include "analysis/utils/Verbose.hh"
 #include "analysis/utils/mt2_bisect.h"
-
+#include "analysis/utils/Tools.hh"
 
 #include "analysis/tools/Candidate.hh"
 #include "analysis/tools/CandFwd.hh"
@@ -66,13 +67,19 @@ public:
   MPAF(string cfg);
   virtual ~MPAF();
 
+  void configure(std::string);
+  
   void analyze();
+
+  void setNMax(unsigned long int nMax);
+  void setNSkip(unsigned long int nSkip);
+  void setDS(string dsName);
 
   // Protected Non-Template Methods
 
 protected:
 
-  void startExecution(std::string);
+ 
   
   // varclass functions
   void fill(string var, float valx, float weight = 1.);
@@ -122,11 +129,32 @@ protected:
   
   //skimming functions
   virtual void modifySkimming()=0;
-  template < typename T > void addSkimBranch(string name,T* val) {
-    _skimTree->Branch( name.c_str(), val );
+  template < typename T > void addSkimBranch(string name,T* val, string ext="") {
+    if(ext=="")
+      _skimTree->Branch( name.c_str(), val );
+    else
+      _skimTree->Branch( name.c_str(), val, ext.c_str() );
   };
   void fillSkimTree() { if(_skim) _skimTree->Fill();};
+  void unSafeFillSkimTree() { _skimTree->Fill();};
 
+  void removeSkimBranch(const string& name) {
+    if(_skimTree->GetBranch(name.c_str() ) )
+      _skimTree->SetBranchStatus( name.c_str() , 0);
+  }
+
+  void keepSkimBranch(const string& name) {
+    if(_skimTree->GetBranch(name.c_str() ) )
+      _skimTree->SetBranchStatus( name.c_str() , 1);
+  }
+
+  void cloneSkimBranch(const string& name) {
+    _vc->cloneBranch(_skimTree, name);
+  }
+  
+  //special skimming functions
+  void protInitSkimming() {initSkimming();};
+  
   //datasets
   const Dataset* getCurrentDS() const {return _datasets[_inds];};
 
@@ -143,6 +171,12 @@ protected:
   string getUncName() { return _unc;};
   int getUncDir() { return _uDir;};
 
+  //verbose functions
+  void print(const string& message, int verbose=1);
+
+
+
+  
   // Private Non-Template Methods
 	
 private:
@@ -156,16 +190,14 @@ private:
   void finalizeSkimming();
 
   void internalWriteOutput();
+  void writeSummary();
+
+  void linking(Dataset* ds, const vector<string>& links, const string& dirName);
 
   void addWorkflowHistos();
 
- 
-
+  
   void applySystVar(SystST s);
-  //MM fixme
-  // float applySystDBVar(SystST s, string db, float v1, float v2, float v3, float v4,
-  // 		       float v5,float v6,float v7,float v8,float v9, float v10);
-
 
   // Protected Members
 
@@ -178,42 +210,46 @@ protected:
   HistoManager* _hm;
   AnaUtils* _au;
 
+  bool _skim;
+
   MIPar _inputVars;
 
-  size_t _ie;
+  unsigned long int _ie;
+  unsigned long int _maxEvts;
   std::string _sampleName;
   float _weight;
 
   std::string _cfgName;
-
+ 
+  // CH: FakeRatio and FRinSitu need dataset access for reweighting...
   unsigned int _numDS;
-  
+  std::vector <Dataset*> _datasets;
 
+  //bof bof...
+  unsigned long int _nSkip;
+  
   // Private Members
  
 private:
-   
-  int _inds;
 
-  vector<unsigned int> _nEvtsDs;
-  vector<unsigned int> _nEvts; 
-  unsigned int _nEvtMax; 
-  unsigned int _nSkip; 
+  vector<unsigned long int> _nEvtsDs;
+  vector<unsigned long int> _nEvts; 
+  unsigned long int _nEvtMax; 
   bool _summary;
+  string _byPassDsName;
+
+  int _inds;
 
   std::map<std::string, std::string> _sampleOption;
   
   //skimming variables
   TFile* _oFile;
-  TTree* _skimTree;
+
   TH1I* _hnSkim;
   TH1D* _hnwSkim;
-
-
-  bool _skim;
+  TTree* _skimTree;
   bool _fullSkim;
-
-  std::vector <Dataset*> _datasets;
+  bool _friendSkim;
 
   // Configuration File Variables
   std::string _inputPath;
@@ -237,6 +273,17 @@ private:
   vector<int> _uncDirs;
   map<string, bool> _uType;
   
+  bool _systVarOnly;
+  string _systSource;
+  int _systDir;
+
+  string _postfix;
+
+  int _verb;
+  
+  bool _corruptedSample;
+  vector<pair<int,int> > _corrSample;
+
 };
 
 

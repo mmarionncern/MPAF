@@ -4,7 +4,7 @@
 
 UncertaintyTest::UncertaintyTest(std::string cfg){
   
-  startExecution(cfg);
+  //startExecution(cfg);
   initialize();
 
 }

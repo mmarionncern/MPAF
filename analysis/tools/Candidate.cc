@@ -15,12 +15,11 @@ size_t Candidate::_curUid=0;
 map<size_t,const Candidate*> Candidate::_baseCand;
 
 void
-Candidate::reset()
-{
- 
+Candidate::reset() {
+  //_uid=0;
   _curUid=0;
-  for(map<size_t,const Candidate*>::iterator it=_baseCand.begin();
-      it!=_baseCand.end(); ++it) {
+  for(map<size_t,const Candidate*>::const_iterator it=_baseCand.begin();
+      it!=_baseCand.end(); it++) {
     delete it->second;
   }
   _baseCand.clear();
@@ -118,19 +117,26 @@ Candidate::Candidate( Vertex* vtx )
 Candidate::Candidate( const CandList& listOfDau )
 {
 
-  init();
-  _uid--;
-  _curUid--;
+  //init();
+  //cout<<" 3-->> "<<_uid<<"  "<<_curUid<<"   "<<listOfDau.size()<<endl;
+  // _uid--;
+  // _curUid--;
+  //cout<<" 3.1-->> "<<_uid<<"  "<<_curUid<<"   "<<listOfDau.size()<<endl;
   for( size_t idau=0; idau<listOfDau.size(); idau++ )
     {
-      const Candidate* dau = listOfDau[idau];
+      //cout<<idau<<" ---->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
+      Candidate* dau = listOfDau[idau];
+      //cout<<idau<<" ---->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
       if( dau->isTransverse() ) _type = kTransverse;
-      addDaughter( dau->clone() );
+      //cout<<idau<<" ---->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
+      addDaughter( dau ); //->clone()
+      //cout<<idau<<" ---->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
     }
-
-  _uid+=listOfDau.size()+1;
-  _curUid+=1;
-
+  //  cout<<" 2.0-->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
+  //_uid+=listOfDau.size()+1;//+1;
+  //_curUid+=1; //MM
+  //cout<<" 2-->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
+  init();
   TVector2 p2_(0,0);
   float pz_(0);
   float E_(0);
@@ -173,7 +179,7 @@ Candidate::Candidate( const CandList& listOfDau )
   if( m2_<0 ) m2_=0;
   _m = sqrt(m2_);
   if( sameVtx ) setVertex( vtx_ );
-
+  //cout<<" 1-->> "<<_uid<<"  "<<"  "<<_curUid<<"  "<<_baseCand.count(_uid)<<endl;
   lock();
 }
 
@@ -200,7 +206,7 @@ Candidate::Candidate( const Candidate& o )
 
   for( size_t idau=0; idau<o.nDaughters(); idau++ )
     {
-      addDaughter( o.daughter(idau)->clone() );
+      addDaughter( o.daughter(idau)->clone() ); //->clone()
     } 
   
 }
@@ -217,6 +223,7 @@ Candidate::create( const TVector3& mom,
 		   float charge,
 		   float mass,  
 		   Vertex* vtx ) { 
+  //Candidate* c=new Candidate( mom, charge, mass, vtx );
   return new Candidate( mom, charge, mass, vtx ); 
 } 
 
@@ -226,7 +233,6 @@ Candidate::create( float pt, float eta, float phi,
 		   float charge,
 		   float mass,  
 		   Vertex* vtx ) { 
-
   return new Candidate( pt, eta, phi, pdgId, charge, mass, vtx ); 
 } 
 
@@ -383,6 +389,7 @@ Candidate::init()
   _name = "";
   _status = kUnlocked;
   _uid  = ++_curUid;
+  //_uid  = ++_uid;
   _type = kFull;
   _q    = 0.;
   _m    = 0.;
@@ -666,7 +673,7 @@ Candidate::daughter( size_t idau ) const
 }
 
 Candidate* 
-Candidate::daughter( size_t idau )
+Candidate::daughterNC( size_t idau )
 {
   assert( idau<nDaughters() );
   return _daughter[idau];
@@ -684,10 +691,14 @@ Candidate::setMother( Candidate* mo )
 void 
 Candidate::addDaughter( Candidate* dau )
 {
-  //  assert( !isLocked() );  
+  //  assert( !isLocked() );
+  //cout<<" ||---->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
   assert( dau!=0 );
+  //cout<<" ||---->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
   _daughter.push_back( dau );
+  //cout<<" ||---->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
   dau->setMother(this);
+  //cout<<" ||---->> "<<_uid<<"  "<<_curUid<<" "<<_baseCand.count(_uid)<<endl;
 }
 
 void

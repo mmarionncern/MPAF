@@ -43,7 +43,7 @@ private:
 private: 
 
   //counter categories, 0 is ALWAYS global (even if not specified later
-  enum {kGlobal=0, kElSel};
+  enum {kGlobal=0, kElSel,kHLTD,kHLTS};
  
 
   CandList _leptons;

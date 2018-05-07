@@ -6,16 +6,21 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
+#include "TError.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "TTree.h"
 #include "TChain.h"
 #include "TObject.h"
 #include "TKey.h"
+#include "TSystem.h"
 
 #include "tools/src/Sample.hh"
 #include "tools/src/Format.cc"
+#include "tools/src/HistoUtils.hh"
 
 class Dataset {
 
@@ -28,7 +33,9 @@ private:
   vector<pair<int,int> > _events;
   std::vector<float> _weights;
   std::vector<int> _nprocs;
-	
+  std::map<int, std::vector<unsigned int> > _links;
+  vector<string> _treelinks;
+
   int _color;
 	
   //for tChain part
@@ -41,12 +48,15 @@ private:
   bool _isGhost;
 	
   int _dsContentType;
-  std::vector<std::string> _friends;
+  std::vector<std::vector<std::string> > _friends;
 
   std::vector<string> _usefulVars;
 
-  // std::map<std::string, std::string> _crSamples;
-  // std::map<std::string, bool> _isNormSamples;
+  bool _isDataDriven;
+  bool _isPoissonPseudo;
+
+  int _totNProcEvents;
+  float _totSumProxWgts;
 
 public:
 
@@ -68,70 +78,75 @@ public:
   void setName(std::string name){ _name=name;};
   void setColor(int ncol){ _color=ncol;};
 	
-  void addSample(SampleId sId, std::string path, std::string dir, 
-		 std::string objName, std::string hname, std::string hwgtname, float xSect,
-		 float kFact, float lumi, float eqLumi, bool loadH=true);
+  void addSample(SampleId sId, std::string path, std::string dir, std::string objName,
+		 std::string hname, std::string hwgtname, float xSect,
+		 float kFact, float lumi, float eqLumi, int link=-1, bool loadH=true,
+		 bool isPoissonPseudo=false);
 
-  void addFriend(std::string friendname);
+  void addFriend(std::vector<std::string> friendT);
 
   void setUsefulVars(std::vector<std::string> vars);
 
   //access functions 
   std::string getName() const { return _name;};
-  int getColor(){ return _color;};
+  int getColor() const { return _color;};
 	
-  bool isDataset(std::string name){return _name==name;};
+  bool isDataset(std::string name) const {return _name==name;};
   bool isPPcolDataset() const { return _isData;};
 
   int hasSample(string sname) const;
 	
-  bool isTreeType() { return _dsContentType==kTree;};
-  bool isHistoType() { return _dsContentType==kHisto;};
-	
-  //bool isDataDriven(){return _isDataDriven;};
-  bool isFromCS(){return _isFromCS!=0;};
-  int csCode(){return _isFromCS;};
-	
-  bool isGhost(){return _isGhost;};
+  bool isTreeType() const { return _dsContentType==kTree;};
+  bool isHistoType() const { return _dsContentType==kHisto;};
 
-  // std::string crSample(std::string sname){return _crSamples[sname];};
-  // bool isNormSample(std:: string sname) {return _isNormSamples[sname];};
-
-  //std::string findProcess(int event);
+  bool isPoissonPseudo() const {return _isPoissonPseudo;};
+  bool isDataDriven() const {return _isDataDriven;};
+  bool isFromCS() const {return _isFromCS!=0;};
+  int csCode() const {return _isFromCS;};
 	
-  //float findWeight(int event);
+  bool isGhost() const {return _isGhost;};
 	
   float getWeight(int is) const {return _samples[is].getLumW(); };
   float getWeight(string sname) const;
 	
-  TTree* getTree() {return _chain;};
-  int getNEvents() { return _chain->GetEntries(); };
+  TTree* getTree() const {return _chain;};
+  unsigned long int getNEvents() const { return _chain->GetEntries(); };
 	
-  int getNProcEvents(/*int evt*/) const;
-  double getSumProcWgts(/*int evt*/) const;
-	
-  //void setNMax(size_t nmax);
-	
-  std::vector<std::string> getSamples();
+  void addLink(string linkname);
+  int getTotNProcEvents() const;
+  float getTotSumProcWgts() const;
+  void setTotNProcEvents(string path, string dir, string subdir, string hwgtname);
+  void setTotSumProcWgts(string path, string dir, string subdir, string hgwtname);
+  int getNProcEvents() const {return _samples[0].getNProcEvts();};
+  float getSumProcWgts() const {return _samples[0].getSumProcWgts();};
+
+  std::vector<std::string> getSampleNames();
+  std::vector<const Sample*> getSamples() const;
   std::vector<std::string> getObservables();
   TH1* getHisto( std::string varName, std::string sName);
-
 
   const Sample* getSample(string sname) const;
   
 
 private:
 
-  void loadTree(std::string path, std::string dir, std::string sname, std::string objName);
-  void loadHistos(std::string path, std::string dir, std::string sname, std::string hname, std::string optCat);
+  void loadTree(std::string path, std::string dir, string subdir, std::string sname, std::string objName);
+  void loadHistos(std::string path, std::string dir, string subdir, std::string sname, std::string hname, std::string optCat);
 
-  // float computeWeight(float nEvts, float xSect, float kFact,
-  // 		      float lumi, float& eqLumi);
-  
-  int getNProcEvents(string path, string dir, string sname, string hname);
-  double getSumProcWgts(string path, string dir, string sname, string hwgtname);
-  
+  int getNProcEvents(string path, string dir, string subdir, string sname, string hname);
+  double getSumProcWgts(string path, string dir, string subdir, string sname, string hwgtname);
 
+  float getLinkedSumNProc(int link);
+  float getLinkedSumWeightProc(int link);
+
+  string getURL(const string& urlFile);
+
+  public:
+  static string goodPath(string path);
+  static string goodAbsFilePath(string path, string dir, string fileName, string subdir = "data");
+  static string goodURLFilePath(string path, string dir, string fileName, string subdir = "data");
+  string goodFilePath(const string& path, const string& dir, const string& fileName, const string& subdir = "data");
+  
   ClassDef(Dataset,0)
   
 };

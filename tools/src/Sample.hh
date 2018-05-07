@@ -30,6 +30,8 @@ private:
 
   SampleId _sId;
 
+  bool _linking;
+
 public:
 
   Sample();
@@ -64,9 +66,13 @@ public:
   string getCR() const {return _sId.cr;};
   bool isDD() const {return _sId.dd;};
 
-private:
+  bool isData() const {return _sId.isData;};
+
+  void linking() {_linking=true;};
 
   void computeWeight();
+
+private:
 
   ClassDef(Sample,0)  
 };

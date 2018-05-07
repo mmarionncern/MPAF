@@ -13,6 +13,8 @@ _c(0),_leg(0),_empty(0),_hMC(0),_hData(0),_gData(0)
   TH1::SetDefaultSumw2(true);
   TH1::AddDirectory(kFALSE);
 
+  _curCanvas="main";
+
   _rmLabel=false;
 
   _lockData=false;
@@ -34,7 +36,7 @@ _c(0),_leg(0),_empty(0),_hMC(0),_hData(0),_gData(0)
   _dOnly=true;
 
   _cumulative=false;
-
+  _pseudoData=false;
   _fitStr="";
   _fitNorm = new Renorm();
 
@@ -104,13 +106,15 @@ DisplayClass::reset() {
   _hCoords.clear();
 
   _uncDet =false;
-  
+
   _is1D=true;
   _is2D=false;
   _isProf=false;
 
   _xmin = _xCoordSave[0];
   _xmax = _xCoordSave[1];
+  _modXmax=-10000;
+  _modXmin=-10000;
   _gBin =  _binningSave;
 
   _cNames.clear();
@@ -168,7 +172,7 @@ DisplayClass::softReset() {
 
 void
 DisplayClass::refreshHistos() {
- 
+  
   for(size_t ii=0;ii<_hClones.size();ii++)
     delete _hClones[ii];
   _hClones.clear();
@@ -185,7 +189,7 @@ DisplayClass::refreshHistos() {
   for(size_t ii=0;ii<_mcUncert.size();ii++)
     delete _mcUncert[ii];
   _mcUncert.clear();
-
+  
   delete _leg;
   _leg=NULL;
 
@@ -199,6 +203,7 @@ DisplayClass::refreshHistos() {
   _gData=NULL;
   _hCoords.clear();
   _mcSystComputed=false;
+  
 }
 
 void
@@ -259,7 +264,7 @@ DisplayClass::loadAutoBinning(string filename) {
       vals[2] = xmax;
       
       _autoBins[ var ] = vals;
-	_autoVars.push_back(var);
+      _autoVars.push_back(var);
     }
   } 
   else {
@@ -307,15 +312,16 @@ DisplayClass::preparePads() {
   //Double_t d_ = 35*m; //30
   Double_t d_ = e_; //30
   Double_t h_ = 375*m; //400
-  Double_t w_ = 375*m; //350
+  Double_t w_ = 375*m*(_largePad?2:1); //350
   Double_t ww_ = g_ + w_ + e_ ;
   Double_t W_ = g_ + n_*w_ + (n_-1)*(g_-e_) + n_*d_;
   Double_t H_ = t_ + h_ + b_ ;
   
   _wpad = ww_;
   _hpad = H_;
-
+ 
   _c=new TCanvas("variables","variables",100,100,W_,H_);
+  
   Double_t xlow_= 0;
   Double_t ylow_=0.;
   Double_t xup_=0;
@@ -348,6 +354,8 @@ DisplayClass::preparePads() {
 
   pad_.push_back(padhigh_);
 
+  _curCanvas="main";
+
   return pad_;
 }
 
@@ -369,7 +377,7 @@ DisplayClass::preparePadsWithRatio() {
   Double_t g_ = 87*m; //87
   Double_t d_ = 30*m; //30
   Double_t h_ = 350*m; //400
-  Double_t w_ = 350*m; //350
+  Double_t w_ = 350*m*(_largePad?2:1); //350
   Double_t hl_ = 70*m;
   
   Double_t ww_ = g_ + w_ + e_ ;
@@ -443,6 +451,8 @@ DisplayClass::preparePadsWithRatio() {
   pad_.push_back(padhigh_);
   pad_.push_back(padlow_);
   
+  _curCanvas="main";
+
   return pad_;
 }
 
@@ -487,7 +497,8 @@ DisplayClass::preparePadsForSystDetail() {
   _padright->SetFrameFillStyle(0);
   _padright->SetFrameLineWidth(_wline);
   _padright->SetFrameBorderMode(0);
-  
+
+  _curCanvas="syst";
 }
 
 
@@ -495,7 +506,7 @@ DisplayClass::preparePadsForSystDetail() {
 
 void 
 DisplayClass::plotDistributions(vector<const hObs*> theObs) {
-
+  
   //first clean objects
   for(size_t ix=0;ix<_pads.size();ix++)
     for(size_t iy=0;iy<_pads[ix].size();iy++) {
@@ -503,7 +514,7 @@ DisplayClass::plotDistributions(vector<const hObs*> theObs) {
     }
   
   _pads.clear();
-
+  
   delete _leg;
   delete _c;
   //====================================
@@ -511,7 +522,7 @@ DisplayClass::plotDistributions(vector<const hObs*> theObs) {
   
   //====================================
   
-  if( _normOpts.find("norm")!=_normOpts.end() ||
+  if( /*_normOpts.find("norm")!=_normOpts.end() ||*/
       theObs[0]->htype.find("2D")!=(size_t)-1 ) {
     _showRatio=false;
     //_addSyst=false;
@@ -521,21 +532,20 @@ DisplayClass::plotDistributions(vector<const hObs*> theObs) {
 
   if(!_showRatio) _pads = preparePads();
   else _pads = preparePadsWithRatio();
- 
+  
   _c->Draw();
-
+ 
   for(int io=(int)_nvars-1;io>=0;io--) {
-    
+  
     if(io!=0) _rmLabel=false;
     refreshHistos();
 
     //prepare the histograms
     prepareHistograms(theObs[io]);
-
     plotDistribution( theObs[io]->htype, theObs[io]->type, io );
 
   }
-   
+  
   _c->Update();
 
 }
@@ -549,27 +559,29 @@ DisplayClass::plotDistribution(const string& htype, const string& type,
   _c->cd();
   _pads[0][iobs]->Draw();
   _pads[0][iobs]->cd();
-
+  
   _csystM = _systMUnc[iobs];
   
   //draw the histograms
   drawDistribution();
-
+  
   _pads[0][iobs]->RedrawAxis();
 
-  if(_logYScale)
-    _pads[0][iobs]->SetLogy(1);
+  if(_logYScale) {
+    if(htype.find("1D")!=string::npos) _pads[0][iobs]->SetLogy(1);
+    else _pads[0][iobs]->SetLogz(1);
+  }
   if(_showGrid) {
     _pads[0][iobs]->SetGridx(1);
     _pads[0][iobs]->SetGridy(1);
   }
-
+  
   _pads[0][iobs]->Update();
 
   //Lumi and legend
- 
+  
   cmsPrel();
- 
+  
   _pads[0][iobs]->Update();
  
   if(htype.find("1D")!=(size_t)-1) { //fixme -> legend adjustment not supported for 2D plots
@@ -581,7 +593,7 @@ DisplayClass::plotDistribution(const string& htype, const string& type,
   }
 
   _pads[0][iobs]->Update();
-
+  
   if(!_showRatio || 
      htype.find("1D")==(size_t)-1 ||
      type=="u" || !_hMC ) return;
@@ -589,12 +601,12 @@ DisplayClass::plotDistribution(const string& htype, const string& type,
   _c->cd();
   _pads[1][iobs]->Draw();
   _pads[1][iobs]->cd();
-
+  
   drawDataMCRatio();
 
   _pads[1][iobs]->RedrawAxis();
   _pads[1][iobs]->Update();
-
+  _pseudoData=false;
 }  
 
 
@@ -656,19 +668,22 @@ DisplayClass::drawDistribution() {
   //Drawing now.... (+legend) ============================
   if(_is1D)
     _empty->DrawCopy();
-   
+
   //signals
   vector<size_t> sigs;
   string opt;
   if(_is1D) opt="same hist";
-  if(_is2D) opt="same box";//box
+  if(_is2D) {
+    opt="same box";//box
+    if((_nhmc==1 && _mcOnly) || _dOnly) opt="colz1";
+  }
   if(_isProf) opt="same";
   if( !(_isProf && _is1D) ) {
     
     bool f=true;
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
-      cout<<nh<<endl;
+      
       if( !_sSignal && nh.find("sig")!=(size_t)-1) 
         sigs.push_back(i);
       else {
@@ -681,7 +696,7 @@ DisplayClass::drawDistribution() {
 	    //fixme, this should not be needed....
 	    _hClones[i]->GetXaxis()->SetRangeUser( _xmin, _xmax );
 	    _hClones[i]->GetYaxis()->SetRangeUser( _ymin, _ymax );
-	    _hClones[i]->DrawCopy( "box" ); //"box"
+	    _hClones[i]->DrawCopy( opt.c_str() ); //"box"
 	    f=false;
 	  }
 	  else {
@@ -693,14 +708,12 @@ DisplayClass::drawDistribution() {
   }
   
   // systematic uncertainties now ============
-  cout<<" systematics? "<<_addSyst<<endl;
   if(_addSyst && !_is2D && _hMC) {
     if(_comSyst) {
       computeSystematics(_isProf,true);
     }
     
     if(_addSyst) {
-      cout<<" ========== adding systematic uncertainties =================== "<<endl;
       TGraphAsymmErrors* mcUnc = (TGraphAsymmErrors*) _mcUncert.back()->Clone();
       
       mcUnc->SetMarkerSize(0); 
@@ -708,12 +721,12 @@ DisplayClass::drawDistribution() {
       mcUnc->SetMarkerColor(1);
       mcUnc->SetFillStyle(3001);
       mcUnc->SetFillColor(kGray+1);
-
+      
       TGraphAsymmErrors* tmpUnc=(TGraphAsymmErrors*)mcUnc->Clone();
       tmpUnc->SetName("uncertainties");
       tmpUnc->SetTitle("uncertainties");
       tmpUnc->Draw("p E2");
-     
+      
     }
 
   }
@@ -725,27 +738,30 @@ DisplayClass::drawDistribution() {
       _hMC->DrawCopy( opt.c_str() );
   }
   else if(_is1D && _isProf) {
-    if(!_mcOnly) {
+    if(!_mcOnly && _hData!=NULL) {
       _hData->SetMarkerStyle(20);
-      _hData->Draw( opt.c_str() );
+      _hData->Draw( "psame" );//opt.c_str()
     }
     if(_hMC!=0 && _normOpts.find("norm")==_normOpts.end()) {
       _hMC->SetMarkerStyle(24);
-      _hMC->DrawCopy( opt.c_str() );
+      _hMC->SetLineColor(kRed+1);
+      _hMC->SetMarkerColor(kRed+1);
+      _hMC->DrawCopy("same");  //opt.c_str()
     }
   }
-  else if(_is2D && !_mcOnly)
+  else if(_is2D && !_mcOnly) {
+    cout<<" ===>>> "<<_hData->Integral()<<"  "<<opt<<endl;
     _hData->DrawCopy( opt.c_str() );
+  }
   // ===========================================
   
-
- 
   //and finally signals if some exists ===========
-  for(size_t is=0;is<sigs.size();is++)
-    _hClones[ sigs[is] ]->DrawCopy( opt.c_str() );
-
+  for(size_t is=0;is<sigs.size();is++){
+    if(is%2!=0){_hClones[ sigs[is] ]->SetLineStyle(2);}
+    //_hClones[ sigs[is] ]->DrawCopy( opt.c_str() );
+    _hClones[ sigs[is] ]->DrawCopy( "same points" );
+  }
   //===============================================
-
   //Information printing
   // if(!_is2D) {
   //   if(!_mcOnly && !_dOnly && _normOpts.find("norm")==_normOpts.end()) {
@@ -762,11 +778,120 @@ DisplayClass::drawDistribution() {
   //     }
   //   }
   // }
-  printInteg(0,1000000,0,1000000);
+  printInteg(-1000000,1000000,-1000000,1000000);
 
 }
 
+void
+DisplayClass::computeSingleSyst(vector<float>& systU, vector<float>& systD, 
+				int ib, systM systs, 
+				systM systsUp, systM systsDo,
+				vector<pair<string,vector<string> > > systsSrc,
+				bool isDif, bool cumul) {
 
+  map<string,float> intSystsUp;
+  map<string,float> intSystsDo;
+
+  intSystsUp["uncertainties"]=0;
+  intSystsDo["uncertainties"]=0;
+
+   //first, mcStatSyst
+  TH1* tmp=(TH1*)_hMC->Clone();
+  tmp->Reset("ICEM");
+  float eyMC=0;
+  float eyDD=0;
+  float y=0;
+  for(size_t ids=0;ids<_nhmc;ids++) {
+    TH1* htmp=(TH1*) _hClonesNoStack[ids]->Clone();
+    
+    if(((string)htmp->GetName()).find("sig")!=(size_t)-1
+       && !_noStack) continue;
+    
+    y += htmp->GetBinContent(ib);
+    
+    if(((string)htmp->GetName()).find("_DD")==(size_t)-1)
+      eyMC += pow( htmp->GetBinError(ib),2)
+	*(isDif?pow(htmp->GetBinWidth(ib),2):1.);
+    else
+      eyDD += htmp->GetBinError(ib)*(isDif?htmp->GetBinWidth(ib):1.);
+    delete htmp;
+  }
+  tmp->SetBinContent(ib,y);
+  tmp->SetBinError(ib, sqrt(eyMC) + eyDD );
+  
+  float s = tmp->GetBinError(ib);
+      
+  if(_normOpts.find("dif")==_normOpts.end()) {
+    intSystsUp["MC statistics"] +=s*s;
+    intSystsDo["MC statistics"] +=s*s;
+    //if(ib==1) cout<<"MC stats --> "<<s<<"  "<<s*s<<endl; 
+  }
+  else {
+    intSystsUp["MC statistics"] +=pow(s/_hMC->GetBinWidth(ib), 2);
+    intSystsDo["MC statistics"] +=pow(s/_hMC->GetBinWidth(ib), 2);
+  }
+    
+  delete tmp;
+  
+
+  //now symetric systs
+  for(itSystM itS=systsUp.begin();itS!=systsUp.end();itS++)  { //stupid to do it that way...
+    if( !findSyst( (*itS).first ) ) continue;
+      
+    string name=(*itS).first.substr((*itS).first.find("Unc")+3);
+    float s = fabs( ((*itS).second)->GetBinContent(ib) - _hMC->GetBinContent(ib) );
+    intSystsUp[name]=s*s;
+    intSystsDo[name]=s*s;
+  }
+    
+  //asymmetric errors
+  for(itSystM itS=systsUp.begin();itS!=systsUp.end();itS++)  { //stupid to do it that way...
+    if( !findSyst( (*itS).first ) ) continue;
+	  
+    string n =  (*itS).first.substr( 0, (*itS).first.size() -2 );
+    string name=n.substr(n.find("Unc")+3);
+    float sU = ((*itS).second)->GetBinContent(ib) - _hMC->GetBinContent(ib);
+    float sD = (systsDo[ n+"Do" ])->GetBinContent(ib) - _hMC->GetBinContent(ib);
+      
+    if( sU*sD > 0) { //same sign errors
+      intSystsUp[name]=sU>0?(sU>sD?(sU*sU):(sD*sD)):0;
+      intSystsDo[name]=sU<=0?(sU<sD?(sU*sU):(sD*sD)):0;
+    }
+    else { //opposite sign errors
+      intSystsUp[name]=sU>0?(sU*sU):(sD*sD);
+      intSystsDo[name]=sU<=0?(sU*sU):(sD*sD);
+    }
+  }
+     
+  //now combination
+  for(size_t iS=0;iS<systsSrc.size();iS++) {
+    for(size_t is=0;is<systsSrc[iS].second.size();is++) {
+      //detail
+      for(size_t iv=iS;iv<(cumul?systsSrc.size():(iS+1));iv++) {
+	//if(ib==1) cout<<systsSrc[iS].first<<"  "<<systsSrc[iS].second[is]<<"  "<<iS<<"  "<<is<<"   "<<iv<<" -->>  "<<systU[iv]<<"  "<<intSystsUp[systsSrc[iS].second[is]]<<"  "<<intSystsDo[systsSrc[iS].second[is]]<<endl;
+	systU[iv] += intSystsUp[systsSrc[iS].second[is]];
+	systD[iv] += intSystsDo[systsSrc[iS].second[is]];
+      }
+      //total
+     
+      intSystsUp["uncertainties"]+=intSystsUp[systsSrc[iS].second[is]];
+      intSystsDo["uncertainties"]+=intSystsDo[systsSrc[iS].second[is]];
+      
+    }
+  }
+  //if(ib<2) cout<<" gkgkg "<<systU.size()<<endl;  
+  //store the MC stat uncertainties
+  systU.push_back(intSystsUp["MC statistics"]);
+  systD.push_back(intSystsDo["MC statistics"]);
+
+  //store the full stats + syst uncertainties
+  //if(ib==1) cout<<" --> "<<intSystsUp["uncertainties"]<<"  "<<intSystsUp["MC statistics"]<<endl;
+  intSystsUp["uncertainties"]+=intSystsUp["MC statistics"];
+  intSystsDo["uncertainties"]+=intSystsDo["MC statistics"];
+  systU.push_back(intSystsUp["uncertainties"]);
+  systD.push_back(intSystsDo["uncertainties"]);
+
+}
 
 
 void
@@ -868,6 +993,12 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   _nh=_iNs.size();
   _nhmc=_mcOnly?_nh:_nh-1;
   _ihd=_mcOnly?-1:theobs->hs.size()-1;
+
+  bool isNorm=(_normOpts.find("norm")!=_normOpts.end());
+
+  _is1D=theobs->htype.find("1D")!=(size_t)-1;
+  _is2D=theobs->htype.find("2D")!=(size_t)-1;
+  _isProf=theobs->htype.find("P")!=(size_t)-1;
   
   //first, remove ghost datasets ===  
   vector<TH1*> hTmps(_nhmc,0); 
@@ -876,15 +1007,14 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     size_t ih = (size_t)_iNs[_nhmc-it-1];
     
     hTmps[it] = (TH1*)theobs->hs[ih]->Clone();
-    hTmps[it]->Scale( _lumi );
-
+    if(!_isProf)
+      hTmps[it]->Scale( _lumi );
+    //MM fixme negative
+    HistoUtils::removeNegativeBins(hTmps[it]);
   }
   //================================
     
-  _is1D=theobs->htype.find("1D")!=(size_t)-1;
-  _is2D=theobs->htype.find("2D")!=(size_t)-1;
-  _isProf=theobs->htype.find("P")!=(size_t)-1;
-  
+ 
   //Histo Cloning and coloring ===========
   //Stacking and weighting ==============
   for(size_t ii=0;ii<_hClones.size();ii++)
@@ -909,7 +1039,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   _hMC= NULL;
   _hData = NULL;
   _gData = NULL;
-    
+  
   size_t nsig=0;
   float iMC=0.; float iData=0.;
   for(size_t ih=0;ih<_nhmc;ih++) {
@@ -919,9 +1049,10 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     
     _hClones[ih] = (TH1*)hTmps[ih]->Clone();
     _hClonesNoStack[ih] = (TH1*)hTmps[ih]->Clone();
-
+    _hClones[ih]->SetCanExtend(TH1::kNoAxis);
+    _hClonesNoStack[ih]->SetCanExtend(TH1::kNoAxis);
     string nh="";
-    if(_normOpts.find("norm")==_normOpts.end() || _is2D) {
+    if(!isNorm || _is2D) {
       iMC += _hClones[ih]->Integral(0,1000000);
 
       nh = (string)( _hClones[ih]->GetName());
@@ -943,10 +1074,13 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     else { //FIXME
       if(_hClones[ih]->Integral(0,10000000)!=0.)
        	_hClones[ih]->Scale( 1./ _hClones[ih]->Integral(0,10000000) );
+      if(_hClonesNoStack[ih]->Integral(0,10000000)!=0.)
+       	_hClonesNoStack[ih]->Scale( 1./ _hClonesNoStack[ih]->Integral(0,10000000) );
       iMC += _hClones[ih]->Integral(0,1000000);
+      nh = (string)( _hClones[ih]->GetName());
+      if(nh.find("sig")!=(size_t)-1 && !_sSignal) nsig++;
     }
 
-   
     _hClones[ih]->SetLineColor( _itCol->second );
     _hClones[ih]->SetFillColor( _itCol->second );
     _hClones[ih]->SetMarkerColor( _itCol->second );
@@ -970,7 +1104,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
       _hClones[ih]->SetLineWidth(2); 
     }
 
-    if(_normOpts.find("norm")!=_normOpts.end()) {
+    if(isNorm) {
       _hClones[ih]->SetFillStyle(0);
       _hClones[ih]->SetLineWidth(2); 
     }
@@ -981,9 +1115,12 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   }
   if(!_mcOnly) {
     _hData = (TH1*)theobs->hs[_ihd]->Clone();
+    _hData->SetCanExtend(TH1::kNoAxis);
+    //MM fixme negative
+    HistoUtils::removeNegativeBins(_hData);
     iData = _hData->Integral(0,1000000);
   }
- 
+  
   //normalization to data =====================
   if(_normOpts.find("dnorm")!=_normOpts.end()) {
     for(size_t ih=0;ih<_nhmc;ih++) {
@@ -1004,7 +1141,8 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     _gBin = _autoBins[ theobs->name ][0];
     _xmin = _autoBins[ theobs->name ][1]; 
     _xmax = _autoBins[ theobs->name ][2]; 
-
+    tmpXm=_xmin;
+    tmpXM=_xmax;
   }
   else {
     if(_gBin==0) { //automatic binning
@@ -1013,7 +1151,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
       _gBckBin=1;
     }
   }
-
+  
   //FIXME MM
   // for(size_t ih=0;ih<_nhmc;ih++) {
   //   cout<<" fixme, line 960 DisplayClass.cc "<<endl;
@@ -1040,7 +1178,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
       ((TH2*)_hData)->Rebin2D(_gBin,_gBin);
   }
   //===============================
-
+ 
   //Background rebinning for 1D histograms
   if(_is1D) {
     for(size_t ih=1;ih<_hClones.size();ih++) {
@@ -1055,7 +1193,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     } //histos
   } //1D condition
     //==========================================
-
+  
     //Overflow/Underflow bins, only for 1D histos==
   if(_is1D) {
     if(_overflow) {
@@ -1084,7 +1222,6 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     }
   }
   // ====================================
-
 
   //Passing from GeV to TeV =====================
   bool xAxTeV=false;
@@ -1121,8 +1258,9 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   TH1* hData=NULL;
   if(_is1D && !_mcOnly) {
     hData=(TH1*)_hData->Clone();
+    hData->SetCanExtend(TH1::kNoAxis);
     if(_hData->GetEntries()!=0) {
-      if(_normOpts.find("norm")!=_normOpts.end()) 
+      if(isNorm) 
 	_datNorm= 1./_hData->Integral(0,10000000);
       
       if(_normOpts.find("dif")!=_normOpts.end() ) 
@@ -1140,10 +1278,11 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     for(size_t ih=0;ih<_nhmc;ih++) {
       TH1* htmp=(TH1*)_hClones[ih]->Clone();
       htmp->Reset("icem");
+      htmp->SetCanExtend(TH1::kNoAxis);
       int nb=htmp->GetNbinsX();
       for(int ib=0;ib<nb+2;ib++) {
 	for(int ic=0;ic<=ib;ic++)
-	  htmp->AddBinContent(ic, _hClones[ih]->GetBinContent(ib) );
+	  htmp->AddBinContent(ib, _hClones[ih]->GetBinContent(ic) );
       }
       _hClones[ih] = (TH1*)htmp->Clone();
     
@@ -1153,6 +1292,7 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     if(!_mcOnly) {
       TH1* htmp=(TH1*)_hData->Clone();
       htmp->Reset("icem");
+      htmp->SetCanExtend(TH1::kNoAxis);
       int nb=htmp->GetNbinsX();
       for(int ib=0;ib<nb+2;ib++) {
 	for(int ic=0;ic<=ib;ic++) {
@@ -1161,18 +1301,20 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
 	
       }
       _hData = (TH1*)htmp->Clone();
+      _hData->SetCanExtend(TH1::kNoAxis);
       delete htmp;
     }
     
   }
   //============================================
-  
+
   //MC total ===================================
   if( _is1D && !_dOnly) {
     if(_hClones.size()!=nsig)
       _hMC = (TH1*)_hClones[nsig]->Clone();
     _hMC->SetLineWidth(2);
-    _hMC->SetLineColor(kBlack);
+    if(!_isProf)
+      _hMC->SetLineColor(kBlack);
     _hMC->SetFillStyle(0);
     _hMC->SetName("simulation");
   }
@@ -1188,19 +1330,23 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
       _empty=(TH1*)_hData->Clone();
   }
   else {
-    _empty = (TH1*)((TH1*)(_hClones[0]))->Clone();
+    _empty=NULL;
+    if(!_dOnly)
+      _empty = (TH1*)((TH1*)(_hClones[0]))->Clone();
+    else if(_hData)
+      _empty=(TH1*)_hData->Clone();
   }
-  
+  // cout<<" empy "<<_empty<<endl;
   _empty->Reset("ICEM");
   _empty->SetName("");
   _empty->SetTitle("");
-  
+  _empty->SetCanExtend(TH1::kNoAxis);
   //X axis
   _xmin = xAxTeV?(_xmin/1000):_xmin;
   _xmax = xAxTeV?(_xmax/1000):_xmax;
-
+ 
   _empty->GetXaxis()->SetRangeUser( _xmin, _xmax -0.0001 );
-
+ 
   if(_is1D && !_isProf) {
     if(_overflow) {
       _empty->GetXaxis()->SetRangeUser(_xmin,_xmax-_empty->GetBinWidth(1)/1.5 -0.0001);
@@ -1224,12 +1370,11 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
     _empty->GetYaxis()->SetTitle( yAxTeV?(_ytitle.replace( _ytitle.find("GeV") , 3, "TeV" ) + " ").c_str():(_ytitle+" ").c_str() );
   }
 
-
   if(_hMC)
     _hMC->SetTitle( _xtitle.c_str() );
 
   //Y axis ===================================
-  
+
   string addbin="";
   if(!_isProf && !_is2D) {
     float bin;
@@ -1263,12 +1408,13 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   }
   //====================================================
   if(_is1D) {
+    
     double mcM= (!_hMC)?0.:HistoUtils::getHistoYhighWithError(_hMC,_xmin,_xmax,"G");
     double dM= _mcOnly?0.:HistoUtils::getHistoYhighWithError(hData,_xmin,_xmax,"p");
     float ymax=max((_hMC!=0)?mcM:1., dM );
  
     ymax *=_logYScale?15:1.5;
-    if(_normOpts.find("norm")!=_normOpts.end())
+    if(isNorm)
       //CH: temporary fix
       //ymax = _ymax; 
       ymax =_logYScale?50:min(ymax,(float)1.5);
@@ -1277,13 +1423,12 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
 
     for(size_t ih=0;ih<_nhmc;ih++) {
       string nh = (string)( _hClones[ih]->GetName());
-      if( (!_sSignal && nh.find("sig")!=(size_t)-1) ) {
-	float yM = HistoUtils::getHistoYhighWithError(_hClones[ih],_xmin,_xmax);
+      if( (!_sSignal && nh.find("sig")!=(size_t)-1) || isNorm ) { 
+	float yM = isNorm?HistoUtils::getHistoYhigh(_hClonesNoStack[ih],_xmin,_xmax):HistoUtils::getHistoYhighWithError(_hClonesNoStack[ih],_xmin,_xmax);
 	if(yM>ymax)
-	  ymax = yM*(_logYScale?15:1.5);
+	  ymax = yM;//*(_logYScale?15:1.5);
       }
     }
-
 
     float ymin = 10000000000.;
     for(size_t ih=0;ih<_nhmc;ih++) {
@@ -1317,18 +1462,20 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
       int yrm = ymin/pow(10.,n);
       ymin = ((yrm==1)?(8*pow(10., n-1 )):((yrm-1)*pow(10., n )));
     }
-    
+
     float ym = _logYScale?ymin:0.1;
-    if(_normOpts.find("norm")!=_normOpts.end() || 
-       _normOpts.find("uni")!=_normOpts.end() )
+    if(isNorm || _normOpts.find("uni")!=_normOpts.end() )
       ym = ymin;
-    _empty->GetYaxis()->SetRangeUser( ym, ymax );
+    if(ymin<=0 && _logYScale==true){ymin=0.01;ym=0.01;}  
+    if(_logYScale) ymax*=3;
+    else if(!_logYScale) ymax*=1.15;
+    _empty->GetYaxis()->SetRangeUser( ym, ymax );  
     if(_userYScale)
-      _empty->GetYaxis()->SetRangeUser( _ymin, _ymax );
+      _empty->GetYaxis()->SetRangeUser( _ymin, _ymax ); 
     
     _empty->GetYaxis()->SetTitle((_ytitle+addbin).c_str());
   
-    if(_normOpts.find("norm")!=_normOpts.end())
+    if(isNorm)
       _empty->GetYaxis()->SetTitle("1/N#times#partialN/#partialO  ");
   }
   else {
@@ -1336,26 +1483,27 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   }
 
   _empty->GetYaxis()->SetNdivisions(_Ydiv[0],_Ydiv[1],_Ydiv[2]);
-
+    
   if(_showRatio)
     _empty->GetXaxis()->SetTitleOffset( 1.05 );
   else
     _empty->GetXaxis()->SetTitleOffset( 0.90 );
   _empty->GetXaxis()->SetTitleSize( 0.06 );
   if(_ytitle.find("_")==string::npos)
-    _empty->GetYaxis()->SetTitleOffset( 1.50 ); //1.35 for _ text
+    _empty->GetYaxis()->SetTitleOffset( _largePad?0.8:1.50 ); //1.35 for _ text
   else
-    _empty->GetYaxis()->SetTitleOffset( 1.35 ); //1.35 for _ text
+    _empty->GetYaxis()->SetTitleOffset( _largePad?0.75:1.35 ); //1.35 for _ text
   _empty->GetYaxis()->SetTitleSize( 0.06 );
   _empty->GetXaxis()->SetLabelOffset( 0.007 );
   _empty->GetXaxis()->SetLabelSize( 0.05 );
+  if(_showRatio) _empty->GetXaxis()->SetLabelSize( 0.00 );
   _empty->GetYaxis()->SetLabelOffset( 0.007 );
   _empty->GetYaxis()->SetLabelSize( 0.05 );
 
   
   // 2D histo
   if(_is2D) {
-    HistoUtils::copyStyle(_empty,_hClones[nsig],true);
+    HistoUtils::copyStyle(_empty,_dOnly?_hData:_hClones[nsig],true);
   }
 
   for(size_t ih=0;ih<_nhmc;ih++) {
@@ -1364,10 +1512,12 @@ DisplayClass::prepareHistograms(const hObs* theobs) {
   
   delete hData;
 
-  //rerieveing the xmin and xmax values
+  //retrieving the xmin and xmax values and store the others
+  _modXmax=_xmax;
+  _modXmin=_xmin;
+  
   _xmin = tmpXm;
   _xmax = tmpXM;
-
 
 }
 
@@ -1392,13 +1542,29 @@ void
 DisplayClass::drawDataMCRatio() {
   
   //The bidon histo
-  TH1* emptyHisto=(TH1*)_hMC->Clone();
+  //cout<<_hMC->GetXaxis()->GetMin()<<"  "<<
+  TH1* emptyHisto=(TH1*)_hClones.back()->Clone();//_hMC->Clone();
   //if(_empty!=nullptr) emptyHisto=(TH1*)_empty->Clone();
   emptyHisto->Reset("ICEM");
+  emptyHisto->SetCanExtend(TH1::kNoAxis);
 
-  TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC, _mcOnly );
+  TH1* hData=(TH1*)_hData->Clone();
+  hData->SetCanExtend(TH1::kNoAxis);
+  string opt="nP";
+  if(_normOpts.find("norm")!=_normOpts.end() ) {
+    hData->Scale(1./hData->Integral(0,10000000));
+    opt="nn";
+  }
+  if(_isProf) opt="nn";
+  
+  TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( hData, _hMC, _mcOnly, opt );
   ratio->SetName( ("ratio") );
- 
+
+  float tmpXM=_xmax;
+  float tmpXm=_xmin;
+  _xmax=_modXmax;
+  _xmin=_modXmin;
+  
   for(int ib=0;ib<emptyHisto->GetNbinsX()+2;ib++)
     { emptyHisto->SetBinContent(ib,-1000);   }
 
@@ -1406,7 +1572,7 @@ DisplayClass::drawDataMCRatio() {
     emptyHisto->GetYaxis()->SetTitleOffset(1000);
     ratio->GetYaxis()->SetTitleOffset(1000);
   }
- 
+
   if(!_overflow && !_underflow) {
     emptyHisto->GetXaxis()->SetRangeUser(_xmin, _xmax-0.0001 );
     ratio->GetXaxis()->SetRangeUser(_xmin,_xmax-0.0001 );
@@ -1481,30 +1647,32 @@ DisplayClass::drawDataMCRatio() {
   emptyHisto->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   emptyHisto->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
   emptyHisto->GetXaxis()->SetTitle( (_xtitle+" ").c_str() );
-  emptyHisto->GetYaxis()->SetTitle( "Data/MC" );
+  emptyHisto->GetYaxis()->SetTitle( "data/MC" );
   emptyHisto->GetXaxis()->SetTitleSize(0.20);
   emptyHisto->GetXaxis()->SetTitleOffset(0.80);
   emptyHisto->GetXaxis()->SetLabelOffset(0.007);
   emptyHisto->GetXaxis()->SetLabelSize(0.165);
   emptyHisto->GetYaxis()->SetLabelSize(0.14);
   emptyHisto->GetYaxis()->SetLabelOffset(0.011);
-  emptyHisto->GetYaxis()->SetTitleSize(0.15);
-  emptyHisto->GetYaxis()->SetTitleOffset(0.54);
+  emptyHisto->GetYaxis()->SetTitleSize(_largePad?0.17:0.15);
+  emptyHisto->GetYaxis()->SetTitleOffset(_largePad?0.27:0.54);
   emptyHisto->GetXaxis()->SetTickLength(0.09);
   emptyHisto->GetYaxis()->SetTickLength(0.05);
-  
+ 
+  ratio->SetMarkerStyle(20); 
+  ratio->SetMarkerColor(1); 
   ratio->GetYaxis()->SetRangeUser(  0.4, 1.6);
   ratio->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   ratio->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
   ratio->GetXaxis()->SetTitle( (_xtitle+"_").c_str() );
-  ratio->GetYaxis()->SetTitle( "Data/MC" );
+  ratio->GetYaxis()->SetTitle( "data/MC" );
   ratio->GetXaxis()->SetTitleSize(0.20);
   ratio->GetXaxis()->SetTitleOffset(0.83);
   ratio->GetXaxis()->SetLabelSize(0.165);
   ratio->GetYaxis()->SetLabelSize(0.14);
   ratio->GetYaxis()->SetLabelOffset(0.015);
-  ratio->GetYaxis()->SetTitleSize(0.15);
-  ratio->GetYaxis()->SetTitleOffset(0.54);
+  ratio->GetYaxis()->SetTitleSize(_largePad?0.17:0.15);
+  ratio->GetYaxis()->SetTitleOffset(_largePad?0.27:0.54);
   ratio->GetXaxis()->SetTickLength(0.09);
   ratio->GetYaxis()->SetTickLength(0.05);
  
@@ -1519,7 +1687,15 @@ DisplayClass::drawDataMCRatio() {
 
   emptyHisto->Draw();
   if(_addSyst) {
-    if(!_uncDet) sysBand.back()->Draw("F");
+    if(!_uncDet) {
+      sysBand.back()->Draw("F"); //full uncertainties
+      if(sysBand.size()!=1 && _mcSyst) { //stat uncertainties
+	if((string)(_mcUncert[sysBand.size()-1-1]->GetName())=="MC statistics") {
+	  sysBand[sysBand.size()-1-1]->SetFillColor(kAzure+2);
+	  sysBand[sysBand.size()-1-1]->Draw("F");
+	}
+      }
+    }
     else {
       for(int iu=(int)sysBand.size()-1;iu>=0;iu--) {
 	int sSy = _mcUncert.size();
@@ -1536,6 +1712,10 @@ DisplayClass::drawDataMCRatio() {
   line->SetLineStyle(7);
   line->SetLineWidth(2);
   line->Draw("same");
+
+  //retrieve xmax values
+   _xmax=tmpXM;
+   _xmin=tmpXm;
   
 }
 
@@ -1735,8 +1915,64 @@ DisplayClass::showSignificance(const hObs* theObs) {
 }
 
 void
-DisplayClass::drawEfficiency(const hObs* theObs) {
+DisplayClass::showDiscriminationPower(const hObs* theObs) {
+  
+  softReset();
 
+  _sSignal=false;
+
+  _xmax = theObs->binsX.back();
+  if(_is2D)
+    _ymax = theObs->binsY.back();
+  _xmin = theObs->binsX[0];
+  if(_is2D)
+    _ymin = theObs->binsY[0];
+
+  
+  //get the canvas ready
+  
+  _pads = preparePads();
+  _pads[0][0]->Draw();
+  _pads[0][0]->cd();
+
+  //now prepare the two distributions (for background and signal)
+  prepareHistograms( theObs );
+  
+
+  vector<size_t> sigs;
+  for(size_t i=0;i<_nhmc;i++) {
+    string nh = (string)( _hClones[i]->GetName());
+    if( !_sSignal && nh.find("sig")!=(size_t)-1) 
+      sigs.push_back(i);
+  }
+
+  if(_is1D) {
+
+    TH1F* numHB = (TH1F*)_hMC->Clone();
+    TH1F* numHS = (TH1F*)_hClones[ sigs.back() ]->Clone();
+
+    TH1F* sig = HistoUtils::discriminationPower( numHS, numHB);
+    HistoUtils::copyStyle( _empty, (TH1*&)sig, true );
+    sig->GetYaxis()->SetTitle("S/#sqrt{B} ");
+    sig->Draw();
+  }
+  // if(_is2D) {
+
+  //   TH2F* numHB = (TH2F*)_hClones[ sigs.size() ]->Clone();
+  //   TH2F* numHS = (TH2F*)_hClones[ sigs.back() ]->Clone();
+    
+  //   TH2F* sig = HistoUtils::significance(numHS, numHB);
+  //   HistoUtils::copyStyle( (TH1*)numHB, (TH1*&)sig, true );
+    
+  //   sig->Draw("colz");
+  // }
+  
+  _sSignal=true;
+}
+
+
+void
+DisplayClass::drawEfficiency(const hObs* theObs) {
 
   softReset();
   
@@ -1745,12 +1981,15 @@ DisplayClass::drawEfficiency(const hObs* theObs) {
     cout<<" 2D histograms not supported for efficiencies"<<endl;
     return;
   }
-  
-  //and get the canvas ready
+
+  //get the canvas ready
+  int tmpNvar= _nvars;
+  _nvars=1;
   _pads = preparePads();
   _pads[0][0]->Draw();
   _pads[0][0]->cd();
-
+  _nvars=tmpNvar;
+  
   //prepare the distributions
   prepareHistograms( theObs );
 
@@ -1783,6 +2022,12 @@ DisplayClass::drawEfficiency(const hObs* theObs) {
     effs.back()->SetMarkerStyle(1);
   }
 
+
+  TLegend* leg=new TLegend(0.60,0.57,0.87,0.77);
+  leg->SetFillColor(0);
+  leg->SetShadowColor(0);
+  leg->SetLineColor(0);
+  
   //now draw! =======================
   _empty->GetYaxis()->SetTitle( "#varepsilon  " );
   for(int i=1;i<_empty->GetNbinsX()+1;i++) 
@@ -1790,13 +2035,26 @@ DisplayClass::drawEfficiency(const hObs* theObs) {
   _empty->GetYaxis()->SetRangeUser(0., 1.05);
   _empty->DrawCopy();
 
-  for(size_t i=0;i<effs.size();i++)
+  int isNorm=(_normOpts.find("norm")!=_normOpts.end());
+  
+  for(size_t i=0;i<effs.size()-isNorm;i++) {
     effs[i]->Draw("l");
+    if(i<=_nhmc-1)
+      leg->AddEntry(effs[i], _names[_nhmc-i-1].c_str(),"l");
+    else
+      leg->AddEntry(effs[_nhmc], "MC total","l");
+  }
 
+
+  leg->Draw();
+  bool tmpRatio=_showRatio;
+  _showRatio=false;
+  cmsPrel();
+  _showRatio=tmpRatio;
 }
 
 void
-DisplayClass::drawROCCurves(const hObs* theObs) {
+DisplayClass::drawROCCurves(const hObs* theObs, const hObs* auxObs) {
 
   softReset();
   
@@ -1820,23 +2078,53 @@ DisplayClass::drawROCCurves(const hObs* theObs) {
       _hSigClones.push_back( (TH1*)_hClonesNoStack[i]->Clone() );
   }
 
-  if(_hSigClones.size()==0) {cout<<" No Signal to use, abort ROC curve drawing"<<endl; return;}
+  if(_hSigClones.size()==0 && auxObs==nullptr) {cout<<" No Signal to use and no auxiliary observable, abort ROC curve drawing"<<endl; return;}
    
   //compute ROC curves
   vector<TGraphAsymmErrors*> rocCurves(_hSigClones.size(),NULL);
-  for(size_t is=0;is<_hSigClones.size();is++) {
-    rocCurves[is] = HistoUtils::curveROC(_hSigClones[is],_hMC);
-    rocCurves[is]->SetLineColor( _hSigClones[is]->GetLineColor() );
-    rocCurves[is]->SetMarkerColor( _hSigClones[is]->GetLineColor() );
-    rocCurves[is]->SetLineWidth(2);
+
+  if(_hSigClones.size()!=0) {
+    if(auxObs==nullptr) {
+      for(size_t is=0;is<_hSigClones.size();is++) {
+	rocCurves[is] = HistoUtils::curveROC(_hMC,_hSigClones[is]);
+	rocCurves[is]->SetLineColor( _hSigClones[is]->GetLineColor() );
+	rocCurves[is]->SetMarkerColor( _hSigClones[is]->GetLineColor() );
+	rocCurves[is]->SetLineWidth(2);
+      }
+    } 
+    else {
+      TH1F* tmpHMC=(TH1F*)_hMC->Clone();
+      _hSigClones.clear();
+      prepareHistograms( auxObs );
+      for(size_t i=0;i<_nhmc;i++) {
+	string nh = (string)( _hClonesNoStack[i]->GetName());
+	if(nh.find("sig")!=(size_t)-1) 
+	  _hSigClones.push_back( (TH1*)_hClonesNoStack[i]->Clone() );
+      }
+      for(size_t is=0;is<_hSigClones.size();is++) {
+	rocCurves[is] = HistoUtils::curveROC(tmpHMC,_hSigClones[is]);
+	rocCurves[is]->SetLineColor( _hSigClones[is]->GetLineColor() );
+	rocCurves[is]->SetMarkerColor( _hSigClones[is]->GetLineColor() );
+	rocCurves[is]->SetLineWidth(2);
+      }
+    }
+  } 
+  else {
+    TH1F* tmpHMC=(TH1F*)_hMC->Clone();
+    prepareHistograms( auxObs );
+    rocCurves.push_back( HistoUtils::curveROC(_hMC, tmpHMC) );
+    rocCurves.back()->SetLineColor( _hClonesNoStack[0]->GetLineColor() );
+    rocCurves.back()->SetMarkerColor( _hClonesNoStack[0]->GetLineColor() );
+    rocCurves.back()->SetLineWidth(2);
   }
 
   TH1F* tmp=new TH1F("dummy","dummy",51,0,1.05);
   TH1* empty=(TH1*)tmp->Clone();
+  empty->SetCanExtend(TH1::kNoAxis);
   HistoUtils::copyStyle(_empty,empty,true);
   empty->GetYaxis()->SetRangeUser(0,1.05);
-  empty->GetXaxis()->SetTitle(" #varepsilon signal  ");
-  empty->GetYaxis()->SetTitle(" #varepsilon bkg ");
+  empty->GetYaxis()->SetTitle(" #varepsilon signal  ");
+  empty->GetXaxis()->SetTitle(" #varepsilon bkg ");
 
   empty->Draw();
   for(size_t is=0;is<rocCurves.size();is++) {
@@ -1898,16 +2186,31 @@ DisplayClass::compaROCCurves(vector<const hObs*> obss) {
 
   TH1F* tmp=new TH1F("dummy","dummy",51,0,1.05);
   TH1* empty=(TH1*)tmp->Clone();
+  empty->SetCanExtend(TH1::kNoAxis);
   HistoUtils::copyStyle(_empty,empty,true);
   empty->GetYaxis()->SetRangeUser(0,1.05);
   empty->GetXaxis()->SetTitle(" #varepsilon signal  ");
   empty->GetYaxis()->SetTitle(" #varepsilon bkg ");
 
   empty->Draw();
+
+  TLegend* leg=new TLegend(0.245,0.697,0.54,0.90);
+  leg->SetFillColor(0);
+  leg->SetShadowColor(0);
+  leg->SetLineColor(0);
+  
   for(size_t is=0;is<rocCurves.size();is++) {
     rocCurves[is]->Draw("l");
+    leg->AddEntry(rocCurves[is], obss[is]->name.c_str(),"l");
   }
 
+  leg->Draw();
+
+  bool tmpRatio=_showRatio;
+  _showRatio=false;
+  cmsPrel();
+  _showRatio=tmpRatio;
+  
   _nhsig=0;
 }
 
@@ -2150,7 +2453,7 @@ DisplayClass::prepareStatistics( vector<pair<string,vector<vector<map<string,flo
 
   TH1F* emptyH = (TH1F*)hMCt->Clone();
   emptyH->Reset("ICEM");
-  
+  emptyH->SetCanExtend(TH1::kNoAxis);
   emptyH->SetFillColor(0);
 
   float xmax=cNames.size();
@@ -2215,9 +2518,10 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
 			       int gbin, int bckbin, 
 			       bool OverFlowBin, bool UnderFlowBin,
 			       bool ShowDMCRatio, bool ShowGrid, bool staking,
-			       bool AddSystematics, bool mcStatSyst,
+			       bool AddSystematics, bool mcStatSyst, bool largePad,
 			       float MarkerSize, float LineWidth, bool sSignal,
-			       bool mcOnly, bool cmsPrel, bool uncDet ) {
+			       bool mcOnly, bool cmsPrel, 
+			       bool uncDet, vector<string> enabledSysts ) {
 
   _ytitle = YTitle;
   _ymin = rangeY[0];
@@ -2228,7 +2532,7 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
   _userYScale=false;
   if(_ymin != 0 || _ymax != _ymin )
     _userYScale=true;
-
+  
   _xCoordSave[0] = _xmin;
   _xCoordSave[1] = _xmax;
 
@@ -2253,12 +2557,39 @@ DisplayClass::configureDisplay(string YTitle, double rangeY[2],
   _mSize = MarkerSize;
   _wLine = LineWidth;
   
+  _largePad=largePad;
+
   _sSignal = sSignal;
 
   _mcOnly = mcOnly;
   _prel = cmsPrel;
 
   _uncDet = uncDet;
+  
+  for(size_t it=0;it<enabledSysts.size();it++) {
+    vector<string> systs=split(enabledSysts[it],':');
+    
+    if(systs.size()==1) {
+      _systMap.push_back(make_pair(systs[0],vector<string>({systs[0]})));
+      _enabledSysts.push_back(systs[0]);
+      cout<<" adding "<<systs[0]<<" to "<<systs[0]<<endl;
+    } else {
+      _systMap.push_back(make_pair(systs[0],vector<string>()));
+      for(size_t i=1;i<systs.size();i++) {
+	_enabledSysts.push_back(systs[i]);
+	_systMap.back().second.push_back(systs[i]);
+	   //_systMap[systs[0]].push_back(systs[i]);
+	cout<<" adding "<<systs[i]<<" to "<<systs[0]<<endl;
+      }
+    }
+  }
+
+  if(_mcSyst) {
+    _systMap.push_back(make_pair("MCStat",vector<string>({"MC statistics"})));
+  }
+
+  
+  //_enabledSysts=enabledSysts;
 }
 
 
@@ -2276,7 +2607,31 @@ DisplayClass::isNoData() {
   _dOnly=false;
 }
 
+bool
+DisplayClass::findSyst(string unc) {
 
+  if(_enabledSysts.size()==0) return true;
+
+  for(size_t iu=0;iu<_enabledSysts.size();iu++) {
+   
+    string name=unc;
+    size_t p1=name.find("Unc");
+    size_t p2=name.find("Do");
+    size_t p3=name.find("Up");
+    if(p2==(size_t)-1 && p3==(size_t)-1)
+      name=name.substr(p1+3,name.size()-1);
+    else if(p2!=(size_t)-1) 
+      name=name.substr(p1+3,p2-p1-3);
+    else
+      name=name.substr(p1+3,p3-p1-3);
+
+    if(name==_enabledSysts[iu]) {
+      return true;
+    }
+  }
+  
+  return false;
+}
 
 void
 DisplayClass::computeSystematics(bool isProf, bool cumul) {
@@ -2285,11 +2640,30 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
     delete _mcUncert[ii];
   _mcUncert.clear();
 
-
-  systM systs = _csystM[0];
-  systM systsUp = _csystM[1];
-  systM systsDo = _csystM[2];
+  //internal systMap
+  vector<pair<string,vector<string> > > systMap;
+  systMap.insert(systMap.end(),_systMap.begin(),_systMap.end());
   
+  
+  //copy by value to allow removal of systematic sources
+  systM systs, systsUp, systsDo;
+  for(itSystM itS=_csystM[0].begin();itS!=_csystM[0].end();itS++) {
+    if( !findSyst( (*itS).first ) ) continue;
+    cout<<(*itS).first<<endl;
+    systs[ (*itS).first ]=itS->second; 
+  }
+  for(itSystM itS=_csystM[1].begin();itS!=_csystM[1].end();itS++) {
+    if( !findSyst( (*itS).first ) ) continue;
+  
+    systsUp[ (*itS).first ]=itS->second; 
+  }
+  for(itSystM itS=_csystM[2].begin();itS!=_csystM[2].end();itS++) {
+    if( !findSyst( (*itS).first ) ) continue;
+    systsDo[ (*itS).first ]=itS->second; 
+  }
+
+
+
   //protection against no uncertainty on the plot
   if( (systs.size() + systsUp.size() + _mcSyst) == 0) {_addSyst=false; return;}
 
@@ -2353,24 +2727,35 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
   // }
   // ========================================
 
+  //full normalization =======================
+  if(_normOpts.find("norm")!=_normOpts.end()) {
+    for(itSystM itS=systs.begin();itS!=systs.end();itS++)
+      ((*itS).second)->Scale( 1./((*itS).second)->Integral(0,100000) );
+    for(itSystM itS=systsUp.begin();itS!=systsUp.end();itS++) 
+      ((*itS).second)->Scale( 1./((*itS).second)->Integral(0,100000)  );
+    for(itSystM itS=systsDo.begin();itS!=systsDo.end();itS++)
+     ((*itS).second)->Scale( 1./((*itS).second)->Integral(0,100000) );
+  }
+    
   //how many uncertainty sources? 
-  if(systs.size() + systsUp.size() > 4) _uncDet=false; //protection
-  int nUncSrc = _uncDet?(systs.size() + systsUp.size() + _mcSyst):1;
- 
-  vector<TGraphAsymmErrors*> unc(nUncSrc,NULL);
-  _uncNames.resize(nUncSrc);
- 
-  _uncNames[0]="uncertainties";
-  for(int iu=0;iu<nUncSrc;iu++) {
+  //if(systs.size() + systsUp.size() > 4) _uncDet=false; //protection
+  if((int)systMap.size() > 4+_mcSyst) _uncDet=false; //protection
+  int nUncSrcLocal = _uncDet?(systMap.size()):1;
+  
+  _uncNames.resize(nUncSrcLocal);
+  _uncNames.push_back("MC stat.");
+  _uncNames.push_back("uncertainties");
+  vector<TGraphAsymmErrors*> unc(nUncSrcLocal+2,NULL);
+  for(int iu=0;iu<nUncSrcLocal+2;iu++) {
     unc[iu] = new TGraphAsymmErrors(_hMC->GetNbinsX()+2);
       
-    unc[0]->SetMarkerSize(0); 
-    unc[0]->SetMarkerStyle(1);
-    unc[0]->SetMarkerColor(1);
-    unc[0]->SetFillColor(kGray+1);
-    unc[0]->SetLineColor(kGray+1);
-    unc[0]->SetLineStyle(3);
-    unc[0]->SetFillStyle(3001);
+    unc[iu]->SetMarkerSize(0); 
+    unc[iu]->SetMarkerStyle(1);
+    unc[iu]->SetMarkerColor(1);
+    unc[iu]->SetFillColor(kGray+1);
+    unc[iu]->SetLineColor(kGray+1);
+    unc[iu]->SetLineStyle(3);
+    unc[iu]->SetFillStyle(3001);
   
   }
 
@@ -2378,124 +2763,43 @@ DisplayClass::computeSystematics(bool isProf, bool cumul) {
 
   for(int ib=0;ib<_hMC->GetNbinsX()+2;ib++) { 
     
-    vector<float> systU(nUncSrc,0);
-    vector<float> systD(nUncSrc,0);
-
-    //first, mcStatSyst
-    size_t nu=0;
-    if(_mcSyst) {
-
-      TH1* tmp=(TH1*)_hMC->Clone();
-      tmp->Reset("ICEM");
-      float eyMC=0;
-      float eyDD=0;
-      float y=0;
-      for(size_t ids=0;ids<_nhmc;ids++) {
-	TH1* htmp=(TH1*) _hClonesNoStack[ids]->Clone();
-
-	if(((string)htmp->GetName()).find("sig")!=(size_t)-1
-	   && !_noStack) continue;
-
-	y += htmp->GetBinContent(ib);
-	
-	if(((string)htmp->GetName()).find("_DD")==(size_t)-1)
-	  eyMC += pow( htmp->GetBinError(ib),2)
-	    *(isDif?pow(htmp->GetBinWidth(ib),2):1.);
-	else
-	  eyDD += htmp->GetBinError(ib)*(isDif?htmp->GetBinWidth(ib):1.);
-	delete htmp;
-      }
-      tmp->SetBinContent(ib,y);
-      tmp->SetBinError(ib, sqrt(eyMC) + eyDD );
-  
-      float s = tmp->GetBinError(ib); 
-      if(_normOpts.find("dif")==_normOpts.end()) {
-	systU[0] +=s*s;
-	systD[0] +=s*s;
-      }
-      else {
-	systU[0] +=pow(s/_hMC->GetBinWidth(ib), 2);
-	systD[0] +=pow(s/_hMC->GetBinWidth(ib), 2);
-      }
+    vector<float> systU(nUncSrcLocal,0);
+    vector<float> systD(nUncSrcLocal,0);
     
-      if(ib==0 && _uncDet) {
-	_uncNames[0] = "MC statistics";
-      }
-      if(_uncDet) nu++;
-      delete tmp;
-    }
+    computeSingleSyst(systU, systD, ib, systs, 
+		      systsUp, systsDo, systMap, isDif, cumul);
     
-    //secondly symetric systs
     
-    for(itSystM itS=systs.begin();itS!=systs.end();itS++)  {
-      
-      float s = fabs( ((*itS).second)->GetBinContent(ib) - _hMC->GetBinContent(ib) );
-      for(size_t iv=nu;iv<(cumul?systU.size():(nu+1));iv++) {
-	systU[iv] +=s*s;
-	systD[iv] +=s*s;
+    for(int ih=0;ih<nUncSrcLocal+2;ih++) { //nUncSrc
+      if(ih<nUncSrcLocal) {
+	_uncNames[ih]=systMap[ih].first;
 	if(ib==0 && _uncDet) {
-	  _uncNames[iv] = (*itS).first;
+	  cout<<" Uncertainty detail : "<<ih<<"   "<<_uncNames[ih]<<endl;
+	  for(size_t is=0;is<systMap[ih].second.size();is++) {
+	    cout<<"\t=>"<<systMap[ih].second[is]<<endl;
+	  }
 	}
       }
-      if(_uncDet) nu++;
-    } //sym
-    
-    //now asymetric systs
-    for(itSystM itS=systsUp.begin();itS!=systsUp.end();itS++)  {
-      
-      string n =  (*itS).first.substr( 0, (*itS).first.size() -2 );
-      float sU = ((*itS).second)->GetBinContent(ib) - _hMC->GetBinContent(ib);
-      float sD = (systsDo[ n+"Do" ])->GetBinContent(ib) - _hMC->GetBinContent(ib);
-      
-      for(size_t iv=nu;iv<(cumul?systU.size():(nu+1));iv++) {
-	
-	if( sU*sD > 0) { //same sign errors
-	  systU[iv] +=sU>0?(sU>sD?(sU*sU):(sD*sD)):0;
-	  systD[iv] +=sU<=0?(sU<sD?(sU*sU):(sD*sD)):0;
-	}
-	else { //opposite sign errors
-	  systU[iv] +=sU>0?(sU*sU):(sD*sD);
-	  systD[iv] +=sU<=0?(sU*sU):(sD*sD);
-	}
-	
-	if(ib==0 && _uncDet) {
-	  _uncNames[iv] = (*itS).first;
-	}
-
-	// if(ib==1)
-	//   cout<<"  "<<(*itS).first<<"  "<<_hMC->GetBinContent(ib)<<"  "<<sU<<"  "<<sD<<" // "<<systU[iv]<<"  "<<systD[iv]<<endl;
-      }
-      
-      if(_uncDet) nu++;
-    } //asym
-    
-    for(int ih=0;ih<nUncSrc;ih++) {
-      if(ib==0 && _uncDet) {
-       	cout<<" Uncertainty detail : "<<ih<<"   "<< _uncNames[ih]<<endl;
-	unc[ih]->SetName(_uncNames[ih].c_str() );
-	unc[ih]->SetTitle(_uncNames[ih].c_str() );
-	
-      }
+      unc[ih]->SetName(_uncNames[ih].c_str() );
+      unc[ih]->SetTitle(_uncNames[ih].c_str() );
       unc[ih]->SetPoint(ib, _hMC->GetXaxis()->GetBinCenter(ib), _hMC->GetBinContent(ib) );
-      
       float width=_hMC->GetXaxis()->GetBinWidth(ib);
-      
       unc[ih]->SetPointEXlow(ib, width/2. );
       unc[ih]->SetPointEXhigh(ib, width/2. );
-      // if(_normOpts.find("dif")!=_normOpts.end()) {
-      // 	unc[ih]->SetPointEYhigh(ib, sqrt(systU[ih])/width );
-      // 	unc[ih]->SetPointEYlow(ib, sqrt(systD[ih])/width );
-      // }
-      // else {
-      unc[ih]->SetPointEYhigh(ib, sqrt(systU[ih]) );
-      unc[ih]->SetPointEYlow(ib, sqrt(systD[ih]) );
-      //}
+      
+      //summing the systematic uncertainties
+      float sU=systU[ih];
+      float sD=systD[ih];
+      unc[ih]->SetPointEYhigh(ib, sqrt(sU) );//systU[ih]
+      unc[ih]->SetPointEYlow(ib, sqrt(sD) ); //systD[ih]
+      //if(ib==1) cout<<ih<<"  "<<_uncNames[ih]<<"  "<<systU.size()<<" ---->>>> "<<sU<<"  "<<sqrt(sU)<<endl;
 
-    }    
+    }//unc src
 
   }//bin
-
+  
   _mcUncert = unc;
+
 }
 
 void
@@ -2518,9 +2822,11 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   _padleft->cd();
 
   computeSystematics(_isProf, cumul);
-
   if(_mcOnly)
     _hData = (TH1F*)_hMC->Clone();
+
+  _xmin = max( (double)_xmin, _mcOnly?_hMC->GetXaxis()->GetXmin():_hData->GetXaxis()->GetXmin() );
+  _xmax = min( (double)_xmax, _mcOnly?_hMC->GetXaxis()->GetXmax():_hData->GetXaxis()->GetXmax() );
 
   TGraphAsymmErrors* ratio = HistoUtils::ratioHistoToGraph( _hData, _hMC, _mcOnly,"" );
   
@@ -2528,6 +2834,7 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   emptyHisto->Reset("ICEM");
   emptyHisto->SetName("empty");
   emptyHisto->SetTitle("empty");
+  emptyHisto->SetCanExtend(TH1::kNoAxis);
   
   for(int ib=0;ib<emptyHisto->GetNbinsX()+2;ib++)
     { emptyHisto->SetBinContent(ib,-1000);   }
@@ -2557,19 +2864,19 @@ DisplayClass::drawDetailSystematics(bool cumul) {
     }
   }
   
-  int style[4]={0,0,3002,3001};
-  int col[4]={kViolet+2,kOrange+7,kAzure+2,kGreen+1};
-  int lStyle[4]={1,2,2,2};
+  int style[4]={3001,3002,0,0};
+  int col[4]={kGreen+1,kAzure+2,kOrange+7,kViolet+2};
+  int lStyle[4]={2,2,2,1};
 
   bool isTeV = _xtitle.find("TeV")!=(size_t)-1;
 
   string Xtitle = _xtitle;
 
   float ym=0,yM=0;
-
+  
   vector<TPolyLine*> sysBand(0,NULL);
-  for(int iu=0;iu<min(4,(int)(_mcUncert.size()));iu++) { 
-    int ii=_mcUncert.size()-iu-1;
+  //for(int iu=0;iu<min(4,(int)(_mcUncert.size()-2));iu++) { 
+  for(int ii=0;ii<min(4,(int)(_mcUncert.size()-2));ii++) { 
     
     double x,y,yl,yh;
       
@@ -2579,10 +2886,10 @@ DisplayClass::drawDetailSystematics(bool cumul) {
       
     for(int ib=0;ib<_mcUncert[ ii ]->GetN();ib++) {
       _mcUncert[ ii ]->GetPoint(ib,x,y);
-
+ 
       yl = _mcUncert[ ii ]->GetErrorYlow(ib);
       yh = _mcUncert[ ii ]->GetErrorYhigh(ib);
-  
+      //if(ib==1) cout<<iu<<"  "<<ii<<"  "<<_mcUncert[ ii ]->GetName()<<" -->> "<<yh<<endl;
       if(x<_xmin-emptyHisto->GetXaxis()->GetBinWidth(1)/2. ||
 	 x>_xmax+emptyHisto->GetXaxis()->GetBinWidth(1)/2. ) continue;
       
@@ -2602,12 +2909,11 @@ DisplayClass::drawDetailSystematics(bool cumul) {
     }
  
     sysBand.push_back( HistoUtils::GetSystBand(xs,yls,yhs,_xmin/(isTeV?1000:1),_xmax/(isTeV?1000:1)) );
-    int sSy = _mcUncert.size();
-    sysBand.back()->SetLineColor(col[iu+4-sSy]);
-    sysBand.back()->SetLineStyle(lStyle[iu+4-sSy]);
+    sysBand.back()->SetLineColor(col[ii]); //ii+4-sSy
+    sysBand.back()->SetLineStyle(lStyle[ii]); //ii+4-sSy
     sysBand.back()->SetLineWidth(2);
-    sysBand.back()->SetFillColor(col[iu+4-sSy]);
-    sysBand.back()->SetFillStyle(style[ iu+4-sSy ]);
+    sysBand.back()->SetFillColor(col[ii]); //ii+4-sSy
+    sysBand.back()->SetFillStyle(style[ii]);//ii+4-sSy
   }
 
   if(1-ym > yM-1 ) yM = 1-ym +1;  
@@ -2617,9 +2923,9 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   emptyHisto->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   emptyHisto->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
   emptyHisto->GetXaxis()->SetTitle( Xtitle.c_str() );
-  emptyHisto->GetYaxis()->SetTitle( (_mcOnly?("#DeltaN/N "):("Data/MC") ) );
+  emptyHisto->GetYaxis()->SetTitle( (_mcOnly?("#DeltaN/N "):("data/MC") ) );
   emptyHisto->GetXaxis()->SetTitleSize(0.11);
-  emptyHisto->GetXaxis()->SetTitleOffset(0.70);
+  emptyHisto->GetXaxis()->SetTitleOffset(0.82);
   emptyHisto->GetXaxis()->SetLabelSize(0.09);
   emptyHisto->GetYaxis()->SetLabelSize(0.09);
   emptyHisto->GetYaxis()->SetLabelOffset(0.011);
@@ -2633,7 +2939,7 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   ratio->GetXaxis()->SetNdivisions(_Xdiv[0],_Xdiv[1],_Xdiv[2]);
   ratio->GetYaxis()->SetNdivisions(3,_Ydiv[1],_Ydiv[2]);
   ratio->GetXaxis()->SetTitle( Xtitle.c_str() );
-  ratio->GetYaxis()->SetTitle( (_mcOnly?("#DeltaN/N "):("Data/MC") ) );
+  ratio->GetYaxis()->SetTitle( (_mcOnly?("#DeltaN/N "):("data/MC") ) );
   ratio->GetXaxis()->SetTitleSize(0.12);
   ratio->GetXaxis()->SetTitleOffset(0.72);
   ratio->GetXaxis()->SetLabelSize(0.09);
@@ -2647,8 +2953,11 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   emptyHisto->Draw();
 
   for(int iu=(int)sysBand.size()-1;iu>=0;iu--) {
-    int sSy = _mcUncert.size();
-    sysBand[iu]->Draw(iu+4-sSy<2?"l":"F");
+    int iui=iu;
+    //if(!cumul)  iui=sysBand.size()-iu-1;
+    //if(cumul) 
+    iui=sysBand.size()-iu-1;
+    sysBand[iui]->Draw(iui>=2?"l":"F"); //iui+4-sSy<2
   }
 
   TLine* line=new TLine(_xmin,1,_xmax,1);
@@ -2672,27 +2981,90 @@ DisplayClass::drawDetailSystematics(bool cumul) {
   
   legSyst->AddEntry(ratio, (_mcOnly?("stat."):("data/MC") ),"pl");
   
-  int iui=0;
   for(int iu=0;iu<(int)sysBand.size();iu++) {
-    if(cumul) iui=sysBand.size()-iu-1;
-    else iui=iu;
-
-    string name=_uncNames[sysBand.size()-iui-1];
-    size_t p1=name.find("Unc");
-    size_t p2=name.find("Do");
-    size_t p3=name.find("Up");
-
-    if(p2==(size_t)-1 && p3==(size_t)-1)
-      name=name.substr(p1+3,name.size()-1);
-    else if(p2!=(size_t)-1) 
-      name=name.substr(p1+3,p2-p1-3);
-    else
-      name=name.substr(p1+3,p3-p1-3);
-    
-    legSyst->AddEntry(sysBand[iui],name.c_str(),(iui<2)?"l":"f");
+    string name=_uncNames[iu];
+    legSyst->AddEntry(sysBand[iu],name.c_str(),iu>=2?"l":"f"); //(iui+4-sSy<2)
   }    
   legSyst->Draw();
 
+}
+
+void
+DisplayClass::drawStatVsSystematics(vector<vector<vector<float> > > numbers, string src) {
+
+  softReset();
+  
+  if(numbers[0].size()==0) {
+    cout<<"Error, numbers are empty "<<endl;
+  }
+
+  int tmpNvar=_nvars;
+  _nvars=1;
+ 
+  _pads = preparePads();
+  TGraph* upVars=new TGraph();
+  TGraph* downVars=new TGraph();
+  float ymax=0;
+  for(size_t iu=0;iu<numbers[0].size();iu++) {
+    upVars->SetPoint(iu, numbers[0][iu][0], numbers[0][iu][1] );
+    downVars->SetPoint(iu, numbers[1][iu][0], numbers[1][iu][1] );
+    if(std::max(numbers[0][iu][1], numbers[1][iu][1])> ymax)
+      ymax=max(numbers[0][iu][1], numbers[1][iu][1]);
+  }
+
+  TH1F* emptyHisto=new TH1F("empty","",100,0.05,100);
+  emptyHisto->SetCanExtend(TH1::kNoAxis);
+  for(int ib=0;ib<emptyHisto->GetNbinsX()+2;ib++)
+    emptyHisto->SetBinContent(ib,-1);
+  
+  emptyHisto->GetYaxis()->SetRangeUser(0,ymax*1.05);
+  emptyHisto->GetXaxis()->SetTitle("statistical uncertainty [%] ");
+  emptyHisto->GetXaxis()->SetTitleSize(0.05);
+  emptyHisto->GetXaxis()->SetTitleOffset(1.2);
+  emptyHisto->GetYaxis()->SetTitle("yield variation [%] ");
+  emptyHisto->GetYaxis()->SetTitleSize(0.05);
+  emptyHisto->GetYaxis()->SetTitleOffset(1.3);
+
+  upVars->SetMarkerStyle(20);
+  downVars->SetMarkerStyle(24);
+  
+  //drawing
+  _c->Draw();
+  _pads[0][0]->Draw();
+  _pads[0][0]->cd();
+  
+  emptyHisto->Draw();
+  upVars->Draw("P");
+  downVars->Draw("P");
+  bool tmpMcOnly=_mcOnly;
+  _mcOnly=true;
+ 
+  TLatex latex;
+  float textSize=0.75*_pads[0][0]->GetTopMargin();
+  latex.SetNDC();
+  latex.SetTextAlign(11); // align left
+  latex.SetTextFont(61);
+  latex.SetTextSize(textSize);
+  latex.DrawLatex(0.6776,0.9526,"CMS");
+  latex.SetTextFont(52);
+  latex.SetTextSize(textSize*0.76);
+  latex.DrawLatex(0.777,0.9526,"Simulation");
+
+  //latex.DrawLatex(0.221,0.883,(src+" variations").c_str() );
+
+  _pads[0][0]->SetLogx(1);
+  _pads[0][0]->SetGridx(1);
+  _pads[0][0]->SetGridy(1);
+
+  TLegend * leg=new TLegend(0.236,0.755,0.495,0.895, ("  "+src+" variations").c_str() );
+  leg->SetFillColor(0);
+  leg->AddEntry(upVars,"+1 #sigma","p");
+  leg->AddEntry(downVars,"-1 #sigma","p");
+  leg->Draw();
+  
+  _nvars = tmpNvar;
+  _mcOnly = tmpMcOnly;
+  
 }
 
 
@@ -2706,19 +3078,19 @@ void
 DisplayClass::printInteg(float x1, float x2, float y1, float y2) {
 
   vector<double> errors(_nhmc+2,0);
-  
+  //cout<<" ==>>> "<<_hMC<<"  "<<_hData<<endl;
   if(!_is2D) {
     if(!_mcOnly && !_dOnly && _normOpts.find("norm")==_normOpts.end()) {
       cout<<" Integral : data -> "
 	  << _hData->IntegralAndError(_hData->GetXaxis()->FindBin(x1), _hData->GetXaxis()->FindBin(x2), (errors.back()) );
       cout<<" +- "<<errors.back()
 	  <<" // MC-> "
-	  <<_hMC->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2), (errors[_nhmc+1]) );
-      cout<<" +- "<<errors[_nhmc+1]<<endl;
+	  <<_hMC->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2), (errors[_nhmc]) );
+      cout<<" +- "<<errors[_nhmc]<<endl;
     }
     else if(_mcOnly && _hMC) {
-      cout<<" Integral : MC -> "<<_hMC->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2), errors[_nhmc+1]);
-      cout<<" +- "<<errors[_nhmc+1]<<endl;
+      cout<<" Integral : MC -> "<<_hMC->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2), errors[_nhmc]);
+      cout<<" +- "<<errors[_nhmc]<<endl;
     }
     else if(_dOnly) { 
       cout<<" Integral : data -> "<<_hData->IntegralAndError(_hData->GetXaxis()->FindBin(x1), _hData->GetXaxis()->FindBin(x2), errors.back());
@@ -2749,17 +3121,17 @@ DisplayClass::printInteg(float x1, float x2, float y1, float y2) {
       cout<<" Integral : data -> "
 	  << ((TH2F*)(_hData))->IntegralAndError(_hData->GetXaxis()->FindBin(x1), _hData->GetXaxis()->FindBin(x2),
 					       _hData->GetYaxis()->FindBin(y1), _hData->GetYaxis()->FindBin(y2), (errors.back()) );
-      cout<<" +- "<<errors.back()
-	  <<" // MC-> "
-	  <<((TH2F*)(_hMC))->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2),
-				   _hMC->GetYaxis()->FindBin(y1), _hMC->GetYaxis()->FindBin(y2)
-				   , (errors[_nhmc+1]) );
-      cout<<" +- "<<errors[_nhmc+1]<<endl;
+      cout<<" +- "<<errors.back();
+      // cout<<" // MC-> "
+      // 	  <<((TH2F*)(_hMC))->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2),
+      // 				   _hMC->GetYaxis()->FindBin(y1), _hMC->GetYaxis()->FindBin(y2)
+      // 				   , (errors[_nhmc]) );
+      // cout<<" +- "<<errors[_nhmc]<<endl;
     }
     else if(_mcOnly && _hMC) {
-      cout<<" Integral : MC -> "<<((TH2F*)(_hMC))->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2),
-							 _hMC->GetYaxis()->FindBin(y1), _hMC->GetYaxis()->FindBin(y2), errors[_nhmc+1]);
-      cout<<" +- "<<errors[_nhmc+1]<<endl;
+      // cout<<" Integral : MC -> "<<((TH2F*)(_hMC))->IntegralAndError(_hMC->GetXaxis()->FindBin(x1), _hMC->GetXaxis()->FindBin(x2),
+      // 							 _hMC->GetYaxis()->FindBin(y1), _hMC->GetYaxis()->FindBin(y2), errors[_nhmc]);
+      // cout<<" +- "<<errors[_nhmc]<<endl;
     }
     else if(_dOnly) { 
       cout<<" Integral : data -> "<<((TH2F*)(_hData))->IntegralAndError(_hData->GetXaxis()->FindBin(x1), _hData->GetXaxis()->FindBin(x2),
@@ -2815,24 +3187,24 @@ DisplayClass::cmsPrel() {
       latex.SetTextAlign(31); // align left, right=31
       latex.SetTextSize(textSize*0.6/0.75);
       if(_lumi > 1000 )
-	latex.DrawLatex(0.965,0.96,Form(" %.1f fb^{-1} (%.0f TeV)",_lumi/1000., _energy));
+	latex.DrawLatex(_largePad?0.956:0.965,0.96,Form(" %.1f fb^{-1} (%.0f TeV)",_lumi/1000., _energy));
       else
-	latex.DrawLatex(0.965,0.96,Form(" %.0f pb^{-1} (%.0f TeV)",_lumi, _energy));
+	latex.DrawLatex(_largePad?0.956:0.965,0.96,Form(" %.0f pb^{-1} (%.0f TeV)",_lumi, _energy));
     }
  
     latex.SetTextAlign(11); // align left
     latex.SetTextFont(61);
     latex.SetTextSize(textSize);
-    latex.DrawLatex(0.853,0.875,"CMS");
+    latex.DrawLatex(_largePad?0.879:0.853,0.875,"CMS");
     
     latex.SetTextFont(52);
     latex.SetTextSize(textSize*0.76);
-    if(!_mcOnly) {
+    if(!_mcOnly && !_pseudoData) {
       if(_prel)
-	latex.DrawLatex(0.80,0.84,"Preliminary");
+	latex.DrawLatex(_largePad?0.848:0.80,0.84,"Preliminary");
     }
     else
-      latex.DrawLatex(0.81,0.84,"Simulation");
+      latex.DrawLatex(_largePad?0.845:0.81,0.84,"Simulation");
 
   }
   else {
@@ -2844,34 +3216,50 @@ DisplayClass::cmsPrel() {
       latex.SetTextAlign(31); // align left, right=31
       latex.SetTextSize(textSize*0.6/0.75);
       if(_lumi > 1000 )
-	latex.DrawLatex(0.922,0.96,Form(" %.1f fb^{-1} (%.0f TeV)",_lumi/1000., _energy) );
+	latex.DrawLatex(_largePad?0.956:0.922,0.96,Form(" %.1f fb^{-1} (%.0f TeV)",_lumi/1000., _energy) );
       else
-	latex.DrawLatex(0.922,0.96,Form(" %.0f pb^{-1} (%.0f TeV)",_lumi, _energy) );
+	latex.DrawLatex(_largePad?0.956:0.922,0.96,Form(" %.0f pb^{-1} (%.0f TeV)",_lumi, _energy) );
     }
  
     latex.SetTextAlign(11); // align left
     latex.SetTextFont(61);
     latex.SetTextSize(textSize);
-    latex.DrawLatex(0.807,0.875,"CMS");
+    latex.DrawLatex(_largePad?0.879:0.807,0.875,"CMS");
     
     latex.SetTextFont(52);
     latex.SetTextSize(textSize*0.76);
-    if(!_mcOnly) {
+    if(!_mcOnly && !_pseudoData) {
       if(_prel)
-	latex.DrawLatex(0.759,0.84,"Preliminary");
+	latex.DrawLatex(_largePad?0.848:0.759,0.84,"Preliminary");
     }
     else
-      latex.DrawLatex(0.749,0.84,"Simulation");
+      latex.DrawLatex(_largePad?0.845:0.749,0.84,"Simulation");
 
   }
 
 }
 
+void
+DisplayClass::pointToPad() {
+  if(_curCanvas=="main")
+    _pads[0][0]->cd();
+  if(_curCanvas=="syst")
+    _padright->cd();
+}
 
+TCanvas*
+DisplayClass::getCurrentCanvas() {
+  if(_curCanvas=="main")
+    return _c;
+  if(_curCanvas=="syst")
+    return _cSyst;
+  
+  return _c;
+}
 
 void
 DisplayClass::addText(float x, float y, float s, string text) {
-  _pads[0][0]->cd();
+  pointToPad();
 
   TLatex t;
   t.SetNDC();
@@ -2919,7 +3307,7 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
     }  
     
     if(_addSyst) {
-      _hCoords.push_back( HistoUtils::getGraphUpperCoordinatesWithError(_mcUncert[0]) );
+      _hCoords.push_back( HistoUtils::getGraphUpperCoordinatesWithError(_mcUncert.back() ) );
     }
 
     if(!_mcOnly) {
@@ -2950,10 +3338,16 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
   string legOpt="pl";
   if(_normOpts.find("norm")!=_normOpts.end()) legOpt="l";
 	
-  if(!_mcOnly)
-    _leg->AddEntry(_gData,"data", legOpt.c_str() );
+  if(!_mcOnly) {
+    if(_pseudoData) {
+      _leg->AddEntry(_gData,"pseudo-data", legOpt.c_str() );
+    }
+    else
+      _leg->AddEntry(_gData,"data", legOpt.c_str() );
 
-  if( _is1D) {
+  }
+    
+  if( _is1D && !_isProf) {
     for(size_t i=0;i<_nhmc;i++) {
       string nh = (string)( _hClones[i]->GetName());
       if( nh.find("sig")==(size_t)-1) {
@@ -2967,9 +3361,12 @@ DisplayClass::adjustLegend(int iobs, bool skipCoords) {
       }
     }
   }
+  if(_is1D && _isProf) {
+    _leg->AddEntry(_hMC,"simulation","lp");
+  }
 
   if(_addSyst && !_is2D) {
-    _leg->AddEntry(_mcUncert[0]->Clone(),"uncertainties","f");
+    _leg->AddEntry(_mcUncert.back()->Clone(),"uncertainties","f");
   }
 
   for(map<string,size_t>::const_iterator it=sigs.begin();
@@ -2989,7 +3386,7 @@ DisplayClass::getLegendCoordinate(TH1*h, float& pxd, float& pyd, float& pxu, flo
   pyu = 0.8;
   fo = 0.9;
   
-  int nObj = min(_names.size()+(int)(!_mcOnly)+(int)_addSyst, (size_t)17);
+  int nObj = min( (_isProf?1:_names.size())+(int)(!_mcOnly)+(int)_addSyst, (size_t)17);
   float Dy = 0.051;  
   float dy = nObj*Dy;
   
@@ -3178,5 +3575,18 @@ DisplayClass::graphConstraint(size_t ih, int iobs, float& xd, float& xu, float& 
     }
   }
   
+}
+
+
+
+std::vector<std::string> 
+DisplayClass::split(const std::string s, char delim) {
+  std::vector<std::string> elems;
+  std::stringstream ss(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+  return elems;
 }
 

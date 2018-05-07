@@ -72,7 +72,7 @@ public:
 		     map<string,float> Kfac,
 		     float l,bool useXS=true );
   void configureData(bool runfilter, int runnum,bool MCOnly);
-  void configureNames(string dir, string objName, string objList);
+  void configureNames(string dir, string objName, vector<string> objList);
 
   void loadXSDB(string dbname);
   void loadKFDB(string dbname);
@@ -82,18 +82,11 @@ public:
   float getLumi() const {return _lumi;};
   vector<string> getSampleNames() {return _samplenames;};
   vector<string> getDsNames() {return _dsnames;};
-
-  // float getWeight(int channel, int evt);
-  // float getWeight(string chan, int evt);
-
-  // string getSample(int channel, int evt);
-  // string getSample(string chan, int evt);
   
   vector<string > getDSNames();
 
   vector<string> getDDCuts(){return _ddCuts;};
 
-  //vector<int> getDDDSStatus();  
   vector<pair<string, float> > getCSData();
 
   Dataset* findDS(string channel);
@@ -107,20 +100,17 @@ public:
   vector<string> findDSNames(string channel, string crName);
   int findChan(string ds);
 
-  void addSample(string str, string sname, int col, float w=1, bool loadH=true );
+  void addSample(string str, string sname, int col, 
+		 float w=1, int link=-1, bool loadH=true );
 
   bool passRunFilter(int run);
 
   Dataset* getDataset(string name);
-  // TTree* getTree(string name) {return _datasets[ name ]->getTree();};
-  // int getNEvents(string name) {return _datasets[ name ]->getNEvents();};
   
   bool isNoDataAna();
 
   string getHName();
   string getHwgtName();
-  
-  //void setNMax(size_t testNMax);
 
   void isHistoAnalysis();
   

@@ -56,6 +56,7 @@ private:
   TPad* _padleft;
   TPad* _padright;
 
+  string _curCanvas;
 
   set<string> _normOpts; 
 
@@ -90,6 +91,8 @@ private:
   vector<TH1*> _hSigClones;
   vector<vector<systM> > _systMUnc;
   vector<systM> _csystM;
+  vector<string> _enabledSysts;
+  vector<pair<string,vector<string> > > _systMap;
 
   vector<TGraphAsymmErrors*> _mcUncert;
 
@@ -110,6 +113,8 @@ private:
   //X and Y binning, internal binning options
   float _xmin;
   float _xmax;
+  float _modXmin;
+  float _modXmax;
   float _ymin;
   float _ymax;
   bool _userYScale;
@@ -145,6 +150,8 @@ private:
   bool _addSyst;
   bool _mcSyst;
 
+  bool _largePad;
+
   bool _sSignal;
   
   int _Xdiv[3];
@@ -160,7 +167,8 @@ private:
   bool _mcOnly;
   bool _dOnly;
   bool _lockData;
-
+  bool _pseudoData;
+  
   //uncertainties
   bool _uncDet;
   vector<string> _uncNames;
@@ -196,9 +204,10 @@ public:
 			bool ShowDMCRatio, bool ShowGrid,
 			bool stacking,
 			bool AddSystematics, bool mcStatSyst,
-			float MarkerSize, float LineWidth,
-			bool sSignal, bool mcOnly,
-			bool cmsPrel, bool uncDet=false); //,bool switchRMS, string errorOpt
+			bool largePad,float MarkerSize,
+			float LineWidth,bool sSignal, bool mcOnly,
+			bool cmsPrel, bool uncDet=false,
+			vector<string> enabledSysts=vector<string>() );
 
   void setObservables(string v1, string v2="", string v3="",
 		      string v4="", string v5="", string v6="");
@@ -226,12 +235,14 @@ public:
   void residualData(const hObs* theObs);
 
   void showSignificance(const hObs* theObs);
+  void showDiscriminationPower(const hObs* theObs);
 
   void saveHistos(string hname, const hObs* theObs);
   
   void prepareStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, vector<string> dsnames, bool isMultiScheme);
   void drawStatistics( vector<pair<string,vector<vector<map<string,float> > > > > vals, vector<string> dsnames, bool isMultiScheme);
   void drawDetailSystematics(bool cumul);
+  void drawStatVsSystematics(vector<vector<vector<float> > > numbers, string src);
 
   void addText(float x, float y, float s, string text);
   void addLine(float x1, float y1, float x2, float y2, int style, int col, int size);
@@ -248,16 +259,18 @@ public:
   void loadAutoBinning(string filename);
   vector<string> getAutoVars() {return _autoVars;};
 
-  const TCanvas* getCanvas() { return _c;}; 
+  const TCanvas* getCanvas() { return getCurrentCanvas();}; 
 
   void checkData();
   void isNoData();
 
   void setSystematicsUnc( vector<vector<systM> > systs );
  
-  void drawROCCurves(const hObs* theObs);
+  void drawROCCurves(const hObs* theObs, const hObs* auxObs=nullptr);
   void drawEfficiency(const hObs* theObs);
   void compaROCCurves(vector<const hObs*> obss);
+
+  void containsPseudoData() { _pseudoData=true;};
   
 private:
 
@@ -266,6 +279,9 @@ private:
   vector<vector<TPad*> > preparePadsWithRatio();
   void preparePadsForSystDetail();
   
+  void pointToPad();
+  TCanvas* getCurrentCanvas();
+
   TPolyLine* PolyLineFromGraph(vector<TGraph*> graphs);
   TPolyLine* PolyLineFromGraph(TGraph* graph);
   
@@ -282,6 +298,12 @@ private:
 		      bool& yAxTev);
 
   void computeSystematics( bool isProf, bool cumul=0);
+  void computeSingleSyst(vector<float>& systU, vector<float>& systD, 
+			 int ib, systM systs, 
+			 systM systsUp, systM systsDo,
+			 vector<pair<string,vector<string> > > systsSrc,
+			 bool isDif, bool cumul);
+  bool findSyst(string unc);
 
   void cmsPrel();
   
@@ -292,6 +314,8 @@ private:
   float graphVal(float x,int ih, int iobs);
   void graphConstraint(size_t ih, int iobs, float& xd, float& xu, float& yd,
 		       float& yu,float& f, float dx, float dy);
+
+  std::vector<std::string> split(const std::string s, char delim);
 
   ClassDef(DisplayClass,0)  
 

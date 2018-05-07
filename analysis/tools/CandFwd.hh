@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+//#include "analysis/tools/Candidate.hh"
+
 //
 // useful global names
 //
@@ -45,6 +47,5 @@ struct SortIndexDRPairs
   
 typedef std::multimap< size_t, indexDRPair > CandIdDrMap; 
 typedef CandIdDrMap::const_iterator CandIdDrMapIterator;
-
 
 #endif

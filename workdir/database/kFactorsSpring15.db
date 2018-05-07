@@ -2,6 +2,9 @@
 //keep this header format!!
 SMS_T1tttt_2J_mGl1200_mLSP800	1
 SMS_T1tttt_2J_mGl1500_mLSP100	1
+T1tttt_mGo1200_mChi800          1
+T1tttt_mGo1500_mChi100          1
+
 T5qqqqWWDeg_mGo1000_mCh310_mChi300_dilep    1
 T5qqqqWWDeg_mGo1000_mCh310_mChi300		    1
 T5qqqqWWDeg_mGo1000_mCh315_mChi300_dilep	1
@@ -27,8 +30,8 @@ T6ttWW_mSbot600_mCh425_mChi50			        1
 T6ttWW_mSbot650_mCh150_mChi50			        1
 T5qqqqWZDeg_mGo1000_mCh315_mChi300_dilep    1 
 T5qqqqWZDeg_mGo1000_mCh325_mChi300_dilep    1
-T5qqqqWZ_mGo1200_mCh1000_mChi800_dilep      1
-T5qqqqWZ_mGo1500_mCh800_mChi100_dilep       1
+T5qqqqWZ_mGo1200_mCh1000_mChi800_lep      1
+T5qqqqWZ_mGo1500_mCh800_mChi100_lep       1
 T5qqqqZZDeg_mGo1000_mCh315_mChi300_dilep    1
 T5qqqqZZDeg_mGo1000_mCh325_mChi300_dilep    1
 T5qqqqZZ_mGo1200_mCh1000_mChi800_dilep      1
@@ -39,6 +42,7 @@ TT_bx50							1.00
 TTLep_NoPU						1.00
 TTJets							1.00
 TTJets_LO						1.00
+TTJets_DiLepton                 1.00
 TT_pow							1.00
 TT_pow_50ns						1.00
 TTLep_pow						1.00
@@ -97,8 +101,8 @@ WZp8_50ns						1.00
 TTHnobb							1.00
 TTJets_50ns						1.00
 TTJets_LO_50ns						1.00
-DYJetsToLL_M50_50ns					1.00
-WJetsToLNu_50ns						1.00
+DYJetsToLL_M50_50ns	    1.00
+WJetsToLNu_50ns	        1.00
 QCD_Pt80to120_50ns					1.00
 QCD_Pt120to170_50ns					1.00
 QCD_Pt170to300_50ns					1.00
@@ -111,6 +115,35 @@ QCD_Pt1400to1800_50ns					1.00
 QCD_Pt1800to2400_50ns					1.00
 QCD_Pt2400to3200_50ns					1.00
 QCD_Pt3200toInf_50ns					1.00
+TBar_tWch_50ns					1.00
+T_tWch_50ns 					1.00
+QCD_Mu15_50ns	            1.00
+QCD_Pt15to20_Mu5_50ns	    1.00
+QCD_Pt20to30_Mu5_50ns	    1.00
+QCD_Pt30to50_Mu5_50ns	    1.00
+QCD_Pt50to80_Mu5_50ns	    1.00
+QCD_Pt80to120_Mu5_50ns	    1.00
+QCD_Pt120to170_Mu5_50ns	    1.00
+QCD_Pt170to300_Mu5_50ns	    1.00
+QCD_Pt300to470_Mu5_50ns	    1.00
+QCD_Pt470to600_Mu5_50ns	    1.00
+QCD_Pt600to800_Mu5_50ns	    1.00
+QCD_Pt800to1000_Mu5_50ns	1.00
+QCD_Pt1000toInf_Mu5_50ns	1.00
+QCD_Pt_15to20_bcToE	        1.00
+QCD_Pt_20to30_bcToE	        1.00
+QCD_Pt_30to80_bcToE	        1.00
+QCD_Pt_80to170_bcToE	    1.00
+QCD_Pt_170to250_bcToE	    1.00
+QCD_Pt_250toInf_bcToE	    1.00
+QCD_Pt15to20_EMEnriched	    1.00
+QCD_Pt20to30_EMEnriched	    1.00
+QCD_Pt30to50_EMEnriched	    1.00
+QCD_Pt50to80_EMEnriched	    1.00
+QCD_Pt80to120_EMEnriched	1.00
+QCD_Pt120to170_EMEnriched	1.00
+QCD_Pt170to300_EMEnriched	1.00
+QCD_Pt300toInf_EMEnriched	1.00
 TTWToLNu                                1.00
 TTZToLLNuNu                             1.00
 WWZ	            1 
@@ -127,3 +160,5 @@ GGHZZ4L         1
 VHToNonbb       1
 TTLLJets_m1to10 1
 TTTT            1
+ZGTo2LG         1
+tZq_ll          1

@@ -394,6 +394,21 @@ HistoUtils::histoReduction(TH1F* source,TH1F* MC) {
 }
 
 
+void
+HistoUtils::removeNegativeBins(TH1*& h) {
+
+  h->SetCanExtend(TH1::kNoAxis);
+  for(int ib=0;ib<h->GetNbinsX()+2;ib++) {
+    float y=h->GetBinContent(ib);
+    if(y<0) {
+      h->SetBinContent(ib,0);
+      h->SetBinError(ib,y);
+    }
+  }
+  
+}
+
+
 vector<TH2F*> HistoUtils::stack2DHistos(vector<TH2F*> Histos2d, vector<string> datanames, map<string,float> weights) {
 
   vector<TH2F*> StackedHistos;
@@ -438,9 +453,10 @@ HistoUtils::rebin1DHisto(TH1*& h, int binning) {
 
 void 
 HistoUtils::addOverflowBin(TH1*& h, float Max) {
-
+  
   TH1* tmp = (TH1*)h->Clone();
   tmp->Reset("ICEM");
+  tmp->SetCanExtend(TH1::kNoAxis);
 
   float intMax= h->GetXaxis()->GetXmax();
   int ovbin = h->FindBin(min(Max, intMax ) );
@@ -448,15 +464,14 @@ HistoUtils::addOverflowBin(TH1*& h, float Max) {
   
   tmp->SetBinContent(ovbin-1, h->IntegralAndError(ovbin, 10000000., err) );
   tmp->SetBinError(ovbin-1, err );
-
   h->Add(tmp);
 
+  int nBinsMax=h->GetNbinsX()+2;
   //remove the ov bin for integral purposes
-  for(int ib=ovbin;ib<h->GetNbinsX()+2;ib++) {
-    h->SetBinContent(ib,0);
-    h->SetBinError(ib,0);
+  for(int ib=ovbin;ib<nBinsMax;ib++) {
+     h->SetBinContent(ib,0);
+     h->SetBinError(ib,0);
   }
-
   delete tmp;
 }
 
@@ -465,6 +480,7 @@ HistoUtils::addUnderflowBin(TH1*& h, float Min) {
 
   TH1* tmp = (TH1*)h->Clone();
   tmp->Reset("ICEM");
+  tmp->SetCanExtend(TH1::kNoAxis);
 
   float intMin= h->GetXaxis()->GetXmin();
   int udbin = h->FindBin(max(Min, intMin ) );
@@ -587,11 +603,14 @@ HistoUtils::ratioHistoToGraph(TH1* hd, TH1* hmc, bool allMc, string opt) {
     Xd = hd->GetBinCenter(ip);
     Yd = hd->GetBinContent(ip);
 
+    eYld = hd->GetBinError(ip);
+    eYhd = hd->GetBinError(ip);
+    
     if(allMc) {
       float eY=hd->GetBinError(ip);
       float N=pow(Yd/eY,2);
       float w=Yd/N;
-     
+      
        if(opt=="nP" || opt=="PP") {
 	 eYld = StatUtils::ErrorPL(N)*w;
 	 eYhd = StatUtils::ErrorPH(N)*w;
@@ -610,10 +629,14 @@ HistoUtils::ratioHistoToGraph(TH1* hd, TH1* hmc, bool allMc, string opt) {
 	eYld = hd->GetBinError(ip);
 	eYhd = hd->GetBinError(ip);
       }
+     
     }
 
     //Xm = hmc->GetBinCenter(ip);
     Ym = hmc->GetBinContent(ip);
+    eYlm = hmc->GetBinError(ip);
+    eYhm = hmc->GetBinError(ip);
+
     if(opt=="dP" || opt=="PP") {
       eYlm = StatUtils::ErrorPL(Ym);
       eYhm = StatUtils::ErrorPH(Ym);
@@ -623,6 +646,8 @@ HistoUtils::ratioHistoToGraph(TH1* hd, TH1* hmc, bool allMc, string opt) {
       eYhm = 0;//hmc->GetBinError(ip);
     }  
 
+    //cout<<Yd<<"  "<<eY<<"  "<<Ym<<"  "<<"   "<<eYld<<"   "<<eYhd<<endl;     
+    
     if(Ym!=0) {
       Nn0++;
       
@@ -848,22 +873,25 @@ HistoUtils::manualRebin(TH1*& h, int bin) {
 
   TH1* htmp=(TH1*)h->Clone();
   htmp->Reset("ICEM");
+  htmp->SetCanExtend(TH1::kNoAxis);
 
-  vector<float> vals(h->GetNbinsX()/bin,0);
-  vector<float> errs(h->GetNbinsX()/bin,0);
+  int nBins=h->GetNbinsX();
+  vector<float> vals(nBins/bin,0);
+  vector<float> errs(nBins/bin,0);
 
-  if(h->GetNbinsX()%bin!=0) 
+  if(nBins%bin!=0) 
     cout<<"Warning, "<<h->GetName()
 	<<" cannot be rebinned by "<<bin<<endl;
 
-  for(int ib=1;ib<h->GetNbinsX()+1;ib++) {
+  for(int ib=1;ib<nBins+1;ib++) {
     vals[ (ib-1)/bin ] += h->GetBinContent(ib)/bin;
     errs[ (ib-1)/bin ] += h->GetBinError(ib)/bin;
   }
-  
+
   htmp->SetBinContent(0, h->GetBinContent(0) );
-  htmp->SetBinContent(h->GetNbinsX()+1,  h->GetBinContent(h->GetNbinsX()+1) );
-  for(int ib=1;ib<h->GetNbinsX()+1;ib++) {
+  htmp->SetBinContent(nBins+1,  h->GetBinContent(nBins+1) );
+
+  for(int ib=1;ib<nBins+1;ib++) {
     htmp->SetBinContent( ib, vals[ (ib-1)/bin ]);
     htmp->SetBinError( ib, errs[ (ib-1)/bin ]);
   }
@@ -989,6 +1017,20 @@ HistoUtils::getHistoYlowWithError(TH1* h, float xm, float xM ,string opt) {
   return ylow;
 }
 
+float
+HistoUtils::getHistoYhigh(TH1* h, float xm, float xM) {
+  
+  float yhigh=-100000000000.; 
+ 
+  for(int i=1;i<h->GetNbinsX()+1;i++) {
+    if(yhigh <h->GetBinContent(i) && h->GetBinContent(i)!=0 && 
+       h->GetBinCenter(i)>=xm && h->GetBinCenter(i)<=xM ) {
+      yhigh = h->GetBinContent(i);
+    }
+  }
+  return yhigh;
+}
+
 
 float
 HistoUtils::getHistoYhighWithError(TH1* h, float xm, float xM, string opt) {
@@ -1021,8 +1063,8 @@ HistoUtils::getGraphYlowWithError(TGraphAsymmErrors* g, float xm, float xM) {
     g->GetPoint(i,x,y);
     eyl = g->GetErrorYlow(i);
   
-    if(ylow > y+eyl && y!=0 && x>=xm && x<=xM ) {
-      ylow = y+eyl; 
+    if(ylow > y-eyl && y!=0 && x>=xm && x<=xM ) {
+      ylow = y-eyl; 
     }
   }
   
@@ -1122,6 +1164,27 @@ HistoUtils::significance(TH1F* hs, TH1F* hb) {
 
 }
 
+TH1F*
+HistoUtils::discriminationPower(TH1F* hs, TH1F* hb) {
+  
+  TH1F* hsb=(TH1F*)hs->Clone();
+  hsb->Reset("ICEM");
+
+  int nT = hs->GetNbinsX()+2;
+  for(int ib=0;ib<nT;ib++) {
+
+    float ints = hs->Integral( ib, nT )/hs->Integral(0,100000);
+    float intb = hb->Integral( ib, nT )/hs->Integral(0,100000);
+    if(intb!=0)
+      hsb->SetBinContent( ib, ints/sqrt(intb) );
+    //hsb->SetBinError( ib, ints/sqrt(intb) );
+  }
+  
+  
+  return hsb;
+
+}
+
 
 
 TH2F*
@@ -1158,7 +1221,7 @@ HistoUtils::efficiency(TH1* h) {
   
   for(int i=0;i<nBins;i++) {
 
-    float eff=h->Integral(i+1,nBins+1)/integ;
+    float eff=h->Integral(i,nBins+1)/integ;
     float err = StatUtils::BinomError(h->GetEntries(), eff );
 
     if(integ!=0) {
@@ -1176,7 +1239,7 @@ HistoUtils::curveROC(TH1* s, TH1* b) {
   int nBins= s->GetNbinsX();
   float intS=s->Integral(0,100000);
   float intB=b->Integral(0,100000);
-  
+  //cout<<intS<<"  "<<intB<<endl;
   TGraphAsymmErrors* g=new TGraphAsymmErrors(nBins);
   for(int i=0;i<nBins;i++) {
     float effS=s->Integral(i+1,nBins+1)/intS;
@@ -1184,8 +1247,9 @@ HistoUtils::curveROC(TH1* s, TH1* b) {
 
     float effB=b->Integral(i+1,nBins+1)/intB;
     float errB = StatUtils::BinomError(b->GetEntries(), effS );
-
+    
     if(intS!=0 && intB!=0) {
+      //cout<<effS<<"  "<<effB<<endl;
       g->SetPoint(i,effS,effB);
       g->SetPointError(i,errS,errS,errB, errB);	
     }
@@ -1195,3 +1259,15 @@ HistoUtils::curveROC(TH1* s, TH1* b) {
 }
 
 
+void
+HistoUtils::poissonHisto(TH1*& h) {
+  h->SetCanExtend(TH1::kNoAxis);
+  for(int ib=0;ib<h->GetNbinsX()+2;ib++) {
+    for(int iby=0;iby<h->GetNbinsY()+2;iby++) {
+      float pY=StatUtils::PoissonYield( h->GetBinContent(ib, iby) );
+      h->SetBinContent(ib, iby, pY );
+      h->SetBinError(ib, iby, sqrt( pY ) ); //not the best, but best approximate
+    }
+  }
+  
+}

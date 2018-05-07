@@ -288,3 +288,14 @@ KineUtils::d0(const TVector3& pv, const TVector3& vtx, TVector3& p) {
   return ( -(vtx.X()-pv.X() )*p.Py() + (vtx.Py()-pv.Y() )*p.Px() ) / p.Pt();
 
 }
+ 
+float 
+KineUtils::M_T(float pt_lepton, float pt_met, float phi_lepton, float phi_met){
+
+        float deltaPhi = dPhi(phi_lepton, phi_met);
+        float m_t = 0;
+        m_t = sqrt(2 * pt_lepton * pt_met * (1 - cos(deltaPhi) ));
+        return m_t;
+}
+
+

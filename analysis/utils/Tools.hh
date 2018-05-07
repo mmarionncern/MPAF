@@ -38,6 +38,7 @@ namespace Tools {
 
 	// Non-template members
 
+
     float add(const std::vector<std::string>);
     float subtract(const std::vector<std::string>);
     std::vector<std::string> split(const std::string, char);
@@ -83,6 +84,7 @@ namespace Tools {
 
 
 
+  std::string getCmdOutput(const std::string& mStr);
 
 
 	float ConvertBoolToFloatAlternatively(bool);

@@ -8,6 +8,7 @@ FILES += HistoUtils
 FILES += Sample
 FILES += StatUtils
 FILES += SystUtils
+#FILES += Tools
 
 # Header files to use for dictionary generation
 DICTFILES := $(FILES) LinkDef

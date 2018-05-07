@@ -22,7 +22,8 @@ Sample::Sample(SampleId sId,
   _eqLumi=eqLumi;
 
   _weight=1.;
-  
+  _linking=false;
+
   computeWeight();
 
 }
@@ -36,10 +37,12 @@ Sample::computeWeight() {
   //means that Xsection used for reweigthing instead of equivalentLumi
   // and means that the number of processed events is available
   
-  if(_eqLumi==-1 && _nProcEvents!=-1) {
+  if((_eqLumi==-1 || _linking) && _nProcEvents!=-1) {
+    _linking=false;
     _eqLumi = _nProcEvents/_xSection;
     if(_sumProcWgts != -1) _eqLumi = _sumProcWgts/_xSection;
   }
-  
+  if(_nProcEvents==-1) _eqLumi=1; //avoid negative weights for already normalized yields, to be checked
+ 
   _weight =(1./_eqLumi)*_kFactor;
 }

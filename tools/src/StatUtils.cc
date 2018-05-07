@@ -4,6 +4,53 @@ using namespace std;
 
 ClassImp(StatUtils)
 
+TRandom3 _rnd;
+
+float
+StatUtils::standardDeviation(const vector<float>& x) {
+
+  float sum=0;
+  float sum2=0; 
+  int n=x.size();
+  if(n==0) return 0;
+  for(unsigned int i=0;i<x.size();i++) {
+    sum += x[i];
+    sum2 += x[i]*x[i];
+  }
+
+  float variance=1./(n-1)*(sum2-1/n*(sum*sum) );
+  return sqrt(variance);
+}
+
+float
+StatUtils::covariance(const vector<float>& x, const vector<float>& y) {
+
+ 
+
+  float prod=0;
+  float sumx=0;
+  float sumy=0;
+  int n=x.size();
+  if(n==0) return 0;
+  
+  for(unsigned int i=0;i<x.size();i++) {
+    prod += x[i]*y[i];
+    sumx += x[i];
+    sumy += y[i];
+  }
+  return prod/n - (sumx/n * sumy/n);
+}
+
+float
+StatUtils::normalizeVariable(float x, float min, float max, float minT, float maxT) {
+
+  if(max==min) return 0;
+  float a=(maxT-minT)/(max-min);
+  float b=(maxT+minT-(max+min)*a)/2.;
+  //cout<<" a: "<<a<<" b: "<<b<<endl;
+  return a*x+b;
+}
+
 float 
 StatUtils::BinomError(float Nt, double eff) {
   
@@ -143,6 +190,11 @@ float StatUtils::Poisson(float mc, int dataN) {
   return poisson;
 }
 
+float
+StatUtils::PoissonYield(float y) {
+  float yield=_rnd.PoissonD(y);
+  return yield;
+}
 // float StatUtils::LnL(float si, float bi, int ni,int NData, float a) {
 
 //   double L=0;
@@ -248,3 +300,8 @@ void StatUtils::Integral(TH1* mc, TH1* data, double xmin, double xmax) {
   cout<<endl<<" *** Integral "<<xmin<<" -> "<<xmax<<" ---> "<<Binm<<"   "<<BinM<<" : MC -> "<<integMC<<"   ; data ->  "<<integdata<< " +- "<<sqrt(integdata)<<endl;
 }
 
+
+float
+StatUtils::retrieveNumEvents(float y, float ye) {
+  return pow( y/ye, 2);
+}

@@ -211,7 +211,7 @@ int
 AnaConfig::findChan(string ds) {
   for(_itNDS=_numDS.begin();_itNDS!=_numDS.end();_itNDS++) {
   
-    vector<string> samples = _datasets[ _itNDS->second ]->getSamples();
+    vector<string> samples = _datasets[ _itNDS->second ]->getSampleNames();
     for(size_t is=0;is<samples.size();is++) {
       if(ds == samples[is]) return _itNDS->first;
     }
@@ -228,14 +228,20 @@ void AnaConfig::configureLumi(map<string,float> LumisXS, map<string,float> Kfac,
   _lumi =l;
   _useXSect = useXS;
   
+
 }
 
 void 
-AnaConfig::configureNames(string dir, string rootFile, string fileList) {
+AnaConfig::configureNames(string dir, string rootFile, vector<string> fileList) {
   _dir = dir;
   _rootFile = rootFile;
-  vector<string> filenames = listFiles((string)(getenv("MPAF")) + "/workdir/stats/" + dir + "/", fileList + ".dat");
+  vector<string> filenames;
+  for(size_t iv=0;iv<fileList.size();iv++) {
+    vector<string> tmp=listFiles((string)(getenv("MPAF")) + "/workdir/stats/" + dir + "/", fileList[iv] + ".dat");
+    filenames.insert(filenames.end(), tmp.begin(), tmp.end() );
+  }
   _statFileList = filenames;
+  //_statFileList = fileList;
   _hname = "nEvtProc";
   _hwgtname = "sumWgtProc";
 }
@@ -268,6 +274,7 @@ AnaConfig::parseSampleId(string str) {
   SampleId sId;
   sId.norm = -1;
   sId.dd = false;
+  sId.isData = false;
   sId.cr = "";
   sId.name = "";
 
@@ -285,7 +292,7 @@ AnaConfig::parseSampleId(string str) {
     sId.dd = true;
     tmpStr=tmpStr.substr(5, tmpStr.size()-5);
   }
-
+ 
   //control region =====
   size_t pc=tmpStr.find(":");
   if(pc!=string::npos) {
@@ -305,15 +312,20 @@ AnaConfig::addUsefulVar(string var) {
 }
 
 void
-AnaConfig::addSample( string str, string sname, int col, float weight, bool loadH) {
+AnaConfig::addSample( string str, string sname, int col, 
+		      float weight, int link, bool loadH) {
  
   
   string dsName=sname;
-  if(sname=="pseudodata") dsName="data";
+  bool isPoissonPseudo=false;
+  if(sname.find("pseudodata")!=string::npos) dsName="data";
+  if(sname.find("Poisson")!=string::npos || sname.find("poisson")!=string::npos ) {
+    isPoissonPseudo=true;
+    dsName="data";
+  }
 
   //parse the sample name
   SampleId sId=parseSampleId(str);
-
   if( sId.cr!="" ) {
     _csData.push_back( pair<string, float>(sId.name,sId.norm) );
   }
@@ -328,15 +340,36 @@ AnaConfig::addSample( string str, string sname, int col, float weight, bool load
     _numDS[ _numDS.size() ] = dsName;
   }
   
+  if(sname=="data" || sname=="Data")
+    sId.isData=true;
+
   if(sname=="data" || sname=="Data" || sId.dd ) {
-    sId.dd=true;
+    float kFact=1.;
+    // if(sId.dd) {
+    //   _itKF=_kFactors.find(sId.name);
+    //   if(_itKF==_kFactors.end()) {
+	
+    // 	//first, check if a kFactor DB is loaded
+    // 	if(_dbm->exists("Kfactors"))
+    // 	  kFact = _dbm->getDBValue("Kfactors", sId.name);
+    // 	if(kFact!=1) { 
+    // 	  cout<<"WARNING: applying k factor " << kFact << " for data-driven dataset " <<  sId.name << endl;
+    // 	}
+    //   }
+    //   else {
+    // 	kFact =1;
+    //   }
+    // }
+
+    // sId.dd=true;
     _datasets[ dsName ]->setUsefulVars(_usefulVars);
     _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
-				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1.*weight, 1., 1., loadH);
+				   _hname+"/"+sId.name,_hwgtname+"/"+sId.name,0., 1.*weight*kFact, 1., 1., link, loadH, isPoissonPseudo);
     _dsnames.push_back(dsName);
- 
+    
     return;
   }
+
  
   
   //histogram analysis
@@ -383,14 +416,14 @@ AnaConfig::addSample( string str, string sname, int col, float weight, bool load
       }
     }
     else {
-      cout<< "no k factor found in database - using default 1" << endl;
-      kFact =1;
+      cout<< "no k factor found in database - using default or card value" << endl;
+      kFact =_itKF->second;
     }
-    
     _datasets[ dsName ]->setUsefulVars(_usefulVars);
     _datasets[ dsName ]->addSample(sId, _path, _dir, _rootFile,
 				   _hname+"/"+sId.name, _hwgtname+"/"+sId.name, 
-				   xSect, kFact*weight, _lumi, eqLumi, loadH);
+				   xSect, kFact*weight, _lumi, eqLumi, link, loadH,
+				   isPoissonPseudo);
     _dsnames.push_back(sname);
   }
   else {
@@ -398,9 +431,8 @@ AnaConfig::addSample( string str, string sname, int col, float weight, bool load
     _datasets[ dsName ]->addSample(sId, "", "", "", "", 0, 0, 0, 0, loadH);
     _dsnames.push_back(dsName);
   }
-  
+ 
 }
-
 
 bool
 AnaConfig::passRunFilter(int run) {

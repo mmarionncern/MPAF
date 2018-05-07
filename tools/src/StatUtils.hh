@@ -12,7 +12,9 @@
 
 #include "TH1.h"
 #include "TMath.h"
+#include "TRandom3.h"
 
+extern TRandom3 _rnd;
 
 using namespace std;
 
@@ -21,6 +23,11 @@ class StatUtils {
 
 public :
 
+  static float standardDeviation(const vector<float>& x);
+  static float covariance(const vector<float>& x, const vector<float>& y);
+
+  static float normalizeVariable(float x, float min, float max, float minT=0, float maxT=1);
+  
   static float BinomError(float Nt, double eff);
   
   static void ComputeStatFromHisto(TH1* histo, double& Em, double& EM, double& M);
@@ -42,7 +49,10 @@ public :
 
   static void Integral(TH1* mc, TH1* data, double xmin, double xmax);
 
+  static float retrieveNumEvents(float y, float ye);
 
+  static float PoissonYield(float y);
+  
   template < typename T > static inline
   unsigned int findBin(T v, vector<T> vals) {
     bool find=false;
@@ -60,7 +70,8 @@ public :
       else {
 	bm = bm+(bM-bm)/2;
       }
-      if( fabs((int)(bM-bm))==1 )  {
+      
+	if( std::abs((int)(bM-bm))==1 )  {
 	return bm;
       }
    
@@ -79,7 +90,27 @@ public :
     return -1;
   };
 
+  template <typename T> static inline
+  T max(vector<T> vals) {
+    if(vals.size()==0) return 0;
+    T max=-10000000;
+    for(size_t i=0;i<vals.size();i++){
+      if(vals[i]>max) max=vals[i];
+    }
+    return max;
+  };
 
+  template <typename T> static inline
+  T min(vector<T> vals) {
+    if(vals.size()==0) return 0;
+    T min=100000000;
+    for(size_t i=0;i<vals.size();i++){
+      if(vals[i]<min) min=vals[i];
+    }
+    return min;
+  };
+
+  
   ClassDef(StatUtils,0)
 
 }; 

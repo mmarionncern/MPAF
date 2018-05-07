@@ -70,6 +70,8 @@ public:
   
   static vector<TH1F*> histoReduction(TH1F* source,TH1F* MC);
 
+  static void removeNegativeBins(TH1*& h);
+  
   static void cleanGraph(TGraph*& g);
 
   //Stacking function
@@ -95,6 +97,7 @@ public:
   
   //statistics and histograms
   static TH1F* significance(TH1F* hs, TH1F* hb);
+  static TH1F* discriminationPower(TH1F* hs, TH1F* hb);
   static TH2F* significance(TH2F* hs, TH2F* hb);
 
   //efficiency cuvre from the histo
@@ -122,6 +125,7 @@ public:
   static vector<vector<float> > getGraphUpperCoordinatesWithError(TGraphAsymmErrors* g);
   
   static float getHistoYlow(TH1* h, float xm=-10000000000., float xM=10000000000.);
+  static float getHistoYhigh(TH1* h, float xm=-10000000000., float xM=10000000000.);
   static float getGraphYlowWithError(TGraphAsymmErrors* g, float xm=-10000000000.,
 				     float xM=10000000000.);
   static float getGraphYhighWithError(TGraphAsymmErrors* g, float xm=-10000000000.,
@@ -138,6 +142,9 @@ public:
   static std::vector<float> getYbinning(TH2* h );
 
 
+  static void poissonHisto(TH1*& h);
+
+  
   ClassDef(HistoUtils,0)
 
 };

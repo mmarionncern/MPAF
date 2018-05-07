@@ -143,53 +143,52 @@ int Tools::execCmd(std::string command){
 
 //____________________________________________________________________________
 std::vector<std::string> Tools::explodeString(const std::string string, std::string delimiter){
-	/*
-	explodes a std::string into a vector of std::strings by breaking the string at
-	every delimiter
-	parameters: string (the string to explode), delimiter (the string at whose
-	            occurrence the string will be broken)
-	return: vector
-	*/
+  /*
+    explodes a std::string into a vector of std::strings by breaking the string at
+    every delimiter
+    parameters: string (the string to explode), delimiter (the string at whose
+    occurrence the string will be broken)
+    return: vector
+  */
 
-	std::vector<std::string> vector;
-	std::string element;
+  std::vector<std::string> vector;
+  std::string element;
 
-	for(std::string::const_iterator i = string.begin(); i != string.end(); ++i){
-		element += *i;
+  for(std::string::const_iterator i = string.begin(); i != string.end(); ++i){
+    element += *i;
 	
-		if(element.size() >= delimiter.size() && element.substr(element.size() - delimiter.size()) == delimiter){
-			vector.push_back(element.substr(0, element.size() - delimiter.size()));
-			element = "";
-		}
-	}
-
-	vector.push_back(element);
+    if(element.size() >= delimiter.size() && element.substr(element.size() - delimiter.size()) == delimiter){
+      vector.push_back(element.substr(0, element.size() - delimiter.size()));
+      element = "";
+    }
+  }
+  vector.push_back(element);
 	
-	return vector;
+  return vector;
 
 }
 
 
 //__________________________________________________________________________
 std::vector<std::string> Tools::split(const std::string s, char delim) {
-    std::vector<std::string> elems;
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
+  std::vector<std::string> elems;
+  std::stringstream ss(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+  return elems;
 }
 
 
 //__________________________________________________________________________
 std::vector<float> Tools::strToFloat(const std::vector<std::string> vec){
 
-	std::vector<float> res;
-    for(unsigned int i = 0; i < vec.size(); ++i){
-        res.push_back(evalSimpleFormula(vec[i]));
-    }
-	return res;
+  std::vector<float> res;
+  for(unsigned int i = 0; i < vec.size(); ++i){
+    res.push_back(evalSimpleFormula(vec[i]));
+  }
+  return res;
 
 }
 
@@ -530,6 +529,28 @@ int Tools::countOccurrences(std::string haystack, std::string needle, size_t pos
 		return 0;
 
 }
+
+
+std::string 
+Tools::getCmdOutput(const std::string& mStr)
+{
+    std::string result, file;
+    FILE* pipe{popen(mStr.c_str(), "r")};
+    char buffer[256];
+
+    while(fgets(buffer, sizeof(buffer), pipe) != nullptr)
+    {
+        file = buffer;
+        result += file.substr(0, file.size() - 1);
+    }
+
+    pclose(pipe);
+    return result;
+}
+
+
+
+
 
 
 ////____________________________________________________________________________

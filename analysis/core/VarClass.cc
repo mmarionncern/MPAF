@@ -71,7 +71,9 @@ void VarClass::reset() {
   //   delete it->second;
 
   _branches.clear();
-
+  _leafSize.clear();
+  _leafSizeI.clear();
+  
   varmVI.clear();
   varmVUI.clear();
   varmVUL.clear();
@@ -126,6 +128,7 @@ void VarClass::reset() {
   uncmF.clear();
   cnt_.clear();
   varIds_.clear();
+  _regTwice.clear();
   initIds();
 
   _friendBranches.clear();
@@ -160,6 +163,18 @@ void VarClass::registerVar(string name) {
 
   _varnames.push_back(name);
 
+}
+
+void VarClass::registerVarPfx(string name, string prefix) {
+  /*
+    adds a variable name to the list of variables that shall be read from the tree
+    parameters: name
+    return: none
+  */
+
+  _varnames.push_back(prefix+"."+name);
+  if(_prefix.find(std::make_pair(name,prefix))==_prefix.end())
+    _prefix[std::make_pair(name,prefix)]=prefix;
 }
 
 void
@@ -245,32 +260,32 @@ VarClass::registerVar(string name, string type) {
 
 
 // //____________________________________________________________________________
- string VarClass::getS(string name, int idx) {
+string VarClass::getS(string name, int idx) {
   /*
     returns the value of a string variable
     parameters: name (variable name), idx (index of the element, if any)
     return: the value in the tree entry
   */
 
-   itVId_ = varIds_.find(name);
-   if(itVId_ == varIds_.end() )
-     cout << " error, no such variable " << name << endl;
-   int id = itVId_->second;
-   int cType = id/oC_;
-   int tType = (id-cType*oC_)/oT_;
-   int key = (id-cType*oC_ - tType/oT_);
+  itVId_ = varIds_.find(name);
+  if(itVId_ == varIds_.end() )
+    cout << " error, no such variable " << name << endl;
+  int id = itVId_->second;
+  int cType = id/oC_;
+  int tType = (id-cType*oC_)/oT_;
+  int key = (id-cType*oC_ - tType*oT_);
 
-   if(key!=kString) return "";
+  if(key!=kString) return "";
 
 
-   switch(cType) {
-   case kScalar: {return varmS[key]; }
-   case kVector: {return (*varmVS[key])[idx];}
-   case kArray: {return varmAS[key][idx];}
-   }
-   return 0;
+  switch(cType) {
+  case kScalar: {return varmS[key]; }
+  case kVector: {return (*varmVS[key])[idx];}
+  case kArray: {return varmAS[key][idx];}
+  }
+  return 0;
 
- }
+}
 
 
 // //____________________________________________________________________________
@@ -281,24 +296,31 @@ unsigned int VarClass::getSize(string name) {
   //     return: its size
   //   */
   //not finished
+ 
+  itVId_ = varIds_.find(name);
+  if(itVId_ == varIds_.end() )
+    cout << " error, no such variable " << name << endl;
+  int id = itVId_->second;
+  int cType = id/oC_;
+  int tType = (id-cType*oC_)/oT_;
+  int key = (id-cType*oC_ - tType*oT_);
 
-   // itVId_ = varIds_.find(name);
-   // if(itVId_ == varIds_.end() )
-   //   cout << " error, no such variable " << name << endl;
-   // int id = itVId_->second;
-   // int cType = id/oC_;
-   // int tType = (id-cType*oC_)/oT_;
-   // int key = (id-cType*oC_ - tType/oT_);
+  if(kScalar==cType) return 0;
 
-   // if(kScalar==cType) return 0;
-
+  switch(cType) {
+  case kVector: {
+    switch(tType) {
+    case kInt: {return (*varmVI[key]).size();}
+    case kUInt: {return (*varmVUI[key]).size();}
+    case kULong: {return (*varmVUL[key]).size();}
+    case kDouble: {return (*varmVD[key]).size();}
+    case kFloat: {return (*varmVF[key]).size();}
+    }
+  }
+  case kArray: {return _leafSize[name];}
+  }
   
-   // switch(cType) {
-   // case kVector: {return (*varmVS[key]).size();}
-   // case kArray: {return varmAS[key][idx];}
-   // }
-
-   return 0;
+  return 0;
 }
 void VarClass::buildFriendTree(TTree* tree, bool bypass){ 
 
@@ -308,7 +330,6 @@ void VarClass::buildFriendTree(TTree* tree, bool bypass){
   
   while (lnk) {
     TTree *ft = (TTree*) tree->GetFriend(lnk->GetObject()->GetName());
-
     TObjArray* branches =  ft->GetListOfBranches();
     string name;
     
@@ -326,36 +347,44 @@ void VarClass::buildFriendTree(TTree* tree, bool bypass){
       len = -1;
       type = "";
       t = (EDataType) -1;
-    
+
       name = (string)( ((*branches)[ib])->GetName());
       ((TBranchSTL*)((*branches)[ib]))->GetExpectedType(cc,t);	
+     
+      if(_regTwice.find(name)!=_regTwice.end()) continue;
       
       //determine if it is array
       leaf = (TLeaf*)leaves->UncheckedAt(ib);
       leafcount =leaf->GetLeafCount();
-      
+
+      if(leafcount==nullptr && leaf->GetLen()>1) {
+	len=leaf->GetLen(); 
+	_leafSize[name]=len;
+      }
+	
       // vector or container 
       if( t == -1 )
 	type = (string)(cc->GetName());
       
       if(leafcount) {
 	len = leafcount->GetMaximum();
+	_leafSize[name]=len;
       }
-	
-      // failed to find the type of the variable automatically
-      // if( type == "" ) {
-      //   map<string,std::pair<string, int> >::const_iterator it = _varTypes.find( name );
-      //   if( it != _varTypes.end() ) {
-      // 	type = it->second.first;
-      // 	t = (EDataType)(it->second.second);
-      // 	//cout << " manual " << type << "  " << t << endl;
-      //   }
-      // }
+    
+      string prf=(string)(lnk->GetObject()->GetName());
+      // cout<<" ==> "<<_prefix.size()<<endl;
+      // for(auto it=_prefix.begin();it!=_prefix.end();it++)
+      // 	cout<<it->first.first<<"  "<<it->first.second<<endl;
       
+      if(_prefix.find(std::make_pair(name,prf))!=_prefix.end() ) {
+	name=prf+"."+name;
+      }
+      if( varIds_.find(name) != varIds_.end() ) continue;//skipping double defined varaibles
+      //cout<<prf<<" -> "<<name<<"  "<<isUsefulVar(name)<<endl;
       // by default, status disabled
       if( !bypass )
-	tree->SetBranchStatus( name.c_str() , 0);
-      
+      	tree->SetBranchStatus( name.c_str() , 0);
+      //tree->SetBranchStatus( name.c_str() , 1);
       // variable to be registered	
       if( isUsefulVar(name) ) {
 	// enable status
@@ -366,10 +395,15 @@ void VarClass::buildFriendTree(TTree* tree, bool bypass){
 
 	//link branch to main tree for skimming purposes
 	_friendBranches.push_back( name );
+
+	if(leafcount) {
+	  _leafSizeI[varIds_[name] ]=len;
+	}
       }
     }
     lnk = lnk->Next(); 
   }
+  
 }
 //____________________________________________________________________________
 void VarClass::buildTree(TTree* tree, bool bypass) {
@@ -395,7 +429,7 @@ void VarClass::buildTree(TTree* tree, bool bypass) {
   TLeaf *leafcount;
   int len;
 
-  for(int ib = 0; ib < branches->GetEntries(); ++ib) {
+  for(int ib=0; ib<branches->GetEntries();++ib) {
 
     len = -1;
     type = "";
@@ -404,18 +438,27 @@ void VarClass::buildTree(TTree* tree, bool bypass) {
     name = (string)( ((*branches)[ib])->GetName());
     ((TBranchSTL*)((*branches)[ib]))->GetExpectedType(cc,t);	
     
+    if(_regTwice.find(name)!=_regTwice.end()) continue;
+
     //determine if it is array
     leaf = (TLeaf*)leaves->UncheckedAt(ib);
     leafcount =leaf->GetLeafCount();
-    
+
+    //cout<<name<<"  "<<leafcount<<"  "<<leaf->GetLen()<<"  "<<leaf->GetLenStatic()<<" ->> "<<(leafcount==0 && leaf->GetLen()!=0)<<"  "<<cc->GetName()<<"  "<<t<<endl;
+    if(leafcount==nullptr && leaf->GetLen()>1) {
+      len=leaf->GetLen(); //to be tested
+      _leafSize[name]=len;
+    }
+      
     // vector or container 
     if( t == -1 )
       type = (string)(cc->GetName());
 	
     if(leafcount) {
       len = leafcount->GetMaximum();
+      _leafSize[name]=len;
     }
-    
+
     // failed to find the type of the variable automatically
     // if( type == "" ) {
     //   map<string,std::pair<string, int> >::const_iterator it = _varTypes.find( name );
@@ -425,21 +468,28 @@ void VarClass::buildTree(TTree* tree, bool bypass) {
     // 	//cout << " manual " << type << "  " << t << endl;
     //   }
     // }
-	
+    // cout<<name<<" --->> "<<leafcount<<"  "<<type<<"  "<<t<<"  "<<len
+    // 	<<" ==>> "<<leaf->GetLen()<<"  "<<leaf->GetLenStatic()<<endl;
     // by default, status disabled
     if( !bypass )
       tree->SetBranchStatus( name.c_str() , 0);
+    //tree->SetBranchStatus( name.c_str() , 1);
     
     // variable to be registered	
     if( isUsefulVar(name) ) {
       // enable status
       tree->SetBranchStatus( name.c_str() , 1);
-    
+      
       // register branch
       registerBranch(tree, name, type, t, len );
-    
+
+      if(len!=-1) {
+	_leafSizeI[varIds_[name] ]=len;
+      }
     }
   }
+
+ 
 }
 
 
@@ -460,6 +510,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // VI: vector<int>
     if( type == "vector<int>" ) {
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -472,6 +523,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // VUI: vector<unsigned int>
     else if( type == "vector<unsigned int>" ) {
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -484,6 +536,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // VUI: vector<unsigned long>
     else if( type == "vector<unsigned long>" ) {
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -496,6 +549,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // VF: vector<float>
     else if( type == "vector<float>" || type == "Float_t" ) {
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -508,6 +562,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // VD: vector<double> 
     else if( type == "vector<double>" ) { 
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -520,6 +575,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // VB: vector<bool>
     else if( type == "vector<bool>" ) {		  
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -532,6 +588,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // S: string
     else if( type == "string" ) {  
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -544,6 +601,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // VS: vector<string>
     else if( type == "vector<string>" ) {		
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -556,6 +614,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // AS: arrayString
     else if( type == "string" && len!=-1) {
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -568,6 +627,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     // TBits
     else if( type == "TBits" ) {	  
       if( varIds_.find(name) != varIds_.end() ) {
+	_regTwice.emplace(name);
 	cout << " Warning, " << name << " already registered" << endl;
 	return;
       }
@@ -580,6 +640,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // AI: arrayI
   else if(t==3 && len!=-1) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -592,6 +653,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // AUI: arrayUI
   else if(t==13 && len!=-1) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -603,6 +665,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // AF: arrayF
   else if(t==5 && len!=-1) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -615,6 +678,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // AD: arrayD
   else if( t==8 && len!=-1 ) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -622,11 +686,12 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
     setIds( name, kArray, kDouble, key, tree);
     varmAD[ key ] = new double[len];
     tree->SetBranchAddress( name.c_str() , varmAD[ key ] );
-  }
+  } 
 
   // AB: arrayB
   else if(  t==18 && len!=-1 ) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -642,6 +707,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // I: int
   else if(t==3) {  
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -654,6 +720,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // UI: unsigned int
   else if( t == 13 ) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -666,6 +733,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // UL: unsigned long
   else if( t == 14 ) {  
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -678,6 +746,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // F: float
   else if( t == 5 ) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -690,6 +759,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // B: bool
   else if( t == 18 ) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -702,6 +772,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   // D: double
   else if( t == 8 ) {
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -714,6 +785,7 @@ void VarClass::registerBranch(TTree* tree, string name, string type, EDataType t
   //UL : unsigned long 64 bits
   else if( t == 17 ) {  
     if( varIds_.find(name) != varIds_.end() ) {
+      _regTwice.emplace(name);
       cout << " Warning, " << name << " already registered" << endl;
       return;
     }
@@ -747,6 +819,23 @@ VarClass::setIds(string name, int cont, int type, int& id, TTree* tree) {
   TBranch* b=tree->GetBranch(name.c_str() );
   _branches[key]=b;
   _loaded[key]=false;
+}
+
+vector<int>
+VarClass::getIds(const string& name) {
+  vector<int> ids(2,-1);
+
+  itVId_ = varIds_.find(name);
+  if(itVId_ == varIds_.end() )
+    cout << " error, no such variable " << name << endl;
+  int id=itVId_->second;
+  int cType = (id/oC_);
+  int tType = ((id-cType*oC_)/oT_);
+  
+  ids[0]=cType;
+  ids[1]=tType;
+
+  return ids;
 }
 
 double
@@ -812,13 +901,215 @@ double VarClass::findAVal(int tType, int key, int idx) {
   return 0;
 }
 
+void
+VarClass::cloneBranch(TTree* skT, const string& name) {
 
-double VarClass::get(string name, int idx) {
+   itVId_ = varIds_.find(name);
+  if(itVId_ == varIds_.end() )
+    cout << " error, no such variable " << name << endl;
+  int id=itVId_->second;
+  int cType = (id/oC_);
+  int tType = ((id-cType*oC_)/oT_);
+  int key = (id-cType*oC_ - tType*oT_);
+  string ext=getEncodedFormat(name);
+ 
+  if(ext=="") { //no leafs
+    switch(cType) {
+    case kScalar: {
+      switch(tType) {
+      case kInt: {skT->Branch(name.c_str(), &(varmI[key]) ,(name+"/I").c_str() ); break;}
+      case kUInt: {skT->Branch(name.c_str(), &(varmUI[key]) ); break;}
+      case kULong: {skT->Branch(name.c_str(), &(varmUL[key]) ); break;}
+      case kULong64: {skT->Branch(name.c_str(), &(varmUL64[key]) ); break;}
+      case kDouble: {skT->Branch(name.c_str(), &(varmD[key]) ); break;}
+      case kFloat: {skT->Branch(name.c_str(), &(varmF[key]) ); break;}
+	//case kString: {break varmS[key];}
+      case kBool: {skT->Branch(name.c_str(), &(varmB[key]) ); break;}
+      }
+      break;
+    }
+    case kVector: {
+      switch(tType) {
+      case kInt: {skT->Branch(name.c_str(), &(varmVI[key]) ); break;}
+      case kUInt: {skT->Branch(name.c_str(), &(varmVUI[key]) ); break;}
+      case kULong: {skT->Branch(name.c_str(), &(varmVUL[key]) ); break;}
+      case kDouble: {skT->Branch(name.c_str(), &(varmVD[key]) ); break;}
+      case kFloat: {skT->Branch(name.c_str(), &(varmVF[key]) ); break;}
+	//case kString: {break (*varmVS[key])[idx];}
+      case kBool: {skT->Branch(name.c_str(), &(varmVB[key]) ); break;}
+      }
+      break;
+    }
+    case kArray: {
+      switch(tType) {
+      case kInt: {skT->Branch(name.c_str(), &(varmAI[key]) ); break;}
+      case kUInt: {skT->Branch(name.c_str(), &(varmAUI[key]) ); break;}
+      case kULong: {skT->Branch(name.c_str(), &(varmAUL[key]) ); break;}
+      case kDouble: {skT->Branch(name.c_str(), &(varmAD[key]) ); break;}
+      case kFloat: {skT->Branch(name.c_str(), &(varmAF[key]) ); break;}
+	//case kString: {break varmAS[key][idx];}
+      case kBool: {skT->Branch(name.c_str(), &(varmAB[key]) ); break;}
+      }
+      break;
+    }
+    }
+
+  } else {
+    
+    switch(cType) {
+    case kScalar: {
+      switch(tType) {
+      case kInt: {skT->Branch(name.c_str(), &(varmI[key]), ext.c_str()); break;}
+      case kUInt: {skT->Branch(name.c_str(), &(varmUI[key]), ext.c_str()); break;}
+      case kULong: {skT->Branch(name.c_str(), &(varmUL[key]), ext.c_str()); break;}
+      case kULong64: {skT->Branch(name.c_str(), &(varmUL64[key]), ext.c_str()); break;}
+      case kDouble: {skT->Branch(name.c_str(), &(varmD[key]), ext.c_str()); break;}
+      case kFloat: {skT->Branch(name.c_str(), &(varmF[key]), ext.c_str()); break;}
+	//case kString: {break varmS[key];}
+      case kBool: {skT->Branch(name.c_str(), &(varmB[key]), ext.c_str()); break;}
+      }
+      break;
+    }
+    case kVector: {
+      switch(tType) {
+      case kInt: {skT->Branch(name.c_str(), &(varmVI[key]), ext.c_str()); break;}
+      case kUInt: {skT->Branch(name.c_str(), &(varmVUI[key]), ext.c_str()); break;}
+      case kULong: {skT->Branch(name.c_str(), &(varmVUL[key]), ext.c_str()); break;}
+      case kDouble: {skT->Branch(name.c_str(), &(varmVD[key]), ext.c_str()); break;}
+      case kFloat: {skT->Branch(name.c_str(), &(varmVF[key]), ext.c_str()); break;}
+	//case kString: {break (*varmVS[key])[idx];}
+      case kBool: {skT->Branch(name.c_str(), &(varmVB[key]), ext.c_str()); break;}
+      }
+      break;
+    }
+    case kArray: {
+      switch(tType) {
+      case kInt: {skT->Branch(name.c_str(), &(varmAI[key]), ext.c_str()); break;}
+      case kUInt: {skT->Branch(name.c_str(), &(varmAUI[key]), ext.c_str()); break;}
+      case kULong: {skT->Branch(name.c_str(), &(varmAUL[key]), ext.c_str()); break;}
+      case kDouble: {skT->Branch(name.c_str(), &(varmAD[key]), ext.c_str()); break;}
+      case kFloat: {skT->Branch(name.c_str(), &(varmAF[key]), ext.c_str()); break;}
+	//case kString: {break varmAS[key][idx];}
+      case kBool: {skT->Branch(name.c_str(), &(varmAB[key]), ext.c_str()); break;}
+      }
+      break;
+    }
+    }
+
+  }
+    
+}
+
+void
+VarClass::reinitArrays() {
+  reinitArray<unsigned int>( varmAUI, oC_*kArray + oT_*kUInt );
+  reinitArray<unsigned long>( varmAUL, oC_*kArray + oT_*kULong );
+  reinitArray<int>( varmAI, oC_*kArray + oT_*kInt );
+  reinitArray<double>( varmAD, oC_*kArray + oT_*kDouble );
+  reinitArray<float>( varmAF, oC_*kArray + oT_*kFloat );
+
+}
+
+void*
+VarClass::getBranchAddress(const string& name) {
   
   itVId_ = varIds_.find(name);
   if(itVId_ == varIds_.end() )
     cout << " error, no such variable " << name << endl;
+  int id=itVId_->second;
+  int cType = (id/oC_);
+  int tType = ((id-cType*oC_)/oT_);
+  int key = (id-cType*oC_ - tType*oT_);
 
+  switch(cType) {
+  case kScalar: {
+    switch(tType) {
+    case kInt: {return &(varmI[key]);}
+    case kUInt: {return &(varmUI[key]);}
+    case kULong: {return &(varmUL[key]);}
+    case kULong64: {return &(varmUL64[key]);}
+    case kDouble: {return &(varmD[key]);}
+    case kFloat: {return &(varmF[key]);}
+      //case kString: {return varmS[key];}
+    case kBool: {return &(varmB[key]);}
+    }
+  }
+  case kVector: {
+    switch(tType) {
+    case kInt: {return &(varmVI[key]);}
+    case kUInt: {return &(varmVUI[key]);}
+    case kULong: {return &(varmVUL[key]);}
+    case kDouble: {return &(varmVD[key]);}
+    case kFloat: {return &(varmVF[key]);}
+      //case kString: {return (*varmVS[key])[idx];}
+    case kBool: {return &(varmVB[key]);}
+    }
+  }
+  case kArray: {
+    switch(tType) {
+    case kInt: {return (varmAI[key]);}
+    case kUInt: {return (varmAUI[key]);}
+    case kULong: {return (varmAUL[key]);}
+    case kDouble: {return (varmAD[key]);}
+    case kFloat: {return (varmAF[key]);}
+      //case kString: {return varmAS[key][idx];}
+    case kBool: {return (varmAB[key]);}
+    }
+  }
+  }
+
+  return nullptr;
+}
+
+
+string
+VarClass::getEncodedFormat(const string& name) {
+  
+  itVId_ = varIds_.find(name);
+  if(itVId_ == varIds_.end() )
+    cout << " error, no such variable " << name << endl;
+  int id=itVId_->second;
+  int cType = (id/oC_);
+  int tType = ((id-cType*oC_)/oT_);
+
+  if(cType!=kArray) return "";
+  ostringstream os;
+  os<<_leafSize[name];
+  
+  switch(tType) {
+  case kInt: {return (name+"["+os.str()+"]/I");}
+  case kUInt: {return (name+"["+os.str()+"]/U");}
+  case kULong: {return (name+"["+os.str()+"]/L");}
+  case kDouble: {return (name+"["+os.str()+"]/D");}
+  case kFloat: {return (name+"["+os.str()+"]/F");}
+    //case kString: {return varmAS[key][idx];}
+  case kBool: {return (name+"["+os.str()+"]/B");}
+  }
+  return "";
+}
+
+unsigned int
+VarClass::findASize(int tType, int key) {
+
+  switch(tType) {
+  case kInt: {return sizeof(varmAI[key])/sizeof(*varmAI[key]);} 
+  case kUInt: {return sizeof(varmAUI[key])/sizeof(*varmAUI[key]);}
+  case kULong: {return sizeof(varmAUL[key])/sizeof(*varmAUL[key]);}
+  case kDouble: {return sizeof(varmAD[key])/sizeof(*varmAD[key]);}
+  case kFloat: {return sizeof(&varmAF[key]);} ///sizeof(*varmAF[key])
+  case kBool: {return sizeof(varmAB[key])/sizeof(*varmAB[key]);}
+  }
+  return 0;
+}
+
+
+double VarClass::get(string name, int idx) {
+  
+  itVId_ = varIds_.find(name);
+  if(_usedVars.find(name)==_usedVars.end())
+    _usedVars[name] = true;
+  if(itVId_ == varIds_.end() )
+    cout << " error, no such variable " << name << endl;
   return findValue(itVId_->second, idx);
 }
 
@@ -827,7 +1118,7 @@ double VarClass::get(string name, int idx) {
 //link functions for skimming =====================
 void VarClass::linkFriendBranches(TTree*& tree) {
   _mTree=tree;
-
+  
   for(size_t ib=0;ib<_friendBranches.size();ib++) {
     linkBranch( _friendBranches[ib]);
   }
@@ -1102,3 +1393,12 @@ VarClass::getUnivF(int id) {
   return vf;
 }
 
+
+
+// string
+// VarClass::getType(const std::string& name) {
+
+//   if(
+  
+
+// }

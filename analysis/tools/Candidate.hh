@@ -127,7 +127,7 @@ public:
   size_t           nDaughters()  const;
   const CandList&  theDaughters() const { return _daughter; }
   const Candidate* daughter( size_t idau ) const;
-  Candidate*       daughter( size_t idau );
+  Candidate*       daughterNC( size_t idau );
   const Candidate* theMother()   const { return _mother; }
   Candidate*       theMother() { return _mother; }
 
@@ -147,7 +147,7 @@ public:
   //void setInfo( CandInfo* info );
 
   // set mother link
-  void setMother( Candidate* );
+  void setMother( Candidate*);
 
   // set daughter link
   void addDaughter( Candidate* );
@@ -284,6 +284,37 @@ private:
   static std::map< size_t, const Candidate* > _baseCand; 
       
 };
+
+
+//Cand Wrapper
+
+struct CandWrapper{
+
+  CandWrapper();
+  CandWrapper(Candidate* c, unsigned int idx, const std::string& coll ) {
+    _c=c;
+    _idx=idx;
+    _coll=coll;
+  }
+
+  Candidate* _c;
+  unsigned int _idx;
+  std::string _coll;
+
+  Candidate* c() const {return _c;};
+  unsigned int idx() const {return _idx;};
+  std::string coll() const {return _coll;};
+
+  bool operator<(const CandWrapper& o ) const {
+    return c()->pt()<o.c()->pt();
+  };
+  
+};
+  
+typedef std::vector<CandWrapper> CandWrapList;
+typedef std::vector<CandWrapper>::const_iterator CandWrapListIterator;
+
+
 
 #endif
 

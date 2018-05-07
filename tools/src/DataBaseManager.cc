@@ -239,7 +239,6 @@ DataBaseManager::readDbHisto(string key, string dbName, string hname) {
   TFile* dbFile=new TFile( ndb.c_str() ,"READ");
  
   TObject* obj =dbFile->Get(hname.c_str());
-
   TString cName = obj->ClassName();
 
   int nV=0;
@@ -442,7 +441,7 @@ DataBaseManager::getTF1DBValue(string key, float x, float v1, float v2, float v3
 float 
 DataBaseManager::getDBValue(string key, float v1, float v2, float v3, float v4,
 			    float v5, float v6,float v7, float v8, float v9, float v10) {
-
+  
   if(!exists(key) ) {
     cout<<"WARNING!! no database "<<key<<" registered! "<<endl;
     return 1;
@@ -533,8 +532,8 @@ DataBaseManager::getDBValue(string key, string v1) {
   
   _mSIt = _mStrIdx.find(v1+key);
   if(_mSIt==_mStrIdx.end()) {
-    cout<<"Warning, no value "<<v1<<" in database"<<key<<endl;
-    return -1000;
+    cout<<"Warning, no value "<<v1<<" in database "<<key<<endl;
+    return 1;
   }
 
   return getDBValue(key, _mSIt->second);
@@ -544,8 +543,8 @@ float
 DataBaseManager::getDBErrL(string key, string v1) {
  _mSIt = _mStrIdx.find(v1+key);
   if(_mSIt==_mStrIdx.end()) {
-    cout<<"Warning, no value "<<v1<<" in database"<<key<<endl;
-    return -1000;
+    cout<<"Warning, no value "<<v1<<" in database "<<key<<endl;
+    return 1;
   }
 
   return getDBErrL(key, _mSIt->second);
@@ -555,8 +554,8 @@ float
 DataBaseManager::getDBErrH(string key, string v1){
  _mSIt = _mStrIdx.find(v1+key);
   if(_mSIt==_mStrIdx.end()) {
-    cout<<"Warning, no value "<<v1<<" in database"<<key<<endl;
-    return -1000;
+    cout<<"Warning, no value "<<v1<<" in database "<<key<<endl;
+    return 1;
   }
 
   return getDBErrH(key, _mSIt->second);

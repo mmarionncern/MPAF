@@ -28,7 +28,6 @@ struct CatId{
   string ext;
   string uncTag;
   int upVar;
-
 };
 
 struct ValId{
@@ -88,7 +87,7 @@ private:
 
 
   void setNumbers();
-  void setHistograms();
+  void setHistograms(bool forLims=false);
 
   vector<string> split(const string& s, char delim);
   string findDiff(const string& s1, const string& s2,
@@ -112,52 +111,61 @@ public:
   void prepareDisplay();
   
   void doPlot();
-
+  void loadHistograms();
+  
   void setObservables(string v1, string v2="", string v3="",
 		      string v4="", string v5="", string v6="");
   void loadAutoBinning(string file);
     
 
-  void getStatistics(string categ="nominal");
+  void getStatistics(string categ="nominal", bool latexOnly = false, bool header=true);
   void drawStatistics(string categ="nominal", string cname="", 
 		      bool multiScheme=false, bool vetoOpt=false, string optCateg="");
 
   void addExternalSystUnc(string dsName, string unctag, float Up, float Do,
 			  string categ="", string cname="");
   void getDetailSystematics(string categ, string lvl);
-  void getCategSystematic(string src, string categ, string lvl, bool latex=false);
+  void getCategSystematic(string src, string categ, string lvl, string vetos="", bool latex=false);
 
-  void savePlot(string path, string advname="");
-  void producePlots(string path);
+  void savePlot(const string& path, string advname="");
+  void producePlots(const string& path);
 
-  void saveHistos(std::string);
+  void saveHistos(const string& obs );
 
+  void emulateHistos(const string& path);
+  
   void getYield(string ds, string lvl);
 
   void drawEfficiencies(string o1);
-  void drawROCcurves(string o1);
+  void drawROCcurves(string o1, string o2="");
   void multiROCcurves();
 
 
   void drawRatio(string o1, string o2 );
   void drawResiduals(string o1);
   void drawSignificance(string o1);
+  void drawDiscriminationPower(string o1);
   void drawCumulativePlots(string o1);
   void drawDetailSyst(bool cumul);
+  void drawStatVsSystematic(const string& dss, const string& src, 
+			    const string& categ, const string& lvl,
+			    const string& vetos);
 
   void getIntegral(float x1, float x2, float y1=0, float y2=1000000);
   
   void saveDataMCRatio(string fname,string hname);
 
   //data cards
-  void addDataCardSample(string sName, string dsName, float w=1);
-  void addDataCardSigSample(string sName, string dsName, float w=1);
+  void addDataCardSample(string sName, string dsName, float w=1, int link=-1);
+  void addDataCardSigSample(string sName, string dsName, float w=1, int link=-1);
   void addNuisanceParameter(string npName, string dss, string scheme,  string vals) ;
   void overwriteNuisanceParameter(string npName, string dss, string vals);
   vector<string> getExternalNuisanceParameters(string sigName);
   void makeSingleDataCard(string sigName, string categ, string cname, string cardName);
   void makeMultiDataCard(string sigName, vector<string> categs, 
 			 string cname, string cardname);
+
+std::string trim(std::string, std::string chr = " ");
 
   ClassDef(MPAFDisplay,0)
 

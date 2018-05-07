@@ -1,16 +1,23 @@
 #!/bin/bash
 
-VAR=("njets" "nbjets" "met" "ht" "lep" "zpeak" "zpt" "mt" "mt2" "pt1" "pt2" "pt3" "mll" "muonsip" "muoniso" "muondz" "muondxy" "muonptrel" "muonptratio"  "elsip" "eliso" "eldz" "eldxy" "elptrel" "elptratio" "3rdlepflavor")
+VAR=("njets" "nbjets" "met" "ht" "pt1" "pt2" "pt3" "srs" "mu_multi" ) # "mt") # "el_multi" "mu_multi" "lep_multi")
+REG=("OffZBaseline" " OnZBaseline" )
+#REG=(" OnZBaseline" )
+#VAR=("ftype")
+#VAR=("njets")
 
 
-for var in ${VAR[@]}; do
+for reg in ${REG[@]}; do
+    region=$reg
+    for var in ${VAR[@]}; do
 
-    variable=$var
+        variable=$var
 
-    cp cards/susy3l_data_25ns_auto.C cards/tmpFiles/susy3l_data_25ns.C
-    sed -i 's|VARIABLE|'$variable'|' cards/tmpFiles/susy3l_data_25ns.C
+        cp cards/susy3l_tt_closure.C cards/tmpFiles/susy3l_tt_closure.C
+        sed -i 's|VARIABLE|'$variable'|' cards/tmpFiles/susy3l_tt_closure.C
+        sed -i 's|REGION|'$region'|' cards/tmpFiles/susy3l_tt_closure.C
 
-    root -l -b cards/tmpFiles/susy3l_data_25ns.C
-
+        root -l -b cards/tmpFiles/susy3l_tt_closure.C
+    done
 done
 

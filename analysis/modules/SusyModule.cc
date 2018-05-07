@@ -1,11 +1,11 @@
 #include "analysis/modules/SusyModule.hh"
-
+#include <boost/property_tree/json_parser.hpp>
 
 SusyModule::SusyModule(VarClass* vc):
   _vc(vc),_dbm(nullptr)
 {
   defineLeptonWPS();
-  
+  loadBTagReaderCSVDisc();
 }
 
 SusyModule::SusyModule(VarClass* vc, DataBaseManager* dbm):
@@ -14,8 +14,11 @@ SusyModule::SusyModule(VarClass* vc, DataBaseManager* dbm):
   defineLeptonWPS();
   loadDBs();
   loadBTagReader();
-  loadBTagFastSimReader();
+  // loadBTagFastSimReader();
+  loadBTagReaderCSVDisc();
   initPUWeights();
+  // string name=(string)(getenv("MPAF")) + "/workdir/database/db2016/HLT_Efficiencies_4fb_2016.root";
+  // _hltEff= new HLTEfficiency(name);
 }
 
 SusyModule::~SusyModule() {
@@ -27,8 +30,8 @@ void
 SusyModule::loadBTagFastSimReader() {
 
   // setup calibration readers
-  string filename=(string) getenv("MPAF") + "/workdir/database/CSV_13TEV_Combined_20_11_2015.csv";
-  _calibFS=new BTagCalibration("csvFast", "workdir/database/CSV_13TEV_Combined_20_11_2015.csv");//filename.c_str());
+  string filename=(string) getenv("MPAF") + "/workdir/database/CSVv2_Moriond17_B_H.csvdb2016/CSV_13TEV_T1tttt_1200_800_11_7_2016.csv";
+  _calibFS=new BTagCalibration("csvFast", filename.c_str());
   _readerFS_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _readerFS_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
   _readerFS_b_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
@@ -53,8 +56,8 @@ void
 SusyModule::loadBTagReader() {
 
   // setup calibration readers
-  string filename=(string) getenv("MPAF") + "/workdir/database/BTagSF_CSVv2_25ns.csv";
-  _calib=new BTagCalibration("csvv2", "workdir/database/BTagSF_CSVv2_25ns.csv");//filename.c_str());
+  string filename=(string) getenv("MPAF") + "/workdir/database/CSVv2_Moriond17_B_H.csv"; //db2016/CSVv2_ichep.csv
+  _calib=new BTagCalibration("csvv2", filename.c_str());
   _reader_b_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _reader_b_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
   _reader_b_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
@@ -64,40 +67,31 @@ SusyModule::loadBTagReader() {
   _reader_l_cv=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "central");
   _reader_l_up=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "up"     );
   _reader_l_do=new BTagCalibrationReader(BTagEntry::OP_MEDIUM, "down"   );
-  _reader_b_cv->load(*_calib, BTagEntry::FLAV_B   , "mujets");
-  _reader_b_up->load(*_calib, BTagEntry::FLAV_B   , "mujets");
-  _reader_b_do->load(*_calib, BTagEntry::FLAV_B   , "mujets");
-  _reader_c_cv->load(*_calib, BTagEntry::FLAV_C   , "mujets");
-  _reader_c_up->load(*_calib, BTagEntry::FLAV_C   , "mujets");
-  _reader_c_do->load(*_calib, BTagEntry::FLAV_C   , "mujets");
-  _reader_l_cv->load(*_calib, BTagEntry::FLAV_UDSG, "comb"  );
-  _reader_l_up->load(*_calib, BTagEntry::FLAV_UDSG, "comb"  );
-  _reader_l_do->load(*_calib, BTagEntry::FLAV_UDSG, "comb"  );
+  _reader_b_cv->load(*_calib, BTagEntry::FLAV_B   , "comb");
+  _reader_b_up->load(*_calib, BTagEntry::FLAV_B   , "comb");
+  _reader_b_do->load(*_calib, BTagEntry::FLAV_B   , "comb");
+  _reader_c_cv->load(*_calib, BTagEntry::FLAV_C   , "comb");
+  _reader_c_up->load(*_calib, BTagEntry::FLAV_C   , "comb");
+  _reader_c_do->load(*_calib, BTagEntry::FLAV_C   , "comb");
+  _reader_l_cv->load(*_calib, BTagEntry::FLAV_UDSG, "incl"  );
+  _reader_l_up->load(*_calib, BTagEntry::FLAV_UDSG, "incl"  );
+  _reader_l_do->load(*_calib, BTagEntry::FLAV_UDSG, "incl"  );
 
 }
 
 
 void
 SusyModule::loadDBs() {
+  string id="total";
+  _dbm->loadDb("BTagEffUDSG","bTagEffs_old.root",(string)("eff_"+id+"_M_udsg") );
+  _dbm->loadDb("BTagEffC","bTagEffs_old.root",(string)("eff_"+id+"_M_c") );
+  _dbm->loadDb("BTagEffB","bTagEffs_old.root",(string)("eff_"+id+"_M_b") );
 
-  //_dbm->loadDb("PileupWeights.root",""); -> done with trees
+  // _dbm->loadDb("T1ttttISR","db2016/T1ttttISR.db");
+  // _dbm->loadDb("T5qqqqVV_noDMISR","db2016/T5qqqqVV_noDMISR.db");
+  // _dbm->loadDb("T1ttttISR_RA5","db2016/T1ttttISR_RA5.db");
+  // _dbm->loadDb("T5qqqqVV_noDMISR_RA5","db2016/T5qqqqVV_noDMISR_RA5.db");
 
-  //HLT scale factors
-  _dbm->loadDb("hltDEG","hltSFDoubleEG.db");
-  _dbm->loadDb("hltDMu","hltSFDoubleMu.db");
-  _dbm->loadDb("hltSEle","hltSFSingleEle.db");
-  _dbm->loadDb("hltSMu","hltSFSingleMu.db");
-  
-  //lepton scale factors
-  _dbm->loadDb("eleSFDb","electronSF.db");
-  _dbm->loadDb("muSFDb","muonSF.db");
-  _dbm->loadDb("tauSFDb","tauSF.db");
-
- 
-  _dbm->loadDb("BTagEffUDSG","GC_BTagEffs.root",(string)("h2_BTaggingEff_csv_med_Eff_udsg") );
-  _dbm->loadDb("BTagEffC","GC_BTagEffs.root",(string)("h2_BTaggingEff_csv_med_Eff_c") );
-  _dbm->loadDb("BTagEffB","GC_BTagEffs.root",(string)("h2_BTaggingEff_csv_med_Eff_b") );
-  _dbm->loadDb("BTagSF", "BTagSFMedium.db");
 }
 
 void
@@ -106,11 +100,14 @@ SusyModule::defineLeptonWPS() {
   _cLostHitWP.resize(kNWPs);
   _tChWP.resize(kNWPs);
   _sipWP.resize(kNWPs);
+  _sipWPLepMVA.resize(kNWPs);
   _muIdWP.resize(kNWPs);
   _dxyWP.resize(kNWPs);
   _dzWP.resize(kNWPs);
   _elMvaIdWP.resize(3);
+  _lepMVAIdWP.resize(12);
   _multiIsoWP.resize(3);
+  _lepIdWPs.resize(kNWPs);
   _ptWP.resize(2);
 
   for(int i=0;i<3;++i) {
@@ -118,7 +115,13 @@ SusyModule::defineLeptonWPS() {
     _multiIsoWP[i].resize(kNWPs);
     if(i!=2) _ptWP[i].resize(kNWPs);
   }
-  
+  for(int i=0;i<kNWPs;i++) {
+    _lepIdWPs[i].resize(kNVars);
+    for(int j=0;j<3;++j) {
+      _elMvaIdWP[j][i].resize(3);
+    }  
+  }
+
   //muId
   _muIdWP[kDenom] = 0; 
   _muIdWP[kLoose] = 0;//1000. 
@@ -133,12 +136,16 @@ SusyModule::defineLeptonWPS() {
   //pt ============================
   _ptWP[kEl][kDenom] = 7 ; _ptWP[kMu][kDenom] = 5 ;
   _ptWP[kEl][kLoose] = 7 ; _ptWP[kMu][kLoose] = 5 ;
-  _ptWP[kEl][kTight] = 15; _ptWP[kMu][kTight] = 10;
+  _ptWP[kEl][kTight] = 10; _ptWP[kMu][kTight] = 10;
 
   //sip & IP ======================
   _sipWP[kDenom] = 4.0; 
   _sipWP[kLoose] = 1000.0;//1000. 
   _sipWP[kTight] = 4.0; 
+  
+  _sipWPLepMVA[kDenom] = 8.0; 
+  _sipWPLepMVA[kLoose] = 1000.0;//1000. 
+  _sipWPLepMVA[kTight] = 8.0; 
   
   _dxyWP[kDenom] = 0.05; //cm
   _dxyWP[kLoose] = 0.05; //cm
@@ -148,33 +155,91 @@ SusyModule::defineLeptonWPS() {
   _dzWP[kLoose] = 0.1; //cm
   _dzWP[kTight] = 0.1; //cm
 
-  //ithgt charge
+  //tight charge
   _tChWP[kLoose]=-1;
   _tChWP[kTight]=1;
 
   //el mva id ======================
-  //Phys14 50ns?
-  // _elMvaIdWP[kEBC][kLoose] = -0.11;
-  // _elMvaIdWP[kEBF][kLoose] = -0.35;
-  // _elMvaIdWP[kEE ][kLoose] = -0.55;
+  _elMvaIdWP[kEBC][kInSitu][kPt5 ] = -0.363;
+  _elMvaIdWP[kEBC][kInSitu][kPt10] = -0.363;
+  _elMvaIdWP[kEBC][kInSitu][kPt25] = -0.363;
 
-  // _elMvaIdWP[kEBC][kTight] = 0.73;
-  // _elMvaIdWP[kEBF][kTight] = 0.57;
-  // _elMvaIdWP[kEE ][kTight] = 0.05;
+  _elMvaIdWP[kEBF][kInSitu][kPt5 ] = -0.579;
+  _elMvaIdWP[kEBF][kInSitu][kPt10] = -0.579;
+  _elMvaIdWP[kEBF][kInSitu][kPt25] = -0.579;
 
-  _elMvaIdWP[kEBC][kLoose] = -0.70;
-  _elMvaIdWP[kEBF][kLoose] = -0.83;
-  _elMvaIdWP[kEE ][kLoose] = -0.92;
+  _elMvaIdWP[kEE ][kInSitu][kPt5 ] = -0.623;
+  _elMvaIdWP[kEE ][kInSitu][kPt10] = -0.623;
+  _elMvaIdWP[kEE ][kInSitu][kPt25] = -0.623;
 
-  _elMvaIdWP[kEBC][kLooseHT] = -0.155;
-  _elMvaIdWP[kEBF][kLooseHT] = -0.56;
-  _elMvaIdWP[kEE ][kLooseHT] = -0.76;
 
-  _elMvaIdWP[kEBC][kTight] = 0.87;
-  _elMvaIdWP[kEBF][kTight] = 0.60;
-  _elMvaIdWP[kEE ][kTight] = 0.17;
+  _elMvaIdWP[kEBC][kInSituHT][kPt5 ] = 0.051;
+  _elMvaIdWP[kEBC][kInSituHT][kPt10] = 0.051;
+  _elMvaIdWP[kEBC][kInSituHT][kPt25] = 0.051;
+
+  _elMvaIdWP[kEBF][kInSituHT][kPt5 ] = -0.261;
+  _elMvaIdWP[kEBF][kInSituHT][kPt10] = -0.261;
+  _elMvaIdWP[kEBF][kInSituHT][kPt25] = -0.261;
+
+  _elMvaIdWP[kEE ][kInSituHT][kPt5 ] = -0.403;
+  _elMvaIdWP[kEE ][kInSituHT][kPt10] = -0.403;
+  _elMvaIdWP[kEE ][kInSituHT][kPt25] = -0.403;
+
+
+  _elMvaIdWP[kEBC][kLoose][kPt5 ] = -0.30;
+  _elMvaIdWP[kEBC][kLoose][kPt10] = -0.86;
+  _elMvaIdWP[kEBC][kLoose][kPt25] = -0.96;
+
+  _elMvaIdWP[kEBF][kLoose][kPt5 ] = -0.36;
+  _elMvaIdWP[kEBF][kLoose][kPt10] = -0.85;
+  _elMvaIdWP[kEBF][kLoose][kPt25] = -0.96;
+
+  _elMvaIdWP[kEE ][kLoose][kPt5 ] = -0.63;
+  _elMvaIdWP[kEE ][kLoose][kPt10] = -0.81;
+  _elMvaIdWP[kEE ][kLoose][kPt25] = -0.95;
+
+
+  _elMvaIdWP[kEBC][kLooseHT][kPt5 ] = -0.46;
+  _elMvaIdWP[kEBC][kLooseHT][kPt10] = -0.48;
+  _elMvaIdWP[kEBC][kLooseHT][kPt25] = -0.85;
+
+  _elMvaIdWP[kEBF][kLooseHT][kPt5 ] = -0.03;
+  _elMvaIdWP[kEBF][kLooseHT][kPt10] = -0.67;
+  _elMvaIdWP[kEBF][kLooseHT][kPt25] = -0.91;
+
+  _elMvaIdWP[kEE ][kLooseHT][kPt5 ] = 0.06;
+  _elMvaIdWP[kEE ][kLooseHT][kPt10] = -0.49;
+  _elMvaIdWP[kEE ][kLooseHT][kPt25] = -0.83;
+
+
+  _elMvaIdWP[kEBC][kTight][kPt5 ] = -100;
+  _elMvaIdWP[kEBC][kTight][kPt10] = 0.77;
+  _elMvaIdWP[kEBC][kTight][kPt25] = 0.52;
+
+  _elMvaIdWP[kEBF][kTight][kPt5 ] = -100;
+  _elMvaIdWP[kEBF][kTight][kPt10] = 0.56;
+  _elMvaIdWP[kEBF][kTight][kPt25] = 0.11;
+
+  _elMvaIdWP[kEE ][kTight][kPt5 ] = -100;
+  _elMvaIdWP[kEE ][kTight][kPt10] = 0.48;
+  _elMvaIdWP[kEE ][kTight][kPt25] = -0.01;
+
+
+  _elMvaIdWP[kEBC][kSpecFakeEl][kPt5 ] = 0;
+  _elMvaIdWP[kEBC][kSpecFakeEl][kPt10] = 0;
+  _elMvaIdWP[kEBC][kSpecFakeEl][kPt25] = 0;
+
+  _elMvaIdWP[kEBF][kSpecFakeEl][kPt5 ] = 0;
+  _elMvaIdWP[kEBF][kSpecFakeEl][kPt10] = 0;
+  _elMvaIdWP[kEBF][kSpecFakeEl][kPt25] = 0;
+
+  _elMvaIdWP[kEE ][kSpecFakeEl][kPt5 ] = 0.3;
+  _elMvaIdWP[kEE ][kSpecFakeEl][kPt10] = 0.3;
+  _elMvaIdWP[kEE ][kSpecFakeEl][kPt25] = 0.3;
+
 
   //multiIso =======================
+
   _multiIsoWP[kMiniIso][kDenom]      = 0.4 ; _multiIsoWP[kPtRatio][kDenom]      = 0   ; _multiIsoWP[kPtRel][kDenom]      = 0  ;
   _multiIsoWP[kMiniIso][kVLoose]     = 0.25; _multiIsoWP[kPtRatio][kVLoose]     = 0.67; _multiIsoWP[kPtRel][kVLoose]     = 6.0;
   _multiIsoWP[kMiniIso][kLoose]      = 0.20; _multiIsoWP[kPtRatio][kLoose]      = 0.69; _multiIsoWP[kPtRel][kLoose]      = 6.0;
@@ -184,120 +249,548 @@ SusyModule::defineLeptonWPS() {
 
   _multiIsoWP[kMiniIso][kSpecFakeEl] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeEl] = 0.80; _multiIsoWP[kPtRel][kSpecFakeEl] = 7.2;
   _multiIsoWP[kMiniIso][kSpecFakeMu] = 0.4 ; _multiIsoWP[kPtRatio][kSpecFakeMu] = 0.76; _multiIsoWP[kPtRel][kSpecFakeMu] = 7.2;
+
+  //lepton MVA ID =======================
+ 
+  _lepMVAIdWP[kNULL]     = -10000;
+
+  _lepMVAIdWP[kVeryLooseMu]     = -0.90;
+  _lepMVAIdWP[kLooseMu]         = -0.60;
+  _lepMVAIdWP[kMediumMu]        = -0.20;
+  _lepMVAIdWP[kTightMu]         = 0.15;
+  _lepMVAIdWP[kVeryTightMu]     = 0.45;
+  _lepMVAIdWP[kExtraTightMu]    = 0.65;
+
+  _lepMVAIdWP[kVeryLooseEl]     = -0.30;
+  _lepMVAIdWP[kLooseEl]         = 0.25;
+  _lepMVAIdWP[kMediumEl]        = 0.50;
+  _lepMVAIdWP[kTightEl]         = 0.65;
+  _lepMVAIdWP[kVeryTightEl]     = 0.75;
+  _lepMVAIdWP[kExtraTightEl]    = 0.85;
+
 }
+
+void
+SusyModule::configureLeptonId(int idType) {
+
+  if(idType==kCB) {
+    
+    _lepIdWPs[kLoose][kEtaMu]    = 2.4;
+    _lepIdWPs[kLoose][kEtaEl]    = 2.5;
+    _lepIdWPs[kLoose][kDxy]      = _dxyWP[kLoose];
+    _lepIdWPs[kLoose][kDz]       = _dzWP[kLoose];
+    _lepIdWPs[kLoose][kSIP]      = _sipWP[kLoose];
+    _lepIdWPs[kLoose][kTCharge]  = _tChWP[kLoose];
+    _lepIdWPs[kLoose][kMVAMu]    = kNULL;
+    _lepIdWPs[kLoose][kMVAEl]    = kNULL;
+    _lepIdWPs[kLoose][kMIsoMu]   = kDenom;
+    _lepIdWPs[kLoose][kMIsoEl]   = kDenom;
+    _lepIdWPs[kLoose][kLepIdMu]  = _muIdWP[kLoose];
+    _lepIdWPs[kLoose][kLepIdEl]  = kLoose;
+    _lepIdWPs[kLoose][kConVeto]  = 1;
+    _lepIdWPs[kLoose][kLostHits] = _cLostHitWP[kLoose];
+    _lepIdWPs[kLoose][kEmulIso]  = 0;
+    _lepIdWPs[kLoose][kPtRatioVar]  = -100000;
+    _lepIdWPs[kLoose][kCSV]      = 100000;
+
+    _lepIdWPs[kFakable][kEtaMu]    = 2.4;
+    _lepIdWPs[kFakable][kEtaEl]    = 2.5;
+    _lepIdWPs[kFakable][kDxy]      = _dxyWP[kLoose];
+    _lepIdWPs[kFakable][kDz]       = _dzWP[kLoose];
+    _lepIdWPs[kFakable][kSIP]      = _sipWP[kDenom];
+    _lepIdWPs[kFakable][kTCharge]  = _tChWP[kTight];
+    _lepIdWPs[kFakable][kMVAMu]    = kNULL;
+    _lepIdWPs[kFakable][kMVAEl]    = kNULL;
+    _lepIdWPs[kFakable][kMIsoMu]   = kDenom;
+    _lepIdWPs[kFakable][kMIsoEl]   = kDenom;
+    _lepIdWPs[kFakable][kLepIdMu]  = _muIdWP[kTight];
+    _lepIdWPs[kFakable][kLepIdEl]  = kLoose; //kSpecFakeEl
+    _lepIdWPs[kFakable][kConVeto]  = 1;
+    _lepIdWPs[kFakable][kLostHits] = _cLostHitWP[kTight];
+    _lepIdWPs[kFakable][kEmulIso]  = 0;
+    _lepIdWPs[kFakable][kPtRatioVar]  = -100000;
+    _lepIdWPs[kFakable][kCSV]      = 100000;
+
+    _lepIdWPs[kTight][kEtaMu]    = 2.4;
+    _lepIdWPs[kTight][kEtaEl]    = 2.5;
+    _lepIdWPs[kTight][kDxy]      = _dxyWP[kTight];
+    _lepIdWPs[kTight][kDz]       = _dzWP[kTight];
+    _lepIdWPs[kTight][kSIP]      = _sipWP[kDenom];
+    _lepIdWPs[kTight][kTCharge]  = _tChWP[kTight];
+    _lepIdWPs[kTight][kMVAMu]    = kNULL;
+    _lepIdWPs[kTight][kMVAEl]    = kNULL;
+    _lepIdWPs[kTight][kMIsoMu] = kMedium;
+    _lepIdWPs[kTight][kMIsoEl] = kTight;
+    _lepIdWPs[kTight][kLepIdMu]  = _muIdWP[kTight];
+    _lepIdWPs[kTight][kLepIdEl]  = kTight;
+    _lepIdWPs[kTight][kConVeto]  = 1;
+    _lepIdWPs[kTight][kLostHits] = _cLostHitWP[kTight];
+    _lepIdWPs[kTight][kEmulIso]  = 0;
+    _lepIdWPs[kTight][kPtRatioVar]  = -100000;
+    _lepIdWPs[kTight][kCSV]      = 100000;
+
+  }
+  else if(idType==kMVA) {
+    
+    _lepIdWPs[kLoose][kEtaMu]    = 2.4;
+    _lepIdWPs[kLoose][kEtaEl]    = 2.5;
+    _lepIdWPs[kLoose][kDxy]      = _dxyWP[kLoose];
+    _lepIdWPs[kLoose][kDz]       = _dzWP[kLoose];
+    _lepIdWPs[kLoose][kSIP]      = _sipWPLepMVA[kDenom];
+    _lepIdWPs[kLoose][kTCharge]  = _tChWP[kLoose];
+    _lepIdWPs[kLoose][kMVAMu]    = kNULL;
+    _lepIdWPs[kLoose][kMVAEl]    = kNULL;
+    _lepIdWPs[kLoose][kMIsoMu]   = kDenom;
+    _lepIdWPs[kLoose][kMIsoEl]   = kDenom;
+    _lepIdWPs[kLoose][kLepIdMu]  = _muIdWP[kLoose];
+    _lepIdWPs[kLoose][kLepIdEl]  = kLoose;
+    _lepIdWPs[kLoose][kConVeto]  = 1;
+    _lepIdWPs[kLoose][kLostHits] = _cLostHitWP[kLoose];
+    _lepIdWPs[kLoose][kEmulIso]  = -1;
+    _lepIdWPs[kLoose][kPtRatioVar]  = -100000;
+    _lepIdWPs[kLoose][kCSV]      = 100000;
+
+    _lepIdWPs[kFakable][kEtaMu]    = 2.4;
+    _lepIdWPs[kFakable][kEtaEl]    = 2.5;
+    _lepIdWPs[kFakable][kDxy]      = _dxyWP[kLoose];
+    _lepIdWPs[kFakable][kDz]       = _dzWP[kLoose];
+    _lepIdWPs[kFakable][kSIP]      = _sipWPLepMVA[kDenom];
+    _lepIdWPs[kFakable][kTCharge]  = _tChWP[kTight];
+    _lepIdWPs[kFakable][kMVAMu]    = kNULL;
+    _lepIdWPs[kFakable][kMVAEl]    = kNULL;
+    _lepIdWPs[kFakable][kMIsoMu]   = kDenom;
+    _lepIdWPs[kFakable][kMIsoEl]   = kDenom;
+    _lepIdWPs[kFakable][kLepIdMu]  = _muIdWP[kTight];
+    _lepIdWPs[kFakable][kLepIdEl]  = kSpecFakeEl;
+    _lepIdWPs[kFakable][kConVeto]  = 1;
+    _lepIdWPs[kFakable][kLostHits] = _cLostHitWP[kTight];
+    _lepIdWPs[kFakable][kEmulIso]  = 0;
+    _lepIdWPs[kFakable][kPtRatioVar]  = 0.3;
+    _lepIdWPs[kFakable][kCSV]      = 0.3;
+
+    _lepIdWPs[kTight][kEtaMu]    = 2.4;
+    _lepIdWPs[kTight][kEtaEl]    = 2.5;
+    _lepIdWPs[kTight][kDxy]      = _dxyWP[kTight];
+    _lepIdWPs[kTight][kDz]       = _dzWP[kTight];
+    _lepIdWPs[kTight][kSIP]      = _sipWPLepMVA[kDenom];
+    _lepIdWPs[kTight][kTCharge]  = _tChWP[kTight];
+    _lepIdWPs[kTight][kMVAMu]    = kTightMu; //kVeryTightMu
+    _lepIdWPs[kTight][kMVAEl]    = kMediumEl; //kTightEl
+    _lepIdWPs[kTight][kMIsoMu]   = kDenom;
+    _lepIdWPs[kTight][kMIsoEl]   = kDenom;
+    _lepIdWPs[kTight][kLepIdMu]  = _muIdWP[kTight];
+    _lepIdWPs[kTight][kLepIdEl]  = kLoose;
+    _lepIdWPs[kTight][kConVeto]  = 1;
+    _lepIdWPs[kTight][kLostHits] = _cLostHitWP[kTight];
+    _lepIdWPs[kTight][kEmulIso]  = 0;
+    _lepIdWPs[kTight][kPtRatioVar]  = -100000;
+    _lepIdWPs[kTight][kCSV]      = 100000;
+    
+  }
+
+
+
+
+
+}
+
+
 
 
 //=====================================================
 // lepton selection
 
 bool
-SusyModule::multiIsoSel(int idx, int wp) const {
-  if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-      (_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
-       _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+SusyModule::multiIsoSel(int idx, int wp, string branch) const {
+
+  if(_vc->get(branch + "_miniRelIso"  , idx) < _multiIsoWP[kMiniIso][wp] &&
+     (_vc->get(branch + "_jetPtRatiov2", idx) > _multiIsoWP[kPtRatio][wp] ||
+      _vc->get(branch + "_jetPtRelv2"  , idx) > _multiIsoWP[kPtRel]  [wp] )) return true;
   
   return false;
 }
 
 
 bool
-SusyModule::multiIsoSelCone(int idx, int wp) const {
+SusyModule::multiIsoSelInSitu(int idx, int wp, string branch) const {
 
-  if( _vc->get("LepGood_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
-	(conePt(idx, wp)*_vc->get("LepGood_pt",idx) *_vc->get("LepGood_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
-	 _vc->get("LepGood_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
+  // CH: wasn't my idea...
+  if(_vc->get(branch + "_miniRelIso"  , idx) < _multiIsoWP[kMiniIso][wp] &&
+     _vc->get(branch + "_jetPtRatiov2", idx) > _multiIsoWP[kPtRatio][wp]) return true;
+  
+  return false;
+}
+
+
+bool
+SusyModule::multiIsoSelCone(int idx, int wp, string branch) const {
+
+  if( _vc->get(branch + "_miniRelIso", idx)<_multiIsoWP[kMiniIso][wp] &&
+      (conePt(idx, wp, branch)*_vc->get(branch + "_pt",idx) *_vc->get(branch + "_jetPtRatiov2", idx)>_multiIsoWP[kPtRatio][wp] ||
+       _vc->get(branch + "_jetPtRelv2", idx)>_multiIsoWP[kPtRel][wp]) ) return true;
   
   return false;
 }
 
 bool
-SusyModule::invMultiIsoSel(int idx, int wp) const {
+SusyModule::invMultiIsoSel(int idx, int wp, string branch) const {
   
-  if( _vc->get("LepGood_miniRelIso", idx)>_multiIsoWP[kMiniIso][wp]) return false;
-  if( 1./_vc->get("LepGood_jetPtRelv2", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get("LepGood_miniRelIso", idx)) ) return false;
-  
+  if( _vc->get(branch + "_miniRelIso", idx)>_multiIsoWP[kMiniIso][wp]) return false;
+  if( 1./_vc->get(branch + "_jetPtRelv2", idx) > (1/_multiIsoWP[kPtRel][wp] + _vc->get(branch + "_miniRelIso", idx)) ) return false;
   return true;
 }
 
 bool 
-SusyModule::elMvaSel(int idx, int wp) const {
+SusyModule::elMvaSel(int idx, int wp, string branch) const {
 
   int etaBin=-1;
+  int ptBin=-1;
+ 
+  if     (std::abs(_vc->get(branch + "_eta", idx)) < 0.8  ) etaBin=0;
+  else if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) etaBin=1;
+  else if(std::abs(_vc->get(branch + "_eta", idx)) < 2.5  ) etaBin=2;
 
-  if     (std::abs(_vc->get("LepGood_eta", idx)) < 0.8  ) etaBin=0;
-  else if(std::abs(_vc->get("LepGood_eta", idx)) < 1.479) etaBin=1;
-  else if(std::abs(_vc->get("LepGood_eta", idx)) < 2.5  ) etaBin=2;
+  if     (std::abs(_vc->get(branch+"_pt", idx))<10) ptBin=kPt5;
+  else if(std::abs(_vc->get(branch+"_pt", idx))<15) ptBin=kPt10;
+  else if(std::abs(_vc->get(branch+"_pt", idx))<=25) ptBin=kVarWP;
+  else  ptBin=kPt25;
 
-  if(_vc->get("LepGood_mvaIdSpring15", idx) <  _elMvaIdWP[etaBin][wp]  ) return false;
+  float cut=-100;
+  if(ptBin!=kVarWP) cut=_elMvaIdWP[etaBin][wp][ptBin];
+  else cut=std::min(_elMvaIdWP[etaBin][wp][kPt10], std::max( _elMvaIdWP[etaBin][wp][kPt25], (float)((_elMvaIdWP[etaBin][wp][kPt25]-_elMvaIdWP[etaBin][wp][kPt10])/10*(_vc->get(branch+"_pt", idx)-15)) ) );
+
+  // cout<<_vc->get(branch + "_eta", idx)<<"  "
+  //     <<_vc->get(branch + "_mvaIdSpring15", idx)<<"  "
+  //     <<_elMvaIdWP[etaBin][wp]<<"     "<<(_vc->get(branch + "_mvaIdSpring15", idx)<_elMvaIdWP[etaBin][wp])<<endl;
+  if(_vc->get(branch + "_mvaIdSpring16GP", idx) <  cut  ) return false;
+  //cout<<" pouic "<<endl;
+  return true;
+}
+
+bool
+SusyModule::inSituFO(int idx, int wp, string branch) const {
+
+  if(_vc->get(branch + "_miniRelIso", idx) > 0.4) return false;
+  if(1 / _vc->get(branch + "_jetPtRatiov2", idx) >= 1 / _multiIsoWP[kPtRatio][wp] + _vc->get(branch + "_miniRelIso", idx)) return false;
+  //if(1 / _vc->get("LepGood_jetPtRatiov2", idx) >= 1 / _multiIsoWP[kPtRatio][wp] + _vc->get("LepGood_miniRelIso", idx) && _vc->get("LepGood_jetPtRelv2", idx) < _multiIsoWP[kPtRel][wp]) return false;
+
+  return true;
+}
+
+
+bool
+SusyModule::muIdSel(const Candidate* c, int idx, int wp, bool chCut, bool invSIP, bool LepMVA, string branch) const {
+
+  int wpIso = kDenom;
+
+  if(std::abs(c->eta())                                >  2.4          ) return false;
+  if(     _vc->get(branch + "_mediumMuonId", idx)  <  _muIdWP[wp]  ) return false;
+  if(chCut && _vc->get(branch + "_tightCharge" , idx)  <= _tChWP[wp]   ) return false;
+  if(std::abs(_vc->get(branch + "_dxy"         , idx)) > _dxyWP[wp]    ) return false;
+  if(std::abs(_vc->get(branch + "_dz"          , idx)) > _dzWP[wp]     ) return false;
+  if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
+
+  if(!LepMVA){
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+    }
+  }
+  else{
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWPLepMVA[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWPLepMVA[wp]    ) return false;
+    }
+  }
+
+  return true;
+
+}
+
+bool
+SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut, bool invSIP, bool LepMVA, string branch) const {
+
+  int wpIso=kDenom;
+
+  if(std::abs(c->eta())                               > 2.5            ) return false; 
+  if(         _vc->get(branch + "_convVeto"   , idx)  != 1             ) return false;
+  if(         _vc->get(branch + "_lostHits"   , idx)  > _cLostHitWP[wp]) return false;
+
+  if(chCut && _vc->get(branch + "_tightCharge", idx)  <= _tChWP[wp]    ) return false;
+  if(std::abs(_vc->get(branch + "_dxy"        , idx)) > _dxyWP[wp]     ) return false;
+  if(std::abs(_vc->get(branch + "_dz"         , idx)) > _dzWP[wp]      ) return false;
+  if(!elMvaSel(idx, mvaWp, branch)                                     ) return false;
+  if(!multiIsoSel(idx, wpIso, branch)                                  ) return false;
+
+  if(!LepMVA){
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWP[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWP[wp]    ) return false;
+    }
+  }
+  else {
+    if(invSIP){
+      if(       _vc->get(branch + "_sip3d"       , idx)  < _sipWPLepMVA[wp]    ) return false;
+    }
+    else {
+      if(       _vc->get(branch + "_sip3d"       , idx)  > _sipWPLepMVA[wp]    ) return false;
+    }
+  }
+
+  return true;
+
+}
+
+
+bool 
+SusyModule::muIdSelV2(const Candidate* c, int idx, const string& branch, int lvl, bool chCut, bool invSIP) {
+  //cout<<" ========================= muon level "+(string)((lvl==kLoose)?"Loose":((lvl==kFakable)?"Fakable":"Tight"))+"  "<<lvl<<"  "<<c->pt()<<"  "<<c->eta()<<"  "<<c->phi()<<endl;
+  if(std::abs(c->eta())                               > _lepIdWPs[lvl][kEtaMu]   ) return false; //cout<<" passing eta --->>> "<<endl;
+  if(std::abs(_vc->get(branch+"_dxy", idx))           > _lepIdWPs[lvl][kDxy]     ) return false; //cout<<" passing dxy "<<endl;
+  if(std::abs(_vc->get(branch+"_dz" , idx))           > _lepIdWPs[lvl][kDz]      ) return false; //cout<<" passing dz "<<endl;
+  if( (invSIP && _vc->get(branch+"_sip3d", idx)       < _lepIdWPs[lvl][kSIP] ) ||
+      (!invSIP && _vc->get(branch+"_sip3d", idx)      > _lepIdWPs[lvl][kSIP] )   ) return false; //cout<<" passing sip "<<endl;
+  if(chCut &&  _vc->get(branch+"_tightCharge" , idx)  <=_lepIdWPs[lvl][kTCharge] ) return false; //cout<<" passing charge "<<endl;
+  if(_vc->get(branch+"_mvaSUSY", idx)                 < _lepMVAIdWP[ _lepIdWPs[lvl][kMVAMu] ] ) return false; //cout<<" passing mva "<<endl;
+  if(!multiIsoSel(idx, _lepIdWPs[lvl][kMIsoMu], branch)                          ) return false; //cout<<" passing iso "<<endl;
+  if(_vc->get(branch+"_mediumMuonId", idx)        < _lepIdWPs[lvl][kLepIdMu] ) return false; //cout<<" passing id "<<endl;
+  if(_vc->get(branch + "_jetPtRatiov2",idx)           < _lepIdWPs[kLoose][kPtRatioVar]) return false; //cout<<" passing ptratio "<<endl;
+  if(_vc->get(branch + "_jetBTagCSV",idx)             > _lepIdWPs[kLoose][kCSV]  ) return false; //cout<<" passing csv "<<endl;
+  //cout<<" passing all "<<endl;
+  return true;
+}
+
+
+bool 
+SusyModule::elIdSelV2(const Candidate* c, int idx, const string& branch, int lvl, bool isoEmul, bool chCut, bool invSIP) {
+  //cout<<" ========================= electron level "+(string)((lvl==kLoose)?"Loose":((lvl==kFakable)?"Fakable":"Tight"))+"  "<<lvl<<"  "<<c->pt()<<"  "<<c->eta()<<endl;
+  if(std::abs(c->eta())                            > _lepIdWPs[lvl][kEtaEl]     ) return false; //cout<<" passing eta "<<std::abs(_vc->get(branch + "_dxy", idx))<<endl;
+  if(std::abs(_vc->get(branch + "_dxy", idx))      > _lepIdWPs[lvl][kDxy]       ) return false; //cout<<" passing dxy "<<std::abs(_vc->get(branch + "_dz" , idx))<<endl;
+  if(std::abs(_vc->get(branch + "_dz" , idx))      > _lepIdWPs[lvl][kDz]        ) return false; //cout<<" passing dz "<<_vc->get(branch + "_sip3d", idx)<<endl;
+  if( (invSIP && _vc->get(branch + "_sip3d", idx)  < _lepIdWPs[lvl][kSIP] ) || 
+      (!invSIP && _vc->get(branch + "_sip3d", idx) > _lepIdWPs[lvl][kSIP] )     ) return false; //cout<<" passing sip "<<_vc->get(branch+"_tightCharge", idx)<<endl;
+  if(chCut && _vc->get(branch+"_tightCharge", idx) <= _lepIdWPs[lvl][kTCharge]  ) return false; //cout<<" passing charge "<<_vc->get(branch + "_mvaSUSY", idx)<<endl;
+  if(_vc->get(branch + "_mvaSUSY", idx)            <  _lepMVAIdWP[ _lepIdWPs[lvl][kMVAEl] ]) return false; //cout<<" passing mva "<<_vc->get(branch + "_miniRelIso"  , idx)<<endl;
+  if(!multiIsoSel(idx,_lepIdWPs[lvl][kMIsoEl] , branch)                         ) return false; //cout<<" passing iso "<<_vc->get(branch + "_jetPtRatiov2",idx)<<endl;
+  if(_vc->get(branch + "_jetPtRatiov2",idx)        < _lepIdWPs[kLoose][kPtRatioVar]) return false; //cout<<" passing ptratio "<<_vc->get(branch + "_jetBTagCSV",idx)<<endl;
+  if(_vc->get(branch + "_jetBTagCSV",idx)          > _lepIdWPs[kLoose][kCSV]    ) return false; //cout<<" passing csv "<<_vc->get(branch + "_convVeto"   , idx)<<endl;
+  if(_vc->get(branch + "_convVeto"   , idx)        != _lepIdWPs[lvl][kConVeto]  ) return false; //cout<<" passing conv "<<_vc->get(branch + "_lostHits"   , idx)<<endl;
+  if(_vc->get(branch + "_lostHits"   , idx)        > _lepIdWPs[lvl][kLostHits] ) return false; //cout<<" passing lost "<<_lepIdWPs[lvl][kEmulIso]+isoEmul<<endl;
+  if(!elHLTEmulSel( idx, _lepIdWPs[lvl][kEmulIso]+isoEmul, "LepGood", true )   ) return false; //cout<<" passing emulation "<<_vc->get(branch + "_mvaIdSpring15", idx)<<endl;
+
+  bool adjust=(_lepIdWPs[lvl][kMVAEl]!=kNULL);
+  int adj=(kLooseHT-kLoose)*adjust*isoEmul;
+  //cout<<adjust<<"  "<<adj<<"  "<<_lepIdWPs[lvl][kLepIdEl]<<"  // "<<_lepIdWPs[lvl][kMVAEl]<<"  "<<kNULL<<endl;
+  if(!elMvaSel(idx,_lepIdWPs[lvl][kLepIdEl]+adj, branch) ) return false;//cout<<" passing Id "<<endl;
+  //cout<<" passing all "<<endl;
+  return true;
+}
+
+
+bool
+SusyModule::muIdSelTTHClean(const Candidate* c, int idx, const string& branch) {
+  cout<<"lepton "<<c->pt()<<"  "<<c->eta()<<" mu "<<endl;
+  if(std::abs(c->eta())                    > 2.4    ) return false;cout<<"btag "<<_vc->get(branch + "_jetBTagCSV",idx)<<endl;
+  if(_vc->get(branch + "_jetBTagCSV",idx)  > 0.8484 ) return false;
+
+  bool id1=_vc->get(branch + "_mvaTTH",idx)>0.9;
+  bool id2= (_vc->get(branch + "_jetPtRatiov2",idx)>0.5 && _vc->get(branch + "_jetBTagCSV",idx)<0.3 && _vc->get(branch+ "_segmentCompatibility",idx)>0.3);
+  cout<<" -->> "<<_vc->get(branch+ "_segmentCompatibility",idx)<<"  "<<_vc->get(branch + "_mvaTTH",idx)<<endl;
+  cout<<"id1 "<<id1<<endl;
+  cout<<"id2 "<<id2<<"   "<<(_vc->get(branch + "_jetPtRatiov2",idx)>0.5)<<"  "<<(_vc->get(branch + "_jetBTagCSV",idx)<0.3)<<"   "<<(_vc->get(branch+ "_segmentCompatibility",idx)>0.3)<<endl;
+  
+  if(!(id1 || id2) ) return false;
+  cout<<" pass ID"<<endl;
+  return true;
+}
+
+bool
+SusyModule::elIdSelTTHClean(const Candidate* c, int idx, const string& branch) {
+  cout<<"lepton "<<c->pt()<<"  "<<c->eta()<<" el "<<endl;
+  if(std::abs(c->eta())                   > 2.5    ) return false;  cout<<"btag "<<_vc->get(branch + "_jetBTagCSV",idx)<<endl;
+  if(_vc->get(branch + "_jetBTagCSV",idx) > 0.8484 ) return false;
+
+  bool barrel=std::abs(c->eta())<1.479;
+  bool id1=_vc->get(branch + "_mvaTTH",idx)>0.9;
+  bool id2= (_vc->get(branch + "_jetPtRatiov2",idx)>0.5 && _vc->get(branch + "_jetBTagCSV",idx)<0.3 && _vc->get(branch+ "_mvaIdSpring16HZZ",idx)>(barrel?0.:0.7));
+
+  cout<<"id1 "<<id1<<" <> "<<barrel<<endl;
+  cout<<"id2 "<<id2<<"   "<<(_vc->get(branch + "_jetPtRatiov2",idx)>0.5)<<"   "<<(_vc->get(branch + "_jetBTagCSV",idx)<0.3)<<"   "<<(_vc->get(branch+ "_mvaIdSpring16HZZ",idx)>(barrel?0.:0.7))<<endl;
+  
+  if(!(id1 || id2) ) return false;
+
+  bool scEndcap=std::abs(_vc->get(branch + "_etaSc", idx))>1.479;
+  cout<<_vc->get(branch + "_etaSc", idx)<<" ==>> "<<_vc->get(branch + "_hadronicOverEm"         , idx)<<"   "<<(_vc->get(branch + "_hadronicOverEm"         , idx)>=(0.10-0.03*scEndcap))<<endl;
+  if(_vc->get(branch + "_hadronicOverEm"         , idx)>=(0.10-0.03*scEndcap)       ) return false; cout<<" bli1 "<<endl;
+  if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx))>=(0.01-0.002*scEndcap)     ) return false;cout<<" bli2 "<<endl;
+  if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx))>=(0.04+0.03*scEndcap)      ) return false;cout<<" bli3 "<<endl;
+  if(_vc->get(branch + "_eInvMinusPInv" , idx)<=-0.05                               ) return false;cout<<" bli4 "<<std::abs(_vc->get(branch + "_eInvMinusPInv" , idx))<<" // "<<(0.01-0.005*scEndcap)<<endl;
+  if(_vc->get(branch + "_eInvMinusPInv" , idx) >=(0.01-0.005*scEndcap)              ) return false;cout<<" bli5 "<<endl;
+  if(_vc->get(branch + "_sigmaIEtaIEta"         , idx) >=(0.011+0.019*scEndcap)     ) return false;
+  
+  if(_vc->get(branch + "_convVeto" , idx) !=1 ) return false;
+  if(_vc->get(branch + "_lostHits" , idx) !=0 ) return false;
+  
+  cout<<" pass ID"<<endl;
+  return true;
+}
+
+
+bool 
+SusyModule::muIdSelTTH(const Candidate* c, int idx, const string& branch, int lvl ) {
+  // (abs(lep.pdgId)!=13 or lep.mediumMuonId>0) and lep.mvaTTH > 0.90,
+  //return lep.conept>10 and lep.jetBTagCSV<0.8484 and (abs(lep.pdgId)!=11 or _ttH_idEmu_cuts_E2(lep)) 
+  //and (lep.mvaTTH>0.90 or (lep.jetPtRatiov2>0.5 and lep.jetBTagCSV<0.3 and (abs(lep.pdgId)!=13 or lep.segmentCompatibility>0.3)
+  //and (abs(lep.pdgId)!=11 or lep.mvaIdSpring16HZZ > (0.0 if abs(lep.eta)<1.479 else 0.7)) ) )
+
+  if(std::abs(c->eta())                    > 2.4  ) return false;
+  if(_vc->get(branch+"_mediumMuonID2016", idx) == 0   ) return false;
+  if(_vc->get(branch + "_mvaTTH",idx)      <  0.9 ) return false;
+  
+  if(!muIdSelTTHClean(c,idx,branch) ) return false;
+  
+  return true;
+}
+
+
+bool 
+SusyModule::elIdSelTTH(const Candidate* c, int idx, const string& branch, int lvl ) {
+  // (abs(lep.pdgId)!=13 or lep.mediumMuonId>0) and lep.mvaTTH > 0.90,
+  //return lep.conept>10 and lep.jetBTagCSV<0.8484 and (abs(lep.pdgId)!=11 or _ttH_idEmu_cuts_E2(lep)) 
+  //and (lep.mvaTTH>0.90 or (lep.jetPtRatiov2>0.5 and lep.jetBTagCSV<0.3 and (abs(lep.pdgId)!=13 or lep.segmentCompatibility>0.3)
+  //and (abs(lep.pdgId)!=11 or lep.mvaIdSpring16HZZ > (0.0 if abs(lep.eta)<1.479 else 0.7)) ) )
+
+  if(std::abs(c->eta())               > 2.5 ) return false;
+  if(_vc->get(branch + "_mvaTTH",idx) < 0.9 ) return false;
+
+  if(!elIdSelTTHClean(c,idx,branch) ) return false;
+  
+  return true;
+}
+
+
+
+bool
+SusyModule::elHLTEmulSel(int idx, int withIso, const string& branch, bool v1) const {
+  
+  if(withIso==-1) return true;
+
+  if(v1) {
+    if(std::abs(_vc->get(branch + "_etaSc", idx)) < 1.479) {
+      if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false; //cout<<" passing HOE "<<_vc->get(branch + "_hadronicOverEm", idx)<<endl;
+      if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false; //cout<<" passing dEta "<<_vc->get(branch + "_dEtaScTrkIn"   , idx)<<endl;
+      if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.04  ) return false; //cout<<" passing dPhi "<<_vc->get(branch + "_dPhiScTrkIn"   , idx)<<endl;
+      if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false; //cout<<" passing eop "<<_vc->get(branch + "_eInvMinusPInv" , idx)<<"  "<<_vc->get(branch + "_sigmaIEtaIEta" , idx)<<endl;
+      if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.011 ) return false; //cout<<" passing sie "<<_vc->get(branch + "_sigmaIEtaIEta" , idx)<<endl;
+    }
+    else {
+      if(         _vc->get(branch + "_hadronicOverEm", idx)  > 0.08  ) return false; //cout<<" passing HOE "<<_vc->get(branch + "_hadronicOverEm", idx)<<endl;
+      if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) > 0.01  ) return false; //cout<<" passing dEta "<<_vc->get(branch + "_dEtaScTrkIn"   , idx)<<endl;
+      if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) > 0.08  ) return false; //cout<<" passing dPhi "<<_vc->get(branch + "_dPhiScTrkIn"   , idx)<<endl;
+      if(std::abs(_vc->get(branch + "_eInvMinusPInv" , idx)) > 0.01  ) return false; //cout<<" passing eop "<<_vc->get(branch + "_eInvMinusPInv" , idx)<<"  "<<_vc->get(branch + "_sigmaIEtaIEta" , idx)<<endl;
+      if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  > 0.031 ) return false; //cout<<" passing sie "<<_vc->get(branch + "_sigmaIEtaIEta" , idx)<<endl;
+    }
+  } else { //version 2
+    long int lumi = 1270;
+    long int evt = 420400;
+    bool debug = false;
+  
+    if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) {
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "entering emu sel (central)" << endl;}}
+      if(         _vc->get(branch + "_hadronicOverEm", idx)  >= 0.10  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _hadronicOverEm" << endl;}}
+      if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) >= 0.01  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dEtaScTrkIn" << endl;}}
+      if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) >= 0.04  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dPhiScTrkIn" << endl;}}
+      if(         _vc->get(branch + "_eInvMinusPInv" , idx)  <= -0.05  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
+      if(         _vc->get(branch + "_eInvMinusPInv" , idx)  >= 0.01  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
+      if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  >= 0.011 ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing trigger emulation" << endl;}}
+    }
+    else {
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "entering emu sel (central)" << endl;}}
+      if(         _vc->get(branch + "_hadronicOverEm", idx)  >= 0.07  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _hadronicOverEm" << endl;}}
+      if(std::abs(_vc->get(branch + "_dEtaScTrkIn"   , idx)) >= 0.008  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dEtaScTrkIn" << endl;}}
+      if(std::abs(_vc->get(branch + "_dPhiScTrkIn"   , idx)) >= 0.07  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _dPhiScTrkIn" << endl;}}
+      if(         _vc->get(branch + "_eInvMinusPInv" , idx)  <= -0.05  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
+      if(         _vc->get(branch + "_eInvMinusPInv" , idx)  >= 0.005  ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing _eInvMinusPInv" << endl;}}
+      if(         _vc->get(branch + "_sigmaIEtaIEta" , idx)  >= 0.03 ) return false;
+      if(debug){if(_vc->get("evt") == evt && _vc->get("lumi") == lumi){cout << "passing trigger emulation" << endl;}}
+    }
+  }
+  //cout<<" --> passing CB"<<endl;
+  if(!elMvaSel(idx, kLoose, branch)                                ) return false;
+  //cout<<" --> mva"<<endl;
+  if(withIso) {
+    if(!elHLTEmulSelIso(idx, kLooseHT, branch)) return false;
+  }
+  //cout<<" --> isoEmulation"<<endl;
+  return true;
+}
+
+
+bool
+SusyModule::elHLTEmulSelIso(int idx, int mvaWP, string branch) const {
+  // cout<<" ===>> "<<_vc->get(branch + "_ecalPFClusterIso", idx)<<"  "<<_vc->get(branch + "_ecalPFClusterIso", idx)/_vc->get(branch + "_pt", idx)
+  // <<"  "<<_vc->get(branch + "_hcalPFClusterIso", idx)/_vc->get(branch + "_pt", idx)<<"  "<<_vc->get(branch + "_dr03TkSumPt"     , idx)/_vc->get(branch + "_pt", idx)<<endl;
+  if(_vc->get(branch + "_ecalPFClusterIso", idx) > 0.45 * _vc->get(branch + "_pt", idx) ) return false; //cout<<" passing ecalPFIso "<<endl;
+  if(_vc->get(branch + "_hcalPFClusterIso", idx) > 0.25 * _vc->get(branch + "_pt", idx) ) return false; //cout<<" passing hcalPFIso "<<endl;
+  if(_vc->get(branch + "_dr03TkSumPt"     , idx) > 0.2  * _vc->get(branch + "_pt", idx) ) return false; //cout<<" passing trkIso "<<endl;
+  if(!elMvaSel(idx, mvaWP, branch)                                                      ) return false; //cout<<" passing mva "<<endl;
+
+  return true;
+}
+
+
+bool
+SusyModule::lepMVAIdSel(int idx, int wp, string branch) const {
+
+  if(_vc->get(branch + "_mvaSUSY", idx)  <  _lepMVAIdWP[wp]  ) return false;
+  return true;
+
+}
+
+bool
+SusyModule::lepMVAIdAuxFakableSel(int idx, int pdgId, string branch) const {
+
+  if(_vc->get(branch + "_jetPtRatiov2",idx)<0.3) return false;
+  if(_vc->get(branch + "_jetBTagCSV",idx)>0.3) return false;
+
+  if(std::abs(pdgId)==13) return true;
+
+  int etaBin=-1;
+  if     (std::abs(_vc->get(branch + "_eta", idx)) < 0.8  ) etaBin=0;
+  else if(std::abs(_vc->get(branch + "_eta", idx)) < 1.479) etaBin=1;
+  else if(std::abs(_vc->get(branch + "_eta", idx)) < 2.5  ) etaBin=2;
+
+  if(_vc->get(branch + "_mvaIdSpring16GP", idx) <  _elMvaIdWP[etaBin][kSpecFakeEl][0]  ) return false;
     
   return true;
 }
 
-
-
 bool
-SusyModule::muIdSel(const Candidate*c, int idx, int wp, bool chCut) const {
+SusyModule::invPtRelSel(int idx, int wp, string branch) const {
 
-  int wpIso = kDenom;
-  if(std::abs(c->eta() ) >  2.4          ) return false;
-  if(         _vc->get("LepGood_mediumMuonId", idx)  < _muIdWP[wp]   ) return false;
-  if( chCut && _vc->get("LepGood_tightCharge" , idx)  <= 1 ) return false;
-  if(         _vc->get("LepGood_sip3d"       , idx)  > _sipWP[wp]    ) return false;
-   if(std::abs(_vc->get("LepGood_dz"          , idx)) > _dzWP[wp]     ) return false;
-  if(std::abs(_vc->get("LepGood_dxy"         , idx)) > _dxyWP[wp]    ) return false;
-  if(!multiIsoSel(idx, wpIso )               ) return false;
-
-  return true;
+  if(_vc->get(branch + "_jetPtRelv2", idx) < _multiIsoWP[kPtRel][wp]) return true;
+  return false;
 
 }
 
 
-bool
-SusyModule::elIdSel(const Candidate* c, int idx, int wp, int mvaWp, bool chCut) const {
-
-  int wpIso=kDenom;
-  if(std::abs(c->eta()) > 2.5            ) return false; 
-
-  if(_vc->get("LepGood_convVeto", idx)  != 1             ) return false;
-  if(_vc->get("LepGood_lostHits", idx)  > _cLostHitWP[wp]) return false;
-
-  if(chCut && _vc->get("LepGood_tightCharge", idx)  <= _tChWP[wp]    ) return false;
-
-  if(_vc->get("LepGood_sip3d"      , idx)  > _sipWP[wp]     ) return false;
-  if(std::abs(_vc->get("LepGood_dz", idx)) > _dzWP[wp]      ) return false;
-  if(std::abs(_vc->get("LepGood_dxy", idx)) > _dxyWP[wp]     ) return false;
-  if(!elMvaSel(idx, mvaWp)                                           ) return false;
-  if(!multiIsoSel(idx, wpIso)        ) return false;
-
-  return true;
-}
-
-bool
-SusyModule::elHLTEmulSel(int idx, bool withIso) const {
-
-  if(std::abs(_vc->get("LepGood_eta",idx))<1.479) {
-    if(_vc->get("LepGood_sigmaIEtaIEta",idx) > 0.011 ) return false;
-    if(std::abs(_vc->get("LepGood_dEtaScTrkIn",idx)) > 0.01 ) return false;
-    if(std::abs(_vc->get("LepGood_dPhiScTrkIn",idx)) > 0.04 ) return false;
-    if(_vc->get("LepGood_hadronicOverEm",idx) > 0.08 ) return false;
-    if(std::abs(_vc->get("LepGood_eInvMinusPInv",idx)) > 0.01 ) return false;
-  }
-  else {
-    if(_vc->get("LepGood_sigmaIEtaIEta",idx) > 0.031 ) return false;
-    if(std::abs(_vc->get("LepGood_dEtaScTrkIn",idx)) > 0.01 ) return false;
-    if(std::abs(_vc->get("LepGood_dPhiScTrkIn",idx)) > 0.08 ) return false;
-    if(_vc->get("LepGood_hadronicOverEm",idx) > 0.08 ) return false;
-    if(std::abs(_vc->get("LepGood_eInvMinusPInv",idx)) > 0.01 ) return false;
-  }
-  
-  if(withIso) {
-    if(_vc->get("LepGood_ecalPFClusterIso",idx) > 0.45*_vc->get("LepGood_pt",idx) ) return false;
-    if(_vc->get("LepGood_hcalPFClusterIso",idx) > 0.25*_vc->get("LepGood_pt",idx) ) return false;
-    if(_vc->get("LepGood_dr03TkSumPt",idx) > 0.2*_vc->get("LepGood_pt",idx) ) return false;
-  }
-
-  return true;
-}
 
 
 //===========================================================
@@ -314,6 +807,16 @@ SusyModule::HT(const CandList* jets){
   unsigned int nJets=jets->size();
   for(unsigned int i=0; i<nJets; ++i) 
     ht += jets->at(i)->pt();
+  
+  return ht;
+}
+
+float 
+SusyModule::HT(const CandWrapList& jets){
+  float ht = 0;
+  unsigned int nJets=jets.size();
+  for(unsigned int i=0; i<nJets; ++i) 
+    ht += jets[i].c()->pt();
   
   return ht;
 }
@@ -386,12 +889,46 @@ SusyModule::passMllMultiVeto(const Candidate* c1, const CandList* cands,
 }
 
 CandList
+SusyModule::findZCand(const CandList* leps, float window, float MTcut) {
+    
+  float diff = 99999;
+  size_t il1_save = -1;
+  size_t il2_save = -1;
+  CandList clist(2,nullptr);
+  bool zFound = false;
+  for(size_t il1=0;il1<leps->size()-1;il1++) {
+    for(size_t il2=il1+1;il2<leps->size();il2++) {
+      if(!(leps->at(il1)->pdgId() == -leps->at(il2)->pdgId())) continue;
+      if(std::abs(91.-Candidate::create(leps->at(il1),leps->at(il2))->mass()) < window && std::abs(91.-Candidate::create(leps->at(il1),leps->at(il2))->mass()) < diff){
+	Candidate* zCand = Candidate::create(leps->at(il1),leps->at(il2));
+	diff = std::abs(91.-(zCand->mass()) );
+	il1_save = il1;
+	il2_save = il2;
+	zFound = true;
+      }
+    }
+  }
+  if(zFound){ 
+    for(size_t il=0;il<leps->size();il++) {
+      if(il == il1_save || il == il2_save) continue;
+      float mt = KineUtils::M_T(leps->at(il)->pt(), _vc->get("met_pt"), leps->at(il)->phi(), _vc->get("met_phi"));
+      if(mt > MTcut){
+	clist[0] = leps->at(il1_save);
+	clist[1] = leps->at(il2_save);
+      }
+    }
+  }
+  return clist;
+}
+
+
+CandList
 SusyModule::bestSSPair(const CandList* leps, bool byflav,
 		       bool bypassMV, bool os, 
 		       float pTthrMu, float pTthrEl,
 		       int& idx1, int& idx2) {
 
-  CandList clist(2,nullptr);
+  CandList clist(2,NULL);
   int tmpFlav=0;
   int tmpSt=0;
 
@@ -441,7 +978,7 @@ SusyModule::bestSSPair(const CandList* leps1, const CandList* leps2, bool byflav
 
   //LISTS HAVE TO BE COMPLEMENTARY, NO OVERLAPS!
 
-  CandList clist(2,nullptr);
+  CandList clist(2,NULL);
   int tmpFlav=0;
   int tmpSt=0;
 
@@ -653,6 +1190,13 @@ SusyModule::buildSSPairs(const CandList* leps1, const CandList* leps2,
 }
 
 
+double
+SusyModule::closestJetPt(int idx, string branch) const {
+
+  return _vc->get(branch + "_pt", idx) / _vc->get(branch + "_jetPtRatiov2", idx);
+
+}
+
 const Candidate*
 SusyModule::jetLepAware(const Candidate* lep) {
   
@@ -691,6 +1235,15 @@ SusyModule::jetLepAware(const Candidate* lep) {
 
 }
 
+double
+SusyModule::conePt(int idx, int isoWp, string branch) const {
+
+  if(_vc->get(branch + "_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
+    return _vc->get(branch + "_pt", idx)*(1 + std::max((double) 0., _vc->get(branch + "_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
+  }
+  return std::max(_vc->get(branch + "_pt", idx), (double) closestJetPt(idx, branch) * _multiIsoWP[kPtRatio][isoWp] );
+}
+
 float
 SusyModule::pTRatio(const Candidate* lep, const Candidate* jet) {
   return lep->pt()/jet->pt();
@@ -703,30 +1256,71 @@ SusyModule::pTRel(const Candidate* lep, const Candidate* jet) {
   return (jet->p4()-lep->p4()).Perp(lep->p4().Vect() );
 }
 
+double
+SusyModule::Mt(Candidate* c1, Candidate* c2, int idx1, int idx2, string branch1, string branch2, int isoWp) const {
 
-float
-SusyModule::closestJetPt(int idx) const {
-  return _vc->get("LepGood_pt", idx) / _vc->get("LepGood_jetPtRatiov2", idx);
+  return rawMt(c1, c2);
+  //return coneMt(idx1, isoWp, c2);
+
+}
+
+double
+SusyModule::rawMt(Candidate* c1, Candidate* c2) const {
+
+  return coneMt(c1, c2, -1, -1);
+
+}
+
+double
+SusyModule::coneMt(Candidate* c1, Candidate* c2, int idx1, int idx2, string branch1, string branch2, int isoWp) const {
+
+  float pt1 = c1 -> pt();
+  float pt2 = c2 -> pt();
+  if(idx1 > -1) pt1 = conePt(idx1, isoWp, branch1);
+  if(idx2 > -1) pt2 = conePt(idx2, isoWp, branch2);
+
+  return sqrt(2 * pt1 * pt2 * (1. - cos(c1 -> phi() - c2 -> phi())));
+  //return sqrt(2 * conePt(idx, isoWp) * met -> pt() * (1. - cos(Tools::AngleSubtraction(_vc->get("LepGood_phi", idx), met -> phi()))));
+
 }
 
 
-float 
-SusyModule::conePt(int idx, int isoWp) const {
-  
-    if(_vc->get("LepGood_jetPtRelv2", idx) > _multiIsoWP[kPtRel][isoWp] ) {
-      return _vc->get("LepGood_pt", idx)*(1 + std::max((double) 0., _vc->get("LepGood_miniRelIso", idx) - _multiIsoWP[kMiniIso][isoWp] ) );
+void 
+SusyModule::awayJets(CandList* leptons, CandList& jets, vector<pair<string, unsigned int> >& jetIdxs, float dR) {
+
+  for(unsigned int il = 0; il < leptons -> size(); ++il) {
+    for(unsigned int ij = 0; ij < jets.size(); ++ij) {
+      float dr = leptons->at(il)->dR( jets[ij] );
+      if(dr < dR){
+        jets   .erase(jets   .begin() + ij);
+        jetIdxs.erase(jetIdxs.begin() + ij);
+      }
     }
-    return std::max(_vc->get("LepGood_pt", idx), (double) closestJetPt(idx) * _multiIsoWP[kPtRatio][isoWp] );
+  }
+}
+
+void
+SusyModule::cleanLeps(CandList& tightLeps, CandList* vetoLeps) {
+
+  for(CandList::iterator it = tightLeps.begin(); it != tightLeps.end();) {
+    int i = it - tightLeps.begin();
+    if(!passMllMultiVeto( tightLeps[i], vetoLeps, 76, 106, true) ||
+       !passMllMultiVeto( tightLeps[i], vetoLeps,  0,  12, true) ) 
+      it = tightLeps.erase(it);
+    else
+      ++it;
+  }
 }
 
 
 void
-SusyModule::ptJets(CandList allJets, vector<pair<string, unsigned int> > allJetIdxs,
+SusyModule::ptJets(const CandList* allJets, 
+		   const vector<pair<string, unsigned int> >& allJetIdxs,
                    CandList& jets, vector<pair<string, unsigned int> >& jetIdxs, float thr){
 
-  for(unsigned int i = 0; i < allJets.size(); ++i) {
-    if(allJets[i] -> pt() > thr) {
-      jets   .push_back(allJets   [i]);
+  for(unsigned int i = 0; i < allJets->size(); ++i) {
+    if(allJets->at(i)->pt() > thr) {
+      jets   .push_back(allJets->at(i));
       jetIdxs.push_back(allJetIdxs[i]);
     }
   }
@@ -749,7 +1343,7 @@ SusyModule::cleanJets(CandList* leptons,
   lepJets.clear();
   lepJetsIdxs.clear();
   
-  vector<string> jetTypes({"Jet","DiscJet"});
+  vector<string> jetTypes({"Jet"});//,"DiscJet"});
   CandList jets;
   vector<bool> bvals;
   vector<pair<string, unsigned int> > tmpIdxs;
@@ -758,57 +1352,61 @@ SusyModule::cleanJets(CandList* leptons,
     string jType=jetTypes[it];
     
     string ext="";
-    if(isJESVar) {
-      ext=((SystUtils::kUp==dir)?"_jecUp":"_jecDown");
-    }
+    // if(isJESVar) {
+    //   ext=((SystUtils::kUp==dir)?"_jecUp":"_jecDown");
+    // }
 
     for(int ij=0;ij<_vc->get("n"+jType+ext);ij++) {
       if(_vc->get(jType+ext+"_id",ij)<1) continue;
+      if(std::abs(_vc->get(jType+ext+"_eta",ij))>2.4) continue; //introduced in RA7 sync round 3
       
-      // float scale=0.;
-      // if(isJESVar) {
-      // 	scale = _dbm->getDBValue("jes", _vc->get(jType+"_eta", ij), _vc->get(jType+"_pt", ij) );
-      // 	scale = ((SystUtils::kUp==dir)?1:(-1))*scale;
-      // }
-    
+      float pt=_vc->get(jType+"_pt", ij);
+      if(isJESVar) {
+	if(SystUtils::kUp==dir)
+	  pt *=_vc->get(jType+"_corr_JECUp",ij)/_vc->get(jType+"_CorrFactor_L1L2L3Res",ij);
+	else
+	  pt *=_vc->get(jType+"_corr_JECDown",ij)/_vc->get(jType+"_CorrFactor_L1L2L3Res",ij);
+      }
 
-      Candidate* jet=Candidate::create(_vc->get(jType+ext+"_pt", ij),
-				       _vc->get(jType+ext+"_eta", ij),
-				       _vc->get(jType+ext+"_phi", ij) );
+      Candidate* jet=Candidate::create(pt, //_vc->get(jType+ext+"_pt", ij)
+				       _vc->get(jType+"_eta", ij),
+				       _vc->get(jType+"_phi", ij) );
 
+      
       jets.push_back(jet);
-      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.890 );//0.814
+      bvals.push_back( _vc->get(jType+ext+"_btagCSV",ij)<0.8484  );//0.814
       tmpIdxs.push_back(make_pair(jType+ext, ij));
     }
   }
-
 
   map<Candidate*, std::pair<float,Candidate*> > cmap;
   map<Candidate*, std::pair<float,Candidate*> >::const_iterator it;
 
   for(unsigned int il=0;il<leptons->size();il++) {
     for(unsigned int ij=0;ij<jets.size();ij++) {
-
       float dR=leptons->at(il)->dR( jets[ij] );
       it = cmap.find(leptons->at(il));
       if(it==cmap.end() ) {
-	cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
+        cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
       }
       else if(dR<it->second.first) {
-	cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
+        cmap[ leptons->at(il) ] =std::make_pair(dR, jets[ij] );
       }
     }
   }
 
   bool pass=true;
   for(unsigned int ij=0;ij<jets.size();ij++) {
-
+    
     pass=true;
     for(unsigned int il=0;il<leptons->size();il++) {
       it = cmap.find(leptons->at(il));
+      
       if(it->second.first > 0.4 ) continue;
       if(it->second.second == jets[ij] ) {pass=false; break;}
+    
     }
+
     if(!pass) { 
       lepJetsIdxs.push_back(tmpIdxs[ij]);
       continue;
@@ -827,14 +1425,30 @@ SusyModule::cleanJets(CandList* leptons,
     bJetIdxs.push_back(tmpIdxs[ij]);
   } //loop jets
 
+
+
 }
 
-void 
+//LHE weights
+double
+SusyModule::getLHEweight(int LHEsysID){
+
+  int tmp_nlhe=_vc->get("nLHEweight");
+  for (int i=0; i<tmp_nlhe; i++) {
+    int tmp_lhe_id = _vc->get("LHEweight_id", i);
+    if (tmp_lhe_id == LHEsysID) {
+      double tmp_lhe_wgt = _vc->get("LHEweight_wgt", i);
+      return tmp_lhe_wgt;
+    } 
+  }
+  return 1.0;
+
+}
+
+
+void
 SusyModule::correctFlipRate(float& rate, float eta){
-
-  if( -2.0<eta && eta<-1.5) rate *= 3.6;
-  else                      rate *= 1.15;
-
+  rate *= 1.1918;
 }
 
 
@@ -882,7 +1496,7 @@ void
 SusyModule::applySingleLepSF(const Candidate* cand, float& weight) {
 
   if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
-
+  
   switch(std::abs(cand->pdgId())) {
   case 11: {weight *= _dbm->getDBValue("eleSFDb", std::abs(cand->eta()), cand->pt() ); break;}
   case 13: {weight *= _dbm->getDBValue("muSFDb", std::abs(cand->eta()), cand->pt() ); break;}
@@ -904,18 +1518,188 @@ SusyModule::getFastSimLepSF(Candidate* lep1, Candidate* lep2, int nVert){
   if(std::abs(lep1 -> pdgId()) == 13) { db2 = "FastSimMuSF"; max2 = 2.39; }
   
   return _dbm -> getDBValue(db1, std::min(lep1->pt(), (float) 199.9), std::min(std::abs(lep1->eta()), max1), std::min(nVert, 39))
-       * _dbm -> getDBValue(db1, std::min(lep2->pt(), (float) 199.9), std::min(std::abs(lep2->eta()), max2), std::min(nVert, 39));
+    * _dbm -> getDBValue(db1, std::min(lep2->pt(), (float) 199.9), std::min(std::abs(lep2->eta()), max2), std::min(nVert, 39));
        
+}
+
+
+float
+SusyModule::applyLepSfRA5(const Candidate* cand, bool isoHLT, int var){
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+  float sf = 1.;
+  float maxPt = 119.9;
+  float maxEta = (std::abs(cand->pdgId())==13)?2.39:2.49;
+  string isotag=isoHLT?"eleIsoSFDb":"eleIsoSFDb";
+  
+  int flavor = cand->pdgId();
+  //electrons
+  if(std::abs(flavor)==11){
+    if(var==0){
+      sf *= _dbm->getDBValue("eleConvSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("eleChargeSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      if(isoHLT) sf *= _dbm->getDBValue("eleIsoEmuSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      else sf *= _dbm->getDBValue("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("eleTrkSFDb", cand->eta(),100);
+    }
+    else if(var==1){
+      sf *= (_dbm->getDBValue("eleConvSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) + 
+	     _dbm->getDBErrH("eleConvSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      sf *= ( _dbm->getDBValue("eleChargeSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) +
+	      _dbm->getDBErrH("eleChargeSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      sf *= (_dbm->getDBValue("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) + 
+	     _dbm->getDBErrH("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      sf *= ( _dbm->getDBValue("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) +
+	      _dbm->getDBErrH("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      if(isoHLT) sf *= ( _dbm->getDBValue("eleIsoEmuSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) +
+			 _dbm->getDBErrH("eleIsoEmuSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      sf *= ( _dbm->getDBValue("eleTrkSFDb", cand->eta(),100) +
+	      _dbm->getDBErrH("eleTrkSFDb", cand->eta(),100));
+      sf += 0.01; //1% for potential pu dependence
+      if(cand->pt()<20){ sf += 0.03;} //additionl 3% for low pt electrons
+    }
+    else if(var==-1){
+      sf *= (_dbm->getDBValue("eleConvSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) + 
+	     _dbm->getDBErrL("eleConvSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      sf *= ( _dbm->getDBValue("eleChargeSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) +
+	      _dbm->getDBErrL("eleChargeSFIsoDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      sf *= (_dbm->getDBValue("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) -
+	     _dbm->getDBErrL("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      sf *= ( _dbm->getDBValue("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) -
+	      _dbm->getDBErrL("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      if(isoHLT) sf *= ( _dbm->getDBValue("eleIsoEmuSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) +
+			 _dbm->getDBErrL("eleIsoEmuSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+      sf *= ( _dbm->getDBValue("eleTrkSFDb", cand->eta(),100) -
+	      _dbm->getDBErrL("eleTrkSFDb", cand->eta(),100));
+      sf -= 0.01; //1% for potential pu dependence
+      if(cand->pt()<20){ sf -= 0.03;} //additionl 3% for low pt electrons
+    }
+  } 
+  //muons
+  if(std::abs(flavor) == 13){
+    sf *= _dbm->getDBValue("muIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+    sf *= _dbm->getDBValue("muDxyzSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+    sf *= _dbm->getDBValue("muSIPSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+    sf *= _dbm->getDBValue("muIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+    sf *= _dbm->getDBValue("muTrkSFDb", cand->eta());
+    sf += var*0.03;
+    
+  }
+       
+  if(sf==0){cout << "Warning! lepton scale factor is 0, check pt and eta for db lookup" << endl;
+    cout << "flavor: " << cand->pdgId() << endl;
+    cout << "pt: " << cand->pt() << endl;
+    cout << "eta: " << cand->eta() << endl;
+    cout << "SF: " << sf << endl;}
+
+  return sf;
+
+}
+
+
+
+float
+SusyModule::applyLepSfRA7(const CandList& cands, int var){
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+  float sf = 1.;
+  float maxPt = 119.9;
+  float maxEta = 2.39;
+  const Candidate* cand;
+  for(size_t il=0; il<cands.size();il++){
+    cand = cands[il];
+    int flavor = cand->pdgId();
+    //electrons
+    if(std::abs(flavor)==11){
+      if(var==0){
+	sf *= _dbm->getDBValue("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+	sf *= _dbm->getDBValue("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+	sf *= _dbm->getDBValue("eleTrkSFDb", cand->eta(),100);
+      }
+      else if(var==1){
+	sf *= (_dbm->getDBValue("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) + 
+	       _dbm->getDBErrH("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+	sf *= ( _dbm->getDBValue("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) +
+		_dbm->getDBErrH("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+	sf *= ( _dbm->getDBValue("eleTrkSFDb", cand->eta(),100) +
+		_dbm->getDBErrH("eleTrkSFDb", cand->eta(),100));
+	sf += 0.01; //1% for potential pu dependence
+	if(cand->pt()<20){ sf += 0.03;} //additionl 3% for low pt electrons
+      }
+      else if(var==-1){
+	sf *= (_dbm->getDBValue("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) -
+	       _dbm->getDBErrL("eleIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+	sf *= ( _dbm->getDBValue("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)) -
+		_dbm->getDBErrL("eleIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta)));
+	sf *= ( _dbm->getDBValue("eleTrkSFDb", cand->eta(),100) -
+		_dbm->getDBErrL("eleTrkSFDb", cand->eta(),100));
+	sf -= 0.01; //1% for potential pu dependence
+	if(cand->pt()<20){ sf -= 0.03;} //additionl 3% for low pt electrons
+      }
+    } 
+    //muons
+    if(std::abs(flavor) == 13){
+      sf *= _dbm->getDBValue("muIdSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("muDxyzSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("muSIPSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("muIsoSFDb", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("muTrkSFDb", cand->eta());
+      sf += var*0.03;
+    
+    }
+       
+    if(sf==0){cout << "Warning! lepton scale factor is 0, check pt and eta for db lookup" << endl;
+      cout << "flavor: " << cand->pdgId() << endl;
+      cout << "pt: " << cand->pt() << endl;
+      cout << "eta: " << cand->eta() << endl;
+      cout << "SF: " << sf << endl;}
+  }
+  return sf;
+
+}
+
+float 
+SusyModule::applyFastSimLepSfRA7(const CandList& cands){
+
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+  float sf = 1.;
+  float maxPt = 119.9;
+  float maxEta = 2.39;
+  //int maxPU = 39;
+  const Candidate* cand;
+  for(size_t il=0; il<cands.size();il++){
+    cand = cands[il];
+    int flavor = cand->pdgId();
+    if(std::abs(flavor)==11){
+      sf *= _dbm->getDBValue("FastSimElIDandIP", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("FastSimElISO", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+    }
+    else if(std::abs(flavor) == 13){
+      sf *= _dbm->getDBValue("FastSimMuID", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("FastSimMuIP2D", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("FastSimMuIP3D", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+      sf *= _dbm->getDBValue("FastSimMuISO", std::min(cand->pt(), maxPt), std::min((std::abs(cand->eta())),maxEta));
+    }
+    if(sf==0){cout << "Warning! fastSim lepton scale factor is 0, check pt, eta and pile-up for db lookup" << endl;
+      cout << "flavor: " << cand->pdgId() << endl;
+      cout << "pt: " << cand->pt() << endl;
+      cout << "eta: " << cand->eta() << endl;
+      cout << "SF: " << sf << endl;}
+  }
+  return sf;
+  
 }
 
 float
 SusyModule::bTagSF(CandList& jets , 
 		   vector<pair<string, unsigned int> >& jetIdx,
-                   CandList& bJets, 
+		   CandList& bJets, 
 		   vector<pair<string, unsigned int> >& bJetIdx, int st, 
 		   bool fastSim, int fsst){
   // put st = -1 / 0 / +1 for down / central / up
   // put fsst = -1 / 0 / +1 for down / central / up for fast-fullSim CF
+
+  //long int _evt = 326295;
+  //long int _lumi = 986;
 
   float pdata = 1.0;
   float pmc   = 1.0;
@@ -923,37 +1707,115 @@ SusyModule::bTagSF(CandList& jets ,
   for(unsigned int i=0;i<jets.size(); ++i) {
     bool find=false;
     unsigned int  flavor = 2;
-    if(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second) == 5) flavor = 0; // b jet
-    else if(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second) == 4) flavor = 1; // c jet
+    if(std::abs(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second)) == 5) flavor = 0; // b jet
+    else if(std::abs(_vc->get( (string)(jetIdx[i].first+"_mcFlavour") , jetIdx[i].second)) == 4) flavor = 1; // c jet
     
     for(unsigned int iv=0;iv<bJets.size();iv++) {
       if(jetIdx[i].first==bJetIdx[iv].first && jetIdx[i].second==bJetIdx[iv].second) { find=true; break;}
     }
 
+    // cout<<i<<" --> "<< (jetIdx[i].first+" pt : ") << _vc->get(jetIdx[i].first+"_pt", jetIdx[i].second)<<"  <>  "<<jets[i]->pt()<<"  <>  "<<jets[i]->eta()<<" // "<<flavor<<"  "<<find << endl;
+    // cout << "jet MC flavor : " << _vc->get("Jet_mcFlavour", i) << endl;
+    // cout << "flavor: " << flavor << endl;
+    // cout << "find: " << find << endl;
+    
+
+
     float fsSF=1.;
     if(fastSim) fsSF=bTagMediumScaleFactorFastSim(jets[i], flavor, fsst);
-    // cout<<fsSF<<endl;
-      //fsSF=1;
+    //cout<<"fs "<<fsSF<<endl;
+    //fsSF=1;
 
     if(find){
       pdata*=bTagMediumEfficiency(jets[i], flavor) * 
 	bTagMediumScaleFactor(jets[i], flavor, st)*fsSF;
       pmc*=bTagMediumEfficiency(jets[i], flavor)*fsSF;
+     
+      // cout << "eff: " << bTagMediumEfficiency(jets[i], flavor) << endl;
+      // cout << "SF: " << bTagMediumScaleFactor(jets[i], flavor, st) << endl;
+    
     }
     else {
       pdata*=(1-bTagMediumEfficiency(jets[i], flavor) * 
 	      bTagMediumScaleFactor(jets[i], flavor, st)*fsSF);
       pmc*=(1-bTagMediumEfficiency(jets[i], flavor)*fsSF);
+      
+      // cout << "eff: " << bTagMediumEfficiency(jets[i], flavor) << endl;
+      // cout << "SF: " << bTagMediumScaleFactor(jets[i], flavor, st) << endl;
+      
     }
   }
 
   //cout<<"pd " <<pdata<<"  "<<pmc<<endl;
-  if(pmc != 0) return pdata/pmc;
+  if(pmc != 0 && pdata !=0 ) return pdata/pmc;
   return 1.0;
 
 }
 
 
+float
+SusyModule::bTagSF(const CandWrapList& jets,
+		   const CandWrapList& bJets, int st, 
+		   bool fastSim, int fsst){
+  // put st = -1 / 0 / +1 for down / central / up
+  // put fsst = -1 / 0 / +1 for down / central / up for fast-fullSim CF
+
+  //long int _evt = 326295;
+  //long int _lumi = 986;
+
+  float pdata = 1.0;
+  float pmc   = 1.0;
+
+  for(unsigned int i=0;i<jets.size(); ++i) {
+    bool find=false;
+    unsigned int  flavor = 2;
+    if(std::abs(_vc->get( (string)(jets[i].coll()+"_mcFlavour") , jets[i].idx())) == 5) flavor = 0; // b jet
+    else if(std::abs(_vc->get( (string)(jets[i].coll()+"_mcFlavour") , jets[i].idx())) == 4) flavor = 1; // c jet
+    
+    for(unsigned int iv=0;iv<bJets.size();iv++) {
+      if(jets[i].coll()==bJets[iv].coll() && jets[i].idx()==bJets[iv].idx()) { find=true; break;}
+    }
+
+    // cout<<i<<" --> "<< (jetIdx[i].first+" pt : ") << _vc->get(jetIdx[i].first+"_pt", jetIdx[i].second)<<"  <>  "<<jets[i]->pt()<<"  <>  "<<jets[i]->eta()<<" // "<<flavor<<"  "<<find << endl;
+    // cout << "jet MC flavor : " << _vc->get("Jet_mcFlavour", i) << endl;
+    // cout << "flavor: " << flavor << endl;
+    // cout << "find: " << find << endl;
+    
+
+
+    float fsSF=1.;
+    if(fastSim) fsSF=bTagMediumScaleFactorFastSim(jets[i].c(), flavor, fsst);
+    //cout<<"fs "<<fsSF<<endl;
+    //fsSF=1;
+
+    if(find){
+      pdata*=bTagMediumEfficiency(jets[i].c(), flavor) * 
+	bTagMediumScaleFactor(jets[i].c(), flavor, st)*fsSF;
+      pmc*=bTagMediumEfficiency(jets[i].c(), flavor)*fsSF;
+     
+      // cout << "eff: " << bTagMediumEfficiency(jets[i], flavor) << endl;
+      // cout << "SF: " << bTagMediumScaleFactor(jets[i], flavor, st) << endl;
+    
+    }
+    else {
+      pdata*=(1-bTagMediumEfficiency(jets[i].c(), flavor) * 
+	      bTagMediumScaleFactor(jets[i].c(), flavor, st)*fsSF);
+      pmc*=(1-bTagMediumEfficiency(jets[i].c(), flavor)*fsSF);
+      
+      // cout << "eff: " << bTagMediumEfficiency(jets[i], flavor) << endl;
+      // cout << "SF: " << bTagMediumScaleFactor(jets[i], flavor, st) << endl;
+      
+    }
+  }
+
+  //cout<<"pd " <<pdata<<"  "<<pmc<<endl;
+  if(pmc != 0 && pdata !=0 ) return pdata/pmc;
+  return 1.0;
+
+}
+
+
+ 
 float
 SusyModule::bTagMediumEfficiency(Candidate* jet, unsigned int flavor){
   
@@ -1001,7 +1863,7 @@ SusyModule::bTagMediumScaleFactor(Candidate* jet, unsigned int flavor, int st){
     else             reader = _reader_l_do;
   }
  
-  
+  //cout<<" --->>> "<<fl<<"  ( "<<flavor<<" )  "<<reader->eval(fl, jet -> eta(), std::max((float)30.,std::min((float)669.,jet->pt())))<<endl;
   float sf = reader->eval(fl, jet -> eta(), std::max((float)30.,std::min((float)669.,jet->pt())));
   return sf;
 
@@ -1075,93 +1937,93 @@ SusyModule::GCtriggerScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, f
 
 float 
 SusyModule::GCelectronScaleFactorHighHT(float pt, float eta) {
-   if (pt>=10 && pt<20 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.800833;
-   if (pt>=10 && pt<20 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 1.09259;
-   if (pt>=10 && pt<20 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 1.38004;
-   if (pt>=10 && pt<20 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 1.06353;
-   if (pt>=10 && pt<20 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 1.01303;
-   if (pt>=20 && pt<30 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.951939;
-   if (pt>=20 && pt<30 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.978131;
-   if (pt>=20 && pt<30 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 1.00001;
-   if (pt>=20 && pt<30 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.944541;
-   if (pt>=20 && pt<30 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.958243;
-   if (pt>=30 && pt<40 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.974265;
-   if (pt>=30 && pt<40 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.979292;
-   if (pt>=30 && pt<40 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.978247;
-   if (pt>=30 && pt<40 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.973954;
-   if (pt>=30 && pt<40 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.982194;
-   if (pt>=40 && pt<50 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.979367;
-   if (pt>=40 && pt<50 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.984915;
-   if (pt>=40 && pt<50 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.989583;
-   if (pt>=40 && pt<50 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 1.00021;
-   if (pt>=40 && pt<50 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.995648;
-   if (pt>=50 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.980086;
-   if (pt>=50 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.980024;
-   if (pt>=50 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.986589;
-   if (pt>=50 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.984587;
-   if (pt>=50 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.995184;
-   return 0.;
+  if (pt>=10 && pt<20 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.800833;
+  if (pt>=10 && pt<20 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 1.09259;
+  if (pt>=10 && pt<20 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 1.38004;
+  if (pt>=10 && pt<20 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 1.06353;
+  if (pt>=10 && pt<20 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 1.01303;
+  if (pt>=20 && pt<30 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.951939;
+  if (pt>=20 && pt<30 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.978131;
+  if (pt>=20 && pt<30 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 1.00001;
+  if (pt>=20 && pt<30 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.944541;
+  if (pt>=20 && pt<30 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.958243;
+  if (pt>=30 && pt<40 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.974265;
+  if (pt>=30 && pt<40 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.979292;
+  if (pt>=30 && pt<40 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.978247;
+  if (pt>=30 && pt<40 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.973954;
+  if (pt>=30 && pt<40 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.982194;
+  if (pt>=40 && pt<50 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.979367;
+  if (pt>=40 && pt<50 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.984915;
+  if (pt>=40 && pt<50 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.989583;
+  if (pt>=40 && pt<50 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 1.00021;
+  if (pt>=40 && pt<50 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.995648;
+  if (pt>=50 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.980086;
+  if (pt>=50 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.980024;
+  if (pt>=50 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.986589;
+  if (pt>=50 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.984587;
+  if (pt>=50 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.995184;
+  return 0.;
 }
 float 
 SusyModule::GCelectronScaleFactorLowHT(float pt, float eta) {
-   if (pt>=10 && pt<20 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.81309;
-   if (pt>=10 && pt<20 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 1.09402;
-   if (pt>=10 && pt<20 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 1.38969;
-   if (pt>=10 && pt<20 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 1.05715;
-   if (pt>=10 && pt<20 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 1.01151;
-   if (pt>=20 && pt<30 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.952485;
-   if (pt>=20 && pt<30 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.978021;
-   if (pt>=20 && pt<30 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.999009;
-   if (pt>=20 && pt<30 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.947156;
-   if (pt>=20 && pt<30 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.957892;
-   if (pt>=30 && pt<40 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.974451;
-   if (pt>=30 && pt<40 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.978913;
-   if (pt>=30 && pt<40 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.979384;
-   if (pt>=30 && pt<40 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.973866;
-   if (pt>=30 && pt<40 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.981911;
-   if (pt>=40 && pt<50 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.979478;
-   if (pt>=40 && pt<50 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.984782;
-   if (pt>=40 && pt<50 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.990569;
-   if (pt>=40 && pt<50 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 1.00085;
-   if (pt>=40 && pt<50 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.996501;
-   if (pt>=50 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.980182;
-   if (pt>=50 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.979994;
-   if (pt>=50 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.988436;
-   if (pt>=50 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.984572;
-   if (pt>=50 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.995253;
-   return 0.;
+  if (pt>=10 && pt<20 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.81309;
+  if (pt>=10 && pt<20 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 1.09402;
+  if (pt>=10 && pt<20 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 1.38969;
+  if (pt>=10 && pt<20 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 1.05715;
+  if (pt>=10 && pt<20 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 1.01151;
+  if (pt>=20 && pt<30 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.952485;
+  if (pt>=20 && pt<30 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.978021;
+  if (pt>=20 && pt<30 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.999009;
+  if (pt>=20 && pt<30 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.947156;
+  if (pt>=20 && pt<30 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.957892;
+  if (pt>=30 && pt<40 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.974451;
+  if (pt>=30 && pt<40 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.978913;
+  if (pt>=30 && pt<40 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.979384;
+  if (pt>=30 && pt<40 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.973866;
+  if (pt>=30 && pt<40 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.981911;
+  if (pt>=40 && pt<50 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.979478;
+  if (pt>=40 && pt<50 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.984782;
+  if (pt>=40 && pt<50 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.990569;
+  if (pt>=40 && pt<50 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 1.00085;
+  if (pt>=40 && pt<50 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.996501;
+  if (pt>=50 && std::abs(eta)>=0 && std::abs(eta)<0.8 ) return 0.980182;
+  if (pt>=50 && std::abs(eta)>=0.8 && std::abs(eta)<1.442 ) return 0.979994;
+  if (pt>=50 && std::abs(eta)>=1.442 && std::abs(eta)<1.566 ) return 0.988436;
+  if (pt>=50 && std::abs(eta)>=1.566 && std::abs(eta)<2 ) return 0.984572;
+  if (pt>=50 && std::abs(eta)>=2 && std::abs(eta)<2.5 ) return 0.995253;
+  return 0.;
 }
 float 
 SusyModule::GCmuonScaleFactor(float pt, float eta) {
-   if (pt>=10 && pt<20 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.950673;
-   if (pt>=10 && pt<20 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.959971;
-   if (pt>=10 && pt<20 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.96344;
-   if (pt>=10 && pt<20 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.97954;
-   if (pt>=20 && pt<25 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.968778;
-   if (pt>=20 && pt<25 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.985696;
-   if (pt>=20 && pt<25 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.986646;
-   if (pt>=20 && pt<25 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.961432;
-   if (pt>=25 && pt<30 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.986112;
-   if (pt>=25 && pt<30 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.982328;
-   if (pt>=25 && pt<30 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.981606;
-   if (pt>=25 && pt<30 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.964637;
-   if (pt>=30 && pt<40 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.989584;
-   if (pt>=30 && pt<40 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.990363;
-   if (pt>=30 && pt<40 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.989629;
-   if (pt>=30 && pt<40 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.954459;
-   if (pt>=40 && pt<50 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.990997;
-   if (pt>=40 && pt<50 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.990606;
-   if (pt>=40 && pt<50 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.991023;
-   if (pt>=40 && pt<50 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.951617;
-   if (pt>=50 && pt<60 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.987545;
-   if (pt>=50 && pt<60 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.989335;
-   if (pt>=50 && pt<60 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.99151;
-   if (pt>=50 && pt<60 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.94982;
-   if (pt>=60 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.992751;
-   if (pt>=60 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.9878;
-   if (pt>=60 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.988131;
-   if (pt>=60 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.958638;
-   return 0.;
+  if (pt>=10 && pt<20 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.950673;
+  if (pt>=10 && pt<20 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.959971;
+  if (pt>=10 && pt<20 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.96344;
+  if (pt>=10 && pt<20 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.97954;
+  if (pt>=20 && pt<25 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.968778;
+  if (pt>=20 && pt<25 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.985696;
+  if (pt>=20 && pt<25 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.986646;
+  if (pt>=20 && pt<25 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.961432;
+  if (pt>=25 && pt<30 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.986112;
+  if (pt>=25 && pt<30 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.982328;
+  if (pt>=25 && pt<30 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.981606;
+  if (pt>=25 && pt<30 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.964637;
+  if (pt>=30 && pt<40 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.989584;
+  if (pt>=30 && pt<40 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.990363;
+  if (pt>=30 && pt<40 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.989629;
+  if (pt>=30 && pt<40 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.954459;
+  if (pt>=40 && pt<50 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.990997;
+  if (pt>=40 && pt<50 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.990606;
+  if (pt>=40 && pt<50 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.991023;
+  if (pt>=40 && pt<50 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.951617;
+  if (pt>=50 && pt<60 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.987545;
+  if (pt>=50 && pt<60 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.989335;
+  if (pt>=50 && pt<60 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.99151;
+  if (pt>=50 && pt<60 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.94982;
+  if (pt>=60 && std::abs(eta)>=0 && std::abs(eta)<0.9 ) return 0.992751;
+  if (pt>=60 && std::abs(eta)>=0.9 && std::abs(eta)<1.2 ) return 0.9878;
+  if (pt>=60 && std::abs(eta)>=1.2 && std::abs(eta)<2.1 ) return 0.988131;
+  if (pt>=60 && std::abs(eta)>=2.1 && std::abs(eta)<2.4 ) return 0.958638;
+  return 0.;
 }
 
 float 
@@ -1177,8 +2039,8 @@ SusyModule::GCleptonScaleFactor(int pdgId, float pt, float eta, float ht) {
 float 
 SusyModule::GCeventScaleFactor(int pdgId1, int pdgId2, float pt1, float pt2, float eta1, float eta2, float ht) {
   return GCtriggerScaleFactor(pdgId1, pdgId2, pt1, pt2, ht) * 
-         GCleptonScaleFactor (pdgId1, pt1, eta1, ht) * 
-         GCleptonScaleFactor(pdgId2, pt2, eta2, ht);
+    GCleptonScaleFactor (pdgId1, pt1, eta1, ht) * 
+    GCleptonScaleFactor(pdgId2, pt2, eta2, ht);
 }
 
 
@@ -2008,6 +2870,65 @@ SusyModule::getVarWeightFastSimLepSF(const Candidate* l1,
 
 }
 
+float
+SusyModule::getVarWeightFastSimLepSFRA7(const CandList& cands, int dir) {
+
+  float totUnc = 1.;
+  for(size_t il = 0;il<cands.size();il++){
+    const Candidate* cand = cands[il];
+    float unc = 1.;
+    if(std::abs(cand->pdgId())==11) {
+      if(cand->pt()<20) unc+=0.10*dir;
+      else if(cand->pt()<30) unc+=0.08*dir;
+      else unc+=0.05*dir;
+    }
+    if(std::abs(cand->pdgId())==13) {
+      if(cand->pt()<20) unc+=0.03*dir;
+      else if(cand->pt()<30) unc+=0.01*dir;
+      else unc+=0.01*dir;
+    }
+    totUnc *= unc;
+  }
+  return totUnc;
+}
+
+float
+SusyModule::getWeightFastSimHltSFRA7(const CandList& cands, float HT) {
+
+  int nEl = 0;
+  bool lowPtEl = false;
+  for(size_t il = 0;il<cands.size();il++){
+    const Candidate* cand = cands[il];
+    if(std::abs(cand->pdgId())==11){
+      nEl +=1;
+      if(cand->pt()<15. && HT < 400) lowPtEl = true;
+    }
+  }
+  if(nEl>=3) return 0.97;
+  else if(lowPtEl) return 0.93;
+  else return 1.;
+
+}
+
+
+float
+SusyModule::getVarWeightFastSimHltSFRA7(const CandList& cands, float HT, int dir) {
+
+  int nEl = 0;
+  bool lowPtEl = false;
+  for(size_t il = 0;il<cands.size();il++){
+    const Candidate* cand = cands[il];
+    if(std::abs(cand->pdgId())==11){
+      nEl +=1;
+      if(cand->pt()<15. && HT < 400) lowPtEl = true;
+    }
+  }
+  if(nEl>=3) return 1+dir*0.05;
+  else if(lowPtEl) return 1+dir*0.05;
+  else return 1+dir*0.03;
+
+}
+
 float 
 SusyModule::getPuWeight(unsigned int nvtx) {
   if(nvtx>_puWeights.size()-1) return 1;
@@ -2018,65 +2939,65 @@ void
 SusyModule::initPUWeights() {
 
   _puWeights.push_back(1.0);
-  _puWeights.push_back(3.153000427291265);
-  _puWeights.push_back(2.4535501340758543);
-  _puWeights.push_back(2.353696182351581);
-  _puWeights.push_back(2.3718057802881676);
-  _puWeights.push_back(2.3508262193470397);
-  _puWeights.push_back(2.291773427755106);
-  _puWeights.push_back(2.129929297304804);
-  _puWeights.push_back(1.9422796094930384);
-  _puWeights.push_back(1.7126175249202766);
-  _puWeights.push_back(1.4622401225778663);
-  _puWeights.push_back(1.2063711142884181);
-  _puWeights.push_back(0.9608504360968657);
-  _puWeights.push_back(0.7484941355600901);
-  _puWeights.push_back(0.5769889517104192);
-  _puWeights.push_back(0.4315759540480359);
-  _puWeights.push_back(0.3195820162866148);
-  _puWeights.push_back(0.2306052595765186);
-  _puWeights.push_back(0.1691819686464576);
-  _puWeights.push_back(0.12324466445693416);
-  _puWeights.push_back(0.08833641123547825);
-  _puWeights.push_back(0.06306193566475429);
-  _puWeights.push_back(0.047857788612281564);
-  _puWeights.push_back(0.034655984107483044);
-  _puWeights.push_back(0.02358209210941948);
-  _puWeights.push_back(0.019535383939466185);
-  _puWeights.push_back(0.01500976654907348);
-  _puWeights.push_back(0.009407396052837736);
-  _puWeights.push_back(0.006332906010381258);
-  _puWeights.push_back(0.008524617116368491);
-  _puWeights.push_back(0.003145186350322339);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.006930381551001214);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(0.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(1.0);
-  _puWeights.push_back(1.0);
+  _puWeights.push_back( 0.046904649804193066);
+  _puWeights.push_back( 0.09278031810949669);
+  _puWeights.push_back( 0.18880389403907694);
+  _puWeights.push_back( 0.3514757265099305);
+  _puWeights.push_back( 0.557758357976481);
+  _puWeights.push_back( 0.7693577917575528);
+  _puWeights.push_back( 0.9666548740765918);
+  _puWeights.push_back( 1.145319485841941);
+  _puWeights.push_back( 1.2648398335691222);
+  _puWeights.push_back( 1.3414360633779425);
+  _puWeights.push_back( 1.3679594451533137);
+  _puWeights.push_back( 1.362759399034107);
+  _puWeights.push_back( 1.327376308549365);
+  _puWeights.push_back( 1.2613315166803767);
+  _puWeights.push_back( 1.196440614259811);
+  _puWeights.push_back( 1.1139701579261285);
+  _puWeights.push_back( 1.029953473266092);
+  _puWeights.push_back( 0.9499371225384508);
+  _puWeights.push_back( 0.8650456207995321);
+  _puWeights.push_back( 0.7851579627730857);
+  _puWeights.push_back( 0.7104602883630896);
+  _puWeights.push_back( 0.6454503663312138);
+  _puWeights.push_back( 0.5827160708961265);
+  _puWeights.push_back( 0.527376483837914);
+  _puWeights.push_back( 0.4700331217669938);
+  _puWeights.push_back( 0.4271753119677936);
+  _puWeights.push_back( 0.3869926520067443);
+  _puWeights.push_back( 0.35986269245880403);
+  _puWeights.push_back( 0.3280226115374019);
+  _puWeights.push_back( 0.2995626735821264);
+  _puWeights.push_back( 0.29695297220375283);
+  _puWeights.push_back( 0.2904602474734967);
+  _puWeights.push_back( 0.27797348557821827);
+  _puWeights.push_back( 0.27285575884404983);
+  _puWeights.push_back( 0.2696769830193652);
+  _puWeights.push_back( 0.2834280746705423);
+  _puWeights.push_back( 0.3079991295527812);
+  _puWeights.push_back( 0.2958183730167929);
+  _puWeights.push_back( 0.3281547943587132);
+  _puWeights.push_back( 0.34428579006474574);
+  _puWeights.push_back( 0.34709355767303973);
+  _puWeights.push_back( 0.5916367460335905);
+  _puWeights.push_back( 0.4991935044658422);
+  _puWeights.push_back( 0.2689257936516321);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 0.690242870372522);
+  _puWeights.push_back( 2.0707286111175662);
+  _puWeights.push_back( 0.2958183730167952);
+  _puWeights.push_back( 0.8874551190503855);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 0.0);
+  _puWeights.push_back( 1.0);
+  _puWeights.push_back( 1.0);
 
 }
 
@@ -2093,11 +3014,6 @@ SusyModule::applyISRWeight(unsigned int process, int var, float& weight) {
   if(collection.size()!=2) return;
 
   Candidate* cand=Candidate::create(collection[0],collection[1]);
-
-  // Candidate* cand=collection[0];
-  // for(unsigned int i=1;i<collection.size(); ++i)
-  //   //pt += collection[i] -> pt();
-  //   cand = Candidate::create(collection[i],cand);
 
   float pt=cand->pt();
   isrWeight(var, pt, weight);
@@ -2121,10 +3037,6 @@ SusyModule::isrWeight(int var, float pt, float& weight){
     else if(pt > 400) weight *= 1.15;
   }
 
-  // central value
-  // else {
-  // }
-
 }
 
 
@@ -2132,11 +3044,8 @@ CandList
 SusyModule::collectGenParticles(int pdgId, int status){
 
   CandList list;
-  //cout<<_vc->get("nGenPart")<<endl;
   for(unsigned int i = 0; i < _vc->get("nGenPart"); ++i){
-    //    cout<<(int)_vc->get("GenPart_pdgId")<<"   "<<pdgId<<"   "<<(std::abs(_vc->get("GenPart_pdgId")) == pdgId)<<"   "<<_vc->get("GenPart_pt"    , i)<<"   "<<_vc->get("GenPart_eta"    , i)<<"  "<<_vc->get("GenPart_status")<<endl;
-    if(std::abs(_vc->get("GenPart_pdgId",i)) == pdgId)// &&
-       //_vc->get("GenPart_status",i) == status)
+    if(std::abs(_vc->get("GenPart_pdgId",i)) == pdgId)
       list.push_back(Candidate::create(_vc->get("GenPart_pt"    , i), 
                                        _vc->get("GenPart_eta"   , i),
                                        _vc->get("GenPart_phi"   , i),
@@ -2148,3 +3057,275 @@ SusyModule::collectGenParticles(int pdgId, int status){
   return list;
 }
 
+
+//Veto event if any central jet (|eta|<2.5 && pT>20 GeV) is unmatched (DeltaR<0.3) a to GenJet and has charged hadron fraction<0.1 
+bool
+SusyModule::vetoFSBadJetEvent(bool isJESVar, int dir, const CandList& leptons) {
+
+  vector<string> jetTypes({"Jet"});//,"DiscJet"});
+
+  for(size_t it=0;it<jetTypes.size();it++) {
+    string jType=jetTypes[it];
+
+    string ext="";
+    if(isJESVar) {
+      ext=((SystUtils::kUp==dir)?"_jecUp":"_jecDown");
+    }
+    for(size_t ij=0;ij<_vc->get("n"+jType+ext);ij++) {
+      Candidate* jet=Candidate::create(_vc->get(jType+ext+"_pt", ij),
+				       _vc->get(jType+ext+"_eta", ij),
+				       _vc->get(jType+ext+"_phi", ij) );
+
+      if(_vc->get(jType+ext+"_pt", ij)<20 ||
+	 std::abs(_vc->get(jType+ext+"_eta", ij))>=2.5 ) continue;
+
+      bool isLep=false;
+      for(size_t il=0;il<leptons.size();il++) {
+	if(leptons[il]->dR(jet)<0.4) isLep=true;
+      }
+      if(isLep) continue;
+
+      float mcPt=_vc->get(jType+ext+"_mcPt", ij);
+    
+      if(mcPt==0 && _vc->get(jType+ext+"_chHEF")<0.1 )
+	return false;
+    }
+  }
+    
+  return true;
+}
+
+
+//Define NISR-jets≡Define NISR-jets≡ number of jet not matched (∆R<0.3) to MC truth particles descending from top, W, Z, H, or SUSY decay
+void
+SusyModule::applyISRJetWeight(const vector<pair<string, unsigned int> >& jetIdxs,
+			      int var, const string& signame, bool isRA5,
+			      float& weight ) {
+
+  int nJet=0;
+  size_t p=signame.find("_mG");
+  string sigtag=signame;
+  if(p!=string::npos) sigtag=signame.substr(0,p);
+  
+  for(size_t ij=0;ij<jetIdxs.size();ij++) {
+    
+    if(std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==25 ||
+       std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==24 ||
+       std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==23 ||
+       std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))==6 ||
+       std::abs(_vc->get(jetIdxs[ij].first+"_partonMotherId"))>999999 )
+      continue;
+       
+    nJet++;
+  }
+
+  if(nJet>6) nJet=6;
+  // if(var==0)
+  //   weight*=_dbm->getDBValue(sigtag+(isRA5?("ISR_RA5"):("ISR")),signame);
+  // else if(var==1)
+  //   weight*=_dbm->getDBErrH(sigtag+(isRA5?("ISR_RA5"):("ISR")),signame);
+  // else if(var==-1)
+  //   weight*=_dbm->getDBErrL(sigtag+(isRA5?("ISR_RA5"):("ISR")),signame);
+
+  
+  switch(nJet) {
+  case(1) : {weight*=0.882*(1+var*0.5);break;}
+  case(2) : {weight*=0.792*(1+var*0.5);break;}
+  case(3) : {weight*=0.702*(1+var*0.5);break;}
+  case(4) : {weight*=0.648*(1+var*0.5);break;}
+  case(5) : {weight*=0.601*(1+var*0.5);break;}
+  case(6) : {weight*=0.515*(1+var*0.5);break;}
+  }
+
+}
+
+void
+SusyModule::applyHLTWeight(float pt1, float eta1, int pdgId1,
+			   float pt2, float eta2, int pdgId2, 
+			   float ht, float& weight, int var) {
+  weight *= _hltEff->getEfficiency(pt1, eta1, pdgId1,
+				   pt2, eta2, pdgId2, 
+				   ht, var);
+
+}
+
+
+void
+SusyModule::applyHLTWeightRA7(float pt1, float eta1, int pdgId1,
+			      float pt2, float eta2, int pdgId2, 
+			      float pt3, float eta3, int pdgId3, 
+			      float ht, float& weight, int var) {
+  weight *= _hltEff->getEfficiencyRA7(pt1, eta1, pdgId1,
+				      pt2, eta2, pdgId2, 
+				      pt3, eta3, pdgId3, 
+				      ht, var);
+}
+
+
+float
+SusyModule::getFSMETWeight(int wf, const string& sname, const string& sp,
+			   bool isRA5, int var ) {
+
+  if(!_dbm->exists("FSMET") ) {
+    _dbm->loadDb("FSMET","db2016/"+sp+"MET/"+sname+(string)(isRA5?"_RA5":"_RA7")+".db");
+  }
+  
+  if(var==0)
+    return _dbm->getDBValue("FSMET",wf);
+  else if(var==1)
+    return _dbm->getDBErrH("FSMET",wf);
+  else if(var==-1)
+    return _dbm->getDBErrL("FSMET",wf);
+
+  else
+    return 1;
+
+}
+
+void
+SusyModule::applyLeptonSF(float pt, float eta, float pdgId, bool isEmuIso, float& weight, int var) {
+  if(_dbm==nullptr) {cout<<"Error, DB manager not set in the susy module, please change the constructor"<<endl; abort();}
+  
+  if(std::abs(pdgId)==11) {
+    weight *= getSingleSF("eleRecoSFDb", pt, std::abs(eta), var);
+    weight *= getSingleSF("eleIdSFIsoDb", pt, std::abs(eta), var);
+    weight *= getSingleSF("eleConvSFIsoDb", pt, std::abs(eta), var);
+    weight *= getSingleSF("eleChargeSFIsoDb", pt, std::abs(eta), var);
+    if(isEmuIso)
+      weight *= getSingleSF("eleIsoSFIsoDb", pt, std::abs(eta), var);
+    else
+      weight *= getSingleSF("eleIsoSFNonDb", pt, std::abs(eta), var);
+     
+
+  } else if(std::abs(pdgId)==13) {
+    weight *= getSingleSF(((pt>10)?"muHIPHSFDb":"muHIPLSFDb"), pt, std::abs(eta), var);
+    weight *= getSingleSF("muIdSFDb", pt, std::abs(eta), var);
+    weight *= getSingleSF("muIsoSFDb", pt, std::abs(eta), var); //not yet available
+    weight *= getSingleSF("muDxyzSFDb", pt, std::abs(eta), var);
+    weight *= getSingleSF("muSIPSFDb", pt, std::abs(eta), var);
+
+  }
+
+
+}
+
+float
+SusyModule::getSingleSF(const string& db, float v1, float v2, int var) {
+  if(var==0)
+    return _dbm->getDBValue(db,v1,v2);
+  else if(var==1)
+    return _dbm->getDBErrH(db,v1,v2);
+  else if(var==-1)
+    return _dbm->getDBErrL(db,v1,v2);
+  else
+    return 1;
+}
+
+
+// float
+// SusyModule::loadBTagReaderForTTV() {
+
+//     string filename=(string) getenv("MPAF") + "/workdir/database/db2016/CSVv2_ichep.csv";
+//   _calibTTV=new BTagCalibration("csvv2", filename.c_str());
+//   _readerTTV_b_cv=new BTagCalibrationReader(3, "central");
+//   _readerTTV_b_up=new BTagCalibrationReader(3, "up_jes"   );
+//   _readerTTV_b_do=new BTagCalibrationReader(3, "down_jes" );
+
+//   _readerTTV_b_cv->load(*_calib, BTagEntry::FLAV_B   , "comb");
+//   _readerTTV_b_up->load(*_calib, BTagEntry::FLAV_B   , "comb");
+//   _readerTTV_b_do->load(*_calib, BTagEntry::FLAV_B   , "comb");
+
+// }
+
+
+
+/// splitted btagging systematics ==============================
+
+void
+SusyModule::loadBTagReaderCSVDisc() {
+  
+  string filename=(string) getenv("MPAF") + "/workdir/database/CSVv2_Moriond17_B_H.csv";
+  _calibCSV = new BTagCalibration("csvv2",filename.c_str());
+  _readerCSV = new BTagCalibrationReader(BTagEntry::OP_RESHAPING,"central",
+					 {"up_jes","down_jes","up_lf","down_lf",
+					     "up_hf","down_hf",
+					     "up_hfstats1","down_hfstats1",
+					     "up_hfstats2","down_hfstats2",
+					     "up_lfstats1","down_lfstats1",
+					     "up_lfstats2","down_lfstats2",
+					     "up_cferr1","down_cferr1",
+					     "up_cferr2","down_cferr2"});
+  _readerCSV->load(*_calibCSV,BTagEntry::FLAV_B,"iterativefit");
+  _readerCSV->load(*_calibCSV,BTagEntry::FLAV_C,"iterativefit");
+  _readerCSV->load(*_calibCSV,BTagEntry::FLAV_UDSG,"iterativefit");
+  
+}
+
+
+
+float
+SusyModule::btagCSVSF(const CandWrapList& jets, const string& unc, const int& dir) {
+
+  float event_wgt_csv = 1.0;
+  for( int ij=0; ij<int(jets.size()); ij++ ){
+    float pt  = jets[ij].c()->pt();
+    float eta = std::abs(jets[ij].c()->eta());
+
+    if( !(pt>20. && fabs(eta)<2.4) ) continue;
+
+    double csv = _vc->get(jets[ij].coll()+"_btagCSV",ij);
+    if( csv < 0.0 ) csv = -0.05;
+    if( csv > 1.0 ) csv = 1.0;
+    
+    int flavor = _vc->get(jets[ij].coll()+"_mcFlavour",ij);
+
+    if( pt > 1000 ) pt = 999.;
+
+    bool isBFlav = false;
+    bool isCFlav = false;
+    bool isLFlav = false;
+    if( abs(flavor)==5 )      isBFlav = true;
+    else if( abs(flavor)==4 ) isCFlav = true;
+    else                      isLFlav = true;
+
+    double my_jet_sf = 1.;
+
+    BTagEntry::JetFlavor jf = BTagEntry::FLAV_UDSG;
+    if( isBFlav )       jf = BTagEntry::FLAV_B;
+    else if( isCFlav ) jf = BTagEntry::FLAV_C;
+    else                  jf = BTagEntry::FLAV_UDSG;
+
+    if( unc=="jes" && SystUtils::kUp==dir )  my_jet_sf = _readerCSV->eval_auto_bounds("up_jes",jf,eta,pt,csv);
+    else if( unc=="jes" && SystUtils::kDown==dir ) my_jet_sf = _readerCSV->eval_auto_bounds("down_jes",jf,eta,pt,csv);
+    else if( unc=="LF" && isBFlav && SystUtils::kUp==dir )  my_jet_sf = _readerCSV->eval_auto_bounds("up_lf",jf,eta,pt,csv);
+    else if( unc=="LF" && isBFlav && SystUtils::kDown==dir )  my_jet_sf = _readerCSV->eval_auto_bounds("down_lf",jf,eta,pt,csv);
+    else if( unc=="HF" && isLFlav && SystUtils::kUp==dir )    my_jet_sf = _readerCSV->eval_auto_bounds("up_hf",jf,eta,pt,csv);
+    else if( unc=="HF" && isLFlav && SystUtils::kDown==dir )  my_jet_sf = _readerCSV->eval_auto_bounds("down_hf",jf,eta,pt,csv);
+    else if( unc=="CSVHFStats1" && isBFlav && SystUtils::kUp==dir )   my_jet_sf = _readerCSV->eval_auto_bounds("up_hfstats1",jf,eta,pt,csv);
+    else if( unc=="CSVHFStats1" && isBFlav && SystUtils::kDown==dir ) my_jet_sf = _readerCSV->eval_auto_bounds("down_hfstats1",jf,eta,pt,csv);
+    else if( unc=="CSVHFStats2" && isBFlav && SystUtils::kUp==dir )   my_jet_sf = _readerCSV->eval_auto_bounds("up_hfstats2",jf,eta,pt,csv);
+    else if( unc=="CSVHFStats2" && isBFlav && SystUtils::kDown==dir ) my_jet_sf = _readerCSV->eval_auto_bounds("down_hfstats2",jf,eta,pt,csv);
+    else if( unc=="CSVLFStats1" && isLFlav && SystUtils::kUp==dir )   my_jet_sf = _readerCSV->eval_auto_bounds("up_lfstats1",jf,eta,pt,csv);
+    else if( unc=="CSVLFStats1" && isLFlav && SystUtils::kDown==dir ) my_jet_sf = _readerCSV->eval_auto_bounds("down_lfstats1",jf,eta,pt,csv);
+    else if( unc=="CSVLFStats2" && isLFlav && SystUtils::kUp==dir )   my_jet_sf = _readerCSV->eval_auto_bounds("up_lfstats2",jf,eta,pt,csv);
+    else if( unc=="CSVLFStats2" && isLFlav && SystUtils::kDown==dir ) my_jet_sf = _readerCSV->eval_auto_bounds("down_lfstats2",jf,eta,pt,csv);
+    else if( unc=="CSVCFErr1" && isCFlav && SystUtils::kUp==dir )   my_jet_sf = _readerCSV->eval_auto_bounds("up_cferr1",jf,eta,pt,csv);
+    else if( unc=="CSVCFErr1" && isCFlav && SystUtils::kDown==dir ) my_jet_sf = _readerCSV->eval_auto_bounds("down_cferr1",jf,eta,pt,csv);
+    else if( unc=="CSVCFErr2" && isCFlav && SystUtils::kUp==dir )   my_jet_sf = _readerCSV->eval_auto_bounds("up_cferr2",jf,eta,pt,csv);
+    else if( unc=="CSVCFErr2" && isCFlav && SystUtils::kDown==dir ) my_jet_sf = _readerCSV->eval_auto_bounds("down_cferr2",jf,eta,pt,csv);
+    else {
+      my_jet_sf = _readerCSV->eval_auto_bounds("central",jf,eta,pt,csv);
+    }
+
+    //protection for c jets
+    if(my_jet_sf==0) my_jet_sf=1;
+    
+    //cout<<unc<<"   "<<my_jet_sf<<endl;
+    
+    assert (my_jet_sf > 0.);
+    event_wgt_csv *= my_jet_sf;
+  } //jets
+  //cout<<" ===>>> "<<event_wgt_csv<<endl;
+  return event_wgt_csv;
+
+}

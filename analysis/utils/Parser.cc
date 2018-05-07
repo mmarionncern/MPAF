@@ -21,7 +21,7 @@ Parser::parseLine(string line) {
   inPar ip;  
   ip.type=Parser::kNone;
   if(tks.size()==0 || tks[0].substr(0,1)=="#" ) return ip;
-  
+
   int type=Parser::kNone;
   if(tks[0]=="dir")
     type=Parser::kDir;
@@ -29,7 +29,7 @@ Parser::parseLine(string line) {
     type=Parser::kAN;
   if(tks[0]=="user")
     type=Parser::kUsr;
-  if(tks[0]=="verb")
+  if(tks[0]=="verbose")
     type=Parser::kVbs;
   if(tks[0]=="skim")
     type=Parser::kSkim;
@@ -51,9 +51,15 @@ Parser::parseLine(string line) {
     type=Parser::kFT;
   if(tks[0]=="summary")
     type=Parser::kSummary;
+  if(tks[0]=="systOnly")
+    type=Parser::kSyst;
+  if(tks[0]=="counterOpt")
+    type=Parser::kCounter;
+  if(tks[0]=="postfix")
+    type=Parser::kPfx;
 
   string val = tks[1];
-
+  
   vector<string> opts;
   for(size_t i=2;i<tks.size();i++) {
     if(tks[i].substr(0,1)!="#")
@@ -67,8 +73,11 @@ Parser::parseLine(string line) {
     for(size_t i=0;i<opts.size();i++) {
       if(opts[i].substr(0,4)=="pfx:") {
         id += opts[i].substr(4, opts[i].size()-4 );
-        //val+= opts[i].substr(4, opts[i].size()-4 );
       }
+      // if(opts[i].substr(0,5)=="link:") {
+	
+      // }
+      
     }
   }
 
@@ -103,6 +112,19 @@ Parser::parseFile(string filename) {
     cout<<"Error, configuration file "<<filename<<" does not exists, aborting..."<<endl;
     abort();
   }
-  
   return mip;
 }
+
+
+
+std::vector<std::string> 
+Parser::split(const std::string& s, char delim) {
+  std::vector<std::string> elems;
+  std::stringstream ss(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+  return elems;
+}
+
